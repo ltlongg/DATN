@@ -2,3 +2,11 @@ __pycache__/
 venv/
 .env
 .agents/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+*.log
+*.sqlite3
+.DS_Store
+.idea/
