@@ -261,7 +261,7 @@ Trong khoảng thời gian này (cuối năm 1887) vì bệnh nặng và vì gia
 ### Khởi nghĩa Hương Khê (1885–1896)
 
 Là đỉnh cao của phong trào Cần vương, và thất bại của công cuộc này cũng đã đánh dấu sự kết thúc sứ mạng lãnh đạo 10 năm chống thực dân Pháp của tầng lớp sĩ phu phong kiến Việt Nam.
-Phan Đình Phùng, thủ lĩnh Khởi nghĩa Hương Khê.Khởi nghĩa Hương Khê (1885 - 1896) là đỉnh cao của phong trào Cần vương, và thất bại của công cuộc này cũng đã đánh dấu sự kết thúc sứ mạng lãnh đạo 10 năm chống thực dân Pháp của tầng lớp sĩ phu phong kiến Việt Nam.
+Phan Đình Phùng, thủ lĩnh Khởi nghĩa Hương Khê. Khởi nghĩa Hương Khê (1885 - 1896) là đỉnh cao của phong trào Cần vương, và thất bại của công cuộc này cũng đã đánh dấu sự kết thúc sứ mạng lãnh đạo 10 năm chống thực dân Pháp của tầng lớp sĩ phu phong kiến Việt Nam.
 Lãnh đạo chính của khởi nghĩa là Đình nguyên tiến sĩ Phan Đình Phùng (1847 - 1895), và một cộng sự đắc lực của ông là tướng Cao Thắng (1864 - 1893).
 
 #### Giới thiệu sơ lược
