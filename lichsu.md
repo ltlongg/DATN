@@ -200,29 +200,9 @@ Kể từ đó cho đến gần cuối năm 1887, quân Pháp vẫn không tiế
 Trong khoảng thời gian này (cuối năm 1887) vì bệnh nặng và vì gian lao quá đỗi, Bố Giáp qua đời tại căn cứ Nghĩa Lộ (Mường Lò) vào ngày 25 tháng 9 năm Đinh Dậu (1887)tại nhà một đồng bào Mèo.Nguyễn Văn Giáp một Thủ lĩnh xuất sắc của phong trào Cần Vương chống Pháp cuối TK 19 ở vùng Tây Bắc.
 ### Khởi nghĩa Hương Khê (1885–1896)
 Là đỉnh cao của phong trào Cần vương, và thất bại của công cuộc này cũng đã đánh dấu sự kết thúc sứ mạng lãnh đạo 10 năm chống thực dân Pháp của tầng lớp sĩ phu phong kiến Việt Nam.
-Lãnh đạo chính của khởi nghĩa là Đình nguyên tiến sĩ Phan Đình Phùng (1847 - 1895), và một cộng sự đắc lực của ông là tướng Cao Thắng (1864 - 1893).
-Địa bàn hoạt động của nghĩa quân bao gồm bốn tỉnh: Thanh Hóa, Nghệ An, Hà Tĩnh, Quảng Bình; với địa bàn chính là Hương Khê (Hà Tĩnh), tồn tại suốt 10 năm liên tục.
-Ở bốn tỉnh này, Phan Đình Phùng đã chia địa bàn thành 15 quân thứ, đồng thời dựa vào địa thế rừng núi hiểm yếu, ông cho xây dựng lực lượng và cơ sở chiến đấu chính nằm ở hai huyện Hương Sơn và Hương Khê (Hà Tĩnh). Theo sử liệu thì Phan Đình Phùng đã cho xây dựng bốn căn cứ lớn, đó là:
-  Căn cứ Cồn Chùa ở xã Sơn Lâm (Hương Sơn, Hà Tĩnh), án ngữ đường sang Nghệ An. Đây là nơi dự trữ lương thực và rèn đúc vũ khí.
-  Căn cứ Thượng Bồng-Hạ Bồng ở tây nam Đức Thọ (Hà Tĩnh) dựa vào địa thế của sông Ngàn Sâu và Ngàn Trươi. Ngoài ra, Phan Đình Phùng còn cho lập nơi đây hệ thống hào lũy, đồn trại, kho lương, bãi tập,...Đây là một căn cứ lớn trong buổi đầu kháng chiến của nghĩa quân Hương Khê.
-  Căn cứ Trùng Khê-Trí Khê nằm ở hai xã Hương Ninh - Hương Thọ thuộc huyện Hương Khê. Đây là căn cứ dự bị, có đường sang Lào, phòng khi bị quân Pháp bao vây.
-  Căn cứ Vụ Quang ở phía tây Hương Khê. Nơi đây có địa hình hiểm trở, tựa lưng vào dãy Trường Sơn. Từ đây, nghĩa quân có thể theo đường núi vào Quảng Bình, Quảng Trị, ra Nghệ An, Thanh Hóa hay theo đường sông đi xuống các vùng đồng bằng hoặc khi cần thiết có thể lánh sang Lào.
-Nghĩa quân Hương Khê dựa vào địa thế núi rừng hiểm trở với hệ thống công sự chằng chịt để tiến hành chiến tranh du kích. Nghĩa quân luôn phân tán hoạt động, đánh quân Pháp bằng nhiều hình thức, như: công đồn, chặn đường tiếp tế, dùng cạm bẫy, và dụ đối phương ra ngoài đồn để diệt họ.
-#### Diễn biến 
-Ban đầu (1885 - 1888): Đây là giai đoạn chuẩn bị, xây dựng lực lượng và cơ sở chiến đấu. Sau một vài trận tập kích và chống càn không hiệu quả, Phan Đình Phùng cho quân rút về làng Phùng Công (Hương Sơn), rồi lại rút lên rừng núi đánh du kích.
-Đầu năm 1887, thấy thực lực nghĩa quân Hương Khê quá suy yếu, Phan Đình Phùng giao quyền chỉ huy cho Cao Thắng để ra Bắc đến các tỉnh Sơn Tây, Hải Dương, Bắc Ninh,...tìm sự hỗ trợ và kết nạp quân đội.
-Ở lại Hà Tĩnh, Cao Thắng cùng các chỉ huy khác như Cao Nữu, Cao Đạt, Nguyễn Niên,...đem quân đến làng Lê Động (Hương Sơn) để tổ chức lại lực lượng, luyện quân, xây dựng hệ thống đồn lũy, rèn đúc vũ khí,...
-Về sau (1889 - 1896):Cuối tháng 9 năm 1889, Phan Đình Phùng từ Bắc Kỳ trở về Hà Tĩnh. Nhờ Cao Thắng và các chỉ huy khác, mà lực lượng lúc này đã có khoảng ngàn lính và 500 khẩu súng tốt.Nhận thấy trong công tác chuẩn bị, mọi mặt đều đã khá, Phan Đình Phùng bèn cho mở rộng địa bàn hoạt động ra khắp bốn tỉnh là Thanh Hóa, Nghệ An, Hà Tĩnh và Quảng Bình; làm cản trở con đường đi lại Bắc-Nam và công cuộc thôn tính nước Việt của quân Pháp. Đối phó lại, thực dân Pháp cho bố trí nhiều đồn lẻ ở các nơi để phong tỏa từng khu vực và kiềm chế hoạt động của nghĩa quân. Riêng ở Hương Khê, đối phương đã cho lập tới 20 đồn, mỗi đồn có khoảng 30 lính đóng giữ.
-Trong những năm từ 1889 đến 1892, nghĩa quân bốn tỉnh trên đã phối hợp và hoạt động mạnh trên một vùng rộng lớn bao gồm Diễn Châu, Yên Thành, Thanh Chương, Nghi Lộc,...để đánh trả và quấy rối quân Pháp. 
-Sau nhiều trận thua đau, kể từ đầu năm 1892 trở đi, thực dân Pháp cho mở nhiều cuộc càn quét, trong số ấy đáng kể là trận càn lớn vào khu Hói Trùng và Ngàn Sâu, là căn cứ của Cao Thắng, vào đầu tháng 8 năm 1892.
-Để đối phó với quân Pháp, Phan Đình Phùng bố trí một lực lượng chống trả tại chỗ, một nhóm khác đi hoạt động ở phía sau lưng đối phương, buộc họ phải rút về vì sợ bị đánh tập hậu. Trong khoảng thời gian này, đã xảy ra nhiều trận giao tranh, đáng kể là trận:
-  Ngày 7 tháng 3 năm 1892, nghĩa quân Hương Khê tiến đánh đồn Trung Lễ. Sau đó, Bá hộ Thuận (Nguyễn Hữu Thuận) còn tiến đánh huyện Thạch Hà, bắt được viên tri huyện. Còn Cao Thắng thì cho quân giả làm lính khố xanh bắt sống được Tuần phủ Đinh Nho Quang.
-  Đêm 23 tháng 8 năm 1892, nghĩa quân Hương Khê do Bá hộ Thuận (Nguyễn Hữu Thuận) chỉ huy đã táo bạo tập kích vào tỉnh lỵ Hà Tĩnh, phá được nhà lao và giải phóng hơn 70 nghĩa quân bị cầm tù.
-**Khởi nghĩa Hương Khê**
 Phan Đình Phùng, thủ lĩnh Khởi nghĩa Hương Khê.Khởi nghĩa Hương Khê (1885 - 1896) là đỉnh cao của phong trào Cần vương, và thất bại của công cuộc này cũng đã đánh dấu sự kết thúc sứ mạng lãnh đạo 10 năm chống thực dân Pháp của tầng lớp sĩ phu phong kiến Việt Nam.
 Lãnh đạo chính của khởi nghĩa là Đình nguyên tiến sĩ Phan Đình Phùng (1847 - 1895), và một cộng sự đắc lực của ông là tướng Cao Thắng (1864 - 1893).
-**Giới thiệu sơ lược**
-*** Tập hợp lực lượng ***
+#### Giới thiệu sơ lược
 Sau khi vua Hàm Nghi ban chiếu Cần Vương (tháng 7 năm 1885), ở Hà Tĩnh và Nghệ An đã bùng nổ nhiều phong trào đấu tranh vũ trang. Cuộc khởi nghĩa đầu tiên là của Lê Ninh ở Trung Lễ (Đức Trung, Đức Thọ), sau đó lần lượt là:
   Khởi nghĩa của Cao Thắng, Cao Nữu ở Hàm Lại, Sơn Lễ (Hương Sơn, Hà Tĩnh).
   Khởi nghĩa của Nguyễn Trạch và Nguyễn Chanh ở Can Lộc (Hà Tĩnh).
@@ -230,14 +210,14 @@ Sau khi vua Hàm Nghi ban chiếu Cần Vương (tháng 7 năm 1885), ở Hà T�
   Khởi nghĩa của Nguyễn Hữu Thuận ở Thạch Hà (Hà Tĩnh).
   Khởi nghĩa của Nguyễn Xuân Ôn và Lê Doãn Nhạ ở Nghệ An, v.v...
 Trên cơ sở các cuộc khởi nghĩa đó, sau khi được vua Hàm Nghi và đại tướng Tôn Thất Thuyết giao trọng trách tổ chức phong trào kháng Pháp ở Hà Tĩnh (tháng 10 năm 1885), Phan Đình Phùng đã tiến hành tập hợp, phát triển thành một phong trào có quy mô rộng lớn, dưới sự chỉ đạo thống nhất là ông.
-*** Địa bàn hoạt động ***
+#### Địa bàn hoạt động
 Địa bàn hoạt động của nghĩa quân bao gồm bốn tỉnh: Thanh Hóa, Nghệ An, Hà Tĩnh, Quảng Bình; với địa bàn chính là Hương Khê (Hà Tĩnh), tồn tại suốt 10 năm liên tục.
 Ở bốn tỉnh này, Phan Đình Phùng đã chia địa bàn thành 15 quân thứ, đồng thời dựa vào địa thế rừng núi hiểm yếu, ông cho xây dựng lực lượng và cơ sở chiến đấu chính nằm ở hai huyện Hương Sơn và Hương Khê (Hà Tĩnh). Theo sử liệu thì Phan Đình Phùng đã cho xây dựng bốn căn cứ lớn, đó là:
 Căn cứ Cồn Chùa ở xã Sơn Lâm (Hương Sơn, Hà Tĩnh), án ngữ đường sang Nghệ An. Đây là nơi dự trữ lương thực và rèn đúc vũ khí.
 Căn cứ Thượng Bồng-Hạ Bồng ở tây nam Đức Thọ (Hà Tĩnh) dựa vào địa thế của sông Ngàn Sâu và Ngàn Trươi. Ngoài ra, Phan Đình Phùng còn cho lập nơi đây hệ thống hào lũy, đồn trại, kho lương, bãi tập,...Đây là một căn cứ lớn trong buổi đầu kháng chiến của nghĩa quân Hương Khê.
 Căn cứ Trùng Khê-Trí Khê nằm ở hai xã Hương Ninh - Hương Thọ thuộc huyện Hương Khê. Đây là căn cứ dự bị, có đường sang Lào, phòng khi bị quân Pháp bao vây.
 Căn cứ Vụ Quang ở phía tây Hương Khê. Nơi đây có địa hình hiểm trở, tựa lưng vào dãy Trường Sơn. Từ đây, nghĩa quân có thể theo đường núi vào Quảng Bình, Quảng Trị, ra Nghệ An, Thanh Hóa hay theo đường sông đi xuống các vùng đồng bằng hoặc khi cần thiết có thể lánh sang Lào.
-*** Tổ chức ***
+#### Tổ chức
 Theo giúp Phan Đình Phùng, có các trí thức như tiến sĩ Phan Trọng Mưu, cử nhân Phan Quảng Cư, Ấm Ninh (Lê Ninh),...và rất nhiều chỉ huy xuất thân từ nhân dân lao động nghèo khổ như Cao Thắng, Nguyễn Chanh, Nguyễn Trạch, Lê Văn Tạc, Phan Đình Can, Phan Đình Phong, Nguyễn Mục, Phan Bá Niên,...
 Về tổ chức lực lượng, nghĩa quân được chia thành 15 quân thứ: Hà Tĩnh có 10, Nghệ An có 2, Quảng Bình có 2, và Thanh Hóa có 1. Các quân thứ được xây dựng trên các cơ sở đơn vị hành chính, thường là huyện, có khi là xã, và lấy tên nơi đó để gọi. Liệt kê ra như sau:
   Khê thứ ở huyện Hương Khê (Hà Tĩnh), chỉ huy là Nguyễn Thoại.
@@ -258,16 +238,13 @@ Về tổ chức lực lượng, nghĩa quân được chia thành 15 quân th�
   Mỗi quân thứ có từ 100 đến 500 quân, đứng đầu là người có năng lực và uy tín. Nghĩa quân có phục trang cùng một kiểu giống nhau.
 Vũ khí của nghĩa quân, ngoài những thứ thông thường, họ còn có khoảng 500 trăm khẩu súng tự chế (kiểu súng Pháp năm 1874) và rất nhiều súng hỏa mai.
 Phần lương thực và của cải chủ yếu là nhờ nhân dân đóng góp.
-*** Cách chiến đấu ***
 Nghĩa quân Hương Khê dựa vào địa thế núi rừng hiểm trở với hệ thống công sự chằng chịt để tiến hành chiến tranh du kích. Nghĩa quân luôn phân tán hoạt động, đánh quân Pháp bằng nhiều hình thức, như: công đồn, chặn đường tiếp tế, dùng cạm bẫy, và dụ đối phương ra ngoài đồn để diệt họ...
-**Diễn biến**
+#### Diễn biến
 Khởi nghĩa Hương Khê có thể chia làm hai giai đoạn chính:
-*** Ban đầu (1885 - 1888) ***
-Đây là giai đoạn chuẩn bị, xây dựng lực lượng và cơ sở chiến đấu. Sau một vài trận tập kích và chống càn không hiệu quả, Phan Đình Phùng cho quân rút về làng Phùng Công (Hương Sơn), rồi lại rút lên rừng núi đánh du kích.
+Giai đoạn (1885 - 1888): Đây là giai đoạn chuẩn bị, xây dựng lực lượng và cơ sở chiến đấu. Sau một vài trận tập kích và chống càn không hiệu quả, Phan Đình Phùng cho quân rút về làng Phùng Công (Hương Sơn), rồi lại rút lên rừng núi đánh du kích.
 Đầu năm 1887, thấy thực lực nghĩa quân Hương Khê quá suy yếu, Phan Đình Phùng giao quyền chỉ huy cho Cao Thắng để ra Bắc đến các tỉnh Sơn Tây, Hải Dương, Bắc Ninh,...tìm sự hỗ trợ và kết nạp quân đội.
 Ở lại Hà Tĩnh, Cao Thắng cùng các chỉ huy khác như Cao Nữu, Cao Đạt, Nguyễn Niên,...đem quân đến làng Lê Động (Hương Sơn) để tổ chức lại lực lượng, luyện quân, xây dựng hệ thống đồn lũy, rèn đúc vũ khí,...
-*** Về sau (1889 - 1896) ***
-Cuối tháng 9 năm 1889, Phan Đình Phùng từ Bắc Kỳ trở về Hà Tĩnh. Nhờ Cao Thắng và các chỉ huy khác, mà lực lượng lúc này đã có khoảng ngàn lính và 500 khẩu súng tốt. Nhận thấy trong công tác chuẩn bị, mọi mặt đều đã khá, Phan Đình Phùng bèn cho mở rộng địa bàn hoạt động ra khắp bốn tỉnh là Thanh Hóa, Nghệ An, Hà Tĩnh và Quảng Bình; làm cản trở con đường đi lại Bắc-Nam và công cuộc thôn tính nước Việt của quân Pháp.
+Giai đoạn (1889 - 1896): Cuối tháng 9 năm 1889, Phan Đình Phùng từ Bắc Kỳ trở về Hà Tĩnh. Nhờ Cao Thắng và các chỉ huy khác, mà lực lượng lúc này đã có khoảng ngàn lính và 500 khẩu súng tốt. Nhận thấy trong công tác chuẩn bị, mọi mặt đều đã khá, Phan Đình Phùng bèn cho mở rộng địa bàn hoạt động ra khắp bốn tỉnh là Thanh Hóa, Nghệ An, Hà Tĩnh và Quảng Bình; làm cản trở con đường đi lại Bắc-Nam và công cuộc thôn tính nước Việt của quân Pháp.
 Đối phó lại, thực dân Pháp cho bố trí nhiều đồn lẻ ở các nơi để phong tỏa từng khu vực và kiềm chế hoạt động của nghĩa quân. Riêng ở Hương Khê, đối phương đã cho lập tới 20 đồn, mỗi đồn có khoảng 30 lính đóng giữ.
 Trong những năm từ 1889 đến 1892, nghĩa quân bốn tỉnh trên đã phối hợp và hoạt động mạnh trên một vùng rộng lớn bao gồm Diễn Châu, Yên Thành, Thanh Chương, Nghi Lộc,...để đánh trả và quấy rối quân Pháp. Theo sách Việt sử tân biên,thì nghĩa quân đã tổ chức được 28 trận lớn nhỏ trong giai đoạn này, để tập kích và chống càn quét, như là:
   Trận chống càn ở Cồn Chùa và Khe Đen do Đề Niên (Phan Bá Niên) chỉ huy vào ngày 1 tháng 9 năm 1889.
