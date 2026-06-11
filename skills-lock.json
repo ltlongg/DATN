@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "chonkie": {
+      "source": "chonkie-inc/skills",
+      "sourceType": "github",
+      "skillPath": "skills/chonkie/SKILL.md",
+      "computedHash": "b8992dcc5aad38947015b7499a0bde2d0f6cd2289ab655ca7a65f1388a39737f"
+    }
+  }
+}

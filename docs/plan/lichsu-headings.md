@@ -1,0 +1,444 @@
+# Headings Trong lichsu.md
+
+Tổng số heading: 438
+
+```text
+- L1 line 1: Thời kì thuộc địa
+  - L2 line 2: 1.Khởi nghĩa Trương Định(1859-1864)
+    - L3 line 3: Trương Định
+    - L3 line 5: Diễn biến
+  - L2 line 13: 2. Khởi nghĩa Nguyễn Hữu Huân (1859-1875)
+    - L3 line 14: Nguyễn Hữu Huân
+    - L3 line 16: Diễn biến
+  - L2 line 21: 3. Khởi nghĩa Nguyễn Trung Trực(1861-1868)
+  - L2 line 32: 4. Khởi nghĩa Bảy Thưa(1867-1873)
+    - L3 line 34: Hoàn cảnh lịch sử
+    - L3 line 38: Diễn biến
+  - L2 line 54: 5.Chiến tranh Pháp - Thanh (trên lãnh thổ Việt Nam)
+    - L3 line 56: Mở màn
+    - L3 line 59: Chiến tranh
+      - L4 line 65: Trận Cầu Giấy
+      - L4 line 74: Trận cửa Thuận An
+      - L4 line 82: Trận thành Sơn Tây
+      - L4 line 89: Trận thành Bắc Ninh
+      - L4 line 93: Trận thành Hưng Hoá
+      - L4 line 103: Trận Bắc Lệ
+      - L4 line 113: Trận Lạng Sơn (1885)
+  - L2 line 127: 6. Khởi nghĩa Yên Thế
+    - L3 line 129: Nguyên nhân phát sinh
+    - L3 line 132: Diễn biến
+      - L4 line 133: Giai đoạn 1 (1884 - 1892)
+      - L4 line 140: Giai đoạn 2 (1893 - 1897)
+      - L4 line 146: Giai đoạn thứ ba (1898 - 1908)
+      - L4 line 150: Giai đoạn thứ tư (1909 - 1913)
+  - L2 line 156: 7. Phong trào Cần vương
+    - L3 line 158: Nguồn gốc
+    - L3 line 172: Khởi nghĩa của Nguyễn Văn Giáp ở Sơn Tây và Tây Bắc (1883-1887)
+      - L4 line 174: Trận Thanh Mai
+      - L4 line 183: Trận Tuần Quán
+      - L4 line 189: Chống càn tại Tiên Động
+      - L4 line 195: Chống càn tại Nghĩa Lộ
+    - L3 line 201: Khởi nghĩa Hương Khê (1885–1896)
+      - L4 line 211: Diễn biến
+    - L3 line 294: Khởi nghĩa Nguyễn Xuân Ôn
+    - L3 line 307: Khởi nghĩa Ba Đình
+      - L4 line 313: Diễn biến
+    - L3 line 320: Khởi nghĩa của Lê Thành Phương ở Phú Yên (1885–1887).
+    - L3 line 335: Khởi nghĩa Hùng Lĩnh
+      - L4 line 337: Diễn biến
+    - L3 line 361: Khởi nghĩa Bãi Sậy
+    - L3 line 376: Khởi nghĩa Thanh Sơn
+      - L4 line 378: Diễn biến
+    - L3 line 397: Khởi nghĩa của Lê Trực và Nguyễn Phạm Tuân ở Quảng Bình.
+    - L3 line 409: Khởi nghĩa của Hoàng Đình Kinh
+    - L3 line 421: Kết thúc phong trào Cần Vương
+  - L2 line 423: 8. Hà Thành đầu độc
+  - L2 line 430: 9. Khởi nghĩa N'Trang Lơng (1911 - 1935)
+    - L3 line 432: Trận phục kích Henri Maitre (Trận Bu Nor)
+  - L2 line 442: 10. Trận Tà Lùng (1915)
+  - L2 line 447: 11. Khởi nghĩa Thái Nguyên (1917)
+  - L2 line 458: 12. Khởi nghĩa Yên Bái (1930)
+  - L2 line 480: 13.Xô Viết Nghệ Tĩnh (1930-1931)
+  - L2 line 491: 14.Chiến dịch Đông Dương (1940)
+- L1 line 495: Nhật thuộc
+  - L2 line 496: 1.Trận Lạng Sơn(1940)
+  - L2 line 505: 2.Khởi nghĩa Bắc Sơn
+    - L3 line 507: Quân Nhật tiến vào Đông Dương
+    - L3 line 510: Khởi nghĩa bùng nổ
+  - L2 line 514: 3.Chiến tranh Pháp – Thái
+  - L2 line 523: 4.Nam Kỳ khởi nghĩa
+  - L2 line 549: 5.Binh biến Đô Lương
+  - L2 line 565: 6.Trận Phai Khắt và Nà Ngần
+  - L2 line 580: 7.Nhật đảo chính Pháp tại Đông Dương
+  - L2 line 588: 8.Khởi nghĩa Ba Tơ
+  - L2 line 598: 9.Cao trào kháng Nhật cứu nước
+    - L3 line 612: Nổi dậy từng phần
+    - L3 line 620: Phá kho thóc cứu đói
+    - L3 line 627: Đấu tranh ở thành thị và các khu công nghiệp
+  - L2 line 631: 10.Cách mạng Tháng Tám 1945
+    - L3 line 648: Tổng khởi nghĩa Hà Nội
+    - L3 line 666: Diễn biến tại Huế
+    - L3 line 671: Diễn biến tại miền Nam
+    - L3 line 676: Hoàng đế Bảo Đại thoái vị
+    - L3 line 684: Tuyên ngôn độc lập
+    - L3 line 692: Tại Sài Gòn
+- L1 line 695: Thời kỳ cộng hoà
+  - L2 line 696: 1.Hoa quân nhập Việt
+  - L2 line 723: 2.Xung đột đảng phái tại Việt Nam (1945–1949)
+    - L3 line 731: Diễn biến tại miền Bắc
+    - L3 line 736: Đại Việt Quốc gia Xã hội Đảng và Đế quốc Việt Nam
+    - L3 line 740: Đại Việt Phục hưng Hội
+    - L3 line 745: Việt Nam Quốc dân Đảng
+    - L3 line 773: Đại Việt Quốc dân đảng
+    - L3 line 782: Đại Việt Duy dân Cách mệnh Đảng
+    - L3 line 787: Việt Nam Cách mệnh Đồng minh Hội
+    - L3 line 795: Chiến sự tại miền Nam
+    - L3 line 821: Chiến sự tại Sài gòn
+    - L3 line 843: Kết quả của xung đột đảng phái
+  - L2 line 848: 3.Chiến tranh Đông Dương
+    - L3 line 857: Giai đoạn 1946-1949
+      - L4 line 858: Cuộc chiến tại các đô thị phía Bắc
+      - L4 line 862: Trận Hà Nội 1946
+        - L5 line 882: Diễn biến
+        - L5 line 917: Kết quả
+      - L4 line 925: Các nỗ lực ngoại giao
+      - L4 line 934: Thế trận những năm 1947-1949 (Chiến dịch Việt Bắc)
+    - L3 line 962: Giai đoạn 1950-1954
+      - L4 line 963: Chiến dịch Biên giới (1950)
+        - L5 line 1007: Đợt 1 (16/9 đến 20/9): Tiêu diệt cứ điểm Đông Khê
+        - L5 line 1025: Đợt 2 (21/9 đến 29/9): tiêu diệt quân cơ động Pháp
+        - L5 line 1078: Đợt 3 (từ 9 đến ngày 14/10 năm 1950): truy kích quân Pháp rút chạy
+        - L5 line 1085: Kết quả của chiến dịch Biên giới
+    - L3 line 1096: Quay lại giai đoạn 1950 -1954
+      - L4 line 1097: Chiến dịch Trần Hưng Đạo 1951
+        - L5 line 1101: Bối cảnh
+        - L5 line 1112: Lực lượng tham chiến
+        - L5 line 1120: Diễn biến đợt 1
+        - L5 line 1131: Diễn biến đợt 2
+        - L5 line 1156: Kết quả
+      - L4 line 1164: Chiến dịch Hoàng Hoa Thám
+        - L5 line 1166: Bối cảnh
+        - L5 line 1170: Lực lượng tham chiến
+        - L5 line 1173: Diễn biến
+        - L5 line 1184: Kết quả
+      - L4 line 1189: Chiến dịch Hà Nam Ninh
+        - L5 line 1191: Bối cảnh
+        - L5 line 1196: Mục tiêu
+        - L5 line 1201: Lực lượng
+        - L5 line 1217: Diễn biến
+        - L5 line 1247: Kết quả
+      - L4 line 1259: Chiến tranh phát triển
+      - L4 line 1267: Chiến dịch Hòa Bình
+        - L5 line 1269: Hoàn cảnh
+        - L5 line 1284: Lực lượng hai bên
+        - L5 line 1297: Diễn biến
+        - L5 line 1325: Kết quả
+      - L4 line 1336: Chiến dịch Tây Bắc
+        - L5 line 1338: Hoàn cảnh
+        - L5 line 1343: Lực lượng tham gia chiến dịch
+        - L5 line 1353: Diễn biến
+        - L5 line 1398: Kết quả
+      - L4 line 1403: Chiến dịch Thượng Lào
+        - L5 line 1405: Mục tiêu của hai bên
+        - L5 line 1415: Diễn biến
+        - L5 line 1429: Kết quả
+      - L4 line 1431: Kế hoạch Navarre
+      - L4 line 1439: Chiến dịch Điện Biên Phủ
+        - L5 line 1454: Chiến cục Đông Xuân 1953-1954
+          - L6 line 1462: Diễn biến
+          - L6 line 1543: Chiến dịch Ninh Bình
+        - L5 line 1566: Quay lại chiến cục Đông Xuân
+      - L4 line 1588: Quay lại chiến dịch Điện Biên Phủ
+        - L5 line 1674: Vòng vây Điện Biên Phủ
+          - L6 line 1705: Khu vực Điện Biên Phủ: Chuẩn bị cho chiến dịch
+          - L6 line 1724: Khu vực Lai Châu: Cuộc hành quân Pollux
+      - L4 line 1738: Quay lại chiến dịch Điện Biên Phủ (2)
+        - L5 line 1751: Đợt 1
+          - L6 line 1755: Trận Him Lam
+          - L6 line 1761: Trận đồi Độc Lập
+          - L6 line 1796: Trận Bản Kéo
+          - L6 line 1807: Kết quả đợt 1
+        - L5 line 1814: Đợt 2
+          - L6 line 1823: Trận đồi A1
+          - L6 line 1925: Trận đồi C1
+          - L6 line 1995: Trận đồi D1
+        - L5 line 2002: Giai đoạn đào hào, vây siết
+          - L6 line 2020: Trận Hồng Cúm
+          - L6 line 2101: Trận sân bay Mường Thanh
+        - L5 line 2106: Kế hoạch cứu nguy của Hoa Kỳ
+        - L5 line 2112: Đợt 3
+        - L5 line 2137: Kết quả trận đánh
+        - L5 line 2144: Ảnh hưởng quốc tế của trận đánh
+        - L5 line 2153: Tù binh Pháp
+    - L3 line 2160: Sự tham gia của các nước ở chiến tranh Đông Dương
+      - L4 line 2162: Về phía Việt Minh
+        - L5 line 2167: Trung Quốc
+        - L5 line 2179: Liên Xô
+      - L4 line 2181: Về phía Pháp
+        - L5 line 2182: Hoa Kỳ
+          - L6 line 2183: Chính sách chống cộng của Mỹ
+          - L6 line 2191: Mỹ hỗ trợ Pháp
+      - L4 line 2203: Hiệp định Genève
+        - L5 line 2204: Triệu tập hội nghị
+        - L5 line 2209: Thành phần tham dự
+        - L5 line 2221: Lập trường và quan điểm của các bên tham dự
+          - L6 line 2222: Lập trường của Việt Nam Dân chủ Cộng hòa
+          - L6 line 2244: Lập trường của Pháp
+          - L6 line 2251: Lập trường của Quốc gia Việt Nam
+          - L6 line 2265: Lập trường của Vương quốc Campuchia
+          - L6 line 2270: Lập trường của Vương quốc Lào
+          - L6 line 2275: Lập trường của Anh
+          - L6 line 2278: Lập trường của Hoa Kỳ
+          - L6 line 2287: Lập trường của Liên Xô
+          - L6 line 2291: Lập trường của Trung Quốc
+        - L5 line 2302: Diễn biến hội nghị
+        - L5 line 2325: Các hoạt động có liên quan
+        - L5 line 2356: Nội dung cơ bản của Hiệp định Genève
+        - L5 line 2368: Thái độ của các bên sau khi ký hiệp định
+        - L5 line 2381: Các sự kiện hậu hiệp định
+        - L5 line 2415: Mỹ hỗ trợ cho Quốc gia Việt Nam
+        - L5 line 2426: Việt Nam Dân chủ Cộng hòa đề nghị tổng tuyển cử
+      - L4 line 2463: Giải phóng Thủ Đô
+  - L2 line 2491: 4.Chiến dịch Thập Vạn Đại Sơn
+  - L2 line 2503: 5. Kháng chiến chống Mỹ (1955 - 1975)
+    - L3 line 2529: Chính sách chống cộng của Mỹ (Thuyết Domino)
+    - L3 line 2550: Trở lại với chính sách chống cộng của Mỹ
+    - L3 line 2565: Mỹ can dự vào Chiến tranh Đông Dương (1945–1954)
+      - L4 line 2569: Sự hình thành chiến lược "Ngăn chặn làn sóng đỏ"
+        - L5 line 2570: Giai đoạn 1945–1947
+        - L5 line 2583: Giai đoạn 1948–1952
+      - L4 line 2600: Thời kỳ Eisenhower-Nixon (1952–1954)
+        - L5 line 2601: Kế hoạch Navarre
+        - L5 line 2614: Kế hoạch Chim kền kền
+      - L4 line 2619: Sau chiến tranh Đông Dương (1954–1963)
+        - L5 line 2620: Mỹ viện trợ cho Quốc gia Việt Nam
+        - L5 line 2647: Mỹ viện trợ cho Việt Nam Cộng hòa
+        - L5 line 2668: Mỹ trực tiếp tham chiến (1964–1973)
+        - L5 line 2672: Chiến tranh Đặc Biệt
+        - L5 line 2744: Chiến tranh cục bộ (Chiến tranh Việt Nam)
+          - L6 line 2815: Trận Bình Giã
+          - L6 line 2849: Đối sách của Việt Nam Dân chủ Cộng hòa
+          - L6 line 2870: Năm mở màn 1965
+          - L6 line 2882: Trận Vạn Tường
+          - L6 line 2900: Trận Đồng Xoài
+          - L6 line 2924: Bước vào mùa khô 1965 - 1966
+          - L6 line 2945: Bước vào mùa khô 1966-1967
+          - L6 line 2970: Làm thất bại gọng kìm "Bình định"
+          - L6 line 2984: Miền Bắc chống chiến tranh phá hoại
+    - L3 line 3013: Việt Nam tạm thời chia thành hai vùng tập kết quân sự
+    - L3 line 3041: Giai đoạn 1954-1959
+      - L4 line 3042: Việt Nam Cộng hòa cự tuyệt Tổng tuyển cử thống nhất Việt Nam
+      - L4 line 3075: Tình hình tại miền Bắc
+      - L4 line 3090: Tình hình tại miền Nam
+        - L5 line 3118: Chiến dịch Hoàng Diệu (1955)
+    - L3 line 3146: Giai đoạn 1960–1965
+      - L4 line 3197: Trận Ấp Bắc
+        - L5 line 3233: Diễn biến
+    - L3 line 3250: Giai đoạn 1965-1968
+      - L4 line 3257: Mỹ ném bom miền Bắc Việt Nam
+      - L4 line 3262: Chiến tranh không quân tại miền Bắc Việt Nam
+        - L5 line 3277: Chiến dịch Sấm Rền
+      - L4 line 3377: Các chiến dịch Tìm-diệt tại miền Nam Việt Nam
+        - L5 line 3387: Chiến dịch Ba Gia
+        - L5 line 3425: Chiến dịch Plei Me
+        - L5 line 3475: Trận Ia Đrăng
+      - L4 line 3548: Bổ sung 1 số trận đánh
+        - L5 line 3549: Trận Đức Cơ
+        - L5 line 3553: Trận Long Tân
+        - L5 line 3566: Chiến dịch Đăk Tô – Tân Cảnh (1967)
+          - L6 line 3602: Kế hoạch tác chiến của Quân Giải phóng miền Nam Việt Nam
+          - L6 line 3610: Diễn biến
+          - L6 line 3676: Kết quả
+        - L5 line 3686: Trận Ông Thành
+          - L6 line 3699: Diễn biến
+          - L6 line 3720: Kết quả
+    - L3 line 3726: Sự kiện Tết Mậu Thân
+      - L4 line 3735: Kế hoạch của Việt Nam Dân chủ Cộng hòa và Mặt trận Dân tộc Giải phóng miền Nam Việt Nam:
+      - L4 line 3757: Diễn biến
+        - L5 line 3758: Tuyên bố ngừng bắn đơn phương của các bên
+        - L5 line 3768: Sự chuẩn bị của Quân Giải phóng miền Nam
+          - L6 line 3793: Chiến sự Đợt 1:
+          - L6 line 3812: Tại Sài Gòn:
+          - L6 line 3843: Tại Huế:
+          - L6 line 3891: Chiến sự Đợt 2
+          - L6 line 3934: Chiến sự Đợt 3
+          - L6 line 3974: Kết quả
+      - L4 line 3991: Chiến dịch Đường 9 – Khe Sanh
+        - L5 line 4022: Binh lực các bên
+          - L6 line 4023: Quân đội Nhân dân Việt Nam
+          - L6 line 4046: Thủy quân lục chiến Hoa Kỳ
+        - L5 line 4061: Diễn biến
+          - L6 line 4068: Đợt 1
+          - L6 line 4097: Đợt 2
+          - L6 line 4134: Đợt 3
+          - L6 line 4179: Đợt 4
+        - L5 line 4195: Kết quả và ý nghĩa
+    - L3 line 4222: Giai đoạn 1969-1972
+      - L4 line 4228: Trận Đồi Thịt Băm
+        - L5 line 4257: Mở màn trận đánh:
+        - L5 line 4268: Quân Mỹ đẩy mạnh tấn công:
+        - L5 line 4286: Lực lượng Quân Giải phóng miền Nam Việt Nam rút lui:
+        - L5 line 4295: Kết quả:
+      - L4 line 4301: Trận Bản Đông
+      - L4 line 4309: Chiến dịch Campuchia
+        - L5 line 4328: Hoa Kỳ và Việt Nam Cộng hòa tiến vào Campuchia
+      - L4 line 4377: Việt Nam hóa chiến tranh
+      - L4 line 4526: Chiến dịch Lam Sơn 719
+        - L5 line 4536: Hoàn cảnh
+        - L5 line 4547: Lực lượng tham chiến
+          - L6 line 4548: Mỹ và Việt Nam Cộng hòa
+          - L6 line 4566: Quân Giải phóng miền Nam Việt Nam
+        - L5 line 4581: Chiến lược và kế hoạch
+        - L5 line 4596: Diễn biến
+        - L5 line 4692: Kết quả
+      - L4 line 4703: Chiến dịch Xuân – Hè 1972
+        - L5 line 4706: Kế hoạch của Quân Giải phóng miền Nam Việt Nam
+        - L5 line 4725: Diễn biến
+        - L5 line 4762: Kết quả
+      - L4 line 4788: Chiến dịch Trị Thiên
+        - L5 line 4790: Kế hoạch của hai bên
+        - L5 line 4806: Lực lượng tham chiến
+        - L5 line 4825: Diễn biến
+          - L6 line 4827: Giai đoạn 1: Quân Giải phóng miền Nam Việt Nam tấn công
+          - L6 line 4867: Giai đoạn 2: Quân đội Hoa Kỳ và Việt Nam Cộng hòa phản kích
+          - L6 line 4894: Giai đoạn 3: Chiến sự ở bờ bắc sông Thạch Hãn
+          - L6 line 4907: Kết quả
+      - L4 line 4915: Chiến dịch Bắc Tây Nguyên 1972
+        - L5 line 4921: Bố trí binh lực hai bên
+        - L5 line 4928: Diễn biến chiến dịch
+          - L6 line 4929: Hướng cụm cứ điểm biên phòng phía Tây sông Poko
+          - L6 line 4935: Hướng Đăk Tô - Tân Cảnh
+          - L6 line 4945: Hướng Kotum
+        - L5 line 4993: Kết thúc
+          - L6 line 4996: Các cuộc chiến đấu Đắc Tô - Tân Cảnh
+          - L6 line 5000: Các cuộc chiến đấu trong thị xã Kon Tum
+      - L4 line 5011: Chiến dịch Nguyễn Huệ
+        - L5 line 5015: Phương án tác chiến
+        - L5 line 5018: Tương quan lực lượng
+        - L5 line 5030: Diễn biến
+          - L6 line 5031: Giai đoạn 1 - Lộc Ninh - Xa Mát - Phước Bình
+          - L6 line 5052: Giai đoạn 2 - Bao vây An Lộc và chốt chặn Đường 13
+          - L6 line 5070: Giai đoạn 3 - lập thế "da báo"
+        - L5 line 5074: Trận Lộc Ninh (1972)
+        - L5 line 5094: Trận An Lộc
+      - L4 line 5109: Trận Thành cổ Quảng Trị
+        - L5 line 5120: Tương quan lực lượng
+        - L5 line 5128: Diễn biến
+          - L6 line 5129: Phòng ngự của Quân Giải phóng miền Nam Việt Nam
+          - L6 line 5145: Trận chiến trong thị xã
+        - L5 line 5174: Kết quả
+      - L4 line 5181: Vừa đánh vừa đàm
+      - L4 line 5198: Chiến dịch Linebacker II
+        - L5 line 5199: Mặt trận đất đối không miền Bắc Việt Nam 1972
+          - L6 line 5212: Chiến dịch Linebacker
+        - L5 line 5306: Diễn biến trận Điện Biên Phủ trên không (Chiến dịch Linebacker II)
+          - L6 line 5403: Kết quả
+    - L3 line 5409: Giai đoạn 1973–1975
+      - L4 line 5415: Hiệp định Paris bị vi phạm
+      - L4 line 5427: Tương quan lực lượng
+      - L4 line 5441: Cuộc tấn công cuối cùng
+      - L4 line 5451: Chiến dịch Mùa Xuân 1975
+        - L5 line 5457: Lực lượng các bên
+          - L6 line 5458: Các đơn vị chủ lực của Quân Giải phóng miền Nam:
+          - L6 line 5578: Hoa Kỳ và Quân lực Việt Nam Cộng hòa
+        - L5 line 5672: Mục tiêu của các bên
+        - L5 line 5729: Các điểm yếu của quân đội VNCH
+        - L5 line 5763: Diễn biến quốc tế
+        - L5 line 5781: Diễn biến tại các mặt trận
+        - L5 line 5858: Kết quả
+    - L3 line 5862: Các chiến dịch trong chiến dịch Mùa Xuân (1975)
+      - L4 line 5863: Chiến dịch Đường 14 – Phước Long
+        - L5 line 5865: Địa bàn tác chiến
+        - L5 line 5869: Binh lực các bên tham chiến
+        - L5 line 5892: Diễn biến trận đánh
+        - L5 line 5918: Phản ứng của các bên và của quốc tế
+        - L5 line 5929: Kết quả trận đánh
+      - L4 line 5936: Chiến dịch Tây Nguyên
+        - L5 line 5940: Lực lượng quân sự của các bên
+          - L6 line 5941: Quân Giải phóng miền Nam Việt Nam
+          - L6 line 5967: Quân lực Việt Nam Cộng hòa
+        - L5 line 5985: Ý đồ chiến lược, chiến thuật quân sự của các bên
+          - L6 line 5986: Phía Quân Giải phóng miền Nam Việt Nam
+          - L6 line 6008: Phía Quân lực Việt Nam Cộng hòa
+        - L5 line 6022: Diễn biến chiến dịch
+          - L6 line 6040: Trận Buôn Ma Thuột
+          - L6 line 6069: Cuộc rút quân trên đường số 7
+        - L5 line 6087: Kết quả
+      - L4 line 6093: Chiến dịch Huế – Đà Nẵng
+        - L5 line 6097: Lực lượng các bên
+          - L6 line 6098: Quân Giải phóng miền Nam Việt Nam
+          - L6 line 6102: Quân lực Việt Nam Cộng hoà
+        - L5 line 6105: Ý đồ quân sự - chính trị của các bên
+          - L6 line 6106: Phương án tấn công của Quân Giải phóng miền Nam Việt
+          - L6 line 6117: Phương án phòng thủ của Quân lực Việt Nam Cộng hòa
+        - L5 line 6127: Diễn biến các chiến dịch
+        - L5 line 6184: Kết quả chiến dịch
+      - L4 line 6188: Chiến dịch Hồ Chí Minh
+        - L5 line 6196: Binh lực và phương án tác chiến của hai bên
+          - L6 line 6197: Quân Giải phóng
+          - L6 line 6220: Quân lực Việt Nam Cộng hòa
+        - L5 line 6244: Các diễn biến tại khu vực Sài Gòn - Gia Định
+          - L6 line 6245: Đợt 1
+          - L6 line 6257: Đợt 2
+        - L5 line 6282: Các diễn biến tại đồng bằng sông Cửu Long
+        - L5 line 6297: Kết quả
+    - L3 line 6301: Chiến tranh kết thúc
+    - L3 line 6307: Hải chiến Hoàng Sa 1974
+      - L4 line 6351: Tương quan lực lượng
+      - L4 line 6380: Diễn biến
+        - L5 line 6394: Đổ bộ thất bại
+        - L5 line 6399: Hải quân Việt Nam Cộng hòa khai chiến
+        - L5 line 6402: Tình hình chiến sự
+        - L5 line 6415: Việt Nam Cộng hòa rút lui
+        - L5 line 6425: Trung Quốc chiếm toàn bộ Hoàng Sa
+      - L4 line 6437: Kết quả
+  - L2 line 6444: 6.Nội chiến Lào
+    - L3 line 6455: Giai đoạn 1954-1958
+    - L3 line 6469: Giai đoạn 1959-1964
+    - L3 line 6483: Giai đoạn 1964-1973
+    - L3 line 6503: Giai đoạn 1973-1975
+  - L2 line 6511: 7.Xung đột biên giới Việt Nam–Campuchia (1975–1978)
+    - L3 line 6520: Đợt tấn công thứ nhất
+    - L3 line 6530: Cuộc tấn công thứ hai
+    - L3 line 6533: Chiến dịch phản công (tháng 12 năm 1978 - tháng 1 năm 1979)
+      - L4 line 6535: Đánh chiếm bờ đông sông Mekong
+      - L4 line 6542: Đánh chiếm Phnôm Pênh
+      - L4 line 6550: Hướng nam, Sihanoukville
+      - L4 line 6560: Kết quả
+    - L3 line 6563: Truy quét tàn quân Khmer Đỏ (tháng 1 năm 1979 - tháng 5 năm 1979)
+      - L4 line 6570: Khu vực Tây Nam
+  - L2 line 6579: 8.Xung đột Thái Lan – Việt Nam (1979–1989)
+    - L3 line 6586: Diễn biến
+      - L4 line 6587: 1979
+      - L4 line 6591: 1980
+      - L4 line 6595: 1981
+      - L4 line 6597: 1982
+      - L4 line 6600: 1983
+      - L4 line 6610: 1984
+      - L4 line 6620: 1985
+      - L4 line 6642: 1986
+      - L4 line 6646: 1987
+      - L4 line 6651: 1988
+      - L4 line 6655: 1989
+  - L2 line 6658: 9. Chiến tranh biên giới Việt – Trung 1979
+    - L3 line 6663: Bối cảnh
+      - L4 line 6664: Quan hệ Việt Nam – Trung Quốc – Liên Xô
+      - L4 line 6677: Quan hệ Việt Nam – Campuchia – Trung Quốc
+      - L4 line 6695: Vấn đề biên giới và hải đảo
+    - L3 line 6708: Tương quan lực lượng
+      - L4 line 6709: Trung Quốc
+      - L4 line 6718: Việt Nam
+    - L3 line 6724: Diễn biến
+      - L4 line 6742: Giai đoạn 1
+      - L4 line 6765: Giai đoạn 2
+      - L4 line 6774: Việt Nam phản kích
+    - L3 line 6776: Kết quả
+    - L3 line 6791: Xung đột giành quyền kiểm soát tại quần đảo Trường Sa 1988
+      - L4 line 6795: Tranh chấp chủ quyền tại 2 quần đảo Trường Sa và Hoàng Sa
+      - L4 line 6824: Diễn biến
+        - L5 line 6838: Đá Gạc Ma
+        - L5 line 6847: Đá Cô Lin
+        - L5 line 6854: Đá Len Đao
+        - L5 line 6861: Chiến dịch CQ-88, Việt Nam giành lại Len Đao
+      - L4 line 6869: Kết quả
+```

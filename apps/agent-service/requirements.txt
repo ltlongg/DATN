@@ -1,0 +1,73 @@
+# ============================================================
+# Agent-service - FastAPI + RAG / GraphRAG orchestration
+# Python 3.11+ recommended
+# Install: uv pip install -r requirements.txt
+#
+# NOTE: torch cần index riêng, chạy trước khi install:
+#   uv pip install torch --index-url https://download.pytorch.org/whl/cpu
+# ============================================================
+
+# --- Web framework ---
+fastapi[standard]
+uvicorn[standard]
+
+# --- Settings / validation ---
+pydantic>=2.0
+pydantic-settings>=2.0
+python-dotenv
+
+# --- HTTP / async ---
+httpx
+tenacity
+
+# --- LLM SDKs ---
+openai>=1.0
+anthropic>=0.20
+# google-generativeai
+
+# --- Agent / orchestration framework ---
+langchain
+langchain-core
+langchain-community
+langchain-openai
+langgraph
+
+# --- Vector store (Qdrant) ---
+qdrant-client
+
+# --- Graph store (Neo4j) for GraphRAG ---
+neo4j
+
+# --- Document parsing ---
+pypdf
+python-docx
+unstructured
+
+# --- Text processing ---
+tiktoken
+
+# --- Tokenizer cho chunking (đếm token theo model embedding tiếng Việt) ---
+transformers
+sentencepiece
+protobuf
+
+# --- Embedding model (AITeamVN/Vietnamese_Embedding, chạy local) ---
+# torch cài riêng: uv pip install torch --index-url https://download.pytorch.org/whl/cpu
+sentence-transformers
+
+# --- Cache / queue ---
+redis
+
+# --- Logging ---
+structlog
+
+# --- Testing ---
+pytest
+pytest-asyncio
+pytest-cov
+
+# --- Dev / lint ---
+ruff
+mypy
+
+chonkie

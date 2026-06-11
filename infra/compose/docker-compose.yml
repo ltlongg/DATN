@@ -1,0 +1,163 @@
+# ============================================================
+# Docker Compose for Agentic RAG Lich Su VN
+#
+# Usage (from project root):
+#   cp .env.example .env
+#   docker compose -f infra/compose/docker-compose.yml up -d
+#
+# Services:
+#   - postgres      : relational DB (users, documents, conversation logs)
+#   - qdrant        : vector store for RAG
+#   - neo4j         : graph store for GraphRAG
+#   - redis         : cache / lightweight queue
+#   - backend       : FastAPI API gateway     (port 8000)
+#   - agent-service : FastAPI agent service   (port 9000)
+#   - frontend      : Vite dev server         (port 5173)
+# ============================================================
+
+name: agentic-rag-lichsu
+
+services:
+  # ---------- Data stores ----------
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: arl-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-agentic_rag}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-agentic_rag}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - arl-net
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    container_name: arl-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"  # HTTP
+      - "6334:6334"  # gRPC
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - arl-net
+
+  neo4j:
+    image: neo4j:5.25-community
+    container_name: arl-neo4j
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-neo4j_password_change_me}
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: apoc.*
+    ports:
+      - "7474:7474"  # HTTP browser
+      - "7687:7687"  # Bolt
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    networks:
+      - arl-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: arl-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - arl-net
+
+  # ---------- Application services ----------
+
+  backend:
+    build:
+      context: ../../apps/backend
+      dockerfile: Dockerfile
+    container_name: arl-backend
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-agentic_rag}
+      AGENT_SERVICE_URL: http://agent-service:9000
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      agent-service:
+        condition: service_started
+    volumes:
+      - ../../apps/backend:/app
+    networks:
+      - arl-net
+
+  agent-service:
+    build:
+      context: ../../apps/agent-service
+      dockerfile: Dockerfile
+    container_name: arl-agent-service
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    environment:
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333
+      NEO4J_URI: bolt://neo4j:7687
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "9000:9000"
+    depends_on:
+      - qdrant
+      - neo4j
+      - redis
+    volumes:
+      - ../../apps/agent-service:/app
+    networks:
+      - arl-net
+
+  frontend:
+    build:
+      context: ../../apps/frontend
+      dockerfile: Dockerfile
+    container_name: arl-frontend
+    restart: unless-stopped
+    env_file:
+      - ../../.env
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ../../apps/frontend:/app
+      - /app/node_modules
+    networks:
+      - arl-net
+
+# ---------- Volumes ----------
+
+volumes:
+  postgres_data:
+  qdrant_data:
+  neo4j_data:
+  neo4j_logs:
+  redis_data:
+
+# ---------- Network ----------
+
+networks:
+  arl-net:
+    driver: bridge

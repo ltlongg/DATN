@@ -1,0 +1,7 @@
+{
+    "files.readonlyInclude": {
+        "lichsu.md": false,
+        "lichsu.clean.md": true,
+        "dataset.clean.md": true
+    }
+}

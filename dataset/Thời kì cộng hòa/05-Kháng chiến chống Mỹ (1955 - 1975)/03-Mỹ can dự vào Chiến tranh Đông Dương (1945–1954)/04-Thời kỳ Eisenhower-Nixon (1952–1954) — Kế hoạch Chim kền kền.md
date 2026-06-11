@@ -1,0 +1,5 @@
+  ##### Kế hoạch Chim kền kền
+  Đầu năm 1954, tình hình quân sự trên chiến trường Đông Dương trở nên tồi tệ đối với Pháp. Hội nghị Genève sắp sửa họp, Mỹ lập cầu hàng không Philippines - Đông Dương, tiếp tế cho quân đội Pháp mỗi ngày từ 200 đến 300 tấn vũ khí, đạn dược, lương thực, quân dụng. Hải quân Mỹ ở Thái Bình Dương đưa hai tàu sân bay thuộc Hạm đội 7 vào vịnh Bắc Bộ. Kế hoạch Chim kền kền dự định đưa 8 sư đoàn quân chiến đấu trên bộ của Mỹ vào trực tiếp tham chiến. Trong số đó sẽ điều ngay một lúc 35 tiểu đoàn vào đồng bằng Bắc Bộ. Tập trung 300 máy bay cường kích để xoá trắng "khu vực Điện Biên Phủ". Và có thể dùng vũ khí nguyên tử đánh vào miền nam Trung Quốc, nếu Trung Quốc đưa quân vào tham chiến.
+
+  Ở Washington, "bản kế hoạch diều hâu" đã chuẩn bị xong, Eisenhower và Nixon (Tổng thống, Phó tổng thống) cùng Ridway (Tham mưu trưởng liên quân Mỹ) đưa trình Hội đồng an ninh quốc gia và Quốc hội, nhưng bị phản đối, không được phê chuẩn. Trước đó một tuần, ngoại trưởng Mỹ Dulles tuyên bố: "Từ nay, Đông Dương nằm trong khu vực bất khả xâm phạm của chiến lược Mỹ."
+
