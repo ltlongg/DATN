@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     # --- LLM (Level 4 chunking + extract metadata nội dung) ---
     openai_api_key: str = ""
     openai_base_url: str | None = None
-    llm_model: str = "gpt-4o-mini"
+    llm_model: str = "gpt-5.4-nano"
 
     # --- Tokenizer đếm token cho ngưỡng chunk ---
     # Mặc định khớp model embedding tiếng Việt; bọc qua count_tokens() để dễ swap.

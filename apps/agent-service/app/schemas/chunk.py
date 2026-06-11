@@ -20,6 +20,9 @@ class ChunkMetadata(BaseModel):
     times: list[str] = Field(default_factory=list)
     locations: list[str] = Field(default_factory=list)
 
+    # Provenance + cờ resume: version prompt đã trích metadata nội dung. None = chưa trích.
+    extracted_prompt_version: str | None = None
+
     # Truy vết / citation.
     source_file: str
     chunk_index: int

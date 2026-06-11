@@ -1,27 +1,32 @@
 """CLI: điền metadata nội dung (times/actors/locations/events) cho từng chunk.
 
-Đọc `dataset/chunks_llm.json` (đã có metadata nền) -> điền 4 trường nội dung bằng
-LLM (OpenAI Structured Outputs / json_schema strict, cần OPENAI_API_KEY) -> ghi
-`dataset/chunks_meta.json` (non-destructive). Toàn bộ 4 trường (kể cả times) do LLM trích.
+Trích bằng LLM (OpenAI Structured Outputs / json_schema strict, cần OPENAI_API_KEY)
+rồi GHI THẲNG (in-place) vào chính `dataset/chunks_llm.json` — không tạo file phụ.
+Toàn bộ 4 trường (kể cả times) do LLM trích. Ghi atomic (file tạm rồi thay thế) nên
+crash giữa chừng không làm hỏng file nguồn.
+
+Mặc định: 4 luồng song song, xử lý theo LÔ 100 chunk rồi DỪNG chờ Enter (để kiểm
+tra), nhấn Enter chạy lô tiếp, Ctrl+C để dừng (đã lưu, lần sau resume tiếp).
 
 Ví dụ:
-    # Thử 20 chunk đầu:
-    python scripts/run_metadata_extraction.py --limit 20
-
-    # Chạy đầy đủ (1213 chunk), 8 luồng, có resume:
+    # Mặc định: 4 luồng, dừng sau mỗi 100 chunk chờ Enter, ghi vào chunks_llm.json:
     python scripts/run_metadata_extraction.py
 
-    # Chạy lại từ đầu, bỏ qua tiến trình cũ:
+    # Chạy thẳng không dừng (vd 8 luồng):
+    python scripts/run_metadata_extraction.py --batch-size 0 --workers 8
+
+    # Trích lại từ đầu (bỏ qua marker đã trích):
     python scripts/run_metadata_extraction.py --overwrite
 
-Resume: chỉ chunk trích thành công mới được ghi vào file tiến trình
-`<output>.progress.json`; lần chạy sau bỏ qua các chunk này. Chunk lỗi sẽ được thử lại.
+Resume: mỗi chunk trích xong được gắn marker `extracted_prompt_version` trong
+metadata; lần chạy sau bỏ qua chunk đã có marker. Chunk lỗi (không marker) sẽ thử lại.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -35,24 +40,11 @@ if str(_APP_ROOT) not in sys.path:
 
 from app.core.config import get_settings  # noqa: E402
 from app.core.llm import get_openai_client  # noqa: E402
-from app.indexing.metadata.entity_extractor import extract_entities  # noqa: E402
+from app.indexing.metadata.entity_extractor import PROMPT_VERSION, extract_entities  # noqa: E402
 from app.schemas.chunk import Chunk  # noqa: E402
 
-_DEFAULT_INPUT = _REPO_ROOT / "dataset" / "chunks_llm.json"
-_DEFAULT_OUTPUT = _REPO_ROOT / "dataset" / "chunks_meta.json"
-
-
-def _progress_path(output: Path) -> Path:
-    return output.with_suffix(".progress.json")
-
-
-def _load_done(path: Path) -> set[str]:
-    if not path.exists():
-        return set()
-    try:
-        return set(json.loads(path.read_text(encoding="utf-8")))
-    except Exception:  # noqa: BLE001 - file hỏng thì coi như chưa có tiến trình
-        return set()
+# Mặc định IN-PLACE: đọc và ghi cùng `chunks_llm.json` (gộp metadata vào luôn).
+_DEFAULT_FILE = _REPO_ROOT / "dataset" / "chunks_llm.json"
 
 
 def _coverage(chunks: list[dict]) -> dict[str, object]:
@@ -71,54 +63,49 @@ def _coverage(chunks: list[dict]) -> dict[str, object]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input", default=str(_DEFAULT_INPUT), help="chunks_llm.json (đã chunk).")
-    parser.add_argument("--output", default=str(_DEFAULT_OUTPUT), help="File JSON đầu ra.")
-    parser.add_argument("--limit", type=int, default=0, help="Chỉ xử lý N chunk đầu. 0 = tất cả.")
-    parser.add_argument("--workers", type=int, default=8, help="Số luồng gọi LLM song song.")
-    parser.add_argument("--overwrite", action="store_true", help="Bỏ qua tiến trình cũ, trích lại từ đầu.")
-    parser.add_argument("--flush-every", type=int, default=50, help="Ghi output + progress sau mỗi N chunk xong.")
+    parser.add_argument("--file", default=str(_DEFAULT_FILE), help="File chunks JSON, đọc + ghi in-place.")
+    parser.add_argument("--limit", type=int, default=0, help="Chỉ XỬ LÝ N chunk đầu chưa trích (file vẫn giữ đủ chunk). 0 = tất cả.")
+    parser.add_argument("--workers", type=int, default=4, help="Số luồng gọi LLM song song.")
+    parser.add_argument(
+        "--batch-size", type=int, default=100,
+        help="Xử lý theo lô N chunk rồi DỪNG chờ Enter để chạy tiếp. 0 = chạy hết không dừng.",
+    )
+    parser.add_argument("--overwrite", action="store_true", help="Trích lại cả chunk đã có marker.")
+    parser.add_argument("--flush-every", type=int, default=50, help="Ghi file sau mỗi N chunk xong.")
     args = parser.parse_args()
 
-    input_path = Path(args.input)
-    if not input_path.exists():
-        parser.error(f"Không tìm thấy {input_path}. Chạy run_llm_chunking.py trước.")
+    file_path = Path(args.file)
+    if not file_path.exists():
+        parser.error(f"Không tìm thấy {file_path}. Chạy run_llm_chunking.py trước.")
 
-    output_path = Path(args.output)
-    progress_path = _progress_path(output_path)
+    # by_id giữ TOÀN BỘ chunk (luôn ghi đủ); --limit chỉ giới hạn số chunk xử lý lần này.
+    all_chunks: list[dict] = json.loads(file_path.read_text(encoding="utf-8"))
+    by_id = {c["chunk_id"]: c for c in all_chunks}
 
-    chunks: list[dict] = json.loads(input_path.read_text(encoding="utf-8"))
+    # Resume qua marker trong metadata: chunk đã có extracted_prompt_version coi như xong.
+    if args.overwrite:
+        done: set[str] = set()
+    else:
+        done = {c["chunk_id"] for c in all_chunks if c["metadata"].get("extracted_prompt_version")}
+
+    todo = [c for c in all_chunks if c["chunk_id"] not in done]
     if args.limit > 0:
-        chunks = chunks[: args.limit]
-    by_id = {c["chunk_id"]: c for c in chunks}
+        todo = todo[: args.limit]
 
-    # Resume: nạp output cũ (giữ dữ liệu đã trích) + tập chunk đã xong.
-    done: set[str] = set()
-    if not args.overwrite and output_path.exists():
-        try:
-            prev = {c["chunk_id"]: c for c in json.loads(output_path.read_text(encoding="utf-8"))}
-            for cid, prev_chunk in prev.items():
-                if cid in by_id:
-                    by_id[cid]["metadata"].update(
-                        {k: prev_chunk["metadata"].get(k, []) for k in ("times", "actors", "locations", "events")}
-                    )
-            done = _load_done(progress_path) & set(by_id)
-        except Exception as exc:  # noqa: BLE001
-            print(f"[CẢNH BÁO] Không đọc được output cũ ({exc}); chạy lại từ đầu.", flush=True)
-
-    todo = [c for c in chunks if c["chunk_id"] not in done]
     settings = get_settings()
     print(
-        f"Input: {input_path.name} | {len(chunks)} chunk "
-        f"({len(done)} đã xong, {len(todo)} cần xử lý) | "
-        f"model={settings.llm_model} | {args.workers} luồng",
+        f"File: {file_path.name} | {len(all_chunks)} chunk "
+        f"({len(done)} đã trích, {len(todo)} sẽ xử lý lần này) | "
+        f"model={settings.llm_model} | prompt={PROMPT_VERSION} | {args.workers} luồng",
         flush=True,
     )
 
     def _write() -> None:
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+        # Ghi atomic: file tạm cùng thư mục rồi os.replace (an toàn cho ghi in-place).
         ordered = sorted(by_id.values(), key=lambda c: c["metadata"]["chunk_index"])
-        output_path.write_text(json.dumps(ordered, ensure_ascii=False, indent=2), encoding="utf-8")
-        progress_path.write_text(json.dumps(sorted(done), ensure_ascii=False), encoding="utf-8")
+        tmp = file_path.with_suffix(file_path.suffix + ".tmp")
+        tmp.write_text(json.dumps(ordered, ensure_ascii=False, indent=2), encoding="utf-8")
+        os.replace(tmp, file_path)
 
     client = get_openai_client()
     errors: list[str] = []
@@ -133,28 +120,63 @@ def main() -> int:
         md["actors"] = ents.actors
         md["locations"] = ents.locations
         md["events"] = ents.events
+        md["extracted_prompt_version"] = PROMPT_VERSION  # marker resume + provenance
         return chunk["chunk_id"]
 
-    completed = 0
-    log_every = max(1, len(todo) // 20)
-    with ThreadPoolExecutor(max_workers=args.workers) as pool:
-        futures = {pool.submit(_process, c): c["chunk_id"] for c in todo}
-        for fut in as_completed(futures):
-            cid = futures[fut]
-            try:
-                fut.result()
-                done.add(cid)
-            except Exception as exc:  # noqa: BLE001 - đếm lỗi, không mark done -> resume thử lại
-                errors.append(f"{cid}: {type(exc).__name__}: {exc}")
-            completed += 1
-            if completed % log_every == 0 or completed == len(todo):
-                pct = completed * 100 // len(todo) if todo else 100
-                print(f"  [{completed:4d}/{len(todo)} {pct:3d}%] lỗi={len(errors)}", flush=True)
-            if completed % args.flush_every == 0:
-                _write()
+    def _batches(items: list[dict], size: int) -> list[list[dict]]:
+        if size <= 0:
+            return [items]
+        return [items[i : i + size] for i in range(0, len(items), size)]
 
-    _write()
+    total = len(todo)
+    completed = 0
+    log_every = max(1, total // 20)
+    batches = _batches(todo, args.batch_size)
+    stopped = False
+    for bi, batch in enumerate(batches):
+        with ThreadPoolExecutor(max_workers=args.workers) as pool:
+            futures = {pool.submit(_process, c): c["chunk_id"] for c in batch}
+            for fut in as_completed(futures):
+                cid = futures[fut]
+                try:
+                    fut.result()
+                    done.add(cid)
+                except Exception as exc:  # noqa: BLE001 - đếm lỗi, không mark done -> resume thử lại
+                    errors.append(f"{cid}: {type(exc).__name__}: {exc}")
+                    # In NGAY để thấy nguyên nhân kể cả khi Ctrl+C giữa chừng (đừng chờ summary).
+                    print(f"    ! {cid}: {type(exc).__name__}: {str(exc)[:160]}", flush=True)
+                completed += 1
+                if completed % log_every == 0 or completed == total:
+                    pct = completed * 100 // total if total else 100
+                    print(f"  [{completed:4d}/{total} {pct:3d}%] lỗi={len(errors)}", flush=True)
+                if completed % args.flush_every == 0:
+                    _write()
+        _write()  # chốt file sau mỗi lô
+
+        # Dừng chờ Enter giữa các lô (trừ lô cuối). Chỉ dừng khi stdin là terminal
+        # tương tác (tty); nếu là pipe/nền/CI thì chạy tiếp để khỏi treo ở input().
+        if args.batch_size > 0 and bi < len(batches) - 1:
+            cov = _coverage(list(by_id.values()))
+            print(
+                f"\n>>> Xong lô {bi + 1}/{len(batches)}: {completed}/{total} chunk "
+                f"(actors={cov['with_actors']}, times={cov['with_times']}, lỗi={len(errors)}). "
+                f"Đã ghi {file_path}.",
+                flush=True,
+            )
+            if not sys.stdin.isatty():
+                print(">>> (stdin không tương tác -> chạy tiếp tự động)", flush=True)
+                continue
+            try:
+                input(">>> Kiểm tra xong, nhấn Enter để chạy lô tiếp (Ctrl+C để dừng)... ")
+            except (EOFError, KeyboardInterrupt):
+                print("\nDừng theo yêu cầu. Tiến trình đã lưu — lần sau chạy lại sẽ resume tiếp.", flush=True)
+                stopped = True
+                break
+
     elapsed = time.perf_counter() - t0
+    if stopped:
+        print(f"\nĐã dừng giữa chừng tại {completed}/{total} chunk [{elapsed:.1f}s]. Đã ghi -> {file_path}")
+        return 0
 
     # Validate schema toàn bộ.
     schema_errors = 0
@@ -171,7 +193,7 @@ def main() -> int:
             print("  -", e)
     if schema_errors:
         print(f"[CẢNH BÁO] {schema_errors} chunk lỗi schema.")
-    print(f"Đã ghi -> {output_path}")
+    print(f"Đã ghi -> {file_path}")
     return 1 if errors else 0
 
 
