@@ -22,7 +22,7 @@ _APP_ROOT = _THIS_DIR.parent
 if str(_APP_ROOT) not in sys.path:
     sys.path.insert(0, str(_APP_ROOT))
 
-from app.indexing.preprocessing import preprocess_file, preprocess_text
+from app.indexing.preprocessing import preprocess_file, preprocess_text  # noqa: E402
 
 
 def main() -> int:
