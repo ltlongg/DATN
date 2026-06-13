@@ -51,8 +51,6 @@ def extract_entities(
             {"role": "user", "content": build_user_prompt(text, headings)},
         ],
         response_format=EntityExtraction,
-        # Không set temperature: reasoning models (gpt-5 series) chỉ cho phép default (1),
-        # truyền 0 → 400. Schema strict đã ép cấu trúc nên bỏ temperature không ảnh hưởng.
     )
     message = completion.choices[0].message
     if getattr(message, "refusal", None):

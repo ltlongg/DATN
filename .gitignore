@@ -10,3 +10,5 @@ venv/
 *.sqlite3
 .DS_Store
 .idea/
+rag_storage/
+.ruff_cache/

@@ -33,10 +33,10 @@ langchain-openai
 langgraph
 
 # --- Vector store (Qdrant) ---
-qdrant-client
+qdrant-client>=1.11,<2
 
 # --- Graph store (Neo4j) for GraphRAG ---
-neo4j
+neo4j>=5,<7
 
 # --- Document parsing ---
 pypdf
@@ -56,7 +56,10 @@ protobuf
 sentence-transformers
 
 # --- Cache / queue ---
-redis
+redis>=5,<8
+
+# --- Relational source of truth (chunks + metadata) ---
+psycopg[binary]>=3,<4
 
 # --- Logging ---
 structlog

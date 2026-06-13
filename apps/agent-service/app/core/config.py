@@ -40,9 +40,29 @@ class Settings(BaseSettings):
     # Mặc định khớp model embedding tiếng Việt; bọc qua count_tokens() để dễ swap.
     embedding_tokenizer: str = "AITeamVN/Vietnamese_Embedding"
 
+    # --- Embedding (sinh vector thật, dùng cho vector indexing/retrieval) ---
+    embedding_model: str = "AITeamVN/Vietnamese_Embedding"
+
+    # --- Qdrant collection cho chunk vector ---
+    qdrant_collection: str = "history_vn_chunks"
+
+    # --- LLM riêng cho pass trích entity/quan hệ (None = dùng llm_model). Đặt model
+    # hỗ trợ structured outputs strict nếu llm_model mặc định không hỗ trợ. ---
+    graph_llm_model: str | None = None
+
     # --- Tham số chunking ---
     chunk_size: int = 700
     min_characters_per_chunk: int = 80
+
+    # --- Storage backends (đọc từ .env) ---
+    neo4j_uri: str = ""
+    neo4j_user: str = "neo4j"
+    neo4j_password: str = ""
+    qdrant_host: str = ""
+    qdrant_port: int = 6333
+    qdrant_api_key: str = ""
+    redis_url: str = ""
+    database_url: str = ""
 
     @field_validator("openai_base_url", mode="before")
     @classmethod

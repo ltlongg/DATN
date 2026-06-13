@@ -333,10 +333,18 @@ Hệ thống sử dụng mô hình lưu trữ phân tán để tối ưu RAM và
 Postgres lưu trữ toàn bộ dữ liệu thô, chi tiết định vị và full metadata của các chunks để phục vụ hiển thị Citation và quản trị.
 
 ```sql
-CREATE TABLE chunks (
+CREATE TABLE rag_chunks (
     chunk_id TEXT PRIMARY KEY,               -- Ví dụ: 'lichsu_clean-000001'
+    doc_id TEXT NOT NULL,
+    lightrag_chunk_key TEXT NOT NULL UNIQUE, -- Khóa source_id của LightRAG
     text TEXT NOT NULL,                      -- Văn bản thô của chunk
     embedding_text TEXT NOT NULL,            -- Văn bản dùng để embed (kèm context headings)
+    metadata JSONB NOT NULL,                 -- Full metadata gốc
+    heading_path TEXT[] NOT NULL DEFAULT '{}',
+    events TEXT[] NOT NULL DEFAULT '{}',
+    actors TEXT[] NOT NULL DEFAULT '{}',
+    times TEXT[] NOT NULL DEFAULT '{}',
+    locations TEXT[] NOT NULL DEFAULT '{}',
     source_file TEXT NOT NULL,               -- File nguồn (lichsu.md)
     chunk_index INT NOT NULL,                -- Thứ tự chunk
     start_line INT,                          -- Dòng bắt đầu
@@ -344,10 +352,7 @@ CREATE TABLE chunks (
     start_index INT,                         -- Vị trí ký tự bắt đầu
     end_index INT,                           -- Vị trí ký tự kết thúc
     text_token_count INT,
-    embedding_token_count INT,
-    metadata JSONB NOT NULL,                 -- Full metadata (times, locations, actors, events, headings)
-    needs_review BOOLEAN NOT NULL DEFAULT FALSE,
-    review_reason TEXT
+    embedding_token_count INT
 );
 ```
 
@@ -359,13 +364,12 @@ Qdrant chỉ lưu trữ ID, Vector Embedding và một **tập con metadata tố
 *   **Payload (Metadata tối giản):**
     ```json
     {
-      "source_file": "lichsu.md",
-      "headings": {
-        "h1": "...",
-        "h2": "..."
-      },
-      "times": ["1954"],
-      "locations": ["Điện Biên Phủ"]
+      "chunk_id": "lichsu_clean-000001",
+      "heading_path": ["Thời kì thuộc địa", "Khởi nghĩa Trương Định", "Diễn biến"],
+      "events": ["Quân Pháp đánh chiếm thành Gia Định"],
+      "actors": ["quân Pháp", "Trương Định"],
+      "times": ["1859"],
+      "locations": ["Gia Định"]
     }
     ```
 
