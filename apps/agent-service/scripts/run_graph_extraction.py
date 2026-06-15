@@ -60,7 +60,13 @@ _ARTIFACT = _REPO_ROOT / "dataset" / "graph_extractions.json"
 def _load_artifact(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
-    data = json.loads(path.read_text(encoding="utf-8"))
+    text = path.read_text(encoding="utf-8").strip()
+    if not text:
+        return {}  # file rỗng (vd xóa để chạy lại) -> coi như cache trống
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        return {}  # cache hỏng/ghi dở -> bỏ qua, trích lại từ đầu
     return data if isinstance(data, dict) else {}
 
 
