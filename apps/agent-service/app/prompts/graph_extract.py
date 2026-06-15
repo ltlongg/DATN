@@ -11,7 +11,7 @@ system prompt mô tả ý nghĩa + ví dụ để tăng chất lượng trích.
 
 from __future__ import annotations
 
-GRAPH_PROMPT_VERSION = "graph-extract-v1"
+GRAPH_PROMPT_VERSION = "graph-extract-v3"
 
 
 SYSTEM_PROMPT = """\
@@ -29,13 +29,13 @@ mảng rỗng nếu đoạn chỉ là bình luận, không có thực thể/sự
 
 <entity_types_and_rules>
 Phân loại entity theo 7 loại sau (nếu không khớp loại nào, dùng "Khác"):
-- Nhân vật: cá nhân lịch sử có thật (vua, quan, lãnh tụ, tướng lĩnh, nhà cách mạng, sĩ phu...).
-- Sự kiện: biến cố lịch sử cụ thể (trận đánh, cuộc khởi nghĩa, phong trào, hội nghị, sự kiện chính trị...).
+- Nhân vật: cá nhân lịch sử có thật (vua, quan, lãnh tụ, tướng lĩnh, nhà cách mạng, sĩ phu, quan chức nước ngoài...).
+- Sự kiện: biến cố hoặc tiến trình lịch sử có thể xác định (trận đánh, cuộc khởi nghĩa, phong trào, chiến dịch, hội nghị, cuộc đảo chính...). Phong trào và chiến dịch dù kéo dài nhiều năm vẫn xếp vào đây, KHÔNG xếp vào Giai đoạn.
 - Địa điểm: nơi sự kiện diễn ra (thành, tỉnh, vùng, làng, địa danh cụ thể).
-- Tổ chức: triều đình, chính quyền, quân đội, đảng phái, lực lượng (vd "triều đình Huế", "quân Pháp", "Đảng Cộng sản Đông Dương").
-- Giai đoạn: thời kỳ, giai đoạn lịch sử (vd "thời Pháp thuộc", "phong trào Cần vương").
-- Văn kiện: văn bản, hiệp ước, hiệp định, tuyên ngôn, nghị quyết, cương lĩnh, luận cương.
-- Khác: chỉ dùng khi thực thể quan trọng nhưng không thuộc các loại trên.
+- Tổ chức: triều đình, chính quyền, quân đội, đảng phái, lực lượng vũ trang, tổ chức yêu nước (vd "triều đình Huế", "quân Pháp", "Đảng Cộng sản Đông Dương", "Việt Minh").
+- Giai đoạn: span thời gian thuần túy dùng làm bối cảnh lịch sử (vd "thời Pháp thuộc", "giai đoạn 1945–1954", "thế kỉ XIX"). KHÔNG dùng cho phong trào hay chiến dịch có tên riêng — những thứ đó là Sự kiện.
+- Văn kiện: văn bản, hiệp ước, hiệp định, tuyên ngôn, nghị quyết, cương lĩnh, luận cương, chiếu chỉ.
+- Khác: thực thể quan trọng không thuộc các loại trên (vd chính sách, học thuyết, khái niệm tư tưởng).
 
 QUY TẮC DOMAIN (quan trọng):
 - entity name phải là cụm danh từ ngắn, thường dưới 8 từ. KHÔNG dùng cả câu hoặc mệnh đề làm entity name.
@@ -89,23 +89,20 @@ QUY TẮC DOMAIN (quan trọng):
 }</output>
 </example>
 <example>
-<text>Sau khi triều đình Huế ký Hiệp ước Pa-tơ-nốt năm 1884, nước ta trở thành thuộc địa của Pháp. Năm 1885, Tôn Thất Thuyết nhân danh vua Hàm Nghi xuống Chiếu Cần vương, kêu gọi văn thân, sĩ phu và nhân dân đứng lên chống Pháp. Phong trào Cần vương bùng nổ từ đó và kéo dài đến cuối thế kỉ XIX.</text>
+<text>Năm 1882, Henri Rivière chỉ huy quân Pháp đánh chiếm thành Hà Nội lần thứ hai. Tổng đốc Hoàng Diệu tử tiết sau khi thành thất thủ. Năm 1883, quân Cờ Đen phục kích và tiêu diệt Rivière tại Cầu Giấy, buộc Pháp phải hoãn kế hoạch mở rộng ra Bắc Kỳ.</text>
 <output>{
   "entities": [
-    {"name": "Triều đình Huế", "type": "Tổ chức", "description": "Chính quyền nhà Nguyễn ký Hiệp ước Pa-tơ-nốt năm 1884."},
-    {"name": "Hiệp ước Pa-tơ-nốt", "type": "Văn kiện", "description": "Hiệp ước do triều đình Huế ký năm 1884, dẫn đến việc nước ta trở thành thuộc địa của Pháp."},
-    {"name": "Pháp", "type": "Tổ chức", "description": "Lực lượng thực dân biến nước ta thành thuộc địa sau Hiệp ước Pa-tơ-nốt năm 1884."},
-    {"name": "Tôn Thất Thuyết", "type": "Nhân vật", "description": "Người nhân danh vua Hàm Nghi xuống Chiếu Cần vương năm 1885."},
-    {"name": "Vua Hàm Nghi", "type": "Nhân vật", "description": "Vị vua được Tôn Thất Thuyết nhân danh khi xuống Chiếu Cần vương năm 1885."},
-    {"name": "Chiếu Cần vương", "type": "Văn kiện", "description": "Chiếu ban năm 1885 kêu gọi văn thân, sĩ phu và nhân dân đứng lên chống Pháp."},
-    {"name": "Phong trào Cần vương", "type": "Giai đoạn", "description": "Phong trào yêu nước chống Pháp bùng nổ từ năm 1885 và kéo dài đến cuối thế kỉ XIX."}
+    {"name": "Henri Rivière", "type": "Nhân vật", "description": "Sĩ quan Pháp chỉ huy đánh chiếm thành Hà Nội năm 1882, bị quân Cờ Đen tiêu diệt tại Cầu Giấy năm 1883."},
+    {"name": "Quân Pháp", "type": "Tổ chức", "description": "Lực lượng thực dân Pháp, đánh chiếm thành Hà Nội lần thứ hai năm 1882 dưới quyền Rivière."},
+    {"name": "Thành Hà Nội", "type": "Địa điểm", "description": "Thành bị quân Pháp đánh chiếm lần thứ hai năm 1882."},
+    {"name": "Hoàng Diệu", "type": "Nhân vật", "description": "Tổng đốc Hà Nội, tử tiết sau khi thành thất thủ năm 1882."},
+    {"name": "Quân Cờ Đen", "type": "Tổ chức", "description": "Lực lượng phục kích và tiêu diệt Henri Rivière tại Cầu Giấy năm 1883."}
   ],
   "relations": [
-    {"source": "Triều đình Huế", "target": "Hiệp ước Pa-tơ-nốt", "keyword": "ký kết", "description": "Triều đình Huế ký Hiệp ước Pa-tơ-nốt năm 1884."},
-    {"source": "Hiệp ước Pa-tơ-nốt", "target": "Pháp", "keyword": "dẫn đến", "description": "Hiệp ước Pa-tơ-nốt năm 1884 dẫn đến việc nước ta trở thành thuộc địa của Pháp."},
-    {"source": "Tôn Thất Thuyết", "target": "Chiếu Cần vương", "keyword": "ban hành", "description": "Năm 1885, Tôn Thất Thuyết nhân danh vua Hàm Nghi xuống Chiếu Cần vương."},
-    {"source": "Chiếu Cần vương", "target": "Phong trào Cần vương", "keyword": "dẫn đến", "description": "Chiếu Cần vương năm 1885 kêu gọi lực lượng yêu nước đứng lên, làm bùng nổ phong trào Cần vương."},
-    {"source": "Phong trào Cần vương", "target": "Pháp", "keyword": "chống lại", "description": "Phong trào Cần vương là phong trào yêu nước chống Pháp từ năm 1885 đến cuối thế kỉ XIX."}
+    {"source": "Henri Rivière", "target": "Quân Pháp", "keyword": "chỉ huy", "description": "Henri Rivière chỉ huy quân Pháp đánh chiếm thành Hà Nội năm 1882."},
+    {"source": "Quân Pháp", "target": "Thành Hà Nội", "keyword": "đánh chiếm", "description": "Quân Pháp dưới lệnh Rivière đánh chiếm thành Hà Nội lần thứ hai năm 1882."},
+    {"source": "Hoàng Diệu", "target": "Thành Hà Nội", "keyword": "bảo vệ", "description": "Tổng đốc Hoàng Diệu bảo vệ thành Hà Nội và tử tiết sau khi thành thất thủ năm 1882."},
+    {"source": "Quân Cờ Đen", "target": "Henri Rivière", "keyword": "tiêu diệt", "description": "Năm 1883, quân Cờ Đen phục kích và tiêu diệt Henri Rivière tại Cầu Giấy."}
   ]
 }</output>
 </example>

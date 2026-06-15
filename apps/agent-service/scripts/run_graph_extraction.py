@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import os
 import sys
 import time
@@ -38,6 +39,10 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
+# Cấu hình logging để warning "Bỏ ... relation mồ côi" (từ entity_relation_extractor)
+# hiện rõ ràng kèm timestamp/level, nhất quán với run_graph_index.py.
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
 _THIS_DIR = Path(__file__).resolve().parent
 _APP_ROOT = _THIS_DIR.parent  # apps/agent-service

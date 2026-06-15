@@ -89,6 +89,8 @@ def extract_graph(
             {"role": "user", "content": build_user_prompt(text, headings)},
         ],
         response_format=GraphExtraction,
+        timeout = 60,
+        temperature=0.0,  # ưu tiên độ chính xác, LLM có thể bỏ qua prompt hơn là bịa ra entity/rel không có thật
     )
     message = completion.choices[0].message
     if getattr(message, "refusal", None):
