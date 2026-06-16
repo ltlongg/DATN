@@ -15,12 +15,12 @@ from pydantic import BaseModel, Field
 
 EntityType = Literal[
     "Nhân vật",
-    "Sự kiện",
-    "Địa điểm",
     "Tổ chức",
-    "Giai đoạn",
+    "Địa điểm",
+    "Sự kiện",
     "Văn kiện",
-    "Khác",
+    "Chủ trương",
+    "Chức danh",
 ]
 
 
