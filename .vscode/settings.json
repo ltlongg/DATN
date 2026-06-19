@@ -2,6 +2,12 @@
     "files.readonlyInclude": {
         "lichsu.md": true,
         "lichsu.clean.md": true,
-        "dataset.clean.md": true
+        "dataset/chunks_llm.json": true,
+        "dataset/graph_extractions.json": true,
+        "dataset.clean.md": true,
+        "dataset/alias_seed.json": false,
+        "dataset/alias_verdicts.json": true,
+        "dataset/alias_review.md": true,
+        "dataset/alias_map.json": true
     }
 }

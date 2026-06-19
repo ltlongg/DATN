@@ -5,9 +5,10 @@ main thread sau khi trích — không có event loop, async driver chỉ thêm p
 Retrieval phase (FastAPI async) sau này có thể thêm `get_async_neo4j_driver()` riêng;
 data model độc lập driver nên không khóa lựa chọn.
 
-Model graph: một label `:Entity` (property `name` UNIQUE + `type`), một relationship
-type `:REL` (property `keyword`). Tên file trùng tên package `neo4j` nhưng import
-tuyệt đối (`from neo4j import ...`) vẫn trỏ về package đã cài, không tự tham chiếu.
+Model graph: một label `:Entity` (property `norm_name` UNIQUE = khóa dedup, `name` =
+hiển thị, `type`), một relationship type `:REL` (property `keyword`). Tên file trùng
+tên package `neo4j` nhưng import tuyệt đối (`from neo4j import ...`) vẫn trỏ về package
+đã cài, không tự tham chiếu.
 """
 
 from __future__ import annotations
@@ -21,8 +22,8 @@ from app.core.config import get_settings
 __all__ = ["get_neo4j_driver", "ensure_graph_constraints"]
 
 _CONSTRAINTS = [
-    "CREATE CONSTRAINT entity_name_unique IF NOT EXISTS "
-    "FOR (e:Entity) REQUIRE e.name IS UNIQUE",
+    "CREATE CONSTRAINT entity_norm_name_unique IF NOT EXISTS "
+    "FOR (e:Entity) REQUIRE e.norm_name IS UNIQUE",
     "CREATE INDEX entity_type_idx IF NOT EXISTS FOR (e:Entity) ON (e.type)",
 ]
 

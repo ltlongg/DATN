@@ -79,3 +79,91 @@ Tài liệu này ghi lại chi tiết các mốc thời gian, công việc đã 
 - Extract metadata nội dung: `times` (regex), `actors/locations/events` (LLM/NER).
 - Embedding + nạp Postgres/Qdrant, sau đó GraphRAG (Neo4j).
 
+---
+
+## [11/06/2026] - Pipeline Trích Xuất Metadata Nội Dung (LLM)
+
+**Thời gian hoạt động:** Cả ngày
+
+### Công việc đã làm:
+1. **Trích metadata nội dung từng chunk bằng LLM Structured Outputs:**
+   - Thêm prompt + schema Pydantic + extractor để lấy 4 trường `times`, `actors`, `locations`, `events` (surface form) từ nội dung mỗi chunk — phục vụ Qdrant payload (pre-filter) và visualization sau này.
+   - Đây là pass metadata **tách biệt** với pass graph (entity-có-kiểu) làm sau — hai mục đích khác nhau, không gộp.
+2. **CLI `scripts/run_metadata_extraction.py`:**
+   - Đọc `dataset/chunks_llm.json`, hỗ trợ chạy **song song**, **resume** (bỏ qua chunk đã làm) và **overwrite**, ghi kết quả ra `dataset/chunks_meta.json`.
+3. **Ổn định cấu hình monorepo:**
+   - Sửa `agent-service` đọc `.env` từ **root repo** (đường dẫn tuyệt đối, không phụ thuộc CWD).
+   - Xử lý `OPENAI_BASE_URL` rỗng → `None` (tránh `APIConnectionError`).
+   - Chuẩn hóa lại `.env.example`: root `.env` là nguồn cấu hình chính.
+
+### Kế hoạch tiếp theo:
+- Dựng pipeline embedding + nạp dữ liệu vào Postgres/Qdrant.
+- Thiết kế tầng GraphRAG (entity + quan hệ → Neo4j).
+
+---
+
+## [13/06/2026] - Chuyển Sang Pipeline GraphRAG Tự Triển Khai (DIY)
+
+**Thời gian hoạt động:** Cả ngày
+
+### Công việc đã làm:
+1. **Gỡ bỏ hoàn toàn LightRAG (`lightrag-hku`):**
+   - Lý do: impedance mismatch lặp lại — `ainsert_custom_chunks` không dựng graph, KV một-backend, bảng riêng không tái dùng data Postgres, luồng chuẩn không tải nổi metadata per-chunk.
+   - Quyết định: tự ráp pipeline DIY bằng client trực tiếp. Ghi rõ lý do + thiết kế trong `docs/plan/chunking-embedding-plan.md`.
+2. **Dựng pipeline offline `scripts/run_graph_index.py`:**
+   - Luồng: đọc `chunks_llm.json` → upsert Postgres `rag_chunks` (source of truth) → embed + upsert Qdrant `history_vn_chunks` → trích entity/quan hệ (song song) → cache `dataset/graph_extractions.json` → merge Neo4j.
+   - Flags: `--limit --workers --overwrite --remerge --skip-vectors --skip-graph`.
+3. **Chốt các quyết định kiến trúc (không đề xuất lại LightRAG):**
+   - **`chunk_id` là khóa nối DUY NHẤT**: Postgres PK ↔ Qdrant payload ↔ Neo4j `source_chunk_ids`.
+   - **Qdrant**: point id = `uuid5(NS, chunk_id)` (deterministic, idempotent); payload đúng 6 field `CHUNK_VECTOR_META_FIELDS`, không lưu text.
+   - **Neo4j**: label `:Entity` (key `name` canonical, UNIQUE constraint) + rel type `:REL` (prop `keyword`); MERGE idempotent, tích lũy `source_chunk_ids` + `descriptions` xuyên chunk.
+   - **Embedding**: model tiếng Việt `AITeamVN/Vietnamese_Embedding` (nền BGE-M3, 1024-dim, cosine).
+
+### Kế hoạch tiếp theo:
+- Tinh chỉnh prompt trích entity/quan hệ để tăng chất lượng (giảm entity rác, gộp alias).
+- Xác định scope MVP cho frontend.
+
+---
+
+## [15-16/06/2026] - Tinh Chỉnh Prompt Trích Graph & Scope Frontend
+
+**Thời gian hoạt động:** Hai ngày
+
+### Công việc đã làm:
+1. **Tune prompt trích entity + quan hệ (`graph-extract-v6`):**
+   - Cố định **7 loại entity**: Nhân vật, Tổ chức, Địa điểm, Sự kiện, Văn kiện, Chủ trương, Chức danh.
+   - Yêu cầu canonicalize alias ngay khi trích (vd "Nguyễn Ái Quốc"/"Bác Hồ" → "Hồ Chí Minh") — đây là điểm contribution của đồ án.
+   - Mục tiêu: tránh **bỏ sót** entity/quan hệ quan trọng, đồng thời tránh trích ra entity/quan hệ **rác**.
+   - Dùng OpenAI Structured Outputs (strict json_schema), nạp few-shot theo domain từ `prompts/entity_type/history_vn.yml`.
+2. **Cải thiện cache handling** trong `run_graph_index.py`: resume theo `prompt_version`, chỉ trích lại khi version đổi.
+3. **Bổ sung scope frontend MVP** (`docs/design/frontend-scope.md`).
+
+### Kế hoạch tiếp theo:
+- Chạy trích graph trên toàn bộ chunk, cache ra artifact.
+- Nạp đầy đủ cả 3 cơ sở dữ liệu.
+
+---
+
+## [17/06/2026] - Trích Graph Toàn Bộ & Hoàn Tất Nạp 3 Cơ Sở Dữ Liệu
+
+**Thời gian hoạt động:** Cả ngày
+
+### Công việc đã làm:
+1. **Trích graph toàn bộ corpus → `dataset/graph_extractions.json`:**
+   - Hoàn tất trích **1.213 chunk** (prompt `graph-extract-v6`, 0 lỗi).
+   - Kết quả thô: **15.862 entity**, **15.057 quan hệ** (cache để inspect + resume, không trích lại tốn API).
+2. **Embedding trên GPU (Google Colab) → notebook `dataset/colab_embed_upsert.ipynb`:**
+   - Vì máy local chỉ có torch CPU (embed 1213 chunk tốn ~15-30 phút), chuyển sang embed trên GPU Colab (L4/A100) rồi upsert thẳng vào Qdrant remote.
+   - Notebook tách cell theo bước, **resumable** qua `embed_progress.json`, helper (`point_id_for`, `make_payload`) sao y `app/core/qdrant.py` để point id + payload khớp tuyệt đối với pipeline local.
+   - Bổ sung phần **merge Neo4j** vào cuối notebook (Cypher sao y `graph_store.py`) để Colab có thể nạp luôn graph (không gọi LLM).
+3. **Nạp đầy đủ cả 3 cơ sở dữ liệu (verify thực tế):**
+   - **Postgres `rag_chunks`**: 1.213 rows (text + metadata, source of truth).
+   - **Qdrant `history_vn_chunks`**: 1.213 points, dim 1024, cosine.
+   - **Neo4j**: **6.216 entity** nodes (dedup theo `name` từ 15.862 thô, ~61%) + **14.157 quan hệ** (mất ~6% do MATCH không thấy endpoint — đúng thiết kế, không tạo node rỗng).
+4. **Quyết định framework cho orchestrator: LangGraph** (không dùng Deep Agents):
+   - Bài toán là RAG server với luồng có cấu trúc (route intent → RAG/GraphRAG/hybrid → synthesize), cần control flow tùy biến (branching, parallel fan-out, reflection loop "đủ data chưa"), không cần planning/memory/file-management của Deep Agents.
+
+### Kế hoạch tiếp theo:
+- Kiểm tra chất lượng alias resolution trên Neo4j (vd các node trùng ngữ nghĩa của "Hồ Chí Minh").
+- Bắt đầu phase retrieval: dựng `AgentState` + `StateGraph` trong `orchestrator/`, rồi lần lượt `tools/traditional_rag/`, `tools/graph_rag/`, `tools/hybrid/`.
+
