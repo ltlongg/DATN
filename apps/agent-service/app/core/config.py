@@ -50,6 +50,15 @@ class Settings(BaseSettings):
     # hỗ trợ structured outputs strict nếu llm_model mặc định không hỗ trợ. ---
     graph_llm_model: str | None = None
 
+    # --- LLM riêng cho pass trích timeline (None = dùng llm_model). Cũng cần strict
+    # Structured Outputs như graph -> tách riêng để cấu hình độc lập. ---
+    timeline_llm_model: str | None = None
+
+    # --- Geocoding: Google Maps API key cho geocode địa danh -> lat/lon (Geocoding API).
+    # Rỗng -> geocoder bỏ qua Google, chỉ dùng LLM fallback.
+    # LƯU Ý ToS: Google chỉ cho cache lat/lon <= 30 ngày — xem docs/reference/google-maps-api.md. ---
+    google_maps_api_key: str = ""
+
     # --- Tham số chunking ---
     chunk_size: int = 700
     min_characters_per_chunk: int = 80
