@@ -167,3 +167,33 @@ Tài liệu này ghi lại chi tiết các mốc thời gian, công việc đã 
 - Kiểm tra chất lượng alias resolution trên Neo4j (vd các node trùng ngữ nghĩa của "Hồ Chí Minh").
 - Bắt đầu phase retrieval: dựng `AgentState` + `StateGraph` trong `orchestrator/`, rồi lần lượt `tools/traditional_rag/`, `tools/graph_rag/`, `tools/hybrid/`.
 
+---
+
+## [19/06/2026] - Hệ Thống Alias Resolution Đa Tầng & Re-index Neo4j
+
+**Thời gian hoạt động:** Cả ngày
+
+### Công việc đã làm:
+1. **Chuẩn hóa `norm_name` về KIỂU CŨ (vị trí dấu thanh) — `app/indexing/graph/normalize.py`:**
+   - Trước đây dời dấu thanh cụm oa/oe/uy về nguyên âm sau (kiểu mới) → sinh chữ sai như `mùa→muà`, `của→cuả` (cụm "ua" có dấu vốn nằm đúng trên 'u').
+   - Đảo chiều về **kiểu cũ** (dấu trên nguyên âm đầu): `hoà→hòa`, `thuý→thúy`, giữ nguyên `mùa`/`của`.
+   - Hai chốt chặn bắt buộc: chỉ dời khi cụm **cuối âm tiết** (loại âm tiết đóng `toàn`/`hoàng` và tam trùng âm `ngoài`/`xoáy`); bỏ qua digraph `qu` (`quả`/`quý`).
+2. **Tầng alias 2b — dựng + duyệt `dataset/alias_seed.json`:**
+   - Hiểu rõ pipeline 2 nguồn: verdict LLM `same`+`cao` → tự gom vào `alias_map.json`; `same`+`vừa` → ra `alias_review.md` cho người duyệt; alias ngữ nghĩa (Hồ Chí Minh / Nguyễn Ái Quốc) → khai tay vào `alias_seed.json`.
+   - Duyệt 53 cặp "vừa": phân loại an toàn / cần cẩn thận / rủi ro cao. Với nhóm rủi ro **đối chiếu mô tả thật trong `graph_extractions.json`** thay vì đoán theo trí nhớ.
+   - Phát hiện & loại 1 cặp sai: `"Chính phủ liên hiệp"` thực chất là **CP Liên hiệp VN 1946** (4/5 mô tả), không phải Lào. Sửa chiều canonical sai: `Trại Hút → Trái Hút`.
+   - Chốt `alias_seed.json` (~29 cụm), build lại `alias_map.json` → **169 biến thể** (build từ verdict cache, **0 gọi LLM**).
+3. **Sửa bug có sẵn — `app/indexing/graph/alias.py`:**
+   - `_REPO_ROOT = parents[4]` trỏ sai `D:\VFS\apps\dataset\` (không tồn tại) → `load_alias_map()` **luôn trả rỗng** → `resolve()` chưa bao giờ chạy, tầng alias 2b vô hiệu từ trước tới nay. Sửa thành `parents[5]`.
+   - Migrate khóa `alias_map.json` (11) + `alias_verdicts.json` (144) cho khớp normalize mới, 0 va chạm.
+4. **Wipe + re-index Neo4j với schema mới:**
+   - Phát hiện 6.216 node cũ là **schema đời trước**: không có `norm_name`, MERGE theo `name`, chưa qua alias → mọi việc trên chưa hề áp vào graph.
+   - Xoá sạch Neo4j (node/quan hệ + constraint/index cũ), giữ nguyên Postgres + Qdrant (không phụ thuộc alias).
+   - Re-merge từ cache (`run_graph_index.py --skip-vectors --remerge`, không tốn LLM): **5.857 entity** (giảm ~359 nhờ gom alias) + **14.088 quan hệ**, 100% node có `norm_name`.
+   - Verify: "Hồ Chí Minh" gom về 1 node (95 chunks), "Quân đội Việt Nam" (27), "Lữ đoàn dù 173" gom 3 biến thể; các tên alias cũ không còn node riêng.
+
+### Kế hoạch tiếp theo:
+- Viết GraphRAG retriever (query side hiện chưa có) — **bắt buộc áp `resolve()` lên entity trong câu hỏi** trước khi MATCH `norm_name` (đối xứng với index), để hỏi bằng alias vẫn tìm đúng node.
+- (Tùy chọn) lưu thêm field `aliases` trên node để trả lời minh bạch "còn gọi là...".
+- Tiếp tục phase retrieval: `AgentState` + `StateGraph` trong `orchestrator/`.
+
