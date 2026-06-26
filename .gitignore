@@ -13,3 +13,4 @@ venv/
 rag_storage/
 .ruff_cache/
 node_modules/
+.playwright-cli/

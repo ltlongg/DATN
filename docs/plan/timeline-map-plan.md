@@ -2,10 +2,19 @@
 
 > Trạng thái: **Phase 1 → 7 đã build & verify**. Toàn pipeline offline + builder online
 > xong: text → units → atomic events (`timeline_events`, 34) → geocode (`gazetteer`, 31,
-> Mapbox+LLM) → `build_visualization()` ra payload map+timeline link bằng event_id.
-> **Chốt §5: Hướng A (segmenter), cap 50K. Chốt §9: geocoding Mapbox→LLM.** Còn lại: chạy
-> full corpus + tích hợp builder vào answer flow agent (Phase 8). File này là
-> source-of-truth của hạng mục timeline/map. Cập nhật khi đổi quyết định.
+> Google+LLM) → `build_visualization()` ra payload map+timeline link bằng event_id.
+> **Chốt §5: Hướng A (segmenter), cap 50K. Chốt §9: geocoding Google→LLM** (đổi từ Mapbox
+> sang Google 2026-06-22, xem §9). Còn lại: chạy full corpus + tích hợp builder vào answer
+> flow agent (Phase 8). File này là source-of-truth của hạng mục timeline/map. Cập nhật
+> khi đổi quyết định.
+>
+> **⚠️ Ưu tiên 2026-06-22 (user): TẠM HOÃN khâu toạ độ** (`gazetteer` + lat/lon) — để LÀM
+> CUỐI, vì độ chính xác địa điểm quan trọng và cần review kĩ (điểm yếu trùng-tên §9). **Tạm
+> thời KHÔNG chạy geocoding** (cả LLM-sinh lẫn Google Maps). Trọng tâm hiện tại: chỉ trích
+> **time + location** (chuỗi tên địa danh, như `timeline_events` đang có). Geocoding là
+> pipeline B độc lập (`scripts/build_gazetteer.py`) — KHÔNG chạy script đó là đủ, không cần
+> sửa code; pipeline A (`run_timeline_index.py`) không import/phụ thuộc nó. Builder online
+> gặp `gazetteer` rỗng → honest fallback: chỉ timeline, không marker (không vỡ).
 
 ---
 
@@ -37,19 +46,20 @@ Chi phí API extract lại **không phải ràng buộc** (đã xác nhận vớ
 
 ## 2. Kiến trúc tổng (2 giai đoạn)
 
-**Offline (chạy 1 lần qua script):**
+**Offline — 3 BƯỚC RỜI, chạy & verify độc lập (chốt 2026-06-22):**
 ```
-lichsu.clean.md  ──►  (1) UNIT hoá  ──►  units[]
-                         (xem §5: 2 hướng đang cân nhắc)
-   units[] ── (2) Extract: mỗi unit → list atomic event (LLM Structured Outputs)
-   │             cache: dataset/timeline_extractions.json (resume theo unit_id+version)
+[BƯỚC 1] run_segmentation.py:   chunks_llm.json ──► UNIT hoá (segmenter) ──► dataset/timeline_units.json
+                                                                  └──── VERIFY phân đoạn ở đây ────┘
+[BƯỚC 2] run_timeline_index.py: timeline_units.json ──► Extract LLM (mỗi unit → atomic event)
+   │                             cache: dataset/timeline_extractions.json (resume theo unit_id+version)
+   │                             ──► Reconcile (dedup + event_id) ──► Postgres: timeline_events ◄ source of truth
    ▼
-   (3) Reconcile: dedup xuyên unit + gán event_id ổn định + link parent
-   ▼
-Postgres: timeline_events   ◄── source of truth
-
-timeline_events.locations ── (G) Geocode (Mapbox→LLM fallback + review) ──► Postgres: gazetteer
+[BƯỚC 3] build_gazetteer.py:    timeline_events.locations ──► Geocode (Google→LLM) ──► Postgres: gazetteer
+                                 (⚠ TẠM HOÃN — làm cuối; xem note ưu tiên đầu file)
 ```
+Ba bước nối nhau qua FILE (units.json → extractions.json → DB), nên verify xong bước
+trước mới chạy bước sau; bước 2 đọc lại `timeline_units.json` thay vì tự gom (đảm bảo
+trích đúng units đã verify).
 
 **Online (khi trả lời user):** answer xong → biết `retrieved_chunk_ids` → lấy event có
 `source_chunk_ids` giao với tập đó → join `gazetteer` lấy toạ độ → trả payload map +
@@ -234,7 +244,10 @@ người chỉnh. → Đây chính là lý do user muốn curate tay. Script ch�
 ### ✅ Đã build (Phase 2)
 - [app/indexing/timeline/segmenter.py](../../apps/agent-service/app/indexing/timeline/segmenter.py)
   + [tests/test_segmenter.py](../../apps/agent-service/tests/test_segmenter.py) — xem §5
-  Hướng A (đã chốt dùng, cap 50K). 6/6 test pass.
+  Hướng A (đã chốt dùng, cap 50K). 6/6 test pass. **Tách bước 1 (2026-06-22)**:
+  `scripts/run_segmentation.py` chạy/verify phân đoạn độc lập (ghi `dataset/timeline_units.json`
+  + report phủ chunk / overlap / độ dài / unit lớn); `segmenter.py` thêm `unit_to_dict`/
+  `unit_from_dict`; bước 2 (`run_timeline_index.py`) đọc lại artifact thay vì tự `build_units`.
 
 ### ✅ Đã build (Phase 4)
 - [app/prompts/timeline_extract.py](../../apps/agent-service/app/prompts/timeline_extract.py)
@@ -279,26 +292,36 @@ người chỉnh. → Đây chính là lý do user muốn curate tay. Script ch�
     nhất quán với graph (model hiện tại cx/gpt-5.4 vẫn chạy tốt); log refusal cho dễ thấy
     (hành vi cache-khi-refusal giữ nguyên như graph extractor).
 
-### ✅ Đã build (Phase 6) — Geocoding HYBRID (Mapbox + LLM)
+### ✅ Đã build (Phase 6) — Geocoding HYBRID (Google + LLM)
+> **Cập nhật 2026-06-22**: đổi provider **Mapbox → Google Geocoding API** (user đã có
+> Google Maps key). Adapter tách rời nên chỉ thay `_mapbox_geocode()` → `_google_geocode()`
+> đúng như §9 dự liệu. Logic hybrid/name-gate/bbox giữ nguyên. Tài liệu API:
+> [docs/reference/google-maps-api.md](../reference/google-maps-api.md).
 - [app/indexing/geocoding/geocoder.py](../../apps/agent-service/app/indexing/geocoding/geocoder.py)
-  — `geocode_location(name) -> GeocodeOutcome` **hybrid: Mapbox trước, LLM fallback**.
-  Mapbox v6 forward (country=vn) cho địa danh còn tên; **name-gate** (so token tên bỏ
-  dấu + i/y) loại fuzzy-match (Mapbox luôn trả "đại khái" 1 kết quả) -> rơi xuống LLM.
-  Lọc bbox VN. Provider tách rời -> đổi Google sau chỉ thay 1 adapter.
+  — `geocode_location(name) -> GeocodeOutcome` **hybrid: Google trước, LLM fallback**.
+  Google Geocoding (`region=vn` chỉ BIAS, **KHÔNG ép country** — địa danh nước ngoài như
+  Paris/Genève/Trung Quốc vẫn geocode được) cho địa danh còn tên; **name-gate** (so token
+  tên bỏ dấu + i/y với `formatted_address`) loại fuzzy-match (Google trả "đại khái" 1 kết
+  quả, cờ `partial_match`) -> rơi xuống LLM. Confidence suy từ `types` (country→thấp,
+  administrative_area_level_1→vừa, còn lại→cao). KHÔNG lọc bbox VN (helper `in_vietnam`
+  giữ lại cho UI).
 - [app/prompts/geocode.py](../../apps/agent-service/app/prompts/geocode.py) —
   `GEOCODE_PROMPT_VERSION`, prompt LLM suy lat/lon + confidence + modern_name cho địa
   danh lịch sử VN (0.0/0.0 = không định vị được -> honest).
 - [app/schemas/gazetteer.py](../../apps/agent-service/app/schemas/gazetteer.py) — thêm
-  `GeocodeOutcome` (hợp nhất Mapbox/LLM, có `resolved_by`). `config.mapbox_access_token`.
+  `GeocodeOutcome` (hợp nhất Google/LLM, `resolved_by ∈ {google,llm,none}`).
+  `config.google_maps_api_key`.
 - [scripts/build_gazetteer.py](../../apps/agent-service/scripts/build_gazetteer.py) —
   đọc địa danh từ `timeline_events.locations` (qua `select_location_counts`), geocode
   (cache `dataset/gazetteer.json`, resume), upsert `gazetteer`, sinh `gazetteer_review.md`.
   Flags `--limit --workers --min-count --overwrite --skip-db`.
-- *Verify thật* (31 địa danh từ 2 unit): **18 Mapbox + 12 LLM + 1 honest "none"**. Name-gate
-  sửa được các fuzzy-match (Chợ Lớn→Q5, Sơn Trà→Đà Nẵng, Rạch Tra→Củ Chi, Bình Cách→Tiền
-  Giang). Join end-to-end OK: event→locations→gazetteer→markers; event thiếu địa điểm →
-  chỉ-timeline. Còn lại trùng-tên-khác-tỉnh (Định Tường→Thanh Hóa…) cần review tay. 12/12
-  test geocoder pass, ruff+mypy sạch.
+- *Verify thật (trước khi đổi, 31 địa danh từ 2 unit)*: **18 Mapbox + 12 LLM + 1 honest
+  "none"**. Name-gate sửa được các fuzzy-match (Chợ Lớn→Q5, Sơn Trà→Đà Nẵng, Rạch Tra→Củ
+  Chi, Bình Cách→Tiền Giang). Join end-to-end OK: event→locations→gazetteer→markers; event
+  thiếu địa điểm → chỉ-timeline. Còn lại trùng-tên-khác-tỉnh (Định Tường→Thanh Hóa…) cần
+  review tay. 12/12 test geocoder pass, ruff+mypy sạch. *Cache `gazetteer.json` hiện vẫn
+  giữ toạ độ nguồn Mapbox (vẫn hợp lệ); chạy `build_gazetteer.py --overwrite` để geocode
+  lại toàn bộ bằng Google nếu muốn đồng nhất nguồn.*
 
 ### ✅ Đã build (Phase 7) — Builder online
 - [app/schemas/visualization.py](../../apps/agent-service/app/schemas/visualization.py)
@@ -319,6 +342,8 @@ người chỉnh. → Đây chính là lý do user muốn curate tay. Script ch�
 - Tích hợp builder vào answer flow agent + (tuỳ chọn) LLM relevance filter.
 
 ### File cache (mirror `graph_extractions.json`, atomic write `os.replace`)
+- `dataset/timeline_units.json` — envelope `{cap, source_file, count, units:[...]}` do BƯỚC 1
+  (`run_segmentation.py`) ghi; BƯỚC 2 đọc lại (KHÔNG tự build). Là nơi verify phân đoạn.
 - `dataset/timeline_extractions.json` — `{unit_id: {prompt_version, heading_path,
   source_chunk_ids, events:[...]}}`. Resume: bỏ qua unit có version khớp.
 - `dataset/gazetteer.json` — cache geocode `{location_norm: {...}}`.
@@ -335,8 +360,9 @@ người chỉnh. → Đây chính là lý do user muốn curate tay. Script ch�
    + Nguyễn Hữu Huân OK (xem §6 Phase 4, §8).
 5. ✅ **Reconcile + load DB** — event_id tất định, dedup, parent_norm; nạp 34 event vào
    `timeline_events`, join online OK (xem §6 Phase 5, §8).
-6. ✅ **Geocoder (Mapbox+LLM) + `build_gazetteer.py`** — 31 địa danh đã vào `gazetteer`,
+6. ✅ **Geocoder (Google+LLM) + `build_gazetteer.py`** — 31 địa danh đã vào `gazetteer`,
    join event→toạ độ OK (xem §6 Phase 6, §8). Còn review tay vài địa danh trùng tên.
+   *(Provider đổi Mapbox→Google 2026-06-22.)*
 7. ✅ **Builder online** + `schemas/visualization.py` — payload map+timeline link bằng
    event_id, honest fallback; verify chunk Trương Định (15 event → 23 marker + 15 item).
 8. 🔜 **Chạy full corpus** + tích hợp builder vào answer flow agent. *(kế tiếp)*
@@ -367,16 +393,24 @@ người chỉnh. → Đây chính là lý do user muốn curate tay. Script ch�
 ---
 
 ## 9. Quyết định mặc định đã chốt (đổi được)
-- **Geocoding = Mapbox-trước + LLM-fallback + review tay** (chốt 2026-06-21). Mapbox cho
-  địa danh còn tên (chính xác); name-gate loại fuzzy-match → LLM lo địa danh lịch sử/đổi
-  tên/biến mất. (Loại OSM/Nominatim thuần vì phủ kém; loại Google vì cần thẻ + ToS cấm lưu
-  geocode.) Provider tách rời, đổi Google sau chỉ thay 1 adapter. *Điểm yếu còn lại: địa
-  danh TRÙNG TÊN khác tỉnh (Định Tường→Thanh Hóa) Mapbox chấm sai mà vẫn "cao" → review tay
-  bắt; ý tưởng sau: regional sanity-check / LLM disambiguate top-N candidate.*
+- **Geocoding = Google-trước + LLM-fallback + review tay** — **⚠️ TẠM HOÃN (2026-06-22):
+  làm cuối, tạm KHÔNG chạy; xem note ưu tiên đầu file.** (đổi từ Mapbox sang Google
+  2026-06-22; quyết định gốc Mapbox chốt 2026-06-21). Google Geocoding (`region=vn` chỉ
+  BIAS, **KHÔNG ép chỉ-Việt-Nam** — corpus có địa danh nước ngoài: Paris/Genève/Trung
+  Quốc/đảo Rêuyniông... cần geocode đúng) cho địa danh còn tên (chính xác); name-gate loại
+  fuzzy-match → LLM lo địa danh lịch sử/đổi tên/biến mất. (Loại OSM/Nominatim thuần vì phủ
+  kém.) Provider tách rời → đổi chỉ thay 1 adapter (`_google_geocode()`), đã chứng minh khi migrate.
+  *Điểm yếu còn lại: địa danh TRÙNG TÊN khác tỉnh (Định Tường→Thanh Hóa) provider chấm sai
+  mà vẫn "cao" → review tay bắt; ý tưởng sau: regional sanity-check / LLM disambiguate
+  top-N candidate.* **⚠️ ToS Google: cache lat/lon ≤ 30 ngày** (place_id lưu vô hạn);
+  `gazetteer.json`/bảng `gazetteer` lưu lâu hơn là rủi ro tuân thủ — xem
+  [docs/reference/google-maps-api.md](../reference/google-maps-api.md) §4.
 - **Lưu Postgres**, không tạo node Neo4j mới; link graph bằng `parent_event_norm`.
 - Thang `confidence` tiếng Việt `cao/vừa/thấp` (đồng bộ `AliasVerdict`).
 - `event_id` = uuid5 tất định (idempotent), KHÔNG ngẫu nhiên.
-- Map render = TrackAsia (xem POC `trackasia-map-test.html`), không cần Google Maps key.
+- Map render = Google Maps JavaScript API (AdvancedMarkerElement), dùng `GOOGLE_MAPS_API_KEY`.
+  POC: `google_map_test.py` (root), `scripts/show_google_map.py`. *(TrackAsia
+  `trackasia-map-test.html` còn lại làm tham khảo; đã chuyển hẳn sang Google.)*
 
 ---
 

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Đồ án tốt nghiệp: **Agentic RAG cho lịch sử Việt Nam** (giai đoạn Pháp thuộc → thống nhất đất nước), dành cho giáo viên. Hệ thống hỏi đáp tiếng Việt có căn cứ từ tài liệu, kết hợp **traditional RAG + GraphRAG + hybrid retrieval**, có khả năng render câu trả lời lên **bản đồ Việt Nam + timeline** khi sự kiện có dữ liệu thời gian/địa điểm.
 
-Dataset chính: `lichsu.md` (~3MB text thuần, ~2.36M ký tự, 6.878 dòng) — chưa được index. Communication và code comments dùng tiếng Việt là OK theo phong cách dự án.
+Dataset chính: `lichsu.clean.md` (~3.1MB, 7.623 dòng) — bản đã preprocess của `lichsu.md`. Đã chunk thành `dataset/chunks_llm.json` (1213 chunk, `chunk_index` 0..1212 liền mạch, có `start_line`/`end_line`). Communication và code comments dùng tiếng Việt là OK theo phong cách dự án.
 
 ## Nguyên tắc phát triển
 
@@ -20,14 +20,20 @@ Dataset chính: `lichsu.md` (~3MB text thuần, ~2.36M ký tự, 6.878 dòng) �
 - **Graph queries**: dùng `Neo4j` driver + Cypher. Không tự implement graph traversal.
 - **HTTP async**: dùng `httpx`. Không dùng `requests` trong async context.
 - **Schema validation**: dùng `Pydantic`. Không tự viết dict validation.
+- **Postgres**: dùng `psycopg` trực tiếp (xem pattern `chunk_store.py`). Lưu ý strip `+psycopg` khỏi `DATABASE_URL`.
 
 Nếu thư viện hiện có không đủ → ghi rõ lý do trước khi viết custom code. "Tôi không nhớ API" không phải lý do — đọc docs hoặc hỏi.
 
+> **Lưu ý LightRAG**: đã từng dùng `lightrag-hku` nhưng **đã gỡ HOÀN TOÀN** (impedance mismatch). GraphRAG hiện là pipeline DIY tự ráp (xem dưới). **Đừng đề xuất lại LightRAG.** Lý do đầy đủ: `docs/plan/chunking-embedding-plan.md`.
+
 ## Repository Status
 
-Repo hiện đang ở **scaffold stage**: cấu trúc thư mục đã tạo, `requirements.txt` và `docker-compose.yml` đã cấu hình, nhưng **chưa có code Python/TS thực** trong `apps/*/app/` hoặc `apps/frontend/src/`. Khi thêm file đầu tiên, tuân theo cấu trúc thư mục đã có sẵn (xem section Architecture).
+Repo là **git repository** (branch `main`). Không còn ở scaffold stage:
 
-Repo **không phải git repository** (`git_repo: false`). Không chạy `git init` trừ khi user yêu cầu rõ ràng.
+- **`agent-service`**: đã có pipeline indexing thực (preprocessing → chunking → graph extraction → timeline extraction → geocoding). Đây là nơi tập trung gần như toàn bộ code hiện tại. Phần `api/` (FastAPI routes) và `orchestrator/` (LangGraph) **chưa build** — retrieval/answer flow là việc kế tiếp.
+- **`backend`** và **`frontend`**: vẫn ở scaffold (cấu trúc thư mục + config, chưa có code thực). Khi thêm file, tuân theo cấu trúc đã có (xem Architecture).
+
+`requirements.txt`, `docker-compose.yml` đã cấu hình. Khi commit, dùng tiếng Việt theo phong cách lịch sử commit hiện có.
 
 ## Architecture (3-service split)
 
@@ -45,80 +51,86 @@ Agent-service (FastAPI + LangGraph, :9000)  ← orchestrate RAG + GraphRAG + hyb
 
 **Nguyên tắc quan trọng**: backend KHÔNG trực tiếp là agent. Backend chỉ là API gateway gọi sang `agent-service` qua HTTP client (`apps/backend/app/modules/agent_client/`). Mọi logic LLM/retrieval nằm trong `agent-service`.
 
+### Hạ tầng đã chạy sẵn (KHÔNG cần docker compose up)
+Neo4j + Qdrant + Redis + Postgres **đã cài và chạy sẵn trên remote dev server** qua Docker. URL + credentials đã có trong **root `.env`**. **KHÔNG cần** cài đặt, tải, hay `docker compose up` gì nữa — cứ đọc config từ `.env` mà dùng. Hai bẫy đã xử lý sẵn:
+- **Qdrant**: remote chạy HTTP thuần nhưng có API key → client mặc định `https=True` và vỡ SSL. Đã ép `https=False` trong `app/core/qdrant.py`. Point id = `uuid5(NS, chunk_id)`.
+- **Postgres**: `DATABASE_URL` dạng `postgresql+psycopg://...` (dialect SQLAlchemy); `psycopg.connect` cần strip `+psycopg`. Đã làm trong `chunk_store.py::_database_url`.
+
 ### Storage roles
-- **Postgres**: users, documents metadata, conversation logs
-- **Qdrant** (collection `history_vn_chunks`): vector embeddings cho RAG truyền thống
-- **Neo4j** (+ APOC plugin): knowledge graph cho GraphRAG (entities: Nhân vật, Sự kiện, Địa điểm, Tổ chức, Giai đoạn, Nguyên nhân, Hệ quả)
-- **Redis**: cache + lightweight queue
+- **Postgres**: source-of-truth cho mọi dữ liệu index hiện tại:
+  - `rag_chunks` — text + metadata mỗi chunk (khóa `chunk_id`)
+  - `timeline_events` — atomic event (when–where–what) cho timeline/map (xem dưới)
+  - `gazetteer` — địa danh → lat/lon (geocoding; xem dưới)
+  - (tương lai) users, documents metadata, conversation logs
+- **Qdrant** (collection `history_vn_chunks`): vector embeddings cho RAG truyền thống. Payload = đúng 6 field `CHUNK_VECTOR_META_FIELDS`, **KHÔNG có text**.
+- **Neo4j** (+ APOC): knowledge graph cho GraphRAG. Label `:Entity` (key `name` canonical, UNIQUE), rel type `:REL` (prop `keyword`). MERGE idempotent, tích lũy `source_chunk_ids` + `descriptions` xuyên chunk.
+- **Redis**: cache + lightweight queue.
+
+**Khóa nối DUY NHẤT giữa các store là `chunk_id`** (Postgres PK ↔ Qdrant payload ↔ Neo4j `source_chunk_ids` ↔ `timeline_events.source_chunk_ids`).
+
+### GraphRAG — pipeline DIY (offline indexing)
+`scripts/run_graph_index.py`: đọc `dataset/chunks_llm.json` → Postgres `rag_chunks` (source of truth) → embed + upsert Qdrant → trích entity/quan hệ (song song) → cache `dataset/graph_extractions.json` → merge Neo4j. Flags: `--limit --workers --overwrite --remerge --skip-vectors --skip-graph`.
+
+**Hai pass trích tách biệt:**
+1. **Metadata** (`app/indexing/metadata/`): times/actors/locations/events dạng surface form, cho Qdrant payload + rerank.
+2. **Graph** (`app/indexing/graph/entity_relation_extractor.py`): entity-có-kiểu + quan hệ, OpenAI Structured Outputs, schema `app/schemas/graph.py`, prompt `app/prompts/graph_extract.py` (few-shot từ `prompts/entity_type/history_vn.yml`). Có `app/indexing/graph/alias.py` + `normalize.py` cho **alias resolution** (xem Domain notes).
+
+### Timeline + Map data layer (offline indexing → builder online)
+Lớp dữ liệu mới song song, dựng **offline 1 lần**; lúc trả lời chỉ **lọc & ráp online** (không trích lại). **Source-of-truth của hạng mục này: `docs/plan/timeline-map-plan.md`** — cập nhật file đó khi đổi quyết định.
+
+Pipeline offline 3 bước rời (verify từng bước):
+1. `scripts/run_segmentation.py` — segmenter gom heading thành "unit" (cap 50K ký tự) → `dataset/timeline_units.json`.
+2. `scripts/run_timeline_index.py` — extract LLM mỗi unit → atomic event (cache `dataset/timeline_extractions.json`, resume theo `unit_id`+version) → reconcile (dedup + `event_id` tất định `uuid5`) → load Postgres `timeline_events`.
+3. `scripts/build_gazetteer.py` — geocode `timeline_events.locations` (Google trước → LLM fallback) → Postgres `gazetteer`. **⚠️ TẠM HOÃN** (xem dưới).
+
+Online: `app/tools/visualization/builder.py::build_visualization(retrieved_chunk_ids)` → `select_events_by_chunks` (toán tử mảng giao `&&`) → join `gazetteer` lấy lat/lon → trả `VisualizationPayload` (map markers + timeline items, link 2 chiều bằng `event_id`), honest fallback (thiếu nơi → chỉ timeline; thiếu time → chỉ map).
+
+> **⚠️ Khâu toạ độ (gazetteer + lat/lon) đang TẠM HOÃN — làm CUỐI** (quyết định user 2026-06-22). Lý do: độ chính xác địa điểm quan trọng + cần review kĩ (điểm yếu: địa danh trùng tên khác tỉnh bị provider chấm "cao" nhưng sai). **Tạm KHÔNG chạy `build_gazetteer.py`** (cả Google lẫn LLM). KHÔNG cần sửa/disable code: pipeline timeline (`run_timeline_index.py`) không phụ thuộc `app/indexing/geocoding/`, vẫn cho time + `locations` (tên). Builder gặp `gazetteer` rỗng → fallback chỉ-timeline, không vỡ. Nếu thấy `gazetteer` rỗng/dở dang: đó là CỐ Ý.
 
 ### Agent-service internal layout (`apps/agent-service/app/`)
-- `api/` — FastAPI routes nhận request từ backend
-- `orchestrator/` — LangGraph state machine quyết định route (RAG / GraphRAG / hybrid), phân tích intent, tổng hợp answer
-- `tools/traditional_rag/`, `tools/graph_rag/`, `tools/hybrid/` — 3 retrieval strategies, agent chọn 1 hoặc kết hợp
-- `indexing/preprocessing/` — chuẩn hóa text trước khi chunk (heading, dash, quote, ellipsis, tách paragraph dài). Idempotent + non-destructive
-- `prompts/` — prompt templates (cần versioning)
-- `schemas/` — Pydantic models cho request/response
-- `core/` — config, logging, clients (Qdrant, Neo4j, LLM)
-- `scripts/` — CLI utilities (ví dụ `preprocess_dataset.py`)
+- `indexing/preprocessing/` — chuẩn hóa text (cleaner.py). Idempotent + non-destructive.
+- `indexing/` (root) — `heading_parser.py`, `llm_chunker.py`, `chunk_slicer.py`, `token_counter.py`.
+- `indexing/metadata/` — pass trích metadata surface form cho chunk.
+- `indexing/graph/` — pass trích entity/quan hệ + alias resolution.
+- `indexing/timeline/` — `segmenter.py`, `atomic_event_extractor.py`, `reconcile.py`.
+- `indexing/geocoding/` — `geocoder.py` (Google + LLM hybrid).
+- `tools/graph_rag/` — `chunk_store.py` (Postgres), `vector_store.py` (Qdrant), `graph_store.py` (Neo4j).
+- `tools/visualization/` — `event_store.py` (`timeline_events`), `gazetteer_store.py` (`gazetteer`), `builder.py` (online).
+- `prompts/` — prompt templates có versioning (graph_extract, metadata_extract, timeline_extract, geocode, alias_judge).
+- `schemas/` — Pydantic models (chunk, graph, metadata, timeline, gazetteer, visualization, alias).
+- `core/` — config, llm, embedding, clients (qdrant, neo4j).
+- `scripts/` — CLI utilities (xem Commands).
+- `api/`, `orchestrator/`, `tools/traditional_rag/`, `tools/hybrid/` — **chưa build** (kế hoạch theo Architecture; retrieval/answer flow là việc kế tiếp).
 
-### Backend internal layout (`apps/backend/app/`)
-- `modules/auth` — JWT-based, 2 roles: `admin` và `teacher`
-- `modules/documents` — CRUD tài liệu (MVP có thể mock, sau hỗ trợ PDF/DOCX/TXT upload)
+### Backend internal layout (`apps/backend/app/`) — scaffold
+- `modules/auth` — JWT, 2 roles: `admin` và `teacher`
+- `modules/documents` — CRUD tài liệu (MVP có thể mock)
 - `modules/rag` — endpoint hỏi đáp, gọi sang agent-service
 - `modules/visualization` — trả map data + timeline data cho frontend
 - `modules/agent_client` — httpx client gọi agent-service
 - `modules/users`, `core/`, `db/`, `shared/` — chuẩn
 
-### Frontend layout (`apps/frontend/src/`)
+### Frontend layout (`apps/frontend/src/`) — scaffold
 - `features/chat` — UI hỏi đáp
-- `features/map` — bản đồ Việt Nam, markers cho events (tham khảo POC tại `trackasia-map-test.html` ở root)
+- `features/map` — bản đồ Việt Nam, markers cho events (xem POC Google Maps bên dưới)
 - `features/timeline` — timeline events liên kết với map qua `event_id`
 - `features/admin` — quản lý documents
 - `features/auth` — đăng nhập
 
 ### Visualization contract (quan trọng)
-Map và timeline phải dùng **chung `event_id`** để liên kết hai chiều (click marker → highlight timeline item và ngược lại). Quy tắc:
+Map và timeline phải dùng **chung `event_id`** để liên kết hai chiều (click marker → highlight timeline item và ngược lại). Đã hiện thực trong `builder.py`. Quy tắc:
 - Event thiếu địa điểm → chỉ hiển thị timeline
 - Event thiếu thời gian → chỉ hiển thị map
 - Không đủ data → KHÔNG ép sinh marker; honest về uncertainty
 - Visualization data sinh ra **online từ events đã retrieve**, KHÔNG pre-compute theo câu hỏi. Metadata (time/location/lat/lon/confidence) phải được extract **offline** khi indexing document.
+- Marker confidence = YẾU NHẤT giữa confidence của event và của toạ độ; render đậm/nhạt theo đó.
 
 ## Commands
 
-### Run toàn bộ stack (Docker Compose)
-```bash
-# Từ project root
-cp .env.example .env  # rồi điền OPENAI_API_KEY, NEO4J_PASSWORD, ...
-docker compose -f infra/compose/docker-compose.yml up -d
-```
-Services lên: postgres :5432, qdrant :6333, neo4j :7474/7687, redis :6379, backend :8000, agent-service :9000, frontend :5173.
-
-### Chạy local (không docker)
-Mỗi service dùng venv riêng — `apps/agent-service/venv/` đã tồn tại, `apps/backend/` cần tạo riêng.
-
-```powershell
-# Agent-service
-cd apps/agent-service
-.\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-uvicorn app.main:app --host 0.0.0.0 --port 9000 --reload
-
-# Backend
-cd apps/backend
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-
-# Frontend (sau khi scaffold Vite)
-cd apps/frontend
-npm install
-npm run dev
-```
+> Hạ tầng (Qdrant/Neo4j/Redis/Postgres) đã chạy remote — **KHÔNG cần `docker compose up`** cho dev thường ngày, cứ đọc root `.env`.
 
 ### Lint / typecheck / test (Python services)
-Dùng **root venv** (`.\venv\Scripts\python.exe`) — `apps/agent-service/venv` trống, không có deps.
-Cả backend và agent-service dùng `ruff`, `mypy`, `pytest` (đã có trong root venv):
+Dùng **root venv** (`.\venv\Scripts\python.exe`) — `apps/agent-service/venv` trống, không có deps. Cả backend và agent-service dùng `ruff`, `mypy`, `pytest` (đã có trong root venv):
 ```powershell
 .\venv\Scripts\python.exe -m ruff check apps/agent-service/app
 .\venv\Scripts\python.exe -m mypy apps/agent-service/app
@@ -126,56 +138,66 @@ Cả backend và agent-service dùng `ruff`, `mypy`, `pytest` (đã có trong ro
 .\venv\Scripts\python.exe -m pytest apps/agent-service/tests/test_foo.py::test_bar  # 1 test
 ```
 
-### Chunking experiment
-`test.py` ở root là script so sánh `RecursiveChunker` vs `SlumberChunker` (Chonkie) trên `lichsu.md`. Dùng để tune chunking strategy trước khi build index thật.
-```bash
-python test.py --file lichsu.md --limit 6000 --skip-slumber
-python test.py --file lichsu.md --slumber-model cx/gpt-5.4
-```
-Slumber dùng OpenAI-compatible endpoint qua `CHONKIE_SLUMBER_BASE_URL` (đang point tới một remote LLM gateway — xem `.env`).
-
 ### Tiền xử lý dataset (preprocessing)
-Trước khi index, chạy pipeline tiền xử lý để chuẩn hóa heading, dash (–/—→-), smart quote (“”→”), ellipsis (…→...), gộp blank line. Ngoài ra `lichsu.md` còn có **soft hyphen U+00AD** xen giữa từ tiếng Việt (di chứng copy từ PDF/DOCX có hyphenation) — phải strip vì sẽ phá tokenization/embedding.
-
-**Lưu ý quan trọng**: preprocessing **KHÔNG** tách paragraph dài. `lichsu.md` có vài section không có paragraph break (lớn nhất `## 7. Phong trào Cần vương` ~652K chars). Chunking pipeline xử lý trường hợp này qua Level 4 fallback (`_fallback_sentence_merge`).
-
-```bash
-# Trên Windows PowerShell, set encoding để in tiếng Việt
-$env:PYTHONIOENCODING="utf-8"
-
-# Dry-run (chỉ in report, không ghi file)
+Chuẩn hóa heading, dash (–/—→-), smart quote (“”→”), ellipsis (…→...), gộp blank line, strip **soft hyphen U+00AD** (di chứng copy từ PDF/DOCX, phá tokenization). **KHÔNG** tách paragraph dài (chunking xử lý qua Level 4 fallback). Idempotent + non-destructive → trả `PreprocessReport`.
+```powershell
+$env:PYTHONIOENCODING="utf-8"   # in được tiếng Việt trên Windows
 cd apps/agent-service
-python scripts/preprocess_dataset.py --input ../../lichsu.md --limit 50000
-
-# Ghi file đã chuẩn hóa
 python scripts/preprocess_dataset.py --input ../../lichsu.md --output ../../lichsu.clean.md
 ```
 
-Pipeline là **idempotent** và **non-destructive**: chạy nhiều lần ra cùng kết quả, không xóa/sửa câu chữ, chỉ chuẩn hóa whitespace + Unicode. Trả về `PreprocessReport` với counter cho từng loại fix (dùng cho logging/observability). Test: `pytest tests/test_preprocessing.py`.
+### Chunking experiment
+`test.py` (nếu có) ở root so sánh `RecursiveChunker` vs `SlumberChunker` (Chonkie). LLM chunking thật: `scripts/run_llm_chunking.py` → `dataset/chunks_llm.json`.
 
-Khi build full indexing pipeline, gọi `preprocess_text()` ngay sau load document, trước khi đưa vào Chonkie.
+### Indexing chính (offline, tốn API cost — cân nhắc trước khi re-run)
+```powershell
+# GraphRAG: chunks_llm.json → rag_chunks (Postgres) → Qdrant → graph (Neo4j)
+python scripts/run_graph_index.py --limit -1 --workers 8
+
+# Timeline 3 bước (verify từng bước):
+python scripts/run_segmentation.py                  # → dataset/timeline_units.json
+python scripts/run_timeline_index.py --limit -1     # → timeline_events (Postgres)
+# python scripts/build_gazetteer.py                 # ⚠️ TẠM HOÃN — đừng chạy
+
+# Alias resolution cho KG
+python scripts/build_alias_map.py
+
+# Reset stores (drop/recreate) khi cần
+python scripts/reset_stores.py
+```
+`run_graph_index.py` flags: `--limit --workers --overwrite --remerge --skip-vectors --skip-graph`.
+`run_timeline_index.py` flags: `--limit --skip-reconcile --skip-db --allow-empty` (`--limit -1` = chỉ reconcile + nạp DB từ cache). **Guard**: reconcile ra 0 event → KHÔNG nạp (tránh TRUNCATE xoá trắng bảng), trừ khi `--allow-empty`.
+
+### Map POC
+Render map = **Google Maps JavaScript API** (AdvancedMarkerElement), dùng `GOOGLE_MAPS_API_KEY`. POC: `google_map_test.py` (root) + `scripts/show_google_map.py`. *(`trackasia-map-test.html` cũ chỉ còn làm tham khảo — đã chuyển hẳn sang Google.)*
 
 ## Configuration
 
-`.env` ở root được docker-compose load cho **tất cả services**. Mỗi app cũng có `.env.example` riêng cho local dev:
-- `apps/agent-service/.env.example` — LLM keys, Qdrant/Neo4j/Redis URLs, `RAG_TOP_K`, `HYBRID_ENABLED`, `GRAPHRAG_ENABLED`
-- `apps/backend/.env.example` — `BACKEND_SECRET_KEY`, `DATABASE_URL`, `AGENT_SERVICE_URL`, JWT settings
-- `apps/frontend/.env.example` — chỉ vars có prefix `VITE_` mới expose ra browser
+`.env` ở root là **nguồn cấu hình DUY NHẤT** cho monorepo; `app/core/config.py` trỏ tuyệt đối tới file đó. Mỗi app cũng có `.env.example` riêng cho local dev.
 
-LLM default: `gpt-4o-mini` (configurable via `LLM_MODEL`). Embedding default: `text-embedding-3-small`. Khi làm tiếng Việt nên cân nhắc switch sang `bge-m3` hoặc `multilingual-e5-large` cho retrieval quality.
+Giá trị **thực tế** trong code (đừng tin mù `.env.example`, có chỗ còn placeholder cũ):
+- **Embedding + tokenizer**: model tiếng Việt `AITeamVN/Vietnamese_Embedding` (KHÔNG phải OpenAI `text-embedding-3-small` như `.env.example` để). Field: `embedding_model`, `embedding_tokenizer`.
+- **LLM default**: `llm_model = "gpt-5.4-nano"` (qua gateway OpenAI-compatible, set `OPENAI_BASE_URL`). Knob riêng: `graph_llm_model`, `timeline_llm_model` (None = fallback `llm_model`; đặt model hỗ trợ Structured Outputs strict).
+- **Geocoding**: `google_maps_api_key` (rỗng → bỏ qua Google, chỉ LLM fallback). ⚠️ ToS Google: cache lat/lon ≤ 30 ngày — xem `docs/reference/google-maps-api.md`.
+- **Chunking**: `chunk_size=700`, `min_characters_per_chunk=80`.
+- **Storage**: `neo4j_uri/user/password`, `qdrant_host/port/api_key`, `qdrant_collection=history_vn_chunks`, `redis_url`, `database_url`.
 
 ## Domain-specific notes (lịch sử Việt Nam)
 
 Đây là phần đặc thù domain mà code generic không cover:
 
-- **Alias resolution**: "Nguyễn Tất Thành / Nguyễn Ái Quốc / Hồ Chí Minh / Bác Hồ" là cùng 1 entity. Extraction prompt và KG merge logic phải xử lý alias rõ ràng — đây là một trong những điểm contribution của đồ án.
-- **Temporal anchor inheritance**: Document lịch sử có cấu trúc "Năm 1859, ... [paragraph]. Đầu năm 1861, ... [paragraph]". Các câu giữa các anchor inherit time/location từ anchor đầu segment. Chunking phải tôn trọng segment boundary thay vì split cứng theo độ dài.
-- **Confidence + provenance**: Mỗi event lưu cả time/location lẫn `confidence` và `inferred_from_context` flag. Marker trên map render khác nhau theo confidence (đậm = explicit, nhạt = inferred).
-- **Honest behavior**: Khi không đủ data → trả lời "chưa đủ thông tin" thay vì hallucinate. Quan trọng vì fact sai trong lịch sử bị trừ điểm nặng.
+- **Alias resolution**: "Nguyễn Tất Thành / Nguyễn Ái Quốc / Hồ Chí Minh / Bác Hồ" là cùng 1 entity. Đã hiện thực trong `app/indexing/graph/alias.py` + `normalize.py` + `build_alias_map.py`. Là một điểm contribution của đồ án.
+- **Temporal anchor inheritance**: Document có cấu trúc "Năm 1859, ... [đoạn]. Đầu năm 1861, ... [đoạn]". Các câu giữa các anchor inherit time/location từ anchor đầu segment. Timeline extractor hạ `confidence` khi suy năm từ ngữ cảnh.
+- **Confidence + provenance**: Mỗi event lưu time/location lẫn `confidence` (`cao`/`vừa`/`thấp`, đồng bộ `AliasVerdict`) và provenance qua `source_chunk_ids`. Marker render khác nhau theo confidence (đậm = explicit, nhạt = inferred).
+- **Honest behavior**: Khi không đủ data → trả lời "chưa đủ thông tin" / không sinh marker, thay vì hallucinate. Quan trọng vì fact sai trong lịch sử bị trừ điểm nặng.
+- **Địa danh nước ngoài**: corpus có Paris/Genève/Trung Quốc/đảo Réunion... → geocoding `region=vn` chỉ BIAS, KHÔNG ép chỉ-Việt-Nam.
 
 ## Reference assets
 
-- `lichsu.md` — corpus chính (~3MB, ~2.36M chars, 6.878 dòng), không index lại từ đầu nhiều lần (tốn API cost); cân nhắc versioning KG khi thay đổi extraction prompt.
-- `trackasia-map-test.html` — standalone POC cho map rendering, dùng làm reference khi build `features/map`.
-- `README.md` — đặc tả chức năng đầy đủ (admin, teacher, RAG, GraphRAG, hybrid, map, timeline, MVP scope vs future). Là nguồn truth cho scope.
-- `docs/brainstorming/` — session notes về kiến trúc và ý tưởng.
+- `lichsu.clean.md` — corpus chính đã preprocess (~3.1MB, 7.623 dòng; 3 h1, 33 h2, 75 h3, 106 h4...). `lichsu.md` là bản gốc. Không index lại nhiều lần (tốn API cost).
+- `dataset/chunks_llm.json` — 1213 chunk (`source_file=lichsu.clean.md`, có `start_line`/`end_line`).
+- `dataset/*.json|*.md` — cache + review của các pipeline: `graph_extractions.json`, `alias_map.json`/`alias_review.md`, `timeline_units.json`, `timeline_extractions.json`, `gazetteer.json`/`gazetteer_review.md`, `entities_by_type.md`.
+- `README.md` — đặc tả chức năng đầy đủ (admin, teacher, RAG, GraphRAG, hybrid, map, timeline, MVP scope). Nguồn truth cho scope.
+- `docs/plan/` — plan đã duyệt: `chunking-embedding-plan.md` (lý do gỡ LightRAG + DIY pipeline), `llm-chunking-plan.md`, `timeline-map-plan.md` (source-of-truth timeline/map), `lichsu-headings.md`.
+- `docs/reference/google-maps-api.md` — tham chiếu Google Geocoding/Maps + ToS caching.
+- `docs/design/frontend-scope.md`, `docs/brainstorming/` — scope frontend + session notes kiến trúc.
