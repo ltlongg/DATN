@@ -1,4 +1,4 @@
-"""Test geocoder hybrid: VN bbox, parse Mapbox v6, fallback LLM — mock, không gọi mạng."""
+"""Test geocoder hybrid: VN bbox, parse Google Geocoding, fallback LLM — mock, không gọi mạng."""
 
 from __future__ import annotations
 
@@ -14,54 +14,55 @@ def test_in_vietnam() -> None:
     assert not G.in_vietnam(0.0, 0.0)
 
 
-def test_confidence_from_feature_type() -> None:
-    assert G._confidence_from_feature_type("place") == "cao"
-    assert G._confidence_from_feature_type("locality") == "cao"
-    assert G._confidence_from_feature_type("region") == "vừa"
-    assert G._confidence_from_feature_type("country") == "thấp"
+def test_confidence_from_types() -> None:
+    assert G._confidence_from_types(["locality", "political"]) == "cao"
+    assert G._confidence_from_types(["administrative_area_level_2", "political"]) == "cao"
+    assert G._confidence_from_types(["administrative_area_level_1", "political"]) == "vừa"
+    assert G._confidence_from_types(["country", "political"]) == "thấp"
+    assert G._confidence_from_types([]) == "cao"
 
 
 def _mock_client(payload: dict, status: int = 200) -> httpx.Client:
     return httpx.Client(transport=httpx.MockTransport(lambda _req: httpx.Response(status, json=payload)))
 
 
-def test_mapbox_parse_dung_thu_tu_lon_lat() -> None:
-    # Mapbox v6 trả coordinates = [lon, lat]; phải map đúng -> lat=10.35, lon=106.66.
-    payload = {
-        "features": [
+def _google_ok(lat: float, lng: float, formatted: str, types: list[str]) -> dict:
+    """Dựng body Google Geocoding status=OK với 1 kết quả."""
+    return {
+        "status": "OK",
+        "results": [
             {
-                "geometry": {"coordinates": [106.6678, 10.3539]},
-                "properties": {"feature_type": "place", "full_address": "Gò Công, Tiền Giang, Việt Nam"},
+                "geometry": {"location": {"lat": lat, "lng": lng}},
+                "formatted_address": formatted,
+                "types": types,
             }
-        ]
+        ],
     }
+
+
+def test_google_parse_lat_lng() -> None:
+    # Google trả geometry.location.{lat,lng} tách rõ (không đảo như Mapbox [lon,lat]).
+    payload = _google_ok(10.3539, 106.6678, "Gò Công, Tiền Giang, Việt Nam", ["locality", "political"])
     with _mock_client(payload) as c:
-        out = G._mapbox_geocode("Gò Công", "pk.test", http_client=c)
+        out = G._google_geocode("Gò Công", "AIza.test", http_client=c)
     assert out is not None
-    assert out.resolved_by == "mapbox"
+    assert out.resolved_by == "google"
     assert abs(out.lat - 10.3539) < 1e-6
     assert abs(out.lon - 106.6678) < 1e-6
     assert out.confidence == "cao"
     assert "Gò Công" in out.provider_name
 
 
-def test_mapbox_khong_co_feature_tra_none() -> None:
-    with _mock_client({"features": []}) as c:
-        assert G._mapbox_geocode("Địa danh lạ", "pk.test", http_client=c) is None
+def test_google_zero_results_tra_none() -> None:
+    with _mock_client({"status": "ZERO_RESULTS", "results": []}) as c:
+        assert G._google_geocode("Địa danh lạ", "AIza.test", http_client=c) is None
 
 
-def test_mapbox_khop_nham_ten_bi_loai() -> None:
-    # Mapbox trả "đại khái" tên KHÁC hẳn (Bình Cách -> Cách Mạng Tháng Tám) -> phải bỏ.
-    payload = {
-        "features": [
-            {
-                "geometry": {"coordinates": [108.8086, 15.1204]},
-                "properties": {"feature_type": "street", "full_address": "Cách Mạng Tháng Tám, Quảng Ngãi, Việt Nam"},
-            }
-        ]
-    }
+def test_google_khop_nham_ten_bi_loai() -> None:
+    # Google trả "đại khái" tên KHÁC hẳn (Bình Cách -> Cách Mạng Tháng Tám) -> phải bỏ.
+    payload = _google_ok(15.1204, 108.8086, "Đường Cách Mạng Tháng Tám, Quảng Ngãi, Việt Nam", ["route"])
     with _mock_client(payload) as c:
-        assert G._mapbox_geocode("Bình Cách", "pk.test", http_client=c) is None
+        assert G._google_geocode("Bình Cách", "AIza.test", http_client=c) is None
 
 
 def test_name_matches_bo_dau_va_i_y() -> None:
@@ -72,15 +73,27 @@ def test_name_matches_bo_dau_va_i_y() -> None:
     assert not G._name_matches("Sơn Trà", "Trần Quốc Thảo, Phan Rang")
 
 
-def test_mapbox_ngoai_vietnam_tra_none() -> None:
-    payload = {"features": [{"geometry": {"coordinates": [2.3522, 48.8566]}, "properties": {"feature_type": "place"}}]}
+def test_google_ngoai_vietnam_van_duoc() -> None:
+    # KHÔNG ép VN: địa danh nước ngoài (Paris, Genève, Trung Quốc...) vẫn được chấp nhận.
+    payload = _google_ok(48.8566, 2.3522, "Paris, Pháp", ["locality", "political"])
     with _mock_client(payload) as c:
-        assert G._mapbox_geocode("Paris", "pk.test", http_client=c) is None
+        out = G._google_geocode("Paris", "AIza.test", http_client=c)
+    assert out is not None
+    assert out.resolved_by == "google"
+    assert abs(out.lat - 48.8566) < 1e-6 and abs(out.lon - 2.3522) < 1e-6
+    assert not G.in_vietnam(out.lat, out.lon)  # ngoài VN nhưng vẫn nhận
 
 
-def test_mapbox_loi_http_tra_none() -> None:
-    with _mock_client({"message": "unauthorized"}, status=401) as c:
-        assert G._mapbox_geocode("X", "pk.bad", http_client=c) is None
+def test_google_status_loi_tra_none() -> None:
+    # HTTP 200 nhưng status=REQUEST_DENIED (key sai/chưa bật API) -> None, để LLM lo.
+    payload = {"status": "REQUEST_DENIED", "error_message": "The provided API key is invalid.", "results": []}
+    with _mock_client(payload) as c:
+        assert G._google_geocode("X", "AIza.bad", http_client=c) is None
+
+
+def test_google_loi_http_tra_none() -> None:
+    with _mock_client({"error": "forbidden"}, status=403) as c:
+        assert G._google_geocode("X", "AIza.bad", http_client=c) is None
 
 
 # --- LLM path (fake client) ---
@@ -121,10 +134,10 @@ def test_llm_geocode_hop_le() -> None:
 
 # --- Hybrid orchestration ---
 
-def test_hybrid_dung_mapbox_khi_tim_thay(monkeypatch) -> None:
-    mb = GeocodeOutcome(lat=21.0, lon=105.8, confidence="cao", resolved_by="mapbox")
+def test_hybrid_dung_google_khi_tim_thay(monkeypatch) -> None:
+    gg = GeocodeOutcome(lat=21.0, lon=105.8, confidence="cao", resolved_by="google")
     called = {"llm": False}
-    monkeypatch.setattr(G, "_mapbox_geocode", lambda *a, **k: mb)
+    monkeypatch.setattr(G, "_google_geocode", lambda *a, **k: gg)
 
     def _llm(*_a: object, **_k: object) -> GeocodeOutcome:
         called["llm"] = True
@@ -132,16 +145,16 @@ def test_hybrid_dung_mapbox_khi_tim_thay(monkeypatch) -> None:
 
     monkeypatch.setattr(G, "_llm_geocode", _llm)
     with _mock_client({}) as c:
-        out = G.geocode_location("Hà Nội", mapbox_token="pk.x", http_client=c, client=object(), model="m")  # type: ignore[arg-type]
-    assert out is mb
-    assert called["llm"] is False  # Mapbox trúng -> KHÔNG gọi LLM
+        out = G.geocode_location("Hà Nội", google_api_key="AIza.x", http_client=c, client=object(), model="m")  # type: ignore[arg-type]
+    assert out is gg
+    assert called["llm"] is False  # Google trúng -> KHÔNG gọi LLM
 
 
-def test_hybrid_fallback_llm_khi_mapbox_miss(monkeypatch) -> None:
+def test_hybrid_fallback_llm_khi_google_miss(monkeypatch) -> None:
     sentinel = GeocodeOutcome(lat=10.0, lon=106.0, confidence="vừa", resolved_by="llm")
-    monkeypatch.setattr(G, "_mapbox_geocode", lambda *a, **k: None)
+    monkeypatch.setattr(G, "_google_geocode", lambda *a, **k: None)
     monkeypatch.setattr(G, "_llm_geocode", lambda *a, **k: sentinel)
     with _mock_client({}) as c:
-        out = G.geocode_location("Tân Hòa", mapbox_token="pk.x", http_client=c, client=object(), model="m")  # type: ignore[arg-type]
+        out = G.geocode_location("Tân Hòa", google_api_key="AIza.x", http_client=c, client=object(), model="m")  # type: ignore[arg-type]
     assert out is sentinel
     assert out.resolved_by == "llm"
