@@ -24,7 +24,7 @@ from dataclasses import dataclass
 
 from app.tools.graph_rag.chunks import build_heading_path
 
-__all__ = ["Unit", "build_units", "CAP_CHARS"]
+__all__ = ["Unit", "build_units", "CAP_CHARS", "unit_to_dict", "unit_from_dict"]
 
 # CAP 50K ký tự: điểm "ngon nhất" đo thật trên corpus — cap lớn nhất mà (1) không
 # unit nào vượt ~15K token (vùng recall LLM yếu), (2) không phải cắt cứng theo chunk
@@ -172,3 +172,27 @@ def build_units(chunks: list[dict], cap: int = CAP_CHARS) -> list[Unit]:
     out: list[Unit] = []
     _segment(items, 0, cap, out)
     return out
+
+
+# --- Serialize: cầu nối giữa BƯỚC 1 (run_segmentation.py ghi artifact units) và BƯỚC 2
+# (run_timeline_index.py đọc lại artifact đó để trích). Giữ định dạng ở một chỗ. ---
+
+
+def unit_to_dict(u: Unit) -> dict[str, object]:
+    """Unit -> dict JSON (để ghi `dataset/timeline_units.json`)."""
+    return {
+        "unit_id": u.unit_id,
+        "heading_path": list(u.heading_path),
+        "source_chunk_ids": list(u.source_chunk_ids),
+        "text": u.text,
+    }
+
+
+def unit_from_dict(d: dict) -> Unit:
+    """dict (đọc từ artifact units) -> Unit."""
+    return Unit(
+        unit_id=str(d["unit_id"]),
+        heading_path=[str(x) for x in (d.get("heading_path") or [])],
+        text=str(d.get("text") or ""),
+        source_chunk_ids=[str(x) for x in (d.get("source_chunk_ids") or [])],
+    )

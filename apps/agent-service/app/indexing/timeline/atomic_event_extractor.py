@@ -90,7 +90,7 @@ def _parse_events(
             {"role": "user", "content": user_content},
         ],
         response_format=TimelineExtraction,
-        timeout=60,
+        timeout=180,
         temperature=0.0,  # ưu tiên độ chính xác; thà bỏ sót còn hơn bịa mốc/nơi
     )
     message = completion.choices[0].message
