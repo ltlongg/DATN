@@ -21,9 +21,10 @@ from qdrant_client.models import PointStruct
 from app.core.config import get_settings
 from app.core.embedding import embed_texts
 from app.core.qdrant import get_qdrant_client, point_id_for
+from app.schemas.retrieval import RetrievalBackendError, RetrievalCandidate
 from app.tools.graph_rag.chunks import CHUNK_VECTOR_META_FIELDS
 
-__all__ = ["upsert_chunk_vectors"]
+__all__ = ["upsert_chunk_vectors", "search_vector"]
 
 log = logging.getLogger(__name__)
 
@@ -63,3 +64,54 @@ def upsert_chunk_vectors(
         total += len(points)
         log.info("Upsert Qdrant: %d/%d", total, len(records))
     return total
+
+
+async def search_vector(
+    query: str,
+    *,
+    top_k: int | None = None,
+    client: QdrantClient | None = None,
+) -> list[RetrievalCandidate]:
+    """Embed query trần -> Qdrant search -> RetrievalCandidate[] (chưa hydrate text).
+
+    Query embed trần (chỉ câu hỏi), KHÁC document embed (có prepend heading) — dense
+    retrieval thường chịu được asymmetry này (xem plan §Traditional). Point thiếu
+    `chunk_id` trong payload -> bỏ + log (không join ngược Postgres được).
+    """
+    settings = get_settings()
+    k = top_k if top_k is not None else settings.rag_top_k
+
+    try:
+        vectors = await embed_texts([query])
+    except Exception as exc:  # model lỗi/không nạp được
+        raise RetrievalBackendError("embedding_failed") from exc
+    if len(vectors) == 0:
+        return []
+
+    try:
+        client = client or get_qdrant_client()
+        response = await asyncio.to_thread(
+            client.query_points,
+            collection_name=settings.qdrant_collection,
+            query=vectors[0].tolist(),
+            limit=k,
+            with_payload=True,
+        )
+    except Exception as exc:  # thiếu env/client hoặc kết nối lỗi
+        raise RetrievalBackendError("qdrant_unavailable") from exc
+
+    candidates: list[RetrievalCandidate] = []
+    for point in response.points:
+        chunk_id = (point.payload or {}).get("chunk_id")
+        if not chunk_id:
+            log.warning("Qdrant point %s thiếu chunk_id trong payload, bỏ qua.", point.id)
+            continue
+        candidates.append(
+            RetrievalCandidate(
+                chunk_id=str(chunk_id),
+                source="vector",
+                rank=len(candidates) + 1,  # rank liền mạch sau khi bỏ point hỏng
+                score=point.score,
+            )
+        )
+    return candidates
