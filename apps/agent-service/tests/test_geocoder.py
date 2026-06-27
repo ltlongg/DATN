@@ -65,11 +65,12 @@ def test_google_khop_nham_ten_bi_loai() -> None:
         assert G._google_geocode("Bình Cách", "AIza.test", http_client=c) is None
 
 
-def test_name_matches_bo_dau_va_i_y() -> None:
-    assert G._name_matches("Mĩ Tho", "Mỹ Tho, Đồng Tháp, Việt Nam")  # i/y + dấu
-    assert G._name_matches("Gia Định", "Gia Dinh, Thành phố Hồ Chí Minh")  # romanized
+def test_name_matches_giu_dau_va_i_y() -> None:
+    # Google (language=vi) trả CÓ DẤU; so khớp GIỮ DẤU, chỉ hợp nhất y/i.
+    assert G._name_matches("Mĩ Tho", "Mỹ Tho, Đồng Tháp, Việt Nam")  # i/y, giữ dấu
+    assert G._name_matches("Gia Định", "Gia Định, Thành phố Hồ Chí Minh")  # đ + dấu khớp thẳng
     assert G._name_matches("Bà Rịa", "Bà Rịa - Sông Pha, Châu Pha")  # đúng tên dù type=street
-    assert not G._name_matches("Chợ Lớn", "Chơ Long, Gia Lai")  # lon != long
+    assert not G._name_matches("Chợ Lớn", "Chơ Long, Gia Lai")  # giữ dấu: Lớn != Long, Chợ != Chơ
     assert not G._name_matches("Sơn Trà", "Trần Quốc Thảo, Phan Rang")
 
 

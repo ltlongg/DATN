@@ -51,20 +51,26 @@ def in_vietnam(lat: float, lon: float) -> bool:
     return VN_LAT_MIN <= lat <= VN_LAT_MAX and VN_LON_MIN <= lon <= VN_LON_MAX
 
 
-def _fold(text: str) -> str:
-    """Bỏ dấu thanh/phụ + hạ thường + đ->d + y->i -> so khớp tên bất kể chính tả.
+# y->i hợp nhất chính tả cũ/mới (Mĩ/Mỹ, kĩ/kỹ) NHƯNG GIỮ dấu thanh: ánh xạ từng biến
+# thể có dấu của 'y' sang 'i' cùng dấu (ý->í, ỳ->ì, ỷ->ỉ, ỹ->ĩ, ỵ->ị, y->i).
+_Y_TO_I = str.maketrans("yýỳỷỹỵ", "iíìỉĩị")
 
-    y->i để hợp nhất biến thể chính tả cũ/mới (Mĩ/Mỹ, kĩ/kỹ). Bỏ dấu để khớp cả khi
-    provider trả dạng romanized (Gia Dinh, Sai Gon, Can Gio).
+
+def _fold(text: str) -> str:
+    """Chuẩn hoá tên để so khớp: hạ thường + NFC + y->i. **GIỮ DẤU.**
+
+    Google Geocoding với `language=vi` luôn trả `formatted_address` CÓ DẤU (kiểm bằng API
+    thật: "Gia Định", "Cần Giờ", "Quảng Châu, Quảng Đông, Trung Quốc"...), nên KHÔNG bỏ
+    dấu — bỏ dấu sẽ làm "Chợ Lớn" trùng "Chơ Long" sai nghĩa. Chỉ y->i để hợp nhất biến
+    thể chính tả cũ/mới (Mĩ/Mỹ, kĩ/kỹ), giữ nguyên dấu thanh. NFC để precomposed/combining
+    về một dạng; regex thay ký tự không phải chữ/số (dấu phẩy, gạch nối) bằng khoảng trắng.
     """
-    text = unicodedata.normalize("NFD", text.lower())
-    text = "".join(c for c in text if not unicodedata.combining(c))
-    text = text.replace("đ", "d").replace("y", "i")
-    return re.sub(r"[^a-z0-9\s]", " ", text)
+    text = unicodedata.normalize("NFC", text.lower()).translate(_Y_TO_I)
+    return re.sub(r"[^\w\s]", " ", text)
 
 
 def _name_matches(query: str, candidate: str) -> bool:
-    """True nếu MỌI token tên truy vấn đều có trong tên Google trả về (bất kể dấu).
+    """True nếu MỌI token tên truy vấn đều có trong tên Google trả về (so khớp giữ dấu).
 
     Chặn fuzzy-match: Google luôn trả "đại khái" một kết quả kể cả khi không khớp
     (vd 'Bình Cách' -> 'Cách Mạng Tháng Tám', 'Sơn Trà' -> 'Trần Quốc Thảo'; thường

@@ -224,9 +224,12 @@ layer.style = { strokeColor: "#E74C3C", strokeWeight: 2, fillColor: "#E74C3C", f
 **Suy confidence** (`_confidence_from_types`): `country` → `thấp`,
 `administrative_area_level_1` → `vừa`, còn lại → `cao`.
 
-**Name-gate** (`_name_matches`): mọi token tên truy vấn (bỏ dấu + `y→i` + `đ→d`) phải
-nằm trong `formatted_address`, nếu không coi như Google không tìm thấy → LLM lo (vì
-Google hay trả "đại khái" 1 kết quả gần đúng, cờ `partial_match=true`).
+**Name-gate** (`_name_matches`): mọi token tên truy vấn (**giữ dấu** + hạ thường + NFC +
+`y→i`) phải nằm trong `formatted_address`, nếu không coi như Google không tìm thấy → LLM
+lo (vì Google hay trả "đại khái" 1 kết quả gần đúng, cờ `partial_match=true`). KHÔNG bỏ
+dấu: `language=vi` luôn trả tên CÓ DẤU (đã đo bằng API thật — "Gia Định", "Cần Giờ",
+"Quảng Châu"), nên bỏ dấu chỉ làm "Chợ Lớn" trùng nhầm "Chơ Long". Chỉ `y→i` (giữ dấu
+thanh) để hợp nhất chính tả cũ/mới Mĩ/Mỹ.
 
 > ⚠️ **Caveat địa danh nước ngoài + `language=vi`**: Google ĐỊA PHƯƠNG HOÁ tên nước
 > ngoài sang tiếng Việt (vd `Paris` → `"Pa ri, Pháp"`, `London` → `"Luân Đôn"`). Nếu
