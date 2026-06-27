@@ -63,6 +63,23 @@ class Settings(BaseSettings):
     chunk_size: int = 700
     min_characters_per_chunk: int = 80
 
+    # --- Retrieval query-side (traditional / graph / hybrid). Thứ tự áp cap graph:
+    # max_seed_entities -> max_chunks_per_seed -> gom+rank -> graph_top_k (cap thắng).
+    # graph_max_context_items cắt graph_context độc lập với graph_top_k. ---
+    rag_top_k: int = 20
+    graph_top_k: int = 20
+    hybrid_candidate_k: int = 30
+    rerank_top_k: int = 8
+    hybrid_rrf_k: int = 60
+    reranker_model: str = ""  # rỗng -> skip rerank, trả theo thứ tự RRF
+    # max token cho cặp (query, passage); khớp AITeamVN/Vietnamese_Reranker (256 query +
+    # 2048 passage). Override qua RERANKER_MAX_LENGTH trong .env nếu cần.
+    reranker_max_length: int = 2304
+    graph_max_seed_entities: int = 5
+    graph_max_chunks_per_seed: int = 20
+    graph_hub_source_count_threshold: int = 80
+    graph_max_context_items: int = 12
+
     # --- Storage backends (đọc từ .env) ---
     neo4j_uri: str = ""
     neo4j_user: str = "neo4j"
