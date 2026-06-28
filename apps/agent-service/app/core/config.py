@@ -80,6 +80,17 @@ class Settings(BaseSettings):
     graph_hub_source_count_threshold: int = 80
     graph_max_context_items: int = 12
 
+    # --- Orchestrator / Ask API (answer flow online). orchestrator_llm_model None =
+    # fallback llm_model. synthesize_max_attempts là tổng số lần synthesize (=2 -> 1 lần
+    # thử + 1 retry; =1 tắt retry). stream_batch_chars: ngưỡng gom token thành batch trước
+    # khi qua guardrails hook + emit (cũng cắt ở dấu kết câu). ---
+    orchestrator_llm_model: str | None = None
+    ask_max_history_messages: int = 12
+    ask_max_question_chars: int = 4000
+    ask_timeout_seconds: int = 60
+    synthesize_max_attempts: int = 2
+    stream_batch_chars: int = 160
+
     # --- Storage backends (đọc từ .env) ---
     neo4j_uri: str = ""
     neo4j_user: str = "neo4j"
