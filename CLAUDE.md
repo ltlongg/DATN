@@ -30,8 +30,8 @@ Nếu thư viện hiện có không đủ → ghi rõ lý do trước khi viết
 
 Repo là **git repository** (branch `main`). Không còn ở scaffold stage:
 
-- **`agent-service`**: đã có pipeline indexing thực (preprocessing → chunking → graph extraction → timeline extraction → geocoding). Đây là nơi tập trung gần như toàn bộ code hiện tại. Phần `api/` (FastAPI routes) và `orchestrator/` (LangGraph) **chưa build** — retrieval/answer flow là việc kế tiếp.
-- **`backend`** và **`frontend`**: vẫn ở scaffold (cấu trúc thư mục + config, chưa có code thực). Khi thêm file, tuân theo cấu trúc đã có (xem Architecture).
+- **`agent-service`**: đã có pipeline indexing thực (preprocessing → chunking → graph extraction → timeline extraction → geocoding) **và** answer flow online — `api/ask.py` (FastAPI `/ask`) + `orchestrator/` (LangGraph: build_query → retrieve → synthesize → validate → visualization, stream SSE). Đây là nơi tập trung gần như toàn bộ logic LLM/retrieval.
+- **`backend`**: đã build API gateway (auth JWT, conversation/message, `/ask` streaming proxy, admin documents mock) — xem layout dưới. **`frontend`**: vẫn ở scaffold (cấu trúc thư mục + config, chưa có code thực).
 
 `requirements.txt`, `docker-compose.yml` đã cấu hình. Khi commit, dùng tiếng Việt theo phong cách lịch sử commit hiện có.
 
@@ -49,7 +49,7 @@ Agent-service (FastAPI + LangGraph, :9000)  ← orchestrate RAG + GraphRAG + hyb
    Qdrant (:6333) + Neo4j (:7687) + Redis (:6379) + Postgres (:5432)
 ```
 
-**Nguyên tắc quan trọng**: backend KHÔNG trực tiếp là agent. Backend chỉ là API gateway gọi sang `agent-service` qua HTTP client (`apps/backend/app/modules/agent_client/`). Mọi logic LLM/retrieval nằm trong `agent-service`.
+**Nguyên tắc quan trọng**: backend KHÔNG trực tiếp là agent. Backend chỉ là API gateway gọi sang `agent-service` qua HTTP client (`apps/backend/app/services/agent_client.py`). Mọi logic LLM/retrieval nằm trong `agent-service`.
 
 ### Hạ tầng đã chạy sẵn (KHÔNG cần docker compose up)
 Neo4j + Qdrant + Redis + Postgres **đã cài và chạy sẵn trên remote dev server** qua Docker. URL + credentials đã có trong **root `.env`**. **KHÔNG cần** cài đặt, tải, hay `docker compose up` gì nữa — cứ đọc config từ `.env` mà dùng. Hai bẫy đã xử lý sẵn:
@@ -102,13 +102,27 @@ Online: `app/tools/visualization/builder.py::build_visualization(retrieved_chunk
 - `scripts/` — CLI utilities (xem Commands).
 - `api/`, `orchestrator/`, `tools/traditional_rag/`, `tools/hybrid/` — **chưa build** (kế hoạch theo Architecture; retrieval/answer flow là việc kế tiếp).
 
-### Backend internal layout (`apps/backend/app/`) — scaffold
-- `modules/auth` — JWT, 2 roles: `admin` và `teacher`
-- `modules/documents` — CRUD tài liệu (MVP có thể mock)
-- `modules/rag` — endpoint hỏi đáp, gọi sang agent-service
-- `modules/visualization` — trả map data + timeline data cho frontend
-- `modules/agent_client` — httpx client gọi agent-service
-- `modules/users`, `core/`, `db/`, `shared/` — chuẩn
+### Backend internal layout (`apps/backend/app/`)
+Cấu trúc theo lớp (KHÔNG dùng `modules/` như scaffold cũ; KHÔNG ORM/Alembic — psycopg
+tay + `CREATE TABLE IF NOT EXISTS`). Plan: `docs/plan/backend-plan.md`.
+- `core/` — `config.py` (pydantic-settings đọc root `.env`), `db.py` (psycopg + DDL 4
+  bảng + `connection()`/`init_schema()`), `security.py` (bcrypt + PyJWT), `errors.py`
+  (`AppError` → body `{code,message}`).
+- `models/` — data access psycopg trực tiếp: `user.py`, `conversation.py` (conversations
+  + messages), `document.py`. Mọi hàm SYNC; API layer gọi qua `anyio.to_thread`.
+- `schemas/` — Pydantic request/response: `auth.py`, `chat.py`, `document.py`, `common.py`.
+- `api/` — router: `health.py` (`/health`,`/ready`), `auth.py` (login/me/logout),
+  `chat.py` (conversation CRUD + `/ask` streaming), `documents.py` (admin mock),
+  `deps.py` (`get_current_user`, `require_admin`, `get_owned_conversation`).
+- `services/` — `agent_client.py` (`open_ask_stream` + error mapping + parse/format SSE),
+  `sse_collector.py` (gom event tái dựng message), `conversation_service.py` (derive_title
+  + bounded history, thuần để unit-test).
+- `scripts/` — `init_db.py` (tạo 4 bảng, chạy 1 lần), `seed_users.py` (2 user demo dev).
+
+**Backend chỉ STREAMING**: `/ask` luôn trả `text/event-stream`, proxy nguyên event SSE của
+agent-service, gom token lưu `messages`. Lỗi TRƯỚC khi mở stream → HTTP 503/504/502; lỗi
+SAU khi mở → event `error`. Bảng: `users/conversations/messages/documents`; `messages.
+created_at` dùng `clock_timestamp()` (không `now()`) để thứ tự message ổn định trong 1 txn.
 
 ### Frontend layout (`apps/frontend/src/`) — scaffold
 - `features/chat` — UI hỏi đáp
@@ -136,6 +150,20 @@ Dùng **root venv** (`.\venv\Scripts\python.exe`) — `apps/agent-service/venv` 
 .\venv\Scripts\python.exe -m mypy apps/agent-service/app
 .\venv\Scripts\python.exe -m pytest apps/agent-service/tests                # toàn bộ
 .\venv\Scripts\python.exe -m pytest apps/agent-service/tests/test_foo.py::test_bar  # 1 test
+```
+
+### Backend (API gateway, :8000)
+Cũng dùng **root venv**. Lần đầu: tạo bảng + seed user demo. Test backend dùng Postgres
+remote thật (cô lập bằng transaction rollback) nên **chậm (~2-3 phút)**; agent-service được
+mock qua `httpx.MockTransport`, không cần agent chạy.
+```powershell
+$env:PYTHONIOENCODING="utf-8"
+cd apps/backend
+python scripts/init_db.py        # CREATE TABLE IF NOT EXISTS 4 bảng (idempotent)
+python scripts/seed_users.py     # admin@example.com/admin123, teacher@example.com/teacher123 (dev)
+..\..\venv\Scripts\python.exe -m uvicorn app.main:app --port 8000   # chạy server
+..\..\venv\Scripts\python.exe -m pytest tests                       # 54 test
+..\..\venv\Scripts\python.exe -m ruff check app && ..\..\venv\Scripts\python.exe -m mypy app
 ```
 
 ### Tiền xử lý dataset (preprocessing)
