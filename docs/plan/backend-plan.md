@@ -318,10 +318,11 @@ email           TEXT UNIQUE NOT NULL
 name            TEXT NOT NULL
 role            TEXT NOT NULL  -- admin | teacher
 password_hash   TEXT NOT NULL
-is_active       BOOLEAN NOT NULL DEFAULT true
 created_at      TIMESTAMPTZ NOT NULL
-updated_at      TIMESTAMPTZ NOT NULL
 ```
+
+> Đã cắt cho MVP: `is_active` (chưa khóa/mở tài khoản), `updated_at` (chưa sửa user).
+> Thêm lại khi cần quản lý user thật.
 
 ### conversations
 
@@ -343,19 +344,21 @@ idx_conversations_user_updated_at(user_id, updated_at DESC)
 
 ```text
 id                    UUID PRIMARY KEY
-conversation_id        UUID NOT NULL REFERENCES conversations(id)
+conversation_id       UUID NOT NULL REFERENCES conversations(id)
 role                  TEXT NOT NULL  -- user | assistant
 content               TEXT NOT NULL
 clarification_needed  BOOLEAN NOT NULL DEFAULT false
-clarification_question TEXT
 citations             JSONB NOT NULL DEFAULT '[]'
 visualization         JSONB
 retrieval_mode        TEXT NOT NULL DEFAULT 'none'
 confidence            TEXT
 warnings              JSONB NOT NULL DEFAULT '[]'
-debug                 JSONB
 created_at            TIMESTAMPTZ NOT NULL
 ```
+
+> Khi assistant hỏi-lại (clarification), câu hỏi-lại lưu thẳng vào `content` và đặt
+> `clarification_needed=true` — không cần cột `clarification_question` riêng.
+> Đã cắt cho MVP: `debug` (chỉ ghi log, không lưu mỗi message).
 
 Index:
 
@@ -371,30 +374,15 @@ name            TEXT NOT NULL
 type            TEXT NOT NULL
 status          TEXT NOT NULL
 chunk_count     INTEGER NOT NULL DEFAULT 0
-error_message   TEXT
-created_by      UUID REFERENCES users(id)
 created_at      TIMESTAMPTZ NOT NULL
 updated_at      TIMESTAMPTZ NOT NULL
 ```
 
-### answer_quality_events (chừa nền cho sau MVP)
+> Đã cắt cho MVP: `error_message` (tài liệu đang mock, chưa index thật nên không có lỗi),
+> `created_by` (chỉ 1 admin). Thêm lại khi làm upload + indexing thật.
 
-MVP chưa cần UI đầy đủ, nhưng nên lưu bảng nhỏ để sau làm monitoring.
-
-```text
-id                UUID PRIMARY KEY
-message_id         UUID REFERENCES messages(id)
-user_id            UUID REFERENCES users(id)
-rating             TEXT      -- up | down | neutral
-reason             TEXT
-created_at         TIMESTAMPTZ NOT NULL
-```
-
-API feedback có thể làm sau frontend chat:
-
-```text
-POST /api/chat/messages/{message_id}/feedback
-```
+> **Bảng `answer_quality_events` đã bỏ khỏi MVP** — nó thuộc Answer Quality Monitoring
+> (xem mục "Sau MVP"). Tạo cùng API feedback khi build tính năng đó, không tạo sớm.
 
 ## Auth & Role Guard
 
@@ -507,12 +495,13 @@ Title conversation:
 
 Khi `stream=true`, backend vừa proxy event vừa gom dữ liệu để lưu message cuối.
 
-Collector backend gom:
+Collector backend gom (rồi map vào cột `messages`):
 
-- `answer`: concat event `token.text`
+- `content`: concat event `token.text`
 - `citations`: event `citations.citations`
 - `visualization`: event `visualization.visualization`
-- `clarification_question`: event `clarification.question`
+- clarification: event `clarification.question` → lưu thẳng vào `content`, đặt
+  `clarification_needed=true` (không có cột riêng)
 - `confidence`, `retrieval_mode`, `warnings`: event `done`
 - nếu có `blocked` hoặc `error`: lưu assistant message trạng thái lỗi/ngắn gọn hoặc không lưu,
   tùy UX chốt sau
