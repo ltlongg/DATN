@@ -30,6 +30,9 @@ _DB_MODULES = (
     "app.models.user",
     "app.models.conversation",
     "app.models.document",
+    "app.models.inspect",
+    "app.models.logs",
+    "app.models.cost",
 )
 
 

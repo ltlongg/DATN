@@ -1,0 +1,92 @@
+"""Ghi token usage của các lệnh gọi LLM ONLINE (build_query, synthesize) vào Postgres.
+
+Mirror pattern chunk_store.py (`_database_url()` strip +psycopg, CREATE TABLE IF NOT
+EXISTS lazy). Bảng `llm_usage` do agent-service sở hữu; backend đọc thẳng (cùng Postgres).
+
+TRIẾT LÝ: ghi usage KHÔNG được làm fail câu trả lời thật (cùng tinh thần build_visualization
+— viz lỗi không fail answer). Vì vậy `record_usage` NUỐT mọi exception. Chỉ track 2 lệnh gọi
+OpenAI online; KHÔNG track embedding (self-hosted, không tính phí token) hay indexing offline.
+Xem backend-additions-plan.md §4.1.
+"""
+
+from __future__ import annotations
+
+import logging
+import uuid
+from typing import Any
+
+import psycopg
+
+from app.core.config import get_settings
+
+logger = logging.getLogger("agent.usage_log")
+
+CREATE_LLM_USAGE_SQL = """
+CREATE TABLE IF NOT EXISTS llm_usage (
+    id                UUID PRIMARY KEY,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+    task              TEXT NOT NULL,
+    model             TEXT NOT NULL,
+    prompt_tokens     INTEGER NOT NULL DEFAULT 0,
+    completion_tokens INTEGER NOT NULL DEFAULT 0,
+    total_tokens      INTEGER NOT NULL DEFAULT 0,
+    user_id           TEXT
+);
+"""
+
+CREATE_INDEX_SQLS = [
+    "CREATE INDEX IF NOT EXISTS llm_usage_created_at_idx ON llm_usage (created_at);",
+    "CREATE INDEX IF NOT EXISTS llm_usage_user_id_idx ON llm_usage (user_id);",
+]
+
+INSERT_USAGE_SQL = """
+INSERT INTO llm_usage (id, task, model, prompt_tokens, completion_tokens, total_tokens, user_id)
+VALUES (%s, %s, %s, %s, %s, %s, %s);
+"""
+
+
+def _database_url(database_url: str | None = None) -> str:
+    url = database_url or get_settings().database_url
+    if not url:
+        raise RuntimeError("Thiếu DATABASE_URL trong .env để ghi llm_usage.")
+    return url.replace("postgresql+psycopg://", "postgresql://", 1)
+
+
+def ensure_llm_usage_table(conn: psycopg.Connection[Any]) -> None:
+    with conn.cursor() as cur:
+        cur.execute(CREATE_LLM_USAGE_SQL)
+        for sql in CREATE_INDEX_SQLS:
+            cur.execute(sql)
+
+
+def record_usage(
+    task: str,
+    model: str,
+    prompt_tokens: int,
+    completion_tokens: int,
+    total_tokens: int,
+    *,
+    user_id: str | None = None,
+    database_url: str | None = None,
+) -> None:
+    """INSERT 1 dòng usage (tự tạo bảng nếu chưa có). Nuốt MỌI exception — lỗi log usage
+    không được làm fail câu trả lời."""
+    try:
+        with psycopg.connect(_database_url(database_url)) as conn:
+            ensure_llm_usage_table(conn)
+            with conn.cursor() as cur:
+                cur.execute(
+                    INSERT_USAGE_SQL,
+                    (
+                        str(uuid.uuid4()),
+                        task,
+                        model,
+                        prompt_tokens,
+                        completion_tokens,
+                        total_tokens,
+                        user_id,
+                    ),
+                )
+            conn.commit()
+    except Exception as exc:  # noqa: BLE001 — ghi usage lỗi không được làm fail answer
+        logger.warning("record_usage bỏ qua (task=%s): %s", task, type(exc).__name__)

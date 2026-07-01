@@ -75,7 +75,7 @@ def _patch_retrieve(monkeypatch, result=None, *, error=None, capture=None):
 
 
 def _patch_synthesize(monkeypatch, *, answer="Đáp án.", used=("c-1",), confidence="cao", capture=None):
-    async def fake(messages, *, emitter, model, batch_chars, client=None):
+    async def fake(messages, *, emitter, model, batch_chars, client=None, on_usage=None):
         if capture is not None:
             capture.setdefault("calls", []).append(messages)
         # stream vài token cho giống thật

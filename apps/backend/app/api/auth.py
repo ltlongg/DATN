@@ -29,6 +29,10 @@ async def login(body: LoginRequest) -> LoginResponse:
     # Cùng một message cho "không có email" và "sai mật khẩu" để không lộ email tồn tại.
     if user is None or not verify_password(body.password, user.password_hash):
         raise AppError(401, "invalid_credentials", "Email hoặc mật khẩu không đúng.")
+    # login KHÔNG đi qua get_current_user -> phải check is_active ở ĐÂY nữa, nếu không tài
+    # khoản bị khóa vẫn được cấp token mới (dù request kế tiếp sẽ 403). Check ở CẢ 2 chỗ.
+    if not user.is_active:
+        raise AppError(403, "account_locked", "Tài khoản đã bị khóa.")
     token = create_access_token(user_id=user.id, role=user.role)
     return LoginResponse(access_token=token, user=_to_public(user))
 

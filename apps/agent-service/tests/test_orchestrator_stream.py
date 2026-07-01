@@ -45,7 +45,7 @@ def _patch_retrieve(monkeypatch, result=None, *, error=None):
 
 
 def _patch_synthesize(monkeypatch, *, answer="Đáp án ngắn.", used=("c-1",), confidence="cao"):
-    async def fake(messages, *, emitter, model, batch_chars, client=None):
+    async def fake(messages, *, emitter, model, batch_chars, client=None, on_usage=None):
         from app.orchestrator.synthesis import emit_text_as_batches
 
         await emit_text_as_batches(answer, emitter, batch_chars)
@@ -140,7 +140,7 @@ async def test_guardrails_block_stops_stream_with_blocked(monkeypatch) -> None:
 
     monkeypatch.setattr(guardrails, "check_batch", block)
 
-    async def fake_synth(messages, *, emitter, model, batch_chars, client=None):
+    async def fake_synth(messages, *, emitter, model, batch_chars, client=None, on_usage=None):
         from app.orchestrator.synthesis import emit_text_as_batches
 
         await emit_text_as_batches("Nội dung. Bị chặn.", emitter, batch_chars)
@@ -152,6 +152,29 @@ async def test_guardrails_block_stops_stream_with_blocked(monkeypatch) -> None:
     assert "blocked" in types
     assert "error" not in types  # blocked KHÔNG kèm error event
     assert "done" not in types  # stream dừng, không done
+
+
+async def test_debug_event_emitted_before_done_when_requested(monkeypatch) -> None:
+    _patch_build_query(monkeypatch)
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    _patch_synthesize(monkeypatch)
+    _patch_viz(monkeypatch)
+    events = await _collect(AskRequest(question="hỏi", stream=True, debug=True))
+    types = [t for t, _ in events]
+    assert types[-1] == "done"
+    assert types[-2] == "debug"  # debug ngay trước done (gom rồi bắn 1 lần ở cuối)
+    dbg = next(d for t, d in events if t == "debug")["debug"]
+    # state["debug"] đã tích lũy build_query + retrieve qua reducer _merge_debug.
+    assert "build_query" in dbg and "retrieve" in dbg
+
+
+async def test_debug_event_absent_when_not_requested(monkeypatch) -> None:
+    _patch_build_query(monkeypatch)
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    _patch_synthesize(monkeypatch)
+    _patch_viz(monkeypatch)
+    events = await _collect(AskRequest(question="hỏi", stream=True, debug=False))
+    assert "debug" not in [t for t, _ in events]
 
 
 async def test_smalltalk_streams_token_and_done(monkeypatch) -> None:

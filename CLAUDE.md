@@ -26,12 +26,14 @@ Nếu thư viện hiện có không đủ → ghi rõ lý do trước khi viết
 
 > **Lưu ý LightRAG**: đã từng dùng `lightrag-hku` nhưng **đã gỡ HOÀN TOÀN** (impedance mismatch). GraphRAG hiện là pipeline DIY tự ráp (xem dưới). **Đừng đề xuất lại LightRAG.** Lý do đầy đủ: `docs/plan/chunking-embedding-plan.md`.
 
+> **Bảng backend tự quản có thể tạo lại tùy ý lúc dev** (`users`/`conversations`/`messages`/`documents`) — sửa thẳng `CREATE TABLE` trong `db.py` rồi drop+tạo lại, **KHÔNG cần viết `ALTER TABLE` migration** lằng nhằng, miễn là chưa có data thật cần giữ (hiện chỉ 2 user seed demo). **TUYỆT ĐỐI KHÔNG** áp dụng cách này cho bảng/store tốn thời gian + tiền API để dựng lại (`rag_chunks`, `timeline_events`, Qdrant collection `history_vn_chunks`, Neo4j graph — dữ liệu index từ LLM calls thật) — mấy cái đó phải giữ nguyên/migrate cẩn thận, không được drop/tạo lại tùy tiện.
+
 ## Repository Status
 
 Repo là **git repository** (branch `main`). Không còn ở scaffold stage:
 
 - **`agent-service`**: đã có pipeline indexing thực (preprocessing → chunking → graph extraction → timeline extraction → geocoding) **và** answer flow online — `api/ask.py` (FastAPI `/ask`) + `orchestrator/` (LangGraph: build_query → retrieve → synthesize → validate → visualization, stream SSE). Đây là nơi tập trung gần như toàn bộ logic LLM/retrieval.
-- **`backend`**: đã build API gateway (auth JWT, conversation/message, `/ask` streaming proxy, admin documents mock) — xem layout dưới. **`frontend`**: vẫn ở scaffold (cấu trúc thư mục + config, chưa có code thực).
+- **`backend`**: đã build API gateway (auth JWT, conversation/message, `/ask` streaming proxy, admin documents mock) — xem layout dưới. Module 4 (admin nâng cao) **3/4 nhóm đã code xong** (Hội thoại & chất lượng, Người dùng & quota, Chi phí) + KB Inspector (Module 5) + debug streaming — xem `### Module 4 — Admin nâng cao` dưới. Chỉ còn **Cấu hình hệ thống** là CHƯA code (tách plan riêng, làm sau). **`frontend`**: vẫn ở scaffold (cấu trúc thư mục + config, chưa có code thực) — kế hoạch đầy đủ ở `docs/plan/frontend-plan.md`.
 
 `requirements.txt`, `docker-compose.yml` đã cấu hình. Khi commit, dùng tiếng Việt theo phong cách lịch sử commit hiện có.
 
@@ -94,13 +96,15 @@ Online: `app/tools/visualization/builder.py::build_visualization(retrieved_chunk
 - `indexing/graph/` — pass trích entity/quan hệ + alias resolution.
 - `indexing/timeline/` — `segmenter.py`, `atomic_event_extractor.py`, `reconcile.py`.
 - `indexing/geocoding/` — `geocoder.py` (Google + LLM hybrid).
-- `tools/graph_rag/` — `chunk_store.py` (Postgres), `vector_store.py` (Qdrant), `graph_store.py` (Neo4j).
+- `tools/graph_rag/` — `chunk_store.py` (Postgres), `vector_store.py` (Qdrant), `graph_store.py` (Neo4j, + `list_entities`/`get_entity` cho KB Inspector).
 - `tools/visualization/` — `event_store.py` (`timeline_events`), `gazetteer_store.py` (`gazetteer`), `builder.py` (online).
 - `prompts/` — prompt templates có versioning (graph_extract, metadata_extract, timeline_extract, geocode, alias_judge).
-- `schemas/` — Pydantic models (chunk, graph, metadata, timeline, gazetteer, visualization, alias).
-- `core/` — config, llm, embedding, clients (qdrant, neo4j).
+- `schemas/` — Pydantic models (chunk, graph, metadata, timeline, gazetteer, visualization, alias, `ask.py` request/response, `kb.py` cho KB Inspector).
+- `core/` — config, llm, embedding, clients (qdrant, neo4j), `usage_log.py` (`record_usage` → bảng `llm_usage`, tạo lazy, nuốt mọi exception).
 - `scripts/` — CLI utilities (xem Commands).
-- `api/`, `orchestrator/`, `tools/traditional_rag/`, `tools/hybrid/` — **chưa build** (kế hoạch theo Architecture; retrieval/answer flow là việc kế tiếp).
+- `api/` — `ask.py` (`POST /ask`, streaming SSE), `kb.py` (`GET /kb/entities`, `/kb/entities/{norm_name}` — read-only, phục vụ backend proxy Module 5).
+- `orchestrator/` — LangGraph: `nodes.py` (build_query → retrieve → synthesize → validate → visualization, có ghi `llm_usage`), `runner.py` (`run_ask_stream`, emit event `debug` trước `done`), `state.py`, `synthesis.py`.
+- `tools/traditional_rag/`, `tools/hybrid/` — `retriever.py` mỗi thư mục; node `retrieve()` gọi thẳng `tools/hybrid/retriever.py::retrieve_hybrid`, set `retrieval_mode="hybrid"`.
 
 ### Backend internal layout (`apps/backend/app/`)
 Cấu trúc theo lớp (KHÔNG dùng `modules/` như scaffold cũ; KHÔNG ORM/Alembic — psycopg
@@ -108,21 +112,49 @@ tay + `CREATE TABLE IF NOT EXISTS`). Plan: `docs/plan/backend-plan.md`.
 - `core/` — `config.py` (pydantic-settings đọc root `.env`), `db.py` (psycopg + DDL 4
   bảng + `connection()`/`init_schema()`), `security.py` (bcrypt + PyJWT), `errors.py`
   (`AppError` → body `{code,message}`).
-- `models/` — data access psycopg trực tiếp: `user.py`, `conversation.py` (conversations
-  + messages), `document.py`. Mọi hàm SYNC; API layer gọi qua `anyio.to_thread`.
-- `schemas/` — Pydantic request/response: `auth.py`, `chat.py`, `document.py`, `common.py`.
-- `api/` — router: `health.py` (`/health`,`/ready`), `auth.py` (login/me/logout),
-  `chat.py` (conversation CRUD + `/ask` streaming), `documents.py` (admin mock),
-  `deps.py` (`get_current_user`, `require_admin`, `get_owned_conversation`).
-- `services/` — `agent_client.py` (`open_ask_stream` + error mapping + parse/format SSE),
-  `sse_collector.py` (gom event tái dựng message), `conversation_service.py` (derive_title
-  + bounded history, thuần để unit-test).
+- `models/` — data access psycopg trực tiếp: `user.py` (+ `is_active`/`question_quota`),
+  `conversation.py` (conversations + messages + `count_user_messages_today`), `document.py`,
+  `inspect.py` (chunks/events cho KB Inspector), `logs.py` (conversation logs admin),
+  `cost.py` (đọc `llm_usage`, tự bắt `UndefinedTable` → `[]`). Mọi hàm SYNC; API layer gọi
+  qua `anyio.to_thread`.
+- `schemas/` — Pydantic request/response: `auth.py`, `chat.py`, `document.py`, `common.py`,
+  `inspect.py`, `logs.py`, `user.py`, `cost.py`.
+- `api/` — router: `health.py` (`/health`,`/ready`), `auth.py` (login/me/logout, check
+  `is_active`), `chat.py` (conversation CRUD + `/ask` streaming, gác `debug`, check quota),
+  `documents.py` (admin mock), `inspect.py` (`/api/admin/kb/*` — chunks/events Postgres trực
+  tiếp + proxy entities sang agent-service), `logs.py` (`/api/admin/logs/*` — hội thoại &
+  chất lượng), `users.py` (`/api/admin/users*` — CRUD + quota + khóa), `cost.py`
+  (`/api/admin/cost/*` — dashboard chi phí), `deps.py` (`get_current_user` — re-check
+  `is_active`, `require_admin`, `get_owned_conversation`).
+- `services/` — `agent_client.py` (`open_ask_stream` + `user_id` + error mapping +
+  parse/format SSE), `sse_collector.py` (gom event tái dựng message), `conversation_service.py`
+  (derive_title + bounded history), `quality_service.py` (`compute_quality_summary`, thuần),
+  `cost_service.py` (`compute_cost_overview/by_day/by_task`, thuần) — 2 service cuối cùng
+  idiom hàm thuần không I/O để unit-test không cần DB.
 - `scripts/` — `init_db.py` (tạo 4 bảng, chạy 1 lần), `seed_users.py` (2 user demo dev).
 
 **Backend chỉ STREAMING**: `/ask` luôn trả `text/event-stream`, proxy nguyên event SSE của
 agent-service, gom token lưu `messages`. Lỗi TRƯỚC khi mở stream → HTTP 503/504/502; lỗi
 SAU khi mở → event `error`. Bảng: `users/conversations/messages/documents`; `messages.
 created_at` dùng `clock_timestamp()` (không `now()`) để thứ tự message ổn định trong 1 txn.
+
+### Module 4 — Admin nâng cao (3/4 nhóm đã code xong)
+Backend giờ có thêm: debug streaming, KB Inspector (Module 5), và 3/4 nhóm Module 4 (Hội
+thoại & chất lượng, Người dùng & quota, Chi phí) — đã build + verify khớp
+`docs/plan/backend-additions-plan.md` (Phần 1–4). 2 file plan, KHÔNG trùng lặp nội dung, sửa
+gì thì sửa đúng file:
+- `docs/plan/backend-additions-plan.md` — **đã code xong** Phần 1–4: debug streaming, read
+  endpoints Module 5 (KB Inspector), 3/4 nhóm Module 4 (logs & chất lượng, users & quota, cost
+  dashboard). `users` table đã sửa thẳng `CREATE TABLE` (drop+tạo lại, không migration) thêm
+  cột `is_active`/`question_quota`.
+- `docs/plan/system-config-plan.md` — nhóm **Cấu hình hệ thống**, tách riêng vì đụng
+  orchestrator đang chạy ổn định (tinh chỉnh retrieval + synthesize). **CHƯA code** — làm SAU
+  KHI Phần 1–4 backend-additions-plan.md xong (đã xong). **Retrieval mode
+  (traditional/graph/hybrid) là 1 field lựa chọn — LUÔN có sẵn cả 3, KHÔNG phải toggle
+  bật/tắt từng cái riêng.** Cả admin (đặt mặc định hệ thống) lẫn user (override
+  per-câu-hỏi ngay trong khung chat) đều chọn được mode. KHÔNG quản lý model qua config.
+- `docs/plan/frontend-plan.md` — kế hoạch FE tương ứng, source-of-truth cho scope/UI toàn
+  bộ frontend (không chỉ Module 4). Đã cập nhật khớp API thật ở trên.
 
 ### Frontend layout (`apps/frontend/src/`) — scaffold
 - `features/chat` — UI hỏi đáp
@@ -226,6 +258,6 @@ Giá trị **thực tế** trong code (đừng tin mù `.env.example`, có chỗ
 - `dataset/chunks_llm.json` — 1213 chunk (`source_file=lichsu.clean.md`, có `start_line`/`end_line`).
 - `dataset/*.json|*.md` — cache + review của các pipeline: `graph_extractions.json`, `alias_map.json`/`alias_review.md`, `timeline_units.json`, `timeline_extractions.json`, `gazetteer.json`/`gazetteer_review.md`, `entities_by_type.md`.
 - `README.md` — đặc tả chức năng đầy đủ (admin, teacher, RAG, GraphRAG, hybrid, map, timeline, MVP scope). Nguồn truth cho scope.
-- `docs/plan/` — plan đã duyệt: `chunking-embedding-plan.md` (lý do gỡ LightRAG + DIY pipeline), `llm-chunking-plan.md`, `timeline-map-plan.md` (source-of-truth timeline/map), `lichsu-headings.md`.
+- `docs/plan/` — plan đã duyệt: `chunking-embedding-plan.md` (lý do gỡ LightRAG + DIY pipeline), `llm-chunking-plan.md`, `timeline-map-plan.md` (source-of-truth timeline/map), `lichsu-headings.md`, `backend-plan.md` (kiến trúc backend gốc), `frontend-plan.md` (kế hoạch frontend đầy đủ 2 role), `backend-additions-plan.md` (Module 4 build ngay + KB Inspector + debug streaming), `system-config-plan.md` (Cấu hình hệ thống — retrieval mode + tinh chỉnh, tách riêng vì rủi ro cao, xem `### Module 4` ở trên).
 - `docs/reference/google-maps-api.md` — tham chiếu Google Geocoding/Maps + ToS caching.
 - `docs/design/frontend-scope.md`, `docs/brainstorming/` — scope frontend + session notes kiến trúc.

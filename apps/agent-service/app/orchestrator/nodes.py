@@ -13,6 +13,7 @@ from langchain_core.runnables import RunnableConfig
 
 from app.core.config import get_settings
 from app.core.llm import get_async_openai_client
+from app.core.usage_log import record_usage
 from app.prompts import build_query as bq_prompt
 from app.prompts import synthesize as syn_prompt
 from app.orchestrator.emitter import Emitter, NullEmitter
@@ -51,6 +52,25 @@ def _orchestrator_model() -> str:
     return settings.orchestrator_llm_model or settings.llm_model
 
 
+async def _record_usage_from_completion(
+    completion: Any, task: str, user_id: str | None
+) -> None:
+    """Ghi usage của 1 lệnh gọi LLM online (fire-and-forget). Completion không có `.usage`
+    (vd mock cũ) -> bỏ qua êm. record_usage tự nuốt lỗi nên không làm fail flow."""
+    usage = getattr(completion, "usage", None)
+    if usage is None:
+        return
+    await asyncio.to_thread(
+        record_usage,
+        task=task,
+        model=_orchestrator_model(),
+        prompt_tokens=getattr(usage, "prompt_tokens", 0) or 0,
+        completion_tokens=getattr(usage, "completion_tokens", 0) or 0,
+        total_tokens=getattr(usage, "total_tokens", 0) or 0,
+        user_id=user_id,
+    )
+
+
 # --- 1. build_query (1 LLM call: rewrite + entity + route) ---
 
 
@@ -73,6 +93,9 @@ async def build_query(state: AgentState, config: RunnableConfig) -> dict[str, An
         parsed = completion.choices[0].message.parsed
         if parsed is None:
             raise ValueError("build_query trả parsed None")
+        await _record_usage_from_completion(
+            completion, "build_query", state.get("user_id")
+        )
         return {
             "standalone_query": parsed.standalone_query.strip() or question,
             "seed_mentions": parsed.mentioned_entities,
@@ -178,11 +201,25 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
             ),
         },
     ]
+    user_id = state.get("user_id")
+
+    async def _on_usage(prompt: int, completion: int, total: int) -> None:
+        await asyncio.to_thread(
+            record_usage,
+            task="synthesize",
+            model=_orchestrator_model(),
+            prompt_tokens=prompt,
+            completion_tokens=completion,
+            total_tokens=total,
+            user_id=user_id,
+        )
+
     result = await stream_synthesis(
         messages,
         emitter=emitter,
         model=_orchestrator_model(),
         batch_chars=settings.stream_batch_chars,
+        on_usage=_on_usage,
     )
     return {
         "answer": result.answer,

@@ -13,7 +13,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.api import auth, chat, documents, health
+from app.api import auth, chat, cost, documents, health, inspect, logs, users
 from app.core.config import get_settings
 from app.core.errors import register_error_handlers
 
@@ -48,6 +48,10 @@ def create_app() -> FastAPI:
     app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
     app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
     app.include_router(documents.router, prefix="/api/admin/documents", tags=["documents"])
+    app.include_router(inspect.router, prefix="/api/admin/kb", tags=["kb-inspect"])
+    app.include_router(logs.router, prefix="/api/admin/logs", tags=["admin-logs"])
+    app.include_router(users.router, prefix="/api/admin/users", tags=["admin-users"])
+    app.include_router(cost.router, prefix="/api/admin/cost", tags=["admin-cost"])
 
     return app
 
