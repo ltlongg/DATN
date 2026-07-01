@@ -29,7 +29,15 @@ from app.schemas.graph import GraphExtraction
 from app.schemas.retrieval import GraphContextItem, RetrievalCandidate
 from app.tools.graph_rag.entity_index import EntityIndex, get_entity_index
 
-__all__ = ["merge_graph", "match_seed_entities", "search_graph", "GraphSeed"]
+__all__ = [
+    "merge_graph",
+    "match_seed_entities",
+    "search_graph",
+    "GraphSeed",
+    "list_entities",
+    "count_entities",
+    "get_entity",
+]
 
 _MERGE_ENTITIES = """
 UNWIND $entities AS ent
@@ -309,3 +317,149 @@ def search_graph(
     graph_context = list(deduped.values())[: settings.graph_max_context_items]
 
     return candidates, graph_context
+
+
+# ===========================================================================
+# Read-side cho KB Inspector (admin, read-only) — xem backend-additions-plan.md §2.2
+# ===========================================================================
+
+# Lọc theo type/q/chunk_id độc lập (mỗi filter None = bỏ qua). $chunk_id lọc entity tham
+# chiếu một chunk (source_chunk_ids đã có sẵn trên node, xem _MERGE_ENTITIES).
+_LIST_ENTITIES = """
+MATCH (e:Entity)
+WHERE ($type IS NULL OR e.type = $type)
+  AND ($q IS NULL OR toLower(e.name) CONTAINS toLower($q))
+  AND ($chunk_id IS NULL OR $chunk_id IN e.source_chunk_ids)
+RETURN e.name AS name, e.norm_name AS norm_name, e.type AS type,
+       size(e.descriptions) AS description_count,
+       size(e.source_chunk_ids) AS source_chunk_count
+ORDER BY e.norm_name
+SKIP $offset LIMIT $limit
+"""
+
+_COUNT_ENTITIES = """
+MATCH (e:Entity)
+WHERE ($type IS NULL OR e.type = $type)
+  AND ($q IS NULL OR toLower(e.name) CONTAINS toLower($q))
+  AND ($chunk_id IS NULL OR $chunk_id IN e.source_chunk_ids)
+RETURN count(e) AS total
+"""
+
+# Ego-graph: node trung tâm + cạnh 1-hop (vô hướng để bắt cả cạnh vào/ra) kèm neighbor.
+# startNode/endNode giữ HƯỚNG THẬT của cạnh; nb là node còn lại (để dựng danh sách neighbor).
+_GET_ENTITY = """
+MATCH (e:Entity {norm_name: $norm_name})
+OPTIONAL MATCH (e)-[r:REL]-(nb:Entity)
+RETURN e.name AS name, e.norm_name AS norm_name, e.type AS type,
+       e.descriptions AS descriptions, e.source_chunk_ids AS source_chunk_ids,
+       collect(CASE WHEN r IS NULL THEN NULL ELSE {
+           keyword: r.keyword, descriptions: r.descriptions,
+           source_chunk_ids: r.source_chunk_ids,
+           src_name: startNode(r).name, src_norm: startNode(r).norm_name,
+           tgt_name: endNode(r).name, tgt_norm: endNode(r).norm_name,
+           nb_name: nb.name, nb_norm: nb.norm_name, nb_type: nb.type
+       } END) AS edges
+"""
+
+
+def _clean(value: str | None) -> str | None:
+    """None/rỗng -> None (bỏ filter); ngược lại strip."""
+    if value is None:
+        return None
+    v = value.strip()
+    return v or None
+
+
+def count_entities(
+    *,
+    type: str | None = None,
+    q: str | None = None,
+    chunk_id: str | None = None,
+    driver: Driver | None = None,
+) -> int:
+    driver = driver or get_neo4j_driver()
+    with driver.session() as session:
+        record = session.run(
+            _COUNT_ENTITIES, type=_clean(type), q=_clean(q), chunk_id=_clean(chunk_id)
+        ).single()
+    return int(record["total"]) if record else 0
+
+
+def list_entities(
+    *,
+    type: str | None = None,
+    q: str | None = None,
+    chunk_id: str | None = None,
+    limit: int = 50,
+    offset: int = 0,
+    driver: Driver | None = None,
+) -> list[dict[str, Any]]:
+    """List `:Entity` (paginate). Lọc theo type/q(name)/chunk_id độc lập; sort norm_name."""
+    driver = driver or get_neo4j_driver()
+    with driver.session() as session:
+        result = session.run(
+            _LIST_ENTITIES,
+            type=_clean(type),
+            q=_clean(q),
+            chunk_id=_clean(chunk_id),
+            limit=limit,
+            offset=offset,
+        )
+        return [
+            {
+                "name": r["name"],
+                "norm_name": r["norm_name"],
+                "type": r["type"],
+                "description_count": int(r["description_count"]),
+                "source_chunk_count": int(r["source_chunk_count"]),
+            }
+            for r in result
+        ]
+
+
+def get_entity(
+    norm_name: str, *, driver: Driver | None = None
+) -> dict[str, Any] | None:
+    """Ego-graph 1-hop của entity theo `norm_name`: node + edges có cấu trúc + neighbor.
+
+    Trả None nếu không có node. Neighbor suy từ edges (distinct theo norm), giữ hướng thật.
+    """
+    driver = driver or get_neo4j_driver()
+    with driver.session() as session:
+        record = session.run(_GET_ENTITY, norm_name=norm_name).single()
+    if record is None:
+        return None
+
+    edges: list[dict[str, Any]] = []
+    neighbors: dict[str, dict[str, Any]] = {}
+    for edge in record["edges"] or []:
+        if not edge or not edge.get("keyword"):
+            continue  # OPTIONAL MATCH rỗng (node cô lập) -> bỏ
+        edges.append(
+            {
+                "source_name": edge.get("src_name"),
+                "source_norm": edge.get("src_norm"),
+                "target_name": edge.get("tgt_name"),
+                "target_norm": edge.get("tgt_norm"),
+                "keyword": edge.get("keyword"),
+                "description": _join_descriptions(edge.get("descriptions")),
+                "source_chunk_ids": list(edge.get("source_chunk_ids") or []),
+            }
+        )
+        nb_norm = edge.get("nb_norm")
+        if nb_norm and nb_norm not in neighbors:
+            neighbors[nb_norm] = {
+                "name": edge.get("nb_name"),
+                "norm_name": nb_norm,
+                "type": edge.get("nb_type"),
+            }
+
+    return {
+        "name": record["name"],
+        "norm_name": record["norm_name"],
+        "type": record["type"],
+        "descriptions": list(record["descriptions"] or []),
+        "source_chunk_ids": list(record["source_chunk_ids"] or []),
+        "neighbors": list(neighbors.values()),
+        "edges": edges,
+    }
