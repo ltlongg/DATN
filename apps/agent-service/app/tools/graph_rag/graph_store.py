@@ -17,6 +17,7 @@ nên relation lỡ thiếu node thì bị bỏ qua thay vì tạo node rỗng.
 
 from __future__ import annotations
 
+import itertools
 from dataclasses import dataclass
 from typing import Any
 
@@ -126,6 +127,29 @@ RETURN seed.name AS seed_name,
 _HUB_WEIGHT = 0.25
 _SEED_HIT = 2.0  # chunk là source của chính seed
 _EDGE_HIT = 1.0  # chunk là source của một cạnh 1-hop
+
+
+# shortestPath giữa 2 seed (C2): trả node + relation TRÊN đường nối để trả lời câu hỏi
+# quan hệ. Match VÔ HƯỚNG (recall) nhưng RETURN startNode/endNode giữ hướng thật của cạnh.
+def _path_cypher(max_hop: int) -> str:
+    """Sinh Cypher shortestPath với cận var-length = `max_hop`.
+
+    Neo4j KHÔNG parametrize được cận var-length nên phải nội suy literal vào chuỗi (cùng lý
+    do file này không parametrize label/rel-type). `max_hop` là hằng config, KHÔNG phải input
+    user; assert int để chặn injection nếu ai đó lỡ truyền chuỗi.
+    """
+    assert isinstance(max_hop, int) and max_hop >= 1, "max_hop phải là int >= 1"
+    return f"""
+MATCH path = shortestPath(
+  (a:Entity {{norm_name: $a}})-[:REL*1..{max_hop}]-(b:Entity {{norm_name: $b}})
+)
+RETURN [n IN nodes(path) | {{name: n.name, norm: n.norm_name,
+                            descriptions: n.descriptions, chunks: n.source_chunk_ids}}] AS nodes,
+       [r IN relationships(path) | {{keyword: r.keyword, descriptions: r.descriptions,
+                                     chunks: r.source_chunk_ids,
+                                     src_name: startNode(r).name, src_norm: startNode(r).norm_name,
+                                     tgt_name: endNode(r).name, tgt_norm: endNode(r).norm_name}}] AS rels
+"""
 
 
 @dataclass(frozen=True)
@@ -289,6 +313,56 @@ def search_graph(
                 for chunk_id in edge_chunks:
                     if not _bump(chunk_id, _EDGE_HIT * weight, seed.mention, counted):
                         break
+
+        # --- C2: path-finding giữa từng cặp seed (chỉ khi >=2 seed) ---
+        # Số cặp = C(n,2), cap seed=5 -> tối đa 10 cặp; shortestPath = 1 đường/cặp -> không bùng nổ.
+        if len(seeds) >= 2:
+            path_cypher = _path_cypher(settings.graph_max_path_hops)
+            path_weight = settings.graph_path_hit_weight
+            path_counted: set[str] = set()  # cap TỔNG chunk path (chung mọi cặp)
+            for a, b in itertools.combinations(seeds, 2):
+                rec = session.run(
+                    path_cypher, a=a.info.norm_name, b=b.info.norm_name
+                ).single()
+                if rec is None:
+                    continue  # không có đường nối -> bỏ qua cặp (honest, không bịa)
+                pair_tag = f"{a.mention}↔{b.mention}"
+                for node in rec["nodes"] or []:
+                    if not node or not node.get("norm"):
+                        continue
+                    context.append(
+                        GraphContextItem(
+                            kind="entity",
+                            name=node.get("name"),
+                            norm_name=node.get("norm"),
+                            description=_join_descriptions(node.get("descriptions")),
+                            source_chunk_ids=list(node.get("chunks") or [])[:per_seed_cap],
+                            matched_seed=pair_tag,
+                        )
+                    )
+                    for chunk_id in node.get("chunks") or []:
+                        if not _bump(chunk_id, path_weight, pair_tag, path_counted):
+                            break
+                for rel in rec["rels"] or []:
+                    if not rel or not rel.get("keyword"):
+                        continue
+                    rel_chunks = list(rel.get("chunks") or [])
+                    context.append(
+                        GraphContextItem(
+                            kind="relation",
+                            source_name=rel.get("src_name"),
+                            source_norm=rel.get("src_norm"),
+                            target_name=rel.get("tgt_name"),
+                            target_norm=rel.get("tgt_norm"),
+                            keyword=rel.get("keyword"),
+                            description=_join_descriptions(rel.get("descriptions")),
+                            source_chunk_ids=rel_chunks[:per_seed_cap],
+                            matched_seed=pair_tag,
+                        )
+                    )
+                    for chunk_id in rel_chunks:
+                        if not _bump(chunk_id, path_weight, pair_tag, path_counted):
+                            break
 
     ranked = sorted(scores.items(), key=lambda kv: (-kv[1], kv[0]))[:k]
     candidates = [
