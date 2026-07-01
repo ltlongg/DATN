@@ -305,3 +305,86 @@ async def test_event_order_on_happy_path(monkeypatch) -> None:
     types = [t for t, _ in emitter.events]
     assert types.index("token") < types.index("citations") < types.index("visualization")
     assert types[0] == "status"
+
+
+# --- dispatch theo mode (user chọn tay 1 trong 3) ---
+
+
+def _patch_three_retrievers(monkeypatch, called: dict, *, result=None) -> None:
+    async def fake_trad(question, **kw):
+        called["which"] = "traditional"
+        return result if result is not None else _retrieval(["c-1"])
+
+    async def fake_graph(query, **kw):
+        called["which"] = "graph"
+        return result if result is not None else _retrieval(["c-1"])
+
+    async def fake_hybrid(question, **kw):
+        called["which"] = "hybrid"
+        return result if result is not None else _retrieval(["c-1"])
+
+    monkeypatch.setattr(nodes, "retrieve_traditional", fake_trad)
+    monkeypatch.setattr(nodes, "retrieve_graph", fake_graph)
+    monkeypatch.setattr(nodes, "retrieve_hybrid", fake_hybrid)
+
+
+@pytest.mark.parametrize("mode", ["traditional", "graph", "hybrid"])
+async def test_dispatch_mode_calls_correct_retriever(monkeypatch, mode) -> None:
+    _patch_build_query(monkeypatch, route="needs_retrieval")
+    called: dict = {}
+    _patch_three_retrievers(monkeypatch, called)
+    _patch_synthesize(monkeypatch, used=("c-1",))
+    _patch_viz(monkeypatch)
+    resp = await run_ask(AskRequest(question="hỏi", mode=mode, stream=False))
+    assert called["which"] == mode
+    assert resp.retrieval_mode == mode  # phản ánh mode đã chọn, không hardcode hybrid
+
+
+async def test_default_mode_is_hybrid(monkeypatch) -> None:
+    _patch_build_query(monkeypatch, route="needs_retrieval")
+    called: dict = {}
+    _patch_three_retrievers(monkeypatch, called)
+    _patch_synthesize(monkeypatch, used=("c-1",))
+    _patch_viz(monkeypatch)
+    resp = await run_ask(AskRequest(question="hỏi", stream=False))  # không truyền mode
+    assert called["which"] == "hybrid"
+    assert resp.retrieval_mode == "hybrid"
+
+
+async def test_graph_empty_suggests_other_mode(monkeypatch) -> None:
+    # mode=graph nhưng không ground được seed -> honest gợi ý đổi mode (KHÔNG auto-fallback).
+    _patch_build_query(monkeypatch, route="needs_retrieval")
+    called: dict = {}
+    empty = RetrievalResult(mode="graph", query="q", chunks=[])
+    _patch_three_retrievers(monkeypatch, called, result=empty)
+    resp = await run_ask(AskRequest(question="hỏi", mode="graph", stream=False))
+    assert called["which"] == "graph"
+    assert resp.retrieval_mode == "graph"
+    assert "Traditional" in (resp.answer or "") and "Hybrid" in (resp.answer or "")
+
+
+async def test_traditional_empty_uses_generic_honest(monkeypatch) -> None:
+    # traditional rỗng -> message honest CHUNG (không gợi ý đổi mode, user chỉ yêu cầu graph).
+    _patch_build_query(monkeypatch, route="needs_retrieval")
+    called: dict = {}
+    empty = RetrievalResult(mode="traditional", query="q", chunks=[])
+    _patch_three_retrievers(monkeypatch, called, result=empty)
+    resp = await run_ask(AskRequest(question="hỏi", mode="traditional", stream=False))
+    assert "chưa tìm thấy đủ thông tin" in (resp.answer or "")
+
+
+# --- Phần F: document reordering áp ở synthesize (chống lost-in-the-middle) ---
+
+
+async def test_synthesize_reorders_chunks_in_prompt(monkeypatch) -> None:
+    import re
+
+    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_retrieve(monkeypatch, _retrieval(["c0", "c1", "c2", "c3", "c4"]))
+    capture: dict = {}
+    _patch_synthesize(monkeypatch, used=("c0",), capture=capture)
+    _patch_viz(monkeypatch)
+    await run_ask(AskRequest(question="hỏi", stream=False))
+    prompt = capture["calls"][0][1]["content"]
+    order = re.findall(r"chunk_id: (c\d)", prompt)
+    assert order == ["c0", "c2", "c4", "c3", "c1"]  # best ở hai đầu, yếu ở giữa

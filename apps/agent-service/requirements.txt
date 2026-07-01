@@ -35,6 +35,9 @@ langgraph
 # --- Vector store (Qdrant) ---
 qdrant-client>=1.11,<2
 
+# --- Sparse BM25 encoder (client-side, deterministic) cho hybrid keyword retrieval ---
+fastembed
+
 # --- Graph store (Neo4j) for GraphRAG ---
 neo4j>=5,<7
 

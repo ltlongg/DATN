@@ -72,6 +72,10 @@ class Settings(BaseSettings):
     rerank_top_k: int = 8
     hybrid_rrf_k: int = 60
     reranker_model: str = ""  # rỗng -> skip rerank, trả theo thứ tự RRF
+    # --- Sparse BM25 (fastembed client-side, fuse trong Qdrant qua Modifier.IDF) ---
+    bm25_model: str = "Qdrant/bm25"      # encoder sparse của fastembed
+    bm25_top_k: int = 20                  # số candidate sparse
+    sparse_vector_name: str = "bm25"      # tên named sparse trong Qdrant
     # max token cho cặp (query, passage); khớp AITeamVN/Vietnamese_Reranker (256 query +
     # 2048 passage). Override qua RERANKER_MAX_LENGTH trong .env nếu cần.
     reranker_max_length: int = 2304
@@ -79,6 +83,10 @@ class Settings(BaseSettings):
     graph_max_chunks_per_seed: int = 20
     graph_hub_source_count_threshold: int = 80
     graph_max_context_items: int = 12
+    # Path-finding giữa các seed (kích hoạt khi >=2 seed). max_path_hops = cận shortestPath
+    # (nội suy vào Cypher — phải int); path_hit_weight = điểm chunk nằm trên path.
+    graph_max_path_hops: int = 3
+    graph_path_hit_weight: float = 1.5
 
     # --- Orchestrator / Ask API (answer flow online). orchestrator_llm_model None =
     # fallback llm_model. synthesize_max_attempts là tổng số lần synthesize (=2 -> 1 lần

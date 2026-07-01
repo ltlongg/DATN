@@ -81,6 +81,34 @@ def test_ask_sends_question_and_first_turn_history_empty(client, auth, mock_agen
     assert payload["stream"] is True
 
 
+def test_ask_forwards_selected_mode(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
+    teacher = auth("teacher")
+    cid = _new_conversation(client, teacher)
+    mock_agent.configure(
+        events=format_sse("token", {"text": "x"})
+        + format_sse("done", {"confidence": "cao", "retrieval_mode": "graph", "warnings": []})
+    )
+    client.post(
+        f"/api/chat/conversations/{cid}/ask",
+        json={"question": "Q", "mode": "graph"},
+        headers=teacher,
+    )
+    assert mock_agent.captured["payload"]["mode"] == "graph"
+
+
+def test_ask_default_mode_is_hybrid(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
+    teacher = auth("teacher")
+    cid = _new_conversation(client, teacher)
+    mock_agent.configure(
+        events=format_sse("token", {"text": "x"})
+        + format_sse("done", {"confidence": "cao", "retrieval_mode": "hybrid", "warnings": []})
+    )
+    client.post(
+        f"/api/chat/conversations/{cid}/ask", json={"question": "Q"}, headers=teacher
+    )
+    assert mock_agent.captured["payload"]["mode"] == "hybrid"
+
+
 def test_ask_second_turn_includes_prior_history(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     teacher = auth("teacher")
     cid = _new_conversation(client, teacher)

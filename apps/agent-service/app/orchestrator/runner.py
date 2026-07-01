@@ -24,6 +24,7 @@ def initial_state(request: AskRequest) -> AgentState:
         "user_id": request.user_id,
         "standalone_query": "",
         "seed_mentions": [],
+        "requested_mode": request.mode,
         "route": None,
         "clarification_needed": False,
         "clarification_question": None,

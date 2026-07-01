@@ -17,6 +17,7 @@ import json
 import logging
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
+from typing import Literal
 
 import httpx
 from pydantic import BaseModel, Field
@@ -32,6 +33,7 @@ class AgentAskRequest(BaseModel):
 
     question: str = Field(min_length=1, max_length=4000)
     history: list[dict[str, str]] = Field(default_factory=list, max_length=12)
+    mode: Literal["traditional", "graph", "hybrid"] = "hybrid"
     stream: bool = True
     debug: bool = False
     # id user đã xác thực (từ JWT) — agent gắn usage LLM vào đúng user cho cost dashboard.

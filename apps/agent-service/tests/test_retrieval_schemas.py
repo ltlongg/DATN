@@ -72,8 +72,15 @@ def test_config_has_retrieval_knobs_with_expected_defaults() -> None:
     assert s.hybrid_candidate_k == 30
     assert s.rerank_top_k == 8
     assert s.hybrid_rrf_k == 60
-    assert s.reranker_model == ""
+    # reranker_model có thể được .env bật (env-configurable) -> chỉ kiểm knob tồn tại + kiểu.
+    assert isinstance(s.reranker_model, str)
     assert s.graph_max_seed_entities == 5
     assert s.graph_max_chunks_per_seed == 20
     assert s.graph_hub_source_count_threshold == 80
     assert s.graph_max_context_items == 12
+    # Knob mới Phase 2/3/4 (không set trong .env -> giữ default).
+    assert s.graph_max_path_hops == 3
+    assert s.graph_path_hit_weight == 1.5
+    assert s.bm25_model == "Qdrant/bm25"
+    assert s.bm25_top_k == 20
+    assert s.sparse_vector_name == "bm25"

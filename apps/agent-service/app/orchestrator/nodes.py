@@ -21,12 +21,23 @@ from app.orchestrator.state import AgentState
 from app.orchestrator.synthesis import emit_text_as_batches, stream_synthesis
 from app.schemas.ask import BuildQueryOutput, Citation, RouteDecision
 from app.schemas.retrieval import RetrievedChunk
+from app.tools.graph_rag.retriever import retrieve_graph
 from app.tools.hybrid.retriever import retrieve_hybrid
+from app.tools.reorder import reorder_for_context
+from app.tools.traditional_rag.retriever import retrieve_traditional
 from app.tools.visualization.builder import build_visualization as build_visualization_payload
 
 HONEST_MESSAGE = (
     "Mình chưa tìm thấy đủ thông tin trong corpus hiện có để trả lời chắc chắn câu này. "
     "Bạn có thể hỏi cụ thể hơn về nhân vật, mốc thời gian hoặc sự kiện không?"
+)
+
+# Riêng mode=graph không ground được seed: gợi ý đổi mode (KHÔNG auto-fallback — quyết
+# định user 2026-07-01). Các trường hợp honest khác giữ HONEST_MESSAGE.
+GRAPH_EMPTY_MESSAGE = (
+    "Mình chưa tìm thấy thực thể hoặc quan hệ phù hợp trong knowledge graph cho câu hỏi này "
+    "ở chế độ Graph. Bạn thử lại bằng chế độ Traditional hoặc Hybrid để tìm theo nội dung "
+    "tài liệu nhé."
 )
 
 
@@ -121,22 +132,32 @@ def route_intent(state: AgentState) -> str:
     return _ROUTE_TARGET.get(route, "retrieve")
 
 
-# --- 3. retrieve (gọi thẳng hybrid, set retrieval_mode="hybrid") ---
+# --- 3. retrieve (dispatch theo requested_mode; set retrieval_mode = mode đã chọn) ---
 
 
 async def retrieve(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     emitter = _emitter(config)
-    await emitter.emit("status", {"node": "retrieve", "msg": "đang tìm tài liệu"})
-    # retrieve_hybrid raise RetrievalBackendError khi CẢ hai backend chết -> propagate (API 503).
-    result = await retrieve_hybrid(
-        state["standalone_query"], seed_mentions=state["seed_mentions"]
-    )
+    mode = state["requested_mode"]
+    await emitter.emit("status", {"node": "retrieve", "msg": f"đang tìm tài liệu ({mode})"})
+    # Retriever raise RetrievalBackendError khi backend chết -> propagate (API 503).
+    # traditional KHÔNG dùng seed_mentions (đúng thiết kế); build_query vẫn chạy bình thường.
+    if mode == "traditional":
+        result = await retrieve_traditional(state["standalone_query"])
+    elif mode == "graph":
+        result = await retrieve_graph(
+            state["standalone_query"], seed_mentions=state["seed_mentions"]
+        )
+    else:  # hybrid
+        result = await retrieve_hybrid(
+            state["standalone_query"], seed_mentions=state["seed_mentions"]
+        )
     return {
         "retrieval": result,
-        "retrieval_mode": "hybrid",
+        "retrieval_mode": mode,
         "warnings": result.warnings,
         "debug": {
             "retrieve": {
+                "mode": mode,
                 "chunks": len(result.chunks),
                 "graph_context": len(result.graph_context),
             }
@@ -165,13 +186,16 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
     settings = get_settings()
     retrieval = state["retrieval"]
     assert retrieval is not None  # has_context đảm bảo có chunk trước khi vào đây
+    # Document reordering (Phần F): xếp chunk điểm cao ra đầu/cuối prompt, chống "lost in the
+    # middle". Thuần layout prompt — KHÔNG đổi retrieval.chunks lưu ở state (citation/viz giữ nguyên).
+    chunks_for_prompt = reorder_for_context(retrieval.chunks)
     messages = [
         {"role": "system", "content": syn_prompt.SYSTEM_PROMPT},
         {
             "role": "user",
             "content": syn_prompt.build_user_prompt(
                 state["standalone_query"],
-                retrieval.chunks,
+                chunks_for_prompt,
                 retrieval.graph_context,
                 is_retry=attempt > 0,
             ),
@@ -257,6 +281,18 @@ def after_validate(state: AgentState) -> str:
 # --- 7. honest_answer ---
 
 
+def _honest_message(state: AgentState) -> str:
+    """Graph mode ground rỗng -> gợi ý đổi mode; còn lại -> message honest chung.
+
+    Phân biệt chính xác: retrieval None = route bypass (out_of_scope); retrieval rỗng +
+    mode graph = không ground được seed; retrieval có chunk nhưng citation fail = giữ chung.
+    """
+    retrieval = state.get("retrieval")
+    if state.get("requested_mode") == "graph" and retrieval is not None and not retrieval.chunks:
+        return GRAPH_EMPTY_MESSAGE
+    return HONEST_MESSAGE
+
+
 async def honest_answer(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     emitter = _emitter(config)
     if state.get("synthesize_attempt_count", 0) > 0:
@@ -264,9 +300,10 @@ async def honest_answer(state: AgentState, config: RunnableConfig) -> dict[str, 
         await emitter.emit("regenerating", {})
     await emitter.emit("status", {"node": "honest_answer", "msg": "chưa đủ dữ liệu"})
     settings = get_settings()
-    await emit_text_as_batches(HONEST_MESSAGE, emitter, settings.stream_batch_chars)
+    message = _honest_message(state)
+    await emit_text_as_batches(message, emitter, settings.stream_batch_chars)
     return {
-        "answer": HONEST_MESSAGE,
+        "answer": message,
         "confidence": "không đủ dữ liệu",
         "citations": [],
         "used_chunk_ids": [],

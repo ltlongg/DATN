@@ -19,6 +19,10 @@ def _vc(chunk_id, rank, score=0.5):
     return RetrievalCandidate(chunk_id=chunk_id, source="vector", rank=rank, score=score)
 
 
+def _sc(chunk_id, rank, score=0.5):
+    return RetrievalCandidate(chunk_id=chunk_id, source="sparse", rank=rank, score=score)
+
+
 def _gc(chunk_id, rank, score=2.0):
     return RetrievalCandidate(chunk_id=chunk_id, source="graph", rank=rank, score=score)
 
@@ -27,7 +31,17 @@ def _row(chunk_id):
     return {"chunk_id": chunk_id, "text": f"text {chunk_id}", "metadata": {}, "heading_path": []}
 
 
-def _patch(monkeypatch, *, vector=None, graph=None, vector_err=None, graph_err=None, rows=None):
+def _patch(
+    monkeypatch,
+    *,
+    vector=None,
+    bm25=None,
+    graph=None,
+    vector_err=None,
+    bm25_err=None,
+    graph_err=None,
+    rows=None,
+):
     available = {r["chunk_id"]: r for r in (rows or [])}
     calls = {"hydrate": 0}
 
@@ -35,6 +49,11 @@ def _patch(monkeypatch, *, vector=None, graph=None, vector_err=None, graph_err=N
         if vector_err:
             raise vector_err
         return vector or []
+
+    async def fake_bm25(question, *, top_k=None, client=None):
+        if bm25_err:
+            raise bm25_err
+        return bm25 or []
 
     def fake_graph(query, *, seed_mentions=None, **kw):
         if graph_err:
@@ -49,6 +68,7 @@ def _patch(monkeypatch, *, vector=None, graph=None, vector_err=None, graph_err=N
         return chunks
 
     monkeypatch.setattr(H, "search_vector", fake_vector)
+    monkeypatch.setattr(H, "search_bm25", fake_bm25)
     monkeypatch.setattr(H, "search_graph", fake_graph)
     monkeypatch.setattr(H, "get_rag_chunks_by_ids", fake_hydrate)
     monkeypatch.setattr(H, "rerank", passthrough_rerank)
@@ -170,3 +190,51 @@ async def test_hybrid_skips_missing_hydrated_chunk_with_warning(monkeypatch) -> 
     result = await H.retrieve_hybrid("q")
     assert [c.chunk_id for c in result.chunks] == ["c-1"]
     assert any("c-2" in w for w in result.warnings)
+
+
+# --- D1: 3-way RRF (dense + sparse BM25 + graph) ---
+
+
+async def test_hybrid_3way_rrf_merges_all_three_sources(monkeypatch) -> None:
+    # c-1 được CẢ 3 nguồn trỏ -> RRF cao nhất, sources gồm cả ba.
+    _patch(
+        monkeypatch,
+        vector=[_vc("c-1", 1), _vc("c-2", 2)],
+        bm25=[_sc("c-1", 1), _sc("c-3", 2)],
+        graph=([_gc("c-1", 1)], []),
+        rows=[_row("c-1"), _row("c-2"), _row("c-3")],
+    )
+    result = await H.retrieve_hybrid("q")
+    assert result.chunks[0].chunk_id == "c-1"
+    c1 = next(c for c in result.chunks if c.chunk_id == "c-1")
+    assert set(c1.sources) == {"vector", "sparse", "graph"}
+    # sources sắp theo _SOURCE_ORDER (vector < sparse < graph).
+    assert c1.sources == ["vector", "sparse", "graph"]
+
+
+async def test_hybrid_degrades_when_sparse_fails(monkeypatch) -> None:
+    _patch(
+        monkeypatch,
+        vector=[_vc("c-1", 1)],
+        bm25_err=RetrievalBackendError("qdrant_unavailable"),
+        graph=([_gc("c-2", 1)], []),
+        rows=[_row("c-1"), _row("c-2")],
+    )
+    result = await H.retrieve_hybrid("q")
+    ids = {c.chunk_id for c in result.chunks}
+    assert ids == {"c-1", "c-2"}  # vẫn dùng vector + graph
+    assert any("sparse" in w.lower() or "BM25" in w for w in result.warnings)
+
+
+async def test_hybrid_sparse_only_contributes_candidate(monkeypatch) -> None:
+    # chunk chỉ do sparse trỏ vẫn vào kết quả.
+    _patch(
+        monkeypatch,
+        vector=[_vc("c-1", 1)],
+        bm25=[_sc("c-9", 1)],
+        graph=([], []),
+        rows=[_row("c-1"), _row("c-9")],
+    )
+    result = await H.retrieve_hybrid("q")
+    c9 = next(c for c in result.chunks if c.chunk_id == "c-9")
+    assert c9.sources == ["sparse"]
