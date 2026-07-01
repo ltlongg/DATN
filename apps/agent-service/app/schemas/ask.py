@@ -11,6 +11,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.schemas.retrieval import RetrievalMode
 from app.schemas.visualization import VisualizationPayload
 
 # Single source of truth — dùng lại ở BuildQueryOutput.route và AgentState["route"].
@@ -29,6 +30,8 @@ class ChatMessage(BaseModel):
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=4000)
     history: list[ChatMessage] = Field(default_factory=list, max_length=12)
+    # User CHỌN TAY 1 trong 3 mode (không để LLM đoán). Mặc định hybrid (hành vi cũ).
+    mode: RetrievalMode = "hybrid"
     stream: bool = True  # True -> SSE; False -> gom event trả 1 AskResponse JSON
     debug: bool = False
 
@@ -50,8 +53,8 @@ class AskResponse(BaseModel):
     clarification_question: str | None = None
     answer: str | None = None
     citations: list[Citation] = Field(default_factory=list)
-    # "none" khi không retrieve (clarify/smalltalk/out_of_scope); "hybrid" sau retrieve.
-    retrieval_mode: Literal["hybrid", "none"] = "none"
+    # "none" khi không retrieve (clarify/smalltalk/out_of_scope); else = mode đã chọn.
+    retrieval_mode: Literal["traditional", "graph", "hybrid", "none"] = "none"
     confidence: AnswerConfidence | None = None
     visualization: VisualizationPayload | None = None
     warnings: list[str] = Field(default_factory=list)

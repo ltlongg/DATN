@@ -7,7 +7,7 @@ luôn streaming). Contract BACKEND -> AGENT là `AgentAskRequest` trong services
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -44,6 +44,8 @@ class ConversationDetail(ConversationOut):
 
 
 class AskRequest(BaseModel):
-    # Frontend KHÔNG chọn chế độ — backend luôn streaming. max_length đồng bộ agent-service.
+    # Backend luôn streaming. Frontend CHỌN mode truy hồi (traditional/graph/hybrid); mặc
+    # định hybrid. max_length đồng bộ agent-service.
     question: str = Field(min_length=1, max_length=get_settings().ask_max_question_chars)
+    mode: Literal["traditional", "graph", "hybrid"] = "hybrid"
     debug: bool = False

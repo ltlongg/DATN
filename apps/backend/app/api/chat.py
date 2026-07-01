@@ -156,7 +156,7 @@ async def ask(
     # 5) Mở stream agent TRƯỚC khi trả StreamingResponse: lỗi connect/status còn map được
     # HTTP 503/504/502 (open_ask_stream ném AppError -> handler trả status, chưa mở SSE).
     agent_request = AgentAskRequest(
-        question=body.question, history=history, stream=True, debug=body.debug
+        question=body.question, history=history, mode=body.mode, stream=True, debug=body.debug
     )
     stream = await open_ask_stream(agent_request)
 

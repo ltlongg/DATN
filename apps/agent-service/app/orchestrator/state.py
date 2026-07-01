@@ -12,7 +12,7 @@ from typing import Annotated, Literal
 from typing_extensions import TypedDict
 
 from app.schemas.ask import AnswerConfidence, ChatMessage, Citation, RouteDecision
-from app.schemas.retrieval import RetrievalResult
+from app.schemas.retrieval import RetrievalMode, RetrievalResult
 from app.schemas.visualization import VisualizationPayload
 
 
@@ -27,12 +27,14 @@ class AgentState(TypedDict):
     history: list[ChatMessage]
     standalone_query: str
     seed_mentions: list[str]
+    # Mode user chọn (traditional/graph/hybrid); node retrieve dispatch theo field này.
+    requested_mode: RetrievalMode
     route: RouteDecision | None
     clarification_needed: bool
     clarification_question: str | None
     retrieval: RetrievalResult | None
-    # "none" mặc định; chỉ node retrieve set "hybrid" (clarify/smalltalk/out_of_scope giữ none).
-    retrieval_mode: Literal["hybrid", "none"]
+    # "none" mặc định; node retrieve set = requested_mode (clarify/smalltalk/out_of_scope giữ none).
+    retrieval_mode: Literal["traditional", "graph", "hybrid", "none"]
     answer: str | None
     confidence: AnswerConfidence | None
     # tăng sau MỖI synthesize; retry nếu < synthesize_max_attempts (guard chống loop).
