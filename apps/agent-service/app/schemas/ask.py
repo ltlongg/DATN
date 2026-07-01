@@ -31,6 +31,9 @@ class AskRequest(BaseModel):
     history: list[ChatMessage] = Field(default_factory=list, max_length=12)
     stream: bool = True  # True -> SSE; False -> gom event trả 1 AskResponse JSON
     debug: bool = False
+    # id user backend (đã decode từ JWT) — để gắn usage vào đúng user. KHÔNG phải field FE
+    # gửi trực tiếp; backend tự điền.
+    user_id: str | None = None
 
 
 class Citation(BaseModel):

@@ -53,7 +53,7 @@ def _patch_graph(monkeypatch, *, route="needs_retrieval", retrieve_error=None):
 
     monkeypatch.setattr(nodes, "retrieve_hybrid", fake_retrieve)
 
-    async def fake_synth(messages, *, emitter, model, batch_chars, client=None):
+    async def fake_synth(messages, *, emitter, model, batch_chars, client=None, on_usage=None):
         from app.orchestrator.synthesis import emit_text_as_batches
 
         await emit_text_as_batches("Đáp án.", emitter, batch_chars)

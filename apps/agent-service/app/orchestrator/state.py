@@ -25,6 +25,8 @@ def _merge_debug(
 class AgentState(TypedDict):
     question: str
     history: list[ChatMessage]
+    # id user backend (từ AskRequest.user_id) — gắn usage LLM vào đúng user cho cost dashboard.
+    user_id: str | None
     standalone_query: str
     seed_mentions: list[str]
     route: RouteDecision | None

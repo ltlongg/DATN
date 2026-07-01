@@ -7,6 +7,8 @@ Xem `docs/plan/orchestrator-plan.md` §Streaming.
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
+
 from openai import AsyncOpenAI
 
 from app.core.llm import get_async_openai_client
@@ -67,10 +69,15 @@ async def stream_synthesis(
     model: str,
     batch_chars: int,
     client: AsyncOpenAI | None = None,
+    on_usage: Callable[[int, int, int], Awaitable[None]] | None = None,
 ) -> SynthesizedAnswer:
     """Stream structured output `SynthesizedAnswer`; emit delta của `answer` thành batch
     qua guardrails. Trả về SynthesizedAnswer cuối. `answer` là field đầu nên token ra
-    trước, `used_chunk_ids`/`confidence` về ở cuối."""
+    trước, `used_chunk_ids`/`confidence` về ở cuối.
+
+    `on_usage(prompt, completion, total)` (nếu truyền) được await đúng 1 lần sau khi có
+    usage. Mặc định None = giữ nguyên hành vi cũ (không đọc usage). `stream_options=
+    include_usage` bật để response streaming có usage ở chunk cuối (VERIFY OpenAI SDK docs)."""
     client = client or get_async_openai_client()
     final: SynthesizedAnswer | None = None
     refusal: str | None = None
@@ -82,6 +89,7 @@ async def stream_synthesis(
         messages=messages,  # type: ignore[arg-type]
         response_format=SynthesizedAnswer,
         temperature=0.0,
+        stream_options={"include_usage": True},
     ) as stream:
         async for event in stream:
             if event.type == "content.delta":
@@ -102,9 +110,18 @@ async def stream_synthesis(
 
     if refusal:
         raise SynthesisError("refusal")
-    if final is None:
+    # Lấy completion cuối (đã tích lũy, không gọi API thêm) khi cần final fallback HOẶC usage.
+    completion = None
+    if final is None or on_usage is not None:
         completion = await stream.get_final_completion()
+    if final is None and completion is not None:
         final = completion.choices[0].message.parsed
     if final is None:
         raise SynthesisError("empty_synthesis")
+    if on_usage is not None and completion is not None:
+        usage = getattr(completion, "usage", None)
+        if usage is not None:
+            await on_usage(
+                usage.prompt_tokens, usage.completion_tokens, usage.total_tokens
+            )
     return final
