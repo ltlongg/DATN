@@ -1,8 +1,10 @@
-"""Test retrieve_traditional: vector candidates -> hydrate Postgres -> RetrievedChunk,
-giữ thứ tự rank, bỏ chunk thiếu (+warning), graph_context luôn rỗng.
+"""Test retrieve_traditional: dense+sparse fuse candidates -> hydrate Postgres ->
+RetrievedChunk -> rerank + cắt rerank_top_k. Bỏ chunk thiếu (+warning), graph_context rỗng.
 """
 
 from __future__ import annotations
+
+from types import SimpleNamespace
 
 from app.schemas.retrieval import RetrievalCandidate
 from app.tools.traditional_rag import retriever as R
@@ -21,12 +23,17 @@ def _row(chunk_id, text="t"):
     }
 
 
-def _patch(monkeypatch, candidates, rows):
+def _patch(monkeypatch, candidates, rows, *, rerank_fn=None, rerank_top_k=8):
     async def fake_search(question, *, top_k=None, client=None):
         return candidates
 
-    monkeypatch.setattr(R, "search_vector", fake_search)
+    async def passthrough_rerank(question, chunks):
+        return chunks
+
+    monkeypatch.setattr(R, "search_dense_sparse", fake_search)
     monkeypatch.setattr(R, "get_rag_chunks_by_ids", lambda ids: rows)
+    monkeypatch.setattr(R, "rerank", rerank_fn or passthrough_rerank)
+    monkeypatch.setattr(R, "get_settings", lambda: SimpleNamespace(rerank_top_k=rerank_top_k))
 
 
 async def test_retrieve_traditional_hydrates_candidates_into_chunks(monkeypatch) -> None:
@@ -57,3 +64,19 @@ async def test_retrieve_traditional_empty_when_no_candidates(monkeypatch) -> Non
     result = await R.retrieve_traditional("câu hỏi mơ hồ")
     assert result.chunks == []
     assert result.graph_context == []
+
+
+async def test_retrieve_traditional_reranks_then_cuts(monkeypatch) -> None:
+    # rerank đảo thứ tự (c-3 lên đầu) rồi cắt rerank_top_k=2 -> [c-3, c-2].
+    async def fake_rerank(question, chunks):
+        return list(reversed(chunks))
+
+    _patch(
+        monkeypatch,
+        [_cand("c-1", 1, 0.9), _cand("c-2", 2, 0.5), _cand("c-3", 3, 0.1)],
+        [_row("c-1"), _row("c-2"), _row("c-3")],
+        rerank_fn=fake_rerank,
+        rerank_top_k=2,
+    )
+    result = await R.retrieve_traditional("q")
+    assert [c.chunk_id for c in result.chunks] == ["c-3", "c-2"]

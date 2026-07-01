@@ -13,7 +13,7 @@ import uuid
 from functools import lru_cache
 
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
+from qdrant_client.models import Distance, Modifier, SparseVectorParams, VectorParams
 
 from app.core.config import get_settings
 from app.core.embedding import EMBEDDING_DIM
@@ -48,12 +48,22 @@ def point_id_for(chunk_id: str) -> str:
 
 
 def ensure_chunks_collection(client: QdrantClient | None = None) -> str:
-    """Tạo collection chunk vector nếu chưa có (cosine, dim = embedding model)."""
+    """Tạo collection chunk vector nếu chưa có.
+
+    Dense GIỮ unnamed (default) -> `search_vector` (query default) KHÔNG vỡ. Thêm named
+    sparse cho BM25: `Modifier.IDF` để Qdrant tự tính IDF (fastembed `Qdrant/bm25` cố ý bỏ
+    IDF). Drop + recreate collection (qua reset) khi đổi schema — point id = uuid5(chunk_id)
+    nên reindex idempotent.
+    """
     client = client or get_qdrant_client()
-    name = get_settings().qdrant_collection
+    settings = get_settings()
+    name = settings.qdrant_collection
     if not client.collection_exists(name):
         client.create_collection(
             collection_name=name,
             vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
+            sparse_vectors_config={
+                settings.sparse_vector_name: SparseVectorParams(modifier=Modifier.IDF)
+            },
         )
     return name

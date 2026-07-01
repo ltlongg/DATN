@@ -16,7 +16,8 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 RetrievalMode = Literal["traditional", "graph", "hybrid"]
-CandidateSource = Literal["vector", "graph"]
+# "vector" = dense; "sparse" = BM25 keyword; "graph" = GraphRAG. Hybrid fuse cả ba qua RRF.
+CandidateSource = Literal["vector", "graph", "sparse"]
 
 
 class RetrievalBackendError(RuntimeError):

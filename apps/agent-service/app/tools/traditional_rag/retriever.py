@@ -1,17 +1,20 @@
-"""Traditional RAG facade: vector search -> hydrate Postgres -> RetrievalResult.
+"""Traditional RAG facade: dense+sparse fuse (Qdrant RRF) -> hydrate Postgres -> rerank.
 
 Đây là một trong ba mode (traditional/graph/hybrid). Dùng standalone cho debug/eval/
-ablation; runtime mặc định đi hybrid. `graph_context` luôn rỗng ở mode này (đó là phần
-của GraphRAG). Backend lỗi -> RetrievalBackendError propagate từ `search_vector`.
+ablation. `graph_context` luôn rỗng ở mode này (đó là phần của GraphRAG). Sau cải tiến:
+dense (semantic) + BM25 (keyword) fuse RRF SERVER-SIDE trong Qdrant rồi rerank cross-encoder
+(no-op nếu `RERANKER_MODEL` rỗng). Backend lỗi -> RetrievalBackendError propagate.
 """
 
 from __future__ import annotations
 
 import asyncio
 
-from app.tools.graph_rag.chunk_store import get_rag_chunks_by_ids
-from app.tools.graph_rag.vector_store import search_vector
+from app.core.config import get_settings
+from app.core.reranker import rerank
 from app.schemas.retrieval import RetrievalResult, RetrievedChunk
+from app.tools.graph_rag.chunk_store import get_rag_chunks_by_ids
+from app.tools.graph_rag.vector_store import search_dense_sparse
 
 __all__ = ["retrieve_traditional"]
 
@@ -19,8 +22,8 @@ __all__ = ["retrieve_traditional"]
 async def retrieve_traditional(
     question: str, *, top_k: int | None = None
 ) -> RetrievalResult:
-    """Embed + Qdrant search rồi hydrate full text/metadata từ Postgres (một lần)."""
-    candidates = await search_vector(question, top_k=top_k)
+    """Dense+sparse fuse -> hydrate Postgres (một lần) -> rerank + cắt `rerank_top_k`."""
+    candidates = await search_dense_sparse(question, top_k=top_k)
     if not candidates:
         return RetrievalResult(mode="traditional", query=question, chunks=[])
 
@@ -30,7 +33,7 @@ async def retrieve_traditional(
 
     chunks: list[RetrievedChunk] = []
     warnings: list[str] = []
-    for cand in candidates:  # giữ thứ tự rank của vector search
+    for cand in candidates:  # giữ thứ tự fused rank trước khi rerank
         row = by_id.get(cand.chunk_id)
         if row is None:
             warnings.append(f"chunk thiếu trong Postgres: {cand.chunk_id}")
@@ -41,11 +44,13 @@ async def retrieve_traditional(
                 text=row["text"],
                 metadata=row.get("metadata") or {},
                 heading_path=row.get("heading_path") or [],
-                vector_score=cand.score,
+                vector_score=cand.score,  # = điểm RRF fused (dense+sparse)
                 sources=["vector"],
             )
         )
 
+    chunks = await rerank(question, chunks)
+    chunks = chunks[: get_settings().rerank_top_k]
     return RetrievalResult(
         mode="traditional", query=question, chunks=chunks, warnings=warnings
     )

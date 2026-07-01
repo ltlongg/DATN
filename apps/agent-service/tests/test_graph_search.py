@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
+import pytest
+
 from app.tools.graph_rag import graph_store as G
 from app.tools.graph_rag.entity_index import EntityIndex
 
@@ -25,8 +27,12 @@ class _Result:
 
 
 class _Session:
-    def __init__(self, records_by_norm):
+    """Fake session: route 1-hop expand (kwarg norm_name) vs path query (kwargs a,b)."""
+
+    def __init__(self, records_by_norm, paths_by_pair=None):
         self._records = records_by_norm
+        self._paths = paths_by_pair or {}
+        self.path_calls = 0
 
     def __enter__(self):
         return self
@@ -35,15 +41,19 @@ class _Session:
         return False
 
     def run(self, cypher, **kwargs):
+        if "a" in kwargs and "b" in kwargs:  # shortestPath giữa cặp seed
+            self.path_calls += 1
+            return _Result(self._paths.get(frozenset({kwargs["a"], kwargs["b"]})))
         return _Result(self._records.get(kwargs.get("norm_name")))
 
 
 class _Driver:
-    def __init__(self, records_by_norm):
-        self._records = records_by_norm
+    def __init__(self, records_by_norm, paths_by_pair=None):
+        # search_graph mở MỘT session (with) -> giữ 1 instance để test soi path_calls.
+        self.session_obj = _Session(records_by_norm, paths_by_pair)
 
     def session(self):
-        return _Session(self._records)
+        return self.session_obj
 
 
 # --- match_seed_entities --------------------------------------------------
@@ -207,3 +217,95 @@ def test_search_graph_caps_chunks_per_seed(monkeypatch) -> None:
         "x", seed_mentions=["Phan Bội Châu"], driver=_Driver(_pbc_records()), index=idx
     )
     assert len(cands) == 1  # cap chặn bùng nổ chunk per seed
+
+
+# --- C2: path-finding giữa các seed (kích hoạt khi >=2 seed) -----------------
+
+
+def _two_seed_index():
+    return _index(
+        [
+            {"name": "Phan Bội Châu", "norm_name": "phan bội châu", "source_count": 10},
+            {"name": "Phan Châu Trinh", "norm_name": "phan châu trinh", "source_count": 10},
+        ]
+    )
+
+
+def _expand_two_seeds():
+    # 1-hop của mỗi seed: node cô lập (edges rỗng) -> chỉ có seed chunk, để path là nguồn relation duy nhất.
+    return {
+        "phan bội châu": {
+            "seed_name": "Phan Bội Châu",
+            "seed_descriptions": ["nhà cách mạng"],
+            "seed_chunks": ["c-1"],
+            "edges": [],
+        },
+        "phan châu trinh": {
+            "seed_name": "Phan Châu Trinh",
+            "seed_descriptions": ["nhà cải cách"],
+            "seed_chunks": ["c-2"],
+            "edges": [],
+        },
+    }
+
+
+def _path_between_two():
+    return {
+        frozenset({"phan bội châu", "phan châu trinh"}): {
+            "nodes": [
+                {"name": "Phan Bội Châu", "norm": "phan bội châu",
+                 "descriptions": ["nhà cách mạng"], "chunks": ["c-1"]},
+                {"name": "Phan Châu Trinh", "norm": "phan châu trinh",
+                 "descriptions": ["nhà cải cách"], "chunks": ["c-2"]},
+            ],
+            "rels": [
+                {"keyword": "cùng thời", "descriptions": ["hai nhà cách mạng cùng thời"],
+                 "chunks": ["c-9"], "src_name": "Phan Bội Châu", "src_norm": "phan bội châu",
+                 "tgt_name": "Phan Châu Trinh", "tgt_norm": "phan châu trinh"},
+            ],
+        }
+    }
+
+
+def test_search_graph_pathfinding_two_seeds_links_entities() -> None:
+    idx = _two_seed_index()
+    cands, ctx = G.search_graph(
+        "Quan hệ giữa Phan Bội Châu và Phan Châu Trinh?",
+        seed_mentions=["Phan Bội Châu", "Phan Châu Trinh"],
+        driver=_Driver(_expand_two_seeds(), _path_between_two()),
+        index=idx,
+    )
+    rels = [i for i in ctx if i.kind == "relation"]
+    assert any(
+        r.source_norm == "phan bội châu"
+        and r.target_norm == "phan châu trinh"
+        and r.keyword == "cùng thời"
+        for r in rels
+    )
+    # chunk c-9 nằm trên path -> được score + thành candidate (provenance).
+    assert "c-9" in {c.chunk_id for c in cands}
+
+
+def test_search_graph_no_path_skips_pair() -> None:
+    idx = _two_seed_index()
+    cands, ctx = G.search_graph(
+        "x",
+        seed_mentions=["Phan Bội Châu", "Phan Châu Trinh"],
+        driver=_Driver(_expand_two_seeds(), {}),  # không có đường nối
+        index=idx,
+    )
+    assert "c-9" not in {c.chunk_id for c in cands}  # không bịa chunk path
+    assert not [i for i in ctx if i.kind == "relation"]  # không relation path
+
+
+def test_search_graph_single_seed_skips_pathfinding() -> None:
+    idx = _index([{"name": "Phan Bội Châu", "norm_name": "phan bội châu", "source_count": 10}])
+    drv = _Driver(_pbc_records())
+    G.search_graph("x", seed_mentions=["Phan Bội Châu"], driver=drv, index=idx)
+    assert drv.session_obj.path_calls == 0  # 1 seed -> KHÔNG gọi path cypher
+
+
+def test_path_cypher_rejects_non_int_maxhop() -> None:
+    # Cận var-length nội suy vào chuỗi Cypher -> chỉ chấp nhận int (chặn injection).
+    with pytest.raises(AssertionError):
+        G._path_cypher("3; DROP")  # type: ignore[arg-type]

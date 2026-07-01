@@ -27,11 +27,11 @@ from app.schemas.retrieval import (
 )
 from app.tools.graph_rag.chunk_store import get_rag_chunks_by_ids
 from app.tools.graph_rag.graph_store import search_graph
-from app.tools.graph_rag.vector_store import search_vector
+from app.tools.graph_rag.vector_store import search_bm25, search_vector
 
 __all__ = ["retrieve_hybrid"]
 
-_SOURCE_ORDER = {"vector": 0, "graph": 1}
+_SOURCE_ORDER = {"vector": 0, "sparse": 1, "graph": 2}
 
 
 async def _vector_candidates(
@@ -39,6 +39,15 @@ async def _vector_candidates(
 ) -> tuple[list[RetrievalCandidate], RetrievalBackendError | None]:
     try:
         return await search_vector(question), None
+    except RetrievalBackendError as exc:
+        return [], exc
+
+
+async def _bm25_candidates(
+    question: str,
+) -> tuple[list[RetrievalCandidate], RetrievalBackendError | None]:
+    try:
+        return await search_bm25(question), None
     except RetrievalBackendError as exc:
         return [], exc
 
@@ -61,34 +70,44 @@ async def retrieve_hybrid(
     question: str, *, seed_mentions: list[str] | None = None
 ) -> RetrievalResult:
     settings = get_settings()
-    (vec_cands, vec_err), (graph_cands, graph_context, graph_err) = await asyncio.gather(
+    (
+        (vec_cands, vec_err),
+        (bm25_cands, bm25_err),
+        (graph_cands, graph_context, graph_err),
+    ) = await asyncio.gather(
         _vector_candidates(question),
+        _bm25_candidates(question),
         _graph_candidates(question, seed_mentions),
     )
 
+    # Vector + sparse cùng dựa Qdrant nên thường sống/chết cùng nhau; điều kiện "chết hẳn"
+    # vẫn là vector (dense) + graph cùng lỗi. Sparse lỗi riêng -> chỉ degrade + warning.
     if vec_err is not None and graph_err is not None:
         raise RetrievalBackendError("all_backends_failed")
 
     warnings: list[str] = []
     if vec_err is not None:
-        warnings.append(f"vector backend lỗi ({vec_err.code}), chỉ dùng graph.")
+        warnings.append(f"vector backend lỗi ({vec_err.code}), bỏ qua nguồn dense.")
+    if bm25_err is not None:
+        warnings.append(f"sparse backend lỗi ({bm25_err.code}), bỏ qua nguồn BM25.")
     if graph_err is not None:
-        warnings.append(f"graph backend lỗi ({graph_err.code}), chỉ dùng vector.")
+        warnings.append(f"graph backend lỗi ({graph_err.code}), bỏ qua nguồn graph.")
 
-    # --- RRF: gộp theo rank, dedupe theo chunk_id ---
+    # --- RRF: gộp 3 nguồn theo rank, dedupe theo chunk_id ---
     rrf_score: dict[str, float] = {}
     vector_score: dict[str, float | None] = {}
     graph_score: dict[str, float | None] = {}
     sources: dict[str, set[CandidateSource]] = {}
-    for cand in [*vec_cands, *graph_cands]:
+    for cand in [*vec_cands, *bm25_cands, *graph_cands]:
         rrf_score[cand.chunk_id] = rrf_score.get(cand.chunk_id, 0.0) + 1.0 / (
             settings.hybrid_rrf_k + cand.rank
         )
         sources.setdefault(cand.chunk_id, set()).add(cand.source)
         if cand.source == "vector":
             vector_score[cand.chunk_id] = cand.score
-        else:
+        elif cand.source == "graph":
             graph_score[cand.chunk_id] = cand.score
+        # "sparse": không có field score riêng (giữ schema gọn) — chỉ góp RRF + source.
 
     fused = sorted(rrf_score, key=lambda cid: (-rrf_score[cid], cid))
     top_fused = fused[: settings.hybrid_candidate_k]
