@@ -30,14 +30,22 @@ DictConnection = Connection[dict[str, Any]]
 SCHEMA_STATEMENTS: tuple[str, ...] = (
     """
     CREATE TABLE IF NOT EXISTS users (
-        id            UUID PRIMARY KEY,
-        email         TEXT UNIQUE NOT NULL,
-        name          TEXT NOT NULL,
-        role          TEXT NOT NULL,
-        password_hash TEXT NOT NULL,
-        created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+        id             UUID PRIMARY KEY,
+        email          TEXT UNIQUE NOT NULL,
+        name           TEXT NOT NULL,
+        role           TEXT NOT NULL,
+        password_hash  TEXT NOT NULL,
+        is_active      BOOLEAN NOT NULL DEFAULT true,
+        question_quota INTEGER,  -- NULL = không giới hạn
+        created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
     );
     """,
+    # is_active/question_quota thêm sau khi bảng users đã tồn tại ở dev DB dùng chung — CREATE
+    # TABLE IF NOT EXISTS ở trên không tự thêm cột vào bảng cũ. ADD COLUMN IF NOT EXISTS
+    # idempotent, không phá dữ liệu conversations/messages hiện có (xem backend-additions-plan
+    # §3.2: dùng ADD COLUMN thay vì drop+recreate để giữ dev data đã có).
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS question_quota INTEGER;",
     """
     CREATE TABLE IF NOT EXISTS conversations (
         id         UUID PRIMARY KEY,

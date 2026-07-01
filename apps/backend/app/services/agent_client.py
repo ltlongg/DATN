@@ -34,6 +34,8 @@ class AgentAskRequest(BaseModel):
     history: list[dict[str, str]] = Field(default_factory=list, max_length=12)
     stream: bool = True
     debug: bool = False
+    # id user đã xác thực (từ JWT) — agent gắn usage LLM vào đúng user cho cost dashboard.
+    user_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -106,6 +108,44 @@ class AgentStream:
     async def aclose(self) -> None:
         await self._response.aclose()
         await self._client.aclose()
+
+
+async def agent_get(
+    path: str, params: dict[str, str | int | None] | None = None
+) -> object:
+    """GET JSON tới agent-service (non-stream) + map lỗi như open_ask_stream.
+
+    Dùng cho các read endpoint proxy (KB Inspector graph). Trả JSON đã parse. Lỗi kết nối/
+    timeout -> 503/504; 404 từ agent -> propagate 404 (vd entity không tồn tại); non-2xx
+    khác -> 502.
+    """
+    settings = get_settings()
+    timeout = httpx.Timeout(
+        connect=settings.agent_connect_timeout_seconds,
+        read=settings.agent_read_idle_timeout_seconds,
+        write=settings.agent_connect_timeout_seconds,
+        pool=settings.agent_connect_timeout_seconds,
+    )
+    # Bỏ param None để agent nhận đúng "không lọc" thay vì chuỗi rỗng.
+    clean = {k: v for k, v in (params or {}).items() if v is not None}
+    async with httpx.AsyncClient(
+        timeout=timeout, base_url=settings.agent_service_url
+    ) as client:
+        try:
+            response = await client.get(path, params=clean)
+        except httpx.ConnectTimeout:
+            raise AppError(504, "agent_timeout", "Dịch vụ trả lời không phản hồi kịp.")
+        except httpx.HTTPError:
+            raise AppError(
+                503, "agent_unavailable", "Dịch vụ trả lời đang tạm thời không sẵn sàng."
+            )
+
+    if response.status_code == 404:
+        raise AppError(404, "not_found", "Không tìm thấy tài nguyên.")
+    if response.status_code // 100 != 2:
+        logger.warning("agent GET %s trả status %s", path, response.status_code)
+        raise AppError(502, "agent_bad_response", "Dịch vụ trả lời phản hồi không hợp lệ.")
+    return response.json()
 
 
 async def open_ask_stream(request: AgentAskRequest) -> AgentStream:

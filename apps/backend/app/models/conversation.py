@@ -180,6 +180,22 @@ def list_messages(conversation_id: str) -> list[Message]:
     return [_to_message(r) for r in rows]
 
 
+def count_user_messages_today(user_id: str) -> int:
+    """Số câu hỏi (message role='user') user đã gửi HÔM NAY — cho kiểm tra quota. Mốc
+    'đầu ngày' tính ở Postgres (date_trunc + now()), không truyền datetime từ Python để
+    tránh lệch múi giờ app/DB."""
+    with connection() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT count(*) AS n FROM messages m "
+            "JOIN conversations c ON c.id = m.conversation_id "
+            "WHERE c.user_id = %s AND m.role = 'user' "
+            "AND m.created_at >= date_trunc('day', now())",
+            (user_id,),
+        )
+        row = cur.fetchone()
+    return int(row["n"]) if row else 0
+
+
 def count_messages(conversation_id: str) -> int:
     with connection() as conn, conn.cursor() as cur:
         cur.execute(

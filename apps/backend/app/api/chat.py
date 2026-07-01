@@ -12,6 +12,7 @@ from fastapi.responses import StreamingResponse
 
 from app.api.deps import get_current_user, get_owned_conversation
 from app.core.config import get_settings
+from app.core.errors import AppError
 from app.models import conversation as conv_repo
 from app.models.conversation import Conversation
 from app.models.user import User
@@ -130,9 +131,29 @@ async def _proxy_stream(
 
 @router.post("/conversations/{conversation_id}/ask")
 async def ask(
-    body: AskRequest, conv: Conversation = Depends(get_owned_conversation)
+    body: AskRequest,
+    conv: Conversation = Depends(get_owned_conversation),
+    user: User = Depends(get_current_user),
 ) -> StreamingResponse:
     settings = get_settings()
+
+    # Gác server-side: chỉ admin được bật debug. User gửi debug=true bị ép False (phòng thủ
+    # kép với FE) — event `debug` chỉ agent phát khi request.debug=True nên ép ở đây là đủ.
+    debug = body.debug and user.role == "admin"
+
+    # Quota: kiểm NGAY ĐẦU, TRƯỚC add_message câu hiện tại. count_user_messages_today đếm cả
+    # message vừa lưu -> nếu check sau add_message thì quota=1 chặn nhầm ngay câu đầu (off-by-
+    # one). Vượt -> 429, chưa lưu message, chưa mở stream.
+    if user.question_quota is not None:
+        used_today = await anyio.to_thread.run_sync(
+            conv_repo.count_user_messages_today, user.id
+        )
+        if used_today >= user.question_quota:
+            raise AppError(
+                429,
+                "quota_exceeded",
+                f"Bạn đã dùng hết quota {user.question_quota} câu hỏi hôm nay.",
+            )
 
     # 1) Bounded history = các lượt TRƯỚC (chưa gồm câu hỏi hiện tại, vốn đi field riêng).
     prior = await anyio.to_thread.run_sync(conv_repo.list_messages, conv.id)
@@ -156,7 +177,7 @@ async def ask(
     # 5) Mở stream agent TRƯỚC khi trả StreamingResponse: lỗi connect/status còn map được
     # HTTP 503/504/502 (open_ask_stream ném AppError -> handler trả status, chưa mở SSE).
     agent_request = AgentAskRequest(
-        question=body.question, history=history, stream=True, debug=body.debug
+        question=body.question, history=history, stream=True, debug=debug, user_id=user.id
     )
     stream = await open_ask_stream(agent_request)
 

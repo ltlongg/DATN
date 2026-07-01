@@ -32,6 +32,9 @@ async def get_current_user(
     user = await anyio.to_thread.run_sync(get_user_by_id, str(payload["sub"]))
     if user is None:
         raise AppError(401, "unauthenticated", "Tài khoản không tồn tại.")
+    # Chặn ở MỌI request có token -> khóa có hiệu lực ngay cả với token cũ còn hạn.
+    if not user.is_active:
+        raise AppError(403, "account_locked", "Tài khoản đã bị khóa.")
     return user
 
 
