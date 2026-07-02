@@ -25,21 +25,25 @@ _lock = Lock()
 
 
 def _load(name: str):
-    """Lazy-load + cache (tokenizer, model) theo tên model. eval() để tắt dropout."""
+    """Lazy-load + cache (tokenizer, model, device) theo tên model. eval() để tắt dropout;
+    tự chuyển model sang GPU nếu `torch.cuda.is_available()`, fallback CPU."""
     cached = _models.get(name)
     if cached is None:
         with _lock:
             cached = _models.get(name)
             if cached is None:
+                import torch
                 from transformers import (
                     AutoModelForSequenceClassification,
                     AutoTokenizer,
                 )
 
+                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
                 tokenizer = AutoTokenizer.from_pretrained(name)
                 model = AutoModelForSequenceClassification.from_pretrained(name)
                 model.eval()
-                cached = (tokenizer, model)
+                model.to(device)
+                cached = (tokenizer, model, device)
                 _models[name] = cached
     return cached
 
@@ -48,14 +52,14 @@ def _score(name: str, pairs: list[list[str]], max_length: int) -> list[float]:
     """Trả logit liên quan cho từng cặp [query, passage] (cao = liên quan hơn)."""
     import torch
 
-    tokenizer, model = _load(name)
+    tokenizer, model, device = _load(name)
     inputs = tokenizer(
         pairs,
         padding=True,
         truncation=True,
         return_tensors="pt",
         max_length=max_length,
-    )
+    ).to(device)
     with torch.no_grad():
         logits = model(**inputs, return_dict=True).logits.view(-1).float()
     return logits.tolist()
