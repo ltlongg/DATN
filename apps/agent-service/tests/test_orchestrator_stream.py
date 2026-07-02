@@ -1,5 +1,5 @@
 """Test run_ask_stream (SSE): thứ tự event, token chỉ trong synthesize, clarify không
-token, lỗi sau khi mở SSE đi qua event error, guardrails blocked dừng stream.
+token, lỗi sau khi mở SSE đi qua event error.
 """
 
 from __future__ import annotations
@@ -7,7 +7,7 @@ from __future__ import annotations
 import json
 from types import SimpleNamespace
 
-from app.orchestrator import guardrails, nodes
+from app.orchestrator import nodes
 from app.orchestrator.runner import run_ask_stream
 from app.schemas.ask import AskRequest, BuildQueryOutput, SynthesizedAnswer
 from app.schemas.retrieval import RetrievalBackendError, RetrievalResult, RetrievedChunk
@@ -127,31 +127,6 @@ async def test_error_after_sse_open_goes_through_error_event(monkeypatch) -> Non
     err = next(d for t, d in events if t == "error")
     assert err["code"] == "all_backends_failed"
     assert "Traceback" not in err["message"]  # không dump stack
-
-
-async def test_guardrails_block_stops_stream_with_blocked(monkeypatch) -> None:
-    _patch_build_query(monkeypatch)
-    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
-    _patch_viz(monkeypatch)
-
-    # synthesize thật (không mock) để đi qua guardrails; mock LLM stream qua client giả.
-    async def block(batch: str) -> bool:
-        return False
-
-    monkeypatch.setattr(guardrails, "check_batch", block)
-
-    async def fake_synth(messages, *, emitter, model, batch_chars, client=None, on_usage=None):
-        from app.orchestrator.synthesis import emit_text_as_batches
-
-        await emit_text_as_batches("Nội dung. Bị chặn.", emitter, batch_chars)
-        return SynthesizedAnswer(answer="x", used_chunk_ids=["c-1"], confidence="cao")
-
-    monkeypatch.setattr(nodes, "stream_synthesis", fake_synth)
-    events = await _collect(AskRequest(question="hỏi", stream=True))
-    types = [t for t, _ in events]
-    assert "blocked" in types
-    assert "error" not in types  # blocked KHÔNG kèm error event
-    assert "done" not in types  # stream dừng, không done
 
 
 async def test_debug_event_emitted_before_done_when_requested(monkeypatch) -> None:

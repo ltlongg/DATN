@@ -1,65 +1,33 @@
-"""Test batching token + guardrails hook + stream_synthesis (fake OpenAI stream).
+"""Test emit_text_as_batches + stream_synthesis (fake OpenAI stream).
 
-Phủ: cắt batch ở dấu kết câu/ngưỡng ký tự, guardrails chặn -> blocked + raise, token ghép
-lại == answer, lấy final qua content.done.
+TẠM BỎ batching + guardrails (xem app/orchestrator/synthesis.py) — token nhả thô theo
+delta LLM, không cắt câu. Phủ: text tĩnh emit nguyên khối, token ghép lại == answer, lấy
+final qua content.done.
 """
 
 from __future__ import annotations
 
 from types import SimpleNamespace
 
-import pytest
-
-from app.orchestrator import guardrails
 from app.orchestrator.emitter import ListEmitter
-from app.orchestrator.errors import GuardrailsBlocked
-from app.orchestrator.synthesis import (
-    _find_cut,
-    emit_text_as_batches,
-    stream_synthesis,
-)
+from app.orchestrator.synthesis import emit_text_as_batches, stream_synthesis
 from app.schemas.ask import SynthesizedAnswer
-
-
-# --- _find_cut ---
-
-
-def test_find_cut_sentence_end_before_threshold() -> None:
-    assert _find_cut("Câu một. còn nữa", 160) == len("Câu một.")
-
-
-def test_find_cut_threshold_before_sentence_end() -> None:
-    # không có dấu kết câu trong 5 ký tự đầu -> cắt ở batch_chars
-    assert _find_cut("abcdefghij", 5) == 5
-
-
-def test_find_cut_waits_when_incomplete() -> None:
-    assert _find_cut("chưa đủ", 160) is None
-
 
 # --- emit_text_as_batches ---
 
 
-async def test_emit_text_concatenates_to_original() -> None:
+async def test_emit_text_as_one_token() -> None:
     emitter = ListEmitter()
     text = "Câu một. Câu hai. Câu ba."
     await emit_text_as_batches(text, emitter, 160)
     tokens = [d["text"] for t, d in emitter.events if t == "token"]
-    assert "".join(tokens) == text
-    assert len(tokens) == 3  # mỗi câu một batch
+    assert tokens == [text]  # không batch -> nguyên khối 1 token
 
 
-async def test_guardrails_block_emits_blocked_and_raises(monkeypatch) -> None:
-    async def block_all(batch: str) -> bool:
-        return False
-
-    monkeypatch.setattr(guardrails, "check_batch", block_all)
+async def test_emit_text_empty_emits_nothing() -> None:
     emitter = ListEmitter()
-    with pytest.raises(GuardrailsBlocked):
-        await emit_text_as_batches("Câu một. Câu hai.", emitter, 160)
-    types = [t for t, _ in emitter.events]
-    assert "blocked" in types
-    assert "token" not in types  # batch đầu bị chặn -> không token nào emit
+    await emit_text_as_batches("", emitter, 160)
+    assert emitter.events == []
 
 
 # --- stream_synthesis với fake OpenAI stream ---
@@ -96,14 +64,18 @@ class _FakeClient:
         self.chat = SimpleNamespace(completions=completions)
 
 
-async def test_stream_synthesis_emits_answer_deltas_and_returns_final() -> None:
+async def test_stream_synthesis_emits_raw_deltas_and_returns_final() -> None:
     final = SynthesizedAnswer(
         answer="Câu một. Câu hai.", used_chunk_ids=["c-1"], confidence="cao"
     )
+    # Mô phỏng SDK thật: parsed KHÔNG chứa answer khi chuỗi chưa đóng nháy (bug từng làm
+    # mất streaming) -> code phải lấy từ snapshot (JSON tích lũy thô, dở dang).
     events = [
-        SimpleNamespace(type="content.delta", parsed={"answer": "Câu "}),
-        SimpleNamespace(type="content.delta", parsed={"answer": "Câu một."}),
-        SimpleNamespace(type="content.delta", parsed={"answer": "Câu một. Câu hai."}),
+        SimpleNamespace(type="content.delta", parsed={}, snapshot='{"answer": "Câu '),
+        SimpleNamespace(type="content.delta", parsed={}, snapshot='{"answer": "Câu một.'),
+        SimpleNamespace(
+            type="content.delta", parsed={}, snapshot='{"answer": "Câu một. Câu hai.'
+        ),
         SimpleNamespace(type="content.done", parsed=final),
     ]
     emitter = ListEmitter()
@@ -115,6 +87,8 @@ async def test_stream_synthesis_emits_answer_deltas_and_returns_final() -> None:
         client=_FakeClient(_FakeStream(events, None)),
     )
     tokens = [d["text"] for t, d in emitter.events if t == "token"]
+    # nhả thô theo từng delta, KHÔNG gộp theo câu -> 3 token khớp 3 event delta
+    assert tokens == ["Câu ", "một.", " Câu hai."]
     assert "".join(tokens) == "Câu một. Câu hai."
     assert result.used_chunk_ids == ["c-1"]
     assert result.confidence == "cao"

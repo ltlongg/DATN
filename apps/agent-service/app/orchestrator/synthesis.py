@@ -1,8 +1,8 @@
-"""Streaming structured-output cho synthesize + batching token qua guardrails hook.
+"""Streaming structured-output cho synthesize — emit token thô, không batch/guardrails.
 
-Stream theo BATCH (cụm/câu), KHÔNG token thô: mỗi batch qua `guardrails.check_batch` TRƯỚC
-khi emit `token`. Cùng cơ chế batch dùng lại cho honest_answer/direct_response (text tĩnh).
-Xem `docs/plan/orchestrator-plan.md` §Streaming.
+TẠM BỎ batching + guardrails hook (làm lại sau, xem `app/orchestrator/guardrails.py`).
+Token nhả thẳng theo delta LLM trả về. `batch_chars` giữ trong signature để không phải
+sửa call site ở `nodes.py`, hiện không dùng.
 """
 
 from __future__ import annotations
@@ -10,56 +10,18 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 
 from openai import AsyncOpenAI
+from pydantic_core import from_json
 
 from app.core.llm import get_async_openai_client
-from app.orchestrator import guardrails
 from app.orchestrator.emitter import Emitter
-from app.orchestrator.errors import GuardrailsBlocked, SynthesisError
+from app.orchestrator.errors import SynthesisError
 from app.schemas.ask import SynthesizedAnswer
-
-_SENTENCE_ENDERS = ".!?\n"
-
-
-def _find_cut(text: str, batch_chars: int) -> int | None:
-    """Chỉ số cắt batch (exclusive): dấu kết câu HOẶC đủ batch_chars — cái nào tới trước.
-    Trả None nếu chưa đủ một batch."""
-    first_end = next(
-        (i + 1 for i, ch in enumerate(text) if ch in _SENTENCE_ENDERS), None
-    )
-    if first_end is not None and first_end <= batch_chars:
-        return first_end
-    if len(text) >= batch_chars:
-        return batch_chars
-    return None
-
-
-async def _guard_and_emit(batch: str, emitter: Emitter) -> None:
-    """Một batch qua guardrails hook rồi emit `token`. Hook chặn -> `blocked` + raise."""
-    if not await guardrails.check_batch(batch):
-        await emitter.emit("blocked", {"reason": "guardrails"})
-        raise GuardrailsBlocked()
-    await emitter.emit("token", {"text": batch})
-
-
-async def _drain_batches(
-    pending: str, emitter: Emitter, batch_chars: int, *, final: bool
-) -> str:
-    """Cắt & emit hết batch hoàn chỉnh trong `pending`. final=True flush phần còn lại."""
-    while True:
-        cut = _find_cut(pending, batch_chars)
-        if cut is None:
-            break
-        batch, pending = pending[:cut], pending[cut:]
-        await _guard_and_emit(batch, emitter)
-    if final and pending:
-        await _guard_and_emit(pending, emitter)
-        pending = ""
-    return pending
 
 
 async def emit_text_as_batches(text: str, emitter: Emitter, batch_chars: int) -> None:
-    """Stream một đoạn text tĩnh (honest/smalltalk) qua cùng cơ chế batch + guardrails."""
-    await _drain_batches(text, emitter, batch_chars, final=True)
+    """Stream một đoạn text tĩnh (honest/smalltalk) — emit nguyên khối, không guardrails."""
+    if text:
+        await emitter.emit("token", {"text": text})
 
 
 async def stream_synthesis(
@@ -71,8 +33,8 @@ async def stream_synthesis(
     client: AsyncOpenAI | None = None,
     on_usage: Callable[[int, int, int], Awaitable[None]] | None = None,
 ) -> SynthesizedAnswer:
-    """Stream structured output `SynthesizedAnswer`; emit delta của `answer` thành batch
-    qua guardrails. Trả về SynthesizedAnswer cuối. `answer` là field đầu nên token ra
+    """Stream structured output `SynthesizedAnswer`; emit delta của `answer` THÔ (không
+    batch/guardrails). Trả về SynthesizedAnswer cuối. `answer` là field đầu nên token ra
     trước, `used_chunk_ids`/`confidence` về ở cuối.
 
     `on_usage(prompt, completion, total)` (nếu truyền) được await đúng 1 lần sau khi có
@@ -82,7 +44,6 @@ async def stream_synthesis(
     final: SynthesizedAnswer | None = None
     refusal: str | None = None
     prev_answer = ""
-    pending = ""
 
     async with client.chat.completions.stream(
         model=model,
@@ -93,20 +54,27 @@ async def stream_synthesis(
     ) as stream:
         async for event in stream:
             if event.type == "content.delta":
-                parsed = event.parsed
-                if isinstance(parsed, dict):
-                    cur = parsed.get("answer")
+                # KHÔNG dùng event.parsed: partial-parse của SDK chỉ đưa field string vào
+                # parsed khi chuỗi đã ĐÓNG nháy -> answer về 1 cục ở cuối, mất streaming.
+                # Tự parse snapshot (JSON tích lũy thô) với allow_partial="trailing-strings"
+                # để lấy được cả chuỗi answer đang dở dang.
+                snapshot = getattr(event, "snapshot", None)
+                if not snapshot:
+                    continue
+                try:
+                    partial = from_json(snapshot, allow_partial="trailing-strings")
+                except ValueError:
+                    continue  # snapshot đứt giữa escape sequence -> chờ delta kế tiếp
+                if isinstance(partial, dict):
+                    cur = partial.get("answer")
                     if isinstance(cur, str) and len(cur) > len(prev_answer):
-                        pending += cur[len(prev_answer):]
+                        delta = cur[len(prev_answer):]
                         prev_answer = cur
-                        pending = await _drain_batches(
-                            pending, emitter, batch_chars, final=False
-                        )
+                        await emitter.emit("token", {"text": delta})
             elif event.type == "content.done":
                 final = event.parsed
             elif event.type == "refusal.done":
                 refusal = event.refusal
-        await _drain_batches(pending, emitter, batch_chars, final=True)
 
     if refusal:
         raise SynthesisError("refusal")
