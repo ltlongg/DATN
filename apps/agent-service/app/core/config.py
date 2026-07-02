@@ -7,11 +7,18 @@ storage) sẽ bổ sung thêm field vào đây.
 
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from pathlib import Path
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Windows: huggingface_hub mặc định cache model bằng symlink -> WinError 1314 nếu user
+# chưa bật Developer Mode (fastembed BM25 + sentence-transformers embedding đều tải qua
+# HF Hub). Set ở đây vì config.py là entrypoint chung cho cả API lẫn script offline
+# indexing -> lib đọc đúng giá trị trước khi model nào kịp cache lần đầu.
+os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS", "1")
 
 # Nguồn .env DUY NHẤT của monorepo: file `.env` ở gốc repo. Trỏ tuyệt đối để chạy
 # script từ thư mục nào cũng đọc đúng (trước đây env_file=".env" phụ thuộc CWD nên

@@ -5,6 +5,9 @@
 #
 # NOTE: torch cần index riêng, chạy trước khi install:
 #   uv pip install torch --index-url https://download.pytorch.org/whl/cpu
+# Máy có GPU NVIDIA (CUDA) muốn tăng tốc embedding/reranker -> dùng index cu128 thay vì cpu:
+#   uv pip install torch --index-url https://download.pytorch.org/whl/cu128
+# (cu121 KHÔNG có wheel cho Python 3.13 trên Windows — dừng ở cp312. cu128 mới có cp313.)
 # ============================================================
 
 # --- Web framework ---
@@ -45,6 +48,10 @@ neo4j>=5,<7
 pypdf
 python-docx
 unstructured
+# numba: unstructured kéo theo numba KHÔNG ràng buộc version -> uv backtrack xuống bản
+# cổ (sdist, không hỗ trợ Python 3.10+) khi conflict numpy ở sâu trong cây dependency.
+# Ghim floor >=0.61 (bản đầu tiên hỗ trợ Python 3.13) để tránh backtrack xuống bản build-fail.
+numba>=0.61,<1.0
 
 # --- Text processing ---
 tiktoken
