@@ -229,7 +229,7 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
     }
 
 
-# --- 6. validate_citations (server-side trust boundary, không LLM) ---
+# --- 6. citation helpers (dùng inline trong build_visualization, không còn node riêng) ---
 
 
 def _as_int(value: object) -> int | None:
@@ -251,31 +251,6 @@ def _build_citation(chunk: RetrievedChunk) -> Citation:
         heading_path=chunk.heading_path,
         quote=None,
     )
-
-
-def validate_citations(state: AgentState) -> dict[str, Any]:
-    retrieval = state["retrieval"]
-    chunks_by_id = {c.chunk_id: c for c in (retrieval.chunks if retrieval else [])}
-    seen: set[str] = set()
-    citations: list[Citation] = []
-    for cid in state.get("used_chunk_ids", []):
-        # Drop id không nằm trong retrieval result; dedupe, giữ thứ tự LLM khai.
-        if cid in chunks_by_id and cid not in seen:
-            seen.add(cid)
-            citations.append(_build_citation(chunks_by_id[cid]))
-    return {"citations": citations}
-
-
-def after_validate(state: AgentState) -> str:
-    settings = get_settings()
-    if state.get("confidence") == "không đủ dữ liệu":
-        return "honest_answer"
-    if state.get("citations"):
-        return "build_visualization"
-    # answer có nội dung nhưng không có citation hợp lệ.
-    if state.get("synthesize_attempt_count", 0) < settings.synthesize_max_attempts:
-        return "synthesize"
-    return "honest_answer"
 
 
 # --- 7. honest_answer ---
@@ -352,18 +327,24 @@ async def clarify(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     }
 
 
-# --- 9. build_visualization (online từ chunk đã citation; viz fail không làm fail answer) ---
+# --- 9. build_visualization (build citation từ used_chunk_ids inline, không lọc/retry;
+# viz fail không làm fail answer) ---
 
 
 async def build_visualization(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     emitter = _emitter(config)
-    citations = state.get("citations", [])
-    # Đường này chỉ tới khi citations non-empty (after_validate đảm bảo).
+    retrieval = state.get("retrieval")
+    chunks_by_id = {c.chunk_id: c for c in (retrieval.chunks if retrieval else [])}
+    citations = [
+        _build_citation(chunks_by_id[cid])
+        for cid in state.get("used_chunk_ids", [])
+        if cid in chunks_by_id
+    ]
     await emitter.emit(
         "citations", {"citations": [c.model_dump() for c in citations]}
     )
     used_ids = [c.chunk_id for c in citations]
-    out: dict[str, Any] = {}
+    out: dict[str, Any] = {"citations": citations}
     viz = None
     try:
         viz = await asyncio.to_thread(build_visualization_payload, used_ids)

@@ -1,8 +1,9 @@
 """Test answer flow qua run_ask với retrieval/LLM/visualization đã mock.
 
 Phủ mọi nhánh: route (needs_retrieval/ambiguous/out_of_scope/smalltalk), has_context
-(empty -> honest), synthesize (valid/invalid citation/insufficient/retry guard), citation
-trust boundary, seed_mentions handoff, visualization (ok/error), build_query fallback.
+(empty -> honest), citation build từ used_chunk_ids (TẠM BỎ validate/retry, xem
+nodes.py::build_visualization), seed_mentions handoff, visualization (ok/error), build_query
+fallback.
 """
 
 from __future__ import annotations
@@ -170,40 +171,33 @@ async def test_retrieval_all_backends_fail_propagates(monkeypatch) -> None:
     assert exc.value.code == "all_backends_failed"
 
 
-# --- citation trust boundary ---
+# --- citation build (TẠM BỎ validate/retry — filter đơn giản, không rẽ honest) ---
 
 
-async def test_invalid_citation_filtered_then_retry_then_honest(monkeypatch) -> None:
+async def test_unknown_chunk_id_dropped_no_retry(monkeypatch) -> None:
     _patch_build_query(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     capture: dict = {}
-    # LLM khai chunk_id không có trong retrieval -> bị drop -> citations rỗng -> retry -> honest.
+    # LLM khai chunk_id không có trong retrieval -> bị lọc khỏi citations, KHÔNG retry,
+    # KHÔNG rẽ honest_answer -> answer gốc vẫn giữ nguyên.
     _patch_synthesize(monkeypatch, used=("ghost-id",), capture=capture)
+    _patch_viz(monkeypatch)
     resp = await run_ask(AskRequest(question="hỏi", stream=False))
-    assert len(capture["calls"]) == 2  # đúng 1 retry rồi dừng (synthesize_max_attempts=2)
-    assert "chưa tìm thấy đủ thông tin" in (resp.answer or "")
+    assert len(capture["calls"]) == 1  # đúng 1 lần gọi, không retry
+    assert resp.answer == "Đáp án."
     assert resp.citations == []
 
 
-async def test_retry_appends_instruction_only_on_second_call(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="needs_retrieval")
-    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
-    capture: dict = {}
-    _patch_synthesize(monkeypatch, used=("ghost-id",), capture=capture)
-    await run_ask(AskRequest(question="hỏi", stream=False))
-    first_user = capture["calls"][0][1]["content"]
-    second_user = capture["calls"][1][1]["content"]
-    assert "Lượt tạo trước bị từ chối" not in first_user
-    assert "Lượt tạo trước bị từ chối" in second_user
-
-
-async def test_confidence_insufficient_goes_honest(monkeypatch) -> None:
+async def test_confidence_insufficient_no_longer_forces_honest(monkeypatch) -> None:
+    # TẠM BỎ nhánh confidence-thấp -> honest_answer (từng nằm ở after_validate).
     _patch_build_query(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     _patch_synthesize(monkeypatch, used=("c-1",), confidence="không đủ dữ liệu")
+    _patch_viz(monkeypatch)
     resp = await run_ask(AskRequest(question="hỏi", stream=False))
     assert resp.confidence == "không đủ dữ liệu"
-    assert "chưa tìm thấy đủ thông tin" in (resp.answer or "")
+    assert resp.answer == "Đáp án."  # answer LLM giữ nguyên, không bị thay bằng honest message
+    assert [c.chunk_id for c in resp.citations] == ["c-1"]
 
 
 async def test_citation_built_from_chunk_metadata(monkeypatch) -> None:

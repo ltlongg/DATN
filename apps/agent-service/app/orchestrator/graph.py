@@ -2,8 +2,11 @@
 
 START -> build_query -> (route_intent) -> retrieve|clarify|honest_answer|direct_response
 retrieve -> (has_context) -> synthesize|honest_answer
-synthesize -> validate_citations -> (after_validate) -> build_visualization|synthesize(retry)|honest_answer
+synthesize -> build_visualization
 clarify|direct_response|honest_answer|build_visualization -> END
+
+TẠM BỎ validate_citations/after_validate (trust-boundary + retry loop) để đơn giản hóa
+flow lúc dev — xem `nodes.py::build_visualization` (citation build inline, không lọc/retry).
 """
 
 from __future__ import annotations
@@ -25,7 +28,6 @@ def get_graph() -> CompiledStateGraph:
     builder.add_node("build_query", nodes.build_query)
     builder.add_node("retrieve", nodes.retrieve)
     builder.add_node("synthesize", nodes.synthesize)
-    builder.add_node("validate_citations", nodes.validate_citations)
     builder.add_node("honest_answer", nodes.honest_answer)
     builder.add_node("direct_response", nodes.direct_response)
     builder.add_node("clarify", nodes.clarify)
@@ -40,12 +42,7 @@ def get_graph() -> CompiledStateGraph:
     builder.add_conditional_edges(
         "retrieve", nodes.has_context, ["synthesize", "honest_answer"]
     )
-    builder.add_edge("synthesize", "validate_citations")
-    builder.add_conditional_edges(
-        "validate_citations",
-        nodes.after_validate,
-        ["synthesize", "build_visualization", "honest_answer"],
-    )
+    builder.add_edge("synthesize", "build_visualization")
     builder.add_edge("clarify", END)
     builder.add_edge("direct_response", END)
     builder.add_edge("honest_answer", END)

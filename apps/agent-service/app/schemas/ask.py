@@ -17,8 +17,7 @@ from app.schemas.visualization import VisualizationPayload
 # Single source of truth — dùng lại ở BuildQueryOutput.route và AgentState["route"].
 RouteDecision = Literal["needs_retrieval", "ambiguous", "out_of_scope", "smalltalk"]
 
-# Thang confidence của câu trả lời (đồng bộ AliasVerdict + timeline). "không đủ dữ liệu"
-# là tín hiệu để validate_citations rẽ sang honest_answer.
+# Thang confidence của câu trả lời (đồng bộ AliasVerdict + timeline).
 AnswerConfidence = Literal["cao", "vừa", "thấp", "không đủ dữ liệu"]
 
 
