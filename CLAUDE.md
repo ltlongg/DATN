@@ -33,7 +33,7 @@ Nếu thư viện hiện có không đủ → ghi rõ lý do trước khi viết
 Repo là **git repository** (branch `main`). Không còn ở scaffold stage:
 
 - **`agent-service`**: đã có pipeline indexing thực (preprocessing → chunking → graph extraction → timeline extraction → geocoding) **và** answer flow online — `api/ask.py` (FastAPI `/ask`) + `orchestrator/` (LangGraph: build_query → retrieve → synthesize → validate → visualization, stream SSE). Đây là nơi tập trung gần như toàn bộ logic LLM/retrieval.
-- **`backend`**: đã build API gateway (auth JWT, conversation/message, `/ask` streaming proxy, admin documents mock) — xem layout dưới. Module 4 (admin nâng cao) **3/4 nhóm đã code xong** (Hội thoại & chất lượng, Người dùng & quota, Chi phí) + KB Inspector (Module 5) + debug streaming — xem `### Module 4 — Admin nâng cao` dưới. Chỉ còn **Cấu hình hệ thống** là CHƯA code (tách plan riêng, làm sau). **`frontend`**: vẫn ở scaffold (cấu trúc thư mục + config, chưa có code thực) — kế hoạch đầy đủ ở `docs/plan/frontend-plan.md`.
+- **`backend`**: đã build API gateway (auth JWT, conversation/message, `/ask` streaming proxy, admin documents mock) — xem layout dưới. Module 4 (admin nâng cao) **3/4 nhóm đã code xong** (Hội thoại & chất lượng, Người dùng & quota, Chi phí) + KB Inspector (Module 5) + debug streaming — xem `### Module 4 — Admin nâng cao` dưới. Chỉ còn **Cấu hình hệ thống** là CHƯA code (tách plan riêng, làm sau). **`frontend`**: đã build thật (Vite+React+TS) phủ cả 2 role — auth/chat streaming SSE/multi-turn sidebar/debug panel admin/map+timeline/quản lý tài liệu/KB Inspector (Module 5)/Module 4 (logs+users+cost). Chỉ tab Cấu hình hệ thống là stub "Sắp cập nhật". Xem `### Frontend layout` dưới + `docs/plan/frontend-plan.md` + `docs/superpowers/plans/2026-07-02-frontend-phased.md` (10 phase đã hoàn thành).
 
 `requirements.txt`, `docker-compose.yml` đã cấu hình. Khi commit, dùng tiếng Việt theo phong cách lịch sử commit hiện có.
 
@@ -156,12 +156,30 @@ gì thì sửa đúng file:
 - `docs/plan/frontend-plan.md` — kế hoạch FE tương ứng, source-of-truth cho scope/UI toàn
   bộ frontend (không chỉ Module 4). Đã cập nhật khớp API thật ở trên.
 
-### Frontend layout (`apps/frontend/src/`) — scaffold
-- `features/chat` — UI hỏi đáp
-- `features/map` — bản đồ Việt Nam, markers cho events (xem POC Google Maps bên dưới)
-- `features/timeline` — timeline events liên kết với map qua `event_id`
-- `features/admin` — quản lý documents
-- `features/auth` — đăng nhập
+### Frontend layout (`apps/frontend/src/`) — đã build
+Vite+React 18+TS. TanStack Query (server state) + Zustand (auth/UI) + Tailwind v3 (tokens:
+brand `#A4161A`, nền kem, serif+sans) + Radix + `@vis.gl/react-google-maps` +
+`react-force-graph-2d` + `recharts`. Test: Vitest + Testing Library (66 test). SSE `/ask` qua
+`fetch`+`ReadableStream` tay. Route cứng `/` (user) vs `/admin/*` (RoleGuard admin).
+- `app/` — `App.tsx` (providers + router + boot getMe), `routes.tsx` (route tree, export array;
+  admin pages KB/Advanced lazy-load tách chunk).
+- `api/` — `client.ts` (fetch wrapper Bearer + `{code,message}`→ApiError + 401 clear),
+  `askStream.ts` (⭐ parser SSE), `auth/chat/documents/kb/logs/users/cost.ts`.
+- `store/` — `authStore` (persist), `chatUiStore` (`selectedEventId` link map↔timeline, debugOpen).
+- `features/auth` — RequireAuth/RoleGuard/LoginForm.
+- `features/chat` — `chatReducer` (thuần, test) + `useChat` + ChatPanel/MessageList/Bubble/
+  Composer/Citation/Clarification/DebugPanel(admin)/VizPanel.
+- `features/map` + `features/timeline` — EventMap/EventMarker/MapEmptyState + Timeline/Row,
+  honest fallback (gazetteer hoãn → markers rỗng → empty-state).
+- `features/admin` — DocumentTable/StatusBadge/DocumentFormModal (CRUD mock).
+- `features/kb` — Module 5 inspector: Chunk/Entity/Event Table+Detail, EgoGraph, điều hướng
+  chéo qua `chunk_id`.
+- `features/advanced` — Module 4: LogsTab/UsersTab/CostTab + ConfigTabStub ("Sắp cập nhật").
+- `components/` — Modal(Radix)/Spinner/EmptyState/ConfidenceBadge dùng chung; `pages/` (Login,
+  Ask, AdminLayout, AdminDocuments/Kb/Advanced).
+
+**Commands** (từ `apps/frontend`): `npm run dev` (:5173), `npm run typecheck`, `npm run test`,
+`npm run build`. `.env`: `VITE_API_BASE_URL`, `VITE_GOOGLE_MAPS_API_KEY`.
 
 ### Visualization contract (quan trọng)
 Map và timeline phải dùng **chung `event_id`** để liên kết hai chiều (click marker → highlight timeline item và ngược lại). Đã hiện thực trong `builder.py`. Quy tắc:
