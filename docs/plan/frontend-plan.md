@@ -168,7 +168,7 @@ src/
 │   │                        #   DebugPanel (admin-only, collapsible dưới mỗi message)
 │   ├── map/                 # EventMap (APIProvider+Map), EventMarker (đậm/nhạt theo confidence),
 │   │                        #   MapEmptyState (honest fallback khi markers rỗng)
-│   ├── timeline/            # Timeline, TimelineRow (confidence), link selectedEventId 2 chiều
+│   ├── timeline/            # TimelineBar (trục ngang zoom/pan, cluster, popover), link selectedEventId 2 chiều
 │   ├── admin/               # DocumentTable, DocumentFormModal, StatusBadge
 │   ├── kb/                  # Module 5 (read-only inspector):
 │   │                        #   ChunkTable+ChunkDetail, EntityTable+EntityDetail (EgoGraph
@@ -245,7 +245,7 @@ src/
 
 - **EventMap**: `APIProvider` (key `VITE_GOOGLE_MAPS_API_KEY`) + `Map` + `AdvancedMarker`. **`.env.example`/`.env` hiện tại của frontend vẫn còn `VITE_MAP_TILE_URL=`** (leftover từ POC TrackAsia cũ, đã bỏ — xem CLAUDE.md §Map POC) **và CHƯA có `VITE_GOOGLE_MAPS_API_KEY`** — phải xóa biến cũ, thêm biến mới vào cả 2 file khi làm bước "Init project" (bước 0, xem "Thứ tự triển khai"). Center mặc định Việt Nam. Marker từ `visualization.markers`.
 - **EventMarker**: render đậm/nhạt theo `confidence` (cao=đậm, thấp=nhạt — explicit vs inferred). Click → set `selectedEventId`.
-- **Timeline**: render từ `visualization.timeline`, sắp theo `time_start`; mỗi row hiện label/summary/time, badge confidence; `located` → có chấm liên kết map. Click row → set `selectedEventId`.
+- **TimelineBar** (đổi thiết kế 2026-07-03, thay Timeline/TimelineRow dọc cũ): thanh timeline **NGANG full-width dưới cùng AskPage** (kéo dưới cả sidebar + khung chat), tham khảo time-horizon.pages.dev. Trên trục chỉ có **icon + thời gian** (không hiện label/summary); click icon mới mở **popover chi tiết** (label, summary, locations, badge confidence, `located` → chấm liên kết map). Sự kiện sát nhau gom **cluster** (icon số đếm → popover danh sách). **Zoom bằng lăn chuột** tại con trỏ (tách cluster, tick tự chuyển năm→tháng), **kéo để pan**, double-click / nút "⟲ Toàn cảnh" reset. Chọn event → set `selectedEventId`. Hiện khi `visualization.timeline` non-empty, độc lập với panel map.
 - **Link 2 chiều**: cả hai đọc `selectedEventId`; marker/row trùng `event_id` → highlight.
 - **Honest fallback** (CLAUDE.md + viz schema):
   - `markers` rỗng (thực tế hiện tại do gazetteer hoãn) → ẩn map / hiện `MapEmptyState` ("Chưa có dữ liệu toạ độ cho sự kiện này"), vẫn render timeline.
