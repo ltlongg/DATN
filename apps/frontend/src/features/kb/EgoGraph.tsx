@@ -70,11 +70,39 @@ export function EgoGraph({
         height={320}
         nodeLabel="name"
         nodeRelSize={5}
-        nodeColor={(n) => ((n as GraphNode).center ? "#A4161A" : "#c4494c")}
         linkLabel="keyword"
         linkColor={() => "#c9bda8"}
         onNodeClick={(n) => onSelectEntity((n as GraphNode).id)}
         cooldownTicks={60}
+        nodeCanvasObject={(node, ctx, globalScale) => {
+          const n = node as GraphNode & { x?: number; y?: number };
+          if (n.x == null || n.y == null) return;
+          const r = n.center ? 6 : 4;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, r, 0, 2 * Math.PI);
+          ctx.fillStyle = n.center ? "#A4161A" : "#c4494c";
+          ctx.fill();
+
+          const fontSize = 12 / globalScale;
+          ctx.font = `${n.center ? 700 : 400} ${fontSize}px sans-serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "top";
+          const label = n.name;
+          const tw = ctx.measureText(label).width;
+          const pad = 2 / globalScale;
+          ctx.fillStyle = "rgba(255,255,255,0.78)";
+          ctx.fillRect(n.x - tw / 2 - pad, n.y + r + pad, tw + pad * 2, fontSize + pad);
+          ctx.fillStyle = "#3a332b";
+          ctx.fillText(label, n.x, n.y + r + pad * 1.5);
+        }}
+        nodePointerAreaPaint={(node, color, ctx) => {
+          const n = node as GraphNode & { x?: number; y?: number };
+          if (n.x == null || n.y == null) return;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.center ? 6 : 4, 0, 2 * Math.PI);
+          ctx.fillStyle = color;
+          ctx.fill();
+        }}
       />
     </div>
   );
