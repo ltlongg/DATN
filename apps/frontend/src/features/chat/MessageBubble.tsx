@@ -32,9 +32,17 @@ export function MessageBubble({
         {item.error ? (
           <p className="text-sm text-rose-700">⚠ {item.error.message}</p>
         ) : item.blocked ? (
-          <p className="text-sm text-rose-700">
-            Câu hỏi bị chặn bởi bộ lọc an toàn.
-          </p>
+          // Guardrails chặn: ưu tiên hiện safe message (agent đã stream qua token). Chỉ khi
+          // không có content mới rơi về câu cố định.
+          item.content !== "" ? (
+            <div className="text-ink">
+              <Markdown content={item.content} />
+            </div>
+          ) : (
+            <p className="text-sm text-rose-700">
+              Câu hỏi bị chặn bởi bộ lọc an toàn.
+            </p>
+          )
         ) : item.clarificationNeeded ? (
           <ClarificationPrompt
             question={item.clarificationQuestion ?? item.content}

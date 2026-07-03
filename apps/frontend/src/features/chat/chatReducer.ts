@@ -135,7 +135,9 @@ export function chatReducer(state: ChatItem[], action: ChatAction): ChatItem[] {
       }));
 
     case "blocked":
-      return patch(state, action.id, (it) => ({ ...it, blocked: true }));
+      // Guardrails chặn input: agent KHÔNG gửi done -> tự kết thúc lượt (tắt streaming) để
+      // bong bóng thôi hiện con trỏ nhấp nháy. Safe message đã nằm trong content qua token.
+      return patch(state, action.id, (it) => ({ ...it, blocked: true, streaming: false }));
 
     case "error":
       return patch(state, action.id, (it) => ({ ...it, error: action.error }));
