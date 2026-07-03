@@ -1,11 +1,11 @@
 import { EventMap } from "@/features/map/EventMap";
-import { Timeline } from "@/features/timeline/Timeline";
 import { useChatUiStore } from "@/store/chatUiStore";
 import type { VisualizationPayload } from "@/types";
 
 /**
- * Panel split-screen: bản đồ (trên) + timeline (dưới), liên kết qua selectedEventId.
- * Honest fallback tự xử lý trong EventMap/Timeline (markers/timeline rỗng -> empty-state).
+ * Panel bản đồ (timeline đã tách thành TimelineBar ngang full-width ở AskPage),
+ * liên kết với timeline qua selectedEventId. Honest fallback tự xử lý trong EventMap
+ * (markers rỗng -> empty-state).
  */
 export function VizPanel({ visualization }: { visualization: VisualizationPayload }) {
   const closeViz = useChatUiStore((s) => s.closeViz);
@@ -28,9 +28,6 @@ export function VizPanel({ visualization }: { visualization: VisualizationPayloa
 
       <div className="min-h-0 flex-1">
         <EventMap markers={visualization.markers} />
-      </div>
-      <div className="h-2/5 overflow-y-auto border-t border-paper-border bg-paper">
-        <Timeline items={visualization.timeline} />
       </div>
     </div>
   );

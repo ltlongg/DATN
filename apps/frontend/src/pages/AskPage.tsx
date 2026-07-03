@@ -4,6 +4,7 @@ import { getConversation } from "@/api/chat";
 import { ChatPanel } from "@/features/chat/ChatPanel";
 import { ConversationSidebar } from "@/features/chat/ConversationSidebar";
 import { VizPanel } from "@/features/chat/VizPanel";
+import { TimelineBar } from "@/features/timeline/TimelineBar";
 import { useChat } from "@/features/chat/useChat";
 import {
   conversationsKey,
@@ -63,24 +64,28 @@ export default function AskPage() {
   }
 
   return (
-    <div className="flex h-full overflow-hidden">
-      <ConversationSidebar
-        conversations={conversations ?? []}
-        activeId={conversationId}
-        loading={isLoading}
-        onSelect={handleSelect}
-        onNew={resetConversation}
-      />
-      <div className="flex flex-1 overflow-hidden">
-        <div
-          className={
-            showViz ? "flex w-1/2 flex-col overflow-hidden" : "mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-hidden"
-          }
-        >
-          <ChatPanel items={items} streaming={streaming} onSend={handleSend} />
+    <div className="flex h-full flex-col overflow-hidden">
+      <div className="flex min-h-0 flex-1 overflow-hidden">
+        <ConversationSidebar
+          conversations={conversations ?? []}
+          activeId={conversationId}
+          loading={isLoading}
+          onSelect={handleSelect}
+          onNew={resetConversation}
+        />
+        <div className="flex flex-1 overflow-hidden">
+          <div
+            className={
+              showViz ? "flex w-1/2 flex-col overflow-hidden" : "mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-hidden"
+            }
+          >
+            <ChatPanel items={items} streaming={streaming} onSend={handleSend} />
+          </div>
+          {showViz && activeViz && <VizPanel visualization={activeViz} />}
         </div>
-        {showViz && activeViz && <VizPanel visualization={activeViz} />}
       </div>
+      {/* Thanh timeline ngang full-width (kéo dưới cả sidebar + khung chat). */}
+      {activeViz && activeViz.timeline.length > 0 && <TimelineBar items={activeViz.timeline} />}
     </div>
   );
 }
