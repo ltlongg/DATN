@@ -52,6 +52,45 @@ def test_get_conversation_detail_includes_messages(
     assert body["messages"][1]["citations"] == [{"chunk_id": "c1"}]
 
 
+def test_rename_conversation(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
+    teacher = auth("teacher")
+    cid = client.post("/api/chat/conversations", json={}, headers=teacher).json()["id"]
+    r = client.patch(
+        f"/api/chat/conversations/{cid}", json={"title": "  Trương Định  "}, headers=teacher
+    )
+    assert r.status_code == 200
+    assert r.json()["title"] == "Trương Định"  # đã trim
+    # Đọc lại xác nhận đã lưu.
+    detail = client.get(f"/api/chat/conversations/{cid}", headers=teacher).json()
+    assert detail["title"] == "Trương Định"
+
+
+def test_rename_rejects_blank_title(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
+    teacher = auth("teacher")
+    cid = client.post("/api/chat/conversations", json={}, headers=teacher).json()["id"]
+    r = client.patch(f"/api/chat/conversations/{cid}", json={"title": "   "}, headers=teacher)
+    assert r.status_code == 422
+
+
+def test_delete_conversation_removes_it(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
+    from app.models import conversation as cr
+
+    teacher = auth("teacher")
+    cid = client.post("/api/chat/conversations", json={}, headers=teacher).json()["id"]
+    cr.add_message(cid, "user", "Câu hỏi")
+    r = client.delete(f"/api/chat/conversations/{cid}", headers=teacher)
+    assert r.status_code == 204
+    # Đã biến mất khỏi danh sách + GET trả 404.
+    assert client.get(f"/api/chat/conversations/{cid}", headers=teacher).status_code == 404
+
+
+def test_admin_can_delete_others_conversation(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
+    # get_owned_conversation cho admin đi qua kể cả khi không sở hữu -> admin xóa được.
+    cid = client.post("/api/chat/conversations", json={}, headers=auth("teacher")).json()["id"]
+    r = client.delete(f"/api/chat/conversations/{cid}", headers=auth("admin"))
+    assert r.status_code == 204
+
+
 # --- unit: derive_title ---
 
 

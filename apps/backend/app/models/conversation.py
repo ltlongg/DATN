@@ -118,6 +118,13 @@ def update_title(conversation_id: str, title: str) -> None:
         conn.commit()
 
 
+def delete_conversation(conversation_id: str) -> None:
+    """Xóa conversation; messages xóa theo nhờ ON DELETE CASCADE."""
+    with connection() as conn, conn.cursor() as cur:
+        cur.execute("DELETE FROM conversations WHERE id = %s", (conversation_id,))
+        conn.commit()
+
+
 def touch_conversation(conversation_id: str) -> None:
     """Bump updated_at để conversation vừa hoạt động nổi lên đầu danh sách."""
     with connection() as conn, conn.cursor() as cur:

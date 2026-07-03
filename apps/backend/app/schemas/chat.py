@@ -19,6 +19,11 @@ class ConversationCreate(BaseModel):
     title: str | None = Field(default=None, max_length=200)
 
 
+class ConversationUpdate(BaseModel):
+    # Đổi tên conversation; title bắt buộc, không rỗng sau khi trim (kiểm ở endpoint).
+    title: str = Field(min_length=1, max_length=200)
+
+
 class ConversationOut(BaseModel):
     id: str
     title: str

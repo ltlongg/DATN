@@ -21,6 +21,7 @@ from app.schemas.chat import (
     ConversationCreate,
     ConversationDetail,
     ConversationOut,
+    ConversationUpdate,
     MessageOut,
 )
 from app.services.agent_client import (
@@ -60,6 +61,25 @@ async def create_conversation(
 async def list_conversations(user: User = Depends(get_current_user)) -> list[ConversationOut]:
     convs = await anyio.to_thread.run_sync(conv_repo.list_conversations, user.id)
     return [_to_out(c) for c in convs]
+
+
+@router.patch("/conversations/{conversation_id}", response_model=ConversationOut)
+async def rename_conversation(
+    body: ConversationUpdate,
+    conv: Conversation = Depends(get_owned_conversation),
+) -> ConversationOut:
+    title = body.title.strip()
+    if not title:
+        raise AppError(422, "invalid_title", "Tên cuộc trò chuyện không được để trống.")
+    await anyio.to_thread.run_sync(conv_repo.update_title, conv.id, title)
+    return _to_out(conv.model_copy(update={"title": title}))
+
+
+@router.delete("/conversations/{conversation_id}", status_code=204)
+async def delete_conversation(
+    conv: Conversation = Depends(get_owned_conversation),
+) -> None:
+    await anyio.to_thread.run_sync(conv_repo.delete_conversation, conv.id)
 
 
 @router.get("/conversations/{conversation_id}", response_model=ConversationDetail)
@@ -177,7 +197,12 @@ async def ask(
     # 5) Mở stream agent TRƯỚC khi trả StreamingResponse: lỗi connect/status còn map được
     # HTTP 503/504/502 (open_ask_stream ném AppError -> handler trả status, chưa mở SSE).
     agent_request = AgentAskRequest(
-        question=body.question, history=history, stream=True, debug=debug, user_id=user.id
+        question=body.question,
+        history=history,
+        mode=body.mode,
+        stream=True,
+        debug=debug,
+        user_id=user.id,
     )
     stream = await open_ask_stream(agent_request)
 

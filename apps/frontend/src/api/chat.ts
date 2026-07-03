@@ -15,3 +15,14 @@ export function createConversation(title?: string): Promise<Conversation> {
 export function getConversation(id: string): Promise<ConversationDetail> {
   return apiFetch<ConversationDetail>(`/api/chat/conversations/${id}`);
 }
+
+export function renameConversation(id: string, title: string): Promise<Conversation> {
+  return apiFetch<Conversation>(`/api/chat/conversations/${id}`, {
+    method: "PATCH",
+    body: { title },
+  });
+}
+
+export function deleteConversation(id: string): Promise<void> {
+  return apiFetch<void>(`/api/chat/conversations/${id}`, { method: "DELETE" });
+}
