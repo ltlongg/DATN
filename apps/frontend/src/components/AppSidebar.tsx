@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import {
   FileText,
+  Landmark,
   Library,
   LogOut,
   MessageSquare,
@@ -112,8 +113,8 @@ export function AppSidebar() {
           {open ? (
             <span className="font-serif text-lg font-bold text-brand">Sử Việt</span>
           ) : (
-            <span className="flex h-9 w-9 items-center justify-center rounded-md border border-brand/20 bg-brand/10 font-serif text-sm font-bold text-brand">
-              Sử
+            <span className="flex h-9 w-9 items-center justify-center rounded-md border border-brand/20 bg-brand/10 text-brand">
+              <Landmark size={18} />
             </span>
           )}
           <WithTooltip open={open} label={open ? "Thu gọn menu" : "Mở rộng menu"}>

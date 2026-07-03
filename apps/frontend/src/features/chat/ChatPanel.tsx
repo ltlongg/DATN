@@ -1,3 +1,5 @@
+import { useState } from "react";
+import type { RetrievalMode } from "@/api/askStream";
 import { Composer } from "@/features/chat/Composer";
 import { MessageList } from "@/features/chat/MessageList";
 import type { ChatItem } from "@/features/chat/chatReducer";
@@ -17,8 +19,12 @@ export function ChatPanel({
 }: {
   items: ChatItem[];
   streaming: boolean;
-  onSend: (text: string) => void;
+  onSend: (text: string, mode: RetrievalMode) => void;
 }) {
+  // Mode truy hồi do khung chat giữ để áp dụng cho cả câu hỏi mẫu lẫn reply.
+  const [mode, setMode] = useState<RetrievalMode>("hybrid");
+  const send = (text: string) => onSend(text, mode);
+
   return (
     <div className="flex h-full flex-col">
       {items.length === 0 ? (
@@ -33,7 +39,7 @@ export function ChatPanel({
             {SAMPLE_QUESTIONS.map((q) => (
               <button
                 key={q}
-                onClick={() => onSend(q)}
+                onClick={() => send(q)}
                 className="rounded-lg border border-paper-border bg-paper-card px-4 py-3 text-left text-sm text-ink transition hover:border-brand"
               >
                 {q}
@@ -42,9 +48,9 @@ export function ChatPanel({
           </div>
         </div>
       ) : (
-        <MessageList items={items} onReply={onSend} />
+        <MessageList items={items} onReply={send} />
       )}
-      <Composer disabled={streaming} onSend={onSend} />
+      <Composer disabled={streaming} mode={mode} onModeChange={setMode} onSend={send} />
     </div>
   );
 }

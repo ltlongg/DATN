@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { openAskStream, type AskHandlers, type AskStreamController } from "@/api/askStream";
+import {
+  openAskStream,
+  type AskHandlers,
+  type AskStreamController,
+  type RetrievalMode,
+} from "@/api/askStream";
 import { chatReducer } from "@/features/chat/chatReducer";
 import { useAuthStore } from "@/store/authStore";
 import { useChatUiStore } from "@/store/chatUiStore";
@@ -52,7 +57,11 @@ export function useChat() {
    * bubble user + placeholder assistant đã hiện TRƯỚC khi gọi nó.
    */
   const ask = useCallback(
-    async (question: string, createConversation: () => Promise<string>) => {
+    async (
+      question: string,
+      mode: RetrievalMode,
+      createConversation: () => Promise<string>,
+    ) => {
       const text = question.trim();
       if (streaming || !text) return;
       const assistantId = crypto.randomUUID();
@@ -83,7 +92,7 @@ export function useChat() {
 
       const controller = openAskStream(
         cid,
-        { question: text, debug: isAdmin },
+        { question: text, mode, debug: isAdmin },
         buildHandlers(assistantId),
       );
       controllerRef.current = controller;

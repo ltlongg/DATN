@@ -1,11 +1,22 @@
 import { useState, type KeyboardEvent } from "react";
+import type { RetrievalMode } from "@/api/askStream";
+
+const MODE_OPTIONS: { value: RetrievalMode; label: string }[] = [
+  { value: "hybrid", label: "Kết hợp" },
+  { value: "traditional", label: "Vector" },
+  { value: "graph", label: "Đồ thị" },
+];
 
 /** Ô nhập câu hỏi. Enter gửi, Shift+Enter xuống dòng. Khoá khi đang stream. */
 export function Composer({
   disabled,
+  mode,
+  onModeChange,
   onSend,
 }: {
   disabled: boolean;
+  mode: RetrievalMode;
+  onModeChange: (mode: RetrievalMode) => void;
   onSend: (text: string) => void;
 }) {
   const [text, setText] = useState("");
@@ -26,6 +37,23 @@ export function Composer({
 
   return (
     <div className="border-t border-paper-border bg-paper-card p-3">
+      <div className="mb-2 flex items-center gap-2">
+        <label htmlFor="retrieval-mode" className="text-xs text-ink-soft">
+          Cách truy hồi
+        </label>
+        <select
+          id="retrieval-mode"
+          value={mode}
+          onChange={(e) => onModeChange(e.target.value as RetrievalMode)}
+          className="rounded-md border border-paper-border bg-white px-2 py-1 text-xs text-ink outline-none focus:border-brand"
+        >
+          {MODE_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="flex items-end gap-2">
         <textarea
           value={text}

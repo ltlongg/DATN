@@ -41,8 +41,12 @@ export interface AskStreamController {
   done: Promise<void>;
 }
 
+/** 3 mode truy hồi user chọn tay; mặc định hybrid (hành vi cũ). */
+export type RetrievalMode = "hybrid" | "traditional" | "graph";
+
 export interface AskBody {
   question: string;
+  mode: RetrievalMode;
   debug: boolean;
 }
 
