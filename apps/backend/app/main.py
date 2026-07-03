@@ -7,7 +7,10 @@ streaming sang agent-service (xem docs/plan/backend-plan.md).
 
 from __future__ import annotations
 
+import logging
 import uuid
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,7 +18,22 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api import auth, chat, cost, documents, health, inspect, logs, users
 from app.core.config import get_settings
+from app.core.db import close_pool, get_pool
 from app.core.errors import register_error_handlers
+
+logger = logging.getLogger("backend.startup")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """Mở pool Postgres lúc startup (warm sẵn connection) và đóng sạch lúc shutdown.
+    Lỗi mở pool KHÔNG chặn startup — pool tự lấp connection lại ở request đầu."""
+    try:
+        get_pool()
+    except Exception:
+        logger.exception("Mở pool Postgres lỗi — sẽ thử lại ở request đầu")
+    yield
+    close_pool()
 
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
@@ -31,7 +49,7 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    app = FastAPI(title="Agentic RAG Backend", version="0.1.0")
+    app = FastAPI(title="Agentic RAG Backend", version="0.1.0", lifespan=lifespan)
 
     app.add_middleware(RequestIDMiddleware)
     app.add_middleware(

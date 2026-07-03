@@ -3,13 +3,20 @@
 
 - `_database_url`: strip `+psycopg` khỏi DATABASE_URL (dialect SQLAlchemy) vì
   `psycopg.connect` không hiểu nó.
-- `connection()`: context manager mở 1 connection (row_factory=dict_row) cho mỗi
-  request. MVP quy mô đồ án không cần pool; mỗi handler mở-đóng 1 connection là đủ
-  minh bạch và an toàn với code async (chạy qua asyncio.to_thread ở service layer).
+- `connection()`: context manager cấp 1 connection (row_factory=dict_row) cho mỗi
+  request. Mặc định lấy từ `psycopg_pool.ConnectionPool` (giữ sẵn connection để tái
+  dùng thay vì mở/đóng mỗi request — DB remote nên round-trip TCP+auth mỗi lần là
+  đáng kể). Nếu truyền `database_url` khác cấu hình (test/script one-off) thì bỏ qua
+  pool, mở connection trực tiếp. Semantics giống hệt trước: commit khi thoát sạch,
+  rollback khi có exception — chỉ khác connection được TRẢ lại pool thay vì đóng hẳn.
+
+Vòng đời pool: `get_pool()` mở lazy lần dùng đầu (server: qua lifespan ở main.py; CLI
+script: lazy + `atexit` đóng sạch). `close_pool()` idempotent.
 """
 
 from __future__ import annotations
 
+import atexit
 from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import Any
@@ -17,6 +24,7 @@ from typing import Any
 import psycopg
 from psycopg import Connection
 from psycopg.rows import dict_row
+from psycopg_pool import ConnectionPool
 
 from app.core.config import get_settings
 
@@ -110,10 +118,51 @@ def _database_url(database_url: str | None = None) -> str:
     return url.replace("postgresql+psycopg://", "postgresql://", 1)
 
 
+# Pool singleton mức module. Mở lazy để import db.py không cần DB sống (test patch
+# `connection` nên không bao giờ chạm pool; CLI script mở lazy rồi atexit đóng).
+_pool: ConnectionPool[DictConnection] | None = None
+
+
+def get_pool() -> ConnectionPool[DictConnection]:
+    """Trả pool đang mở, tạo lần đầu nếu chưa có. `open()` không blocking — nếu DB tạm
+    thời chưa sẵn sàng, pool tự lấp connection ngầm, không làm chết startup."""
+    global _pool
+    if _pool is None:
+        settings = get_settings()
+        pool: ConnectionPool[DictConnection] = ConnectionPool(
+            conninfo=_database_url(),
+            min_size=settings.pg_pool_min_size,
+            max_size=settings.pg_pool_max_size,
+            kwargs={"row_factory": dict_row},
+            open=False,
+            name="backend-pg",
+        )
+        pool.open()
+        _pool = pool
+        atexit.register(close_pool)
+    return _pool
+
+
+def close_pool() -> None:
+    """Đóng pool (idempotent). Gọi lúc shutdown server (lifespan) và atexit cho CLI."""
+    global _pool
+    if _pool is not None:
+        _pool.close()
+        _pool = None
+
+
 @contextmanager
 def connection(database_url: str | None = None) -> Iterator[DictConnection]:
-    """Mở 1 connection dict_row; commit khi thoát sạch, rollback nếu có exception."""
-    with psycopg.connect(_database_url(database_url), row_factory=dict_row) as conn:
+    """Cấp 1 connection dict_row; commit khi thoát sạch, rollback nếu có exception.
+
+    Mặc định lấy từ pool. `database_url` khác cấu hình -> mở trực tiếp (bỏ pool) vì pool
+    gắn 1 conninfo cố định.
+    """
+    if database_url is not None and _database_url(database_url) != _database_url():
+        with psycopg.connect(_database_url(database_url), row_factory=dict_row) as conn:
+            yield conn
+        return
+    with get_pool().connection() as conn:
         yield conn
 
 

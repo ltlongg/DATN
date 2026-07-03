@@ -5,6 +5,7 @@ on_usage.
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from types import SimpleNamespace
 
 from app.core import usage_log
@@ -50,7 +51,12 @@ class _FakeConn:
 
 def test_record_usage_inserts_correct_columns(monkeypatch) -> None:
     log: list = []
-    monkeypatch.setattr(usage_log.psycopg, "connect", lambda *a, **k: _FakeConn(log))
+
+    @contextmanager
+    def fake_connection(database_url=None):
+        yield _FakeConn(log)
+
+    monkeypatch.setattr(usage_log, "connection", fake_connection)
     usage_log.record_usage("build_query", "gpt", 10, 5, 15, user_id="u-1")
     insert = next(e for e in log if "INSERT INTO llm_usage" in e[0])
     _id, task, model, prompt, completion, total, user_id = insert[1]
@@ -60,10 +66,12 @@ def test_record_usage_inserts_correct_columns(monkeypatch) -> None:
 
 
 def test_record_usage_swallows_errors(monkeypatch) -> None:
-    def boom(*a, **k):
+    @contextmanager
+    def boom(database_url=None):
         raise RuntimeError("db down")
+        yield  # pragma: no cover — không bao giờ tới, giữ hàm là generator
 
-    monkeypatch.setattr(usage_log.psycopg, "connect", boom)
+    monkeypatch.setattr(usage_log, "connection", boom)
     # Không raise -> ghi usage lỗi không làm fail answer.
     usage_log.record_usage("synthesize", "m", 1, 2, 3)
 

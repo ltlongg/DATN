@@ -51,6 +51,11 @@ class Settings(BaseSettings):
 
     # --- Postgres (dạng SQLAlchemy URL +psycopg; psycopg.connect cần strip — xem db.py) ---
     database_url: str = ""
+    # Connection pool (psycopg_pool): giữ sẵn connection để tái dùng thay vì mở/đóng mỗi
+    # request (DB remote -> tiết kiệm round-trip TCP+auth). min = số conn mở sẵn lúc idle,
+    # max = trần conn đồng thời. Xem db.py::get_pool.
+    pg_pool_min_size: int = 1
+    pg_pool_max_size: int = 10
 
     # --- Agent-service gateway ---
     agent_service_url: str = "http://localhost:9000"

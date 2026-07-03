@@ -6,10 +6,10 @@ from collections.abc import Iterable
 from typing import Any
 
 import psycopg
-from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
 from app.core.config import get_settings
+from app.core.postgres import connection
 
 CREATE_RAG_CHUNKS_SQL = """
 CREATE TABLE IF NOT EXISTS rag_chunks (
@@ -99,7 +99,7 @@ def get_rag_chunks_by_ids(
     if not chunk_ids:
         return []
 
-    with psycopg.connect(_database_url(database_url), row_factory=dict_row) as conn:
+    with connection(database_url) as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """

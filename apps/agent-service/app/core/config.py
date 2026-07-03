@@ -106,6 +106,15 @@ class Settings(BaseSettings):
     synthesize_max_attempts: int = 2
     stream_batch_chars: int = 160
 
+    # --- Guardrails input layer (v1). 1 lớp kiểm input trước build_query, chỉ LLM structured
+    # output (KHÔNG regex/keyword/blocklist). Dùng model riêng nhỏ/rẻ (KHÔNG fallback sang
+    # orchestrator_llm_model/llm_model). fail_closed=True: model lỗi/timeout -> vẫn chặn +
+    # trả safe message mặc định. Xem docs/plan/guardrails-input-plan.md. ---
+    guardrails_enabled: bool = True
+    guardrails_llm_model: str = "gpt-4o-mini"
+    guardrails_timeout_seconds: int = 8
+    guardrails_fail_closed: bool = True
+
     # --- Storage backends (đọc từ .env) ---
     neo4j_uri: str = ""
     neo4j_user: str = "neo4j"
@@ -115,6 +124,11 @@ class Settings(BaseSettings):
     qdrant_api_key: str = ""
     redis_url: str = ""
     database_url: str = ""
+    # Connection pool Postgres (psycopg_pool): giữ sẵn connection cho hot path online
+    # (hydrate chunk, timeline events, gazetteer, ghi llm_usage) thay vì mở/đóng mỗi lần.
+    # Xem app/core/postgres.py::get_pool.
+    pg_pool_min_size: int = 1
+    pg_pool_max_size: int = 10
 
     @field_validator("openai_base_url", mode="before")
     @classmethod

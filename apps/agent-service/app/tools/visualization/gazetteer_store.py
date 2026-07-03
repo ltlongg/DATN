@@ -14,9 +14,9 @@ from collections.abc import Iterable
 from typing import Any
 
 import psycopg
-from psycopg.rows import dict_row
 
 from app.core.config import get_settings
+from app.core.postgres import connection
 
 CREATE_GAZETTEER_SQL = """
 CREATE TABLE IF NOT EXISTS gazetteer (
@@ -98,7 +98,7 @@ def lookup_coords(
     if not location_norms:
         return {}
 
-    with psycopg.connect(_database_url(database_url), row_factory=dict_row) as conn:
+    with connection(database_url) as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT * FROM gazetteer WHERE location_norm = ANY(%s::text[])",

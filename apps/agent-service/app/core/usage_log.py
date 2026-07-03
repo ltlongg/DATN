@@ -17,7 +17,7 @@ from typing import Any
 
 import psycopg
 
-from app.core.config import get_settings
+from app.core.postgres import connection
 
 logger = logging.getLogger("agent.usage_log")
 
@@ -45,13 +45,6 @@ VALUES (%s, %s, %s, %s, %s, %s, %s);
 """
 
 
-def _database_url(database_url: str | None = None) -> str:
-    url = database_url or get_settings().database_url
-    if not url:
-        raise RuntimeError("Thiếu DATABASE_URL trong .env để ghi llm_usage.")
-    return url.replace("postgresql+psycopg://", "postgresql://", 1)
-
-
 def ensure_llm_usage_table(conn: psycopg.Connection[Any]) -> None:
     with conn.cursor() as cur:
         cur.execute(CREATE_LLM_USAGE_SQL)
@@ -72,7 +65,7 @@ def record_usage(
     """INSERT 1 dòng usage (tự tạo bảng nếu chưa có). Nuốt MỌI exception — lỗi log usage
     không được làm fail câu trả lời."""
     try:
-        with psycopg.connect(_database_url(database_url)) as conn:
+        with connection(database_url) as conn:
             ensure_llm_usage_table(conn)
             with conn.cursor() as cur:
                 cur.execute(

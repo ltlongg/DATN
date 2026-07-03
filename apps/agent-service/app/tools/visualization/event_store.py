@@ -17,9 +17,9 @@ from collections.abc import Iterable
 from typing import Any
 
 import psycopg
-from psycopg.rows import dict_row
 
 from app.core.config import get_settings
+from app.core.postgres import connection
 
 CREATE_TIMELINE_EVENTS_SQL = """
 CREATE TABLE IF NOT EXISTS timeline_events (
@@ -143,7 +143,7 @@ def select_events_by_chunks(
     if not chunk_ids:
         return []
 
-    with psycopg.connect(_database_url(database_url), row_factory=dict_row) as conn:
+    with connection(database_url) as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """

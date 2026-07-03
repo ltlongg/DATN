@@ -12,6 +12,7 @@ from fastapi import FastAPI
 from app.api.ask import router as ask_router
 from app.api.kb import router as kb_router
 from app.core.embedding import embed_texts
+from app.core.postgres import close_pool, get_pool
 from app.core.sparse import encode_query
 
 # import app.core.config (qua app.api.ask -> ...) đã set HF_HUB_DISABLE_SYMLINKS=1 —
@@ -35,7 +36,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.info("model warm-up xong (embedding + sparse)")
     except Exception:
         logger.exception("model warm-up lỗi — sẽ lazy-load lại ở request đầu")
+    try:
+        get_pool()  # mở pool Postgres sẵn; lỗi không chặn startup (pool tự lấp lại)
+    except Exception:
+        logger.exception("mở pool Postgres lỗi — sẽ thử lại ở request đầu")
     yield
+    close_pool()
 
 
 def create_app() -> FastAPI:
