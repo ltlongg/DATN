@@ -1,4 +1,5 @@
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import { Markdown } from "@/components/Markdown";
 import { CitationList } from "@/features/chat/CitationList";
 import { ClarificationPrompt } from "@/features/chat/ClarificationPrompt";
 import { DebugPanel } from "@/features/chat/DebugPanel";
@@ -42,8 +43,8 @@ export function MessageBubble({
           />
         ) : (
           <>
-            <div className="whitespace-pre-wrap text-ink">
-              {item.content}
+            <div className="text-ink">
+              {item.content !== "" && <Markdown content={item.content} />}
               {item.streaming && item.content === "" && (
                 <span className="text-ink-soft">Đang suy nghĩ…</span>
               )}
