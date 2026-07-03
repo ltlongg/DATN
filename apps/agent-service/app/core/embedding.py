@@ -14,11 +14,14 @@ giây.
 from __future__ import annotations
 
 import asyncio
+import logging
 from threading import Lock
 
 import numpy as np
 
 from app.core.config import get_settings
+
+log = logging.getLogger(__name__)
 
 _model = None  # cache SentenceTransformer (nạp 1 lần)
 _model_lock = Lock()
@@ -34,10 +37,15 @@ def _get_model():
         with _model_lock:
             if _model is None:
                 # import trong hàm: tránh kéo torch nặng khi chỉ import module này để lấy hằng số.
+                import torch
                 from sentence_transformers import SentenceTransformer
 
-                _model = SentenceTransformer(get_settings().embedding_model)
+                # Tường minh chọn GPU khi có (khớp reranker.py); fallback CPU. SentenceTransformer
+                # mặc định cũng tự chọn cuda, nhưng truyền device= để chắc chắn + dễ chẩn đoán.
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+                _model = SentenceTransformer(get_settings().embedding_model, device=device)
                 _model.max_seq_length = EMBEDDING_MAX_TOKENS
+                log.info("Embedding model nạp trên device=%s", device)
     return _model
 
 
