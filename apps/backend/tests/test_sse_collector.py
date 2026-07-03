@@ -53,10 +53,25 @@ def test_error_not_persisted() -> None:
     assert col.error == {"code": "qdrant_unavailable", "message": "x"}
 
 
-def test_blocked_not_persisted() -> None:
+def test_blocked_without_content_not_persisted() -> None:
     col = SseCollector()
-    col.feed("blocked", {"reason": "guardrails"})
+    col.feed("blocked", {"stage": "input", "categories": ["prompt_injection"]})
+    assert col.blocked
     assert not col.should_persist()
+
+
+def test_blocked_with_safe_message_persisted() -> None:
+    # Guardrails chặn: agent stream safe message qua token TRƯỚC blocked -> lưu như assistant
+    # message thường (frontend thấy lại khi reload).
+    col = SseCollector()
+    col.feed("token", {"text": "Xin lỗi, mình không hỗ trợ yêu cầu này."})
+    col.feed("blocked", {"stage": "input", "categories": ["harmful_instructions"]})
+    assert col.blocked
+    assert col.should_persist()
+    fields = col.message_fields()
+    assert fields["role"] == "assistant"
+    assert fields["content"] == "Xin lỗi, mình không hỗ trợ yêu cầu này."
+    assert fields["clarification_needed"] is False
 
 
 def test_empty_answer_not_persisted() -> None:

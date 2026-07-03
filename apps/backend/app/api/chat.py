@@ -119,9 +119,11 @@ async def _proxy_stream(
 ) -> AsyncIterator[str]:
     """Proxy event SSE xuống frontend, gom vào collector, lưu message cuối khi `done`.
 
-    - event != done: forward nguyên (không sửa nội dung token).
+    - event != done/blocked: forward nguyên (không sửa nội dung token).
     - event == done: lưu assistant message rồi forward done đã thêm conversation_id/
       message_id (message_id=None nếu không lưu) để frontend link được message.
+    - event == blocked: guardrails chặn input -> agent KHÔNG emit done. Persist safe message
+      (nếu có content) NGAY tại đây rồi forward blocked nguyên (event realtime, không kèm id).
     """
     async for event in stream.events():
         collector.feed(event.event, event.data)
@@ -139,6 +141,15 @@ async def _proxy_stream(
                 "done",
                 {**event.data, "conversation_id": conversation_id, "message_id": saved_id},
             )
+        elif event.event == "blocked":
+            saved_id = await _persist_assistant(conversation_id, assistant_id, collector)
+            logger.info(
+                "ask blocked conversation=%s persisted=%s categories=%s",
+                conversation_id,
+                saved_id is not None,
+                event.data.get("categories"),
+            )
+            yield format_sse("blocked", event.data)
         else:
             yield format_sse(event.event, event.data)
             if event.event == "error":

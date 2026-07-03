@@ -57,12 +57,14 @@ class SseCollector:
     def should_persist(self) -> bool:
         """Có lưu assistant message không.
 
-        - error/blocked -> KHÔNG lưu (frontend đã thấy lỗi qua SSE; assistant rỗng sẽ bị
-          loại khỏi history nên lưu cũng vô nghĩa).
+        - error -> KHÔNG lưu (frontend đã thấy lỗi qua SSE; assistant rỗng bị loại khỏi history).
+        - blocked (guardrails) -> lưu safe message NẾU có content; blocked rỗng thì bỏ. Safe
+          message lưu như assistant message thường để còn thấy khi reload (event `blocked` chỉ
+          là trạng thái realtime, không tồn tại sau reload — xem guardrails-input-plan.md).
         - clarification -> lưu (cần trong history cho lượt sau).
         - câu trả lời thường -> lưu nếu có nội dung.
         """
-        if self.error is not None or self.blocked:
+        if self.error is not None:
             return False
         if self.clarification_needed:
             return True

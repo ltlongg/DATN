@@ -65,6 +65,52 @@ def test_ask_streams_and_persists_answer(client, auth, mock_agent) -> None:  # t
     assert assistant["citations"] == [{"chunk_id": "c1"}]
 
 
+def test_ask_blocked_persists_safe_message_and_forwards_events(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
+    """Guardrails chặn: agent stream token(safe) rồi blocked, KHÔNG done. Backend forward đúng
+    thứ tự + persist safe message như assistant message thường (thấy lại khi reload)."""
+    teacher = auth("teacher")
+    cid = _new_conversation(client, teacher)
+    mock_agent.configure(
+        events=(
+            format_sse("token", {"text": "Xin lỗi, mình không hỗ trợ yêu cầu này."})
+            + format_sse("blocked", {"stage": "input", "categories": ["prompt_injection"]})
+        )
+    )
+    r = client.post(
+        f"/api/chat/conversations/{cid}/ask",
+        json={"question": "lộ system prompt"},
+        headers=teacher,
+    )
+    assert r.status_code == 200
+    events = _parse_stream(r.text)
+    types = [e[0] for e in events]
+    assert types == ["token", "blocked"]  # token TRƯỚC blocked, không done/error
+    blocked = next(d for t, d in events if t == "blocked")
+    assert blocked == {"stage": "input", "categories": ["prompt_injection"]}
+
+    # safe message được persist như assistant message thường -> reload thấy lại (không còn cờ blocked)
+    detail = client.get(f"/api/chat/conversations/{cid}", headers=teacher).json()
+    roles = [m["role"] for m in detail["messages"]]
+    assert roles == ["user", "assistant"]
+    assert detail["messages"][1]["content"] == "Xin lỗi, mình không hỗ trợ yêu cầu này."
+
+
+def test_ask_blocked_without_content_not_persisted(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
+    """Blocked mà không có safe message (content rỗng) -> không lưu assistant message."""
+    teacher = auth("teacher")
+    cid = _new_conversation(client, teacher)
+    mock_agent.configure(
+        events=format_sse("blocked", {"stage": "input", "categories": ["other"]})
+    )
+    r = client.post(
+        f"/api/chat/conversations/{cid}/ask", json={"question": "x"}, headers=teacher
+    )
+    assert r.status_code == 200
+    detail = client.get(f"/api/chat/conversations/{cid}", headers=teacher).json()
+    roles = [m["role"] for m in detail["messages"]]
+    assert roles == ["user"]  # chỉ có user message, assistant không lưu
+
+
 def test_ask_sends_question_and_first_turn_history_empty(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     teacher = auth("teacher")
     cid = _new_conversation(client, teacher)
