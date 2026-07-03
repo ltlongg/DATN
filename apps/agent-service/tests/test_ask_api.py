@@ -9,16 +9,29 @@ from __future__ import annotations
 import asyncio
 from types import SimpleNamespace
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.api import ask as ask_module
 from app.main import app
 from app.orchestrator import nodes
 from app.schemas.ask import BuildQueryOutput, SynthesizedAnswer
+from app.schemas.guardrails import GuardrailDecision
 from app.schemas.retrieval import RetrievalBackendError, RetrievalResult, RetrievedChunk
 from app.schemas.visualization import VisualizationPayload
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def _allow_guardrails(monkeypatch):
+    """guard_input đứng đầu graph; mặc định allow để test /ask không gọi LLM guardrails thật
+    (guard_input dùng client riêng trong module guardrails, không bị _patch_graph phủ)."""
+
+    async def allow(question, history, *, user_id=None):
+        return GuardrailDecision(action="allow")
+
+    monkeypatch.setattr(nodes, "check_input", allow)
 
 
 def _retrieval(chunk_ids) -> RetrievalResult:

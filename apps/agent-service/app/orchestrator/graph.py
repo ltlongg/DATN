@@ -1,9 +1,12 @@
 """Wiring answer graph. Xem `docs/plan/orchestrator-plan.md` §Graph flow.
 
-START -> build_query -> (route_intent) -> retrieve|clarify|honest_answer|direct_response
+START -> guard_input -> build_query -> (route_intent) -> retrieve|clarify|honest_answer|direct_response
 retrieve -> (has_context) -> synthesize|honest_answer
 synthesize -> build_visualization
 clarify|direct_response|honest_answer|build_visualization -> END
+
+guard_input (guardrails input layer): allow -> build_query; block -> raise GuardrailsBlocked
+(dừng flow, không có edge ra; runner streaming đã emit token+blocked, không emit done).
 
 TẠM BỎ validate_citations/after_validate (trust-boundary + retry loop) để đơn giản hóa
 flow lúc dev — xem `nodes.py::build_visualization` (citation build inline, không lọc/retry).
@@ -25,6 +28,7 @@ def get_graph() -> CompiledStateGraph:
     """Compile graph một lần (không checkpointer — flow stateless, xem plan §3)."""
     builder = StateGraph(AgentState)
 
+    builder.add_node("guard_input", nodes.guard_input)
     builder.add_node("build_query", nodes.build_query)
     builder.add_node("retrieve", nodes.retrieve)
     builder.add_node("synthesize", nodes.synthesize)
@@ -33,7 +37,10 @@ def get_graph() -> CompiledStateGraph:
     builder.add_node("clarify", nodes.clarify)
     builder.add_node("build_visualization", nodes.build_visualization)
 
-    builder.add_edge(START, "build_query")
+    # guard_input chạy đầu tiên; block -> raise GuardrailsBlocked (dừng, không edge). allow ->
+    # chảy thẳng sang build_query như luồng cũ.
+    builder.add_edge(START, "guard_input")
+    builder.add_edge("guard_input", "build_query")
     builder.add_conditional_edges(
         "build_query",
         nodes.route_intent,

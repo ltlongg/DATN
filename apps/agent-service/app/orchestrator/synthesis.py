@@ -7,6 +7,7 @@ sửa call site ở `nodes.py`, hiện không dùng.
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import Awaitable, Callable
 
 from openai import AsyncOpenAI
@@ -17,11 +18,41 @@ from app.orchestrator.emitter import Emitter
 from app.orchestrator.errors import SynthesisError
 from app.schemas.ask import SynthesizedAnswer
 
+# Nhả text TĨNH dần cho giống câu trả lời thường (hiệu ứng gõ). Cụm nhỏ ~chunk chars, cắt ở
+# ranh giới từ; delay nhỏ giữa 2 cụm để client render tăng dần.
+STATIC_STREAM_CHUNK_CHARS = 24
+STATIC_STREAM_DELAY_SECONDS = 0.03
+
 
 async def emit_text_as_batches(text: str, emitter: Emitter, batch_chars: int) -> None:
     """Stream một đoạn text tĩnh (honest/smalltalk) — emit nguyên khối, không guardrails."""
     if text:
         await emitter.emit("token", {"text": text})
+
+
+async def stream_static_text(
+    text: str,
+    emitter: Emitter,
+    *,
+    chunk_chars: int = STATIC_STREAM_CHUNK_CHARS,
+    delay: float = STATIC_STREAM_DELAY_SECONDS,
+) -> None:
+    """Nhả một đoạn text TĨNH dần theo từng cụm ~`chunk_chars` (cắt ở khoảng trắng gần nhất để
+    không đứt giữa từ), sleep `delay` giữa các cụm -> hiển thị tăng dần như câu trả lời thường.
+    Dùng cho safe message của guardrails. Ghép mọi cụm lại == `text` nguyên vẹn."""
+    remaining = text
+    while remaining:
+        if len(remaining) <= chunk_chars:
+            chunk, remaining = remaining, ""
+        else:
+            # Cắt ở khoảng trắng gần nhất <= chunk_chars (giữ khoảng trắng ở đầu cụm kế tiếp).
+            cut = remaining.rfind(" ", 0, chunk_chars + 1)
+            if cut <= 0:
+                cut = chunk_chars
+            chunk, remaining = remaining[:cut], remaining[cut:]
+        await emitter.emit("token", {"text": chunk})
+        if remaining and delay > 0:
+            await asyncio.sleep(delay)
 
 
 async def stream_synthesis(

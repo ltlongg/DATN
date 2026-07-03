@@ -63,11 +63,17 @@ def build_response(request: AskRequest, state: dict[str, Any]) -> AskResponse:
 
 
 async def run_ask(request: AskRequest, *, emitter: Emitter | None = None) -> AskResponse:
-    """Chạy graph tới hết, dựng AskResponse từ state cuối (đường stream=False)."""
+    """Chạy graph tới hết, dựng AskResponse từ state cuối (đường stream=False).
+
+    Guardrails chặn input -> GuardrailsBlocked: trả AskResponse với safe message (đường
+    non-stream không có event `blocked`, gói gọn vào answer)."""
     emitter = emitter or NullEmitter()
-    final = await get_graph().ainvoke(
-        initial_state(request), config={"configurable": {"emitter": emitter}}
-    )
+    try:
+        final = await get_graph().ainvoke(
+            initial_state(request), config={"configurable": {"emitter": emitter}}
+        )
+    except GuardrailsBlocked as blocked:
+        return AskResponse(answer=blocked.safe_message, retrieval_mode="none")
     return build_response(request, final)
 
 

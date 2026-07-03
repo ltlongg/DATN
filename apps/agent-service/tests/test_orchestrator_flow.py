@@ -16,8 +16,20 @@ from app.orchestrator import nodes
 from app.orchestrator.emitter import ListEmitter
 from app.orchestrator.runner import run_ask
 from app.schemas.ask import AskRequest, BuildQueryOutput, SynthesizedAnswer
+from app.schemas.guardrails import GuardrailDecision
 from app.schemas.retrieval import RetrievalBackendError, RetrievalResult, RetrievedChunk
 from app.schemas.visualization import TimelineItem, VisualizationPayload
+
+
+@pytest.fixture(autouse=True)
+def _allow_guardrails(monkeypatch):
+    """guard_input chạy đầu graph -> mặc định cho qua để test flow hiện có không gọi LLM
+    guardrails thật. Test guardrails riêng ở test_guardrails.py."""
+
+    async def allow(question, history, *, user_id=None):
+        return GuardrailDecision(action="allow")
+
+    monkeypatch.setattr(nodes, "check_input", allow)
 
 
 # --- helpers ---

@@ -10,7 +10,11 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 from app.orchestrator.emitter import ListEmitter
-from app.orchestrator.synthesis import emit_text_as_batches, stream_synthesis
+from app.orchestrator.synthesis import (
+    emit_text_as_batches,
+    stream_static_text,
+    stream_synthesis,
+)
 from app.schemas.ask import SynthesizedAnswer
 
 # --- emit_text_as_batches ---
@@ -27,6 +31,32 @@ async def test_emit_text_as_one_token() -> None:
 async def test_emit_text_empty_emits_nothing() -> None:
     emitter = ListEmitter()
     await emit_text_as_batches("", emitter, 160)
+    assert emitter.events == []
+
+
+# --- stream_static_text (nhả dần cho guardrails safe message) ---
+
+
+async def test_stream_static_text_chunks_and_rejoins() -> None:
+    emitter = ListEmitter()
+    text = "Xin lỗi, mình không thể hỗ trợ yêu cầu này. Hãy hỏi về lịch sử Việt Nam nhé."
+    await stream_static_text(text, emitter, chunk_chars=24, delay=0)
+    tokens = [d["text"] for t, d in emitter.events if t == "token"]
+    assert len(tokens) >= 2  # cắt thành nhiều cụm -> nhả dần
+    assert "".join(tokens) == text  # ghép lại nguyên vẹn
+    assert all(len(t) <= 24 for t in tokens)  # mỗi cụm không vượt ngưỡng
+
+
+async def test_stream_static_text_short_is_single_token() -> None:
+    emitter = ListEmitter()
+    await stream_static_text("Ngắn thôi.", emitter, chunk_chars=24, delay=0)
+    tokens = [d["text"] for t, d in emitter.events if t == "token"]
+    assert tokens == ["Ngắn thôi."]
+
+
+async def test_stream_static_text_empty_emits_nothing() -> None:
+    emitter = ListEmitter()
+    await stream_static_text("", emitter, delay=0)
     assert emitter.events == []
 
 

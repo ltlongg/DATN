@@ -7,11 +7,24 @@ from __future__ import annotations
 import json
 from types import SimpleNamespace
 
+import pytest
+
 from app.orchestrator import nodes
 from app.orchestrator.runner import run_ask_stream
 from app.schemas.ask import AskRequest, BuildQueryOutput, SynthesizedAnswer
+from app.schemas.guardrails import GuardrailDecision
 from app.schemas.retrieval import RetrievalBackendError, RetrievalResult, RetrievedChunk
 from app.schemas.visualization import VisualizationPayload
+
+
+@pytest.fixture(autouse=True)
+def _allow_guardrails(monkeypatch):
+    """Mặc định guardrails allow để test luồng SSE hiện có (test block ở test_guardrails.py)."""
+
+    async def allow(question, history, *, user_id=None):
+        return GuardrailDecision(action="allow")
+
+    monkeypatch.setattr(nodes, "check_input", allow)
 
 
 def _retrieval(chunk_ids) -> RetrievalResult:

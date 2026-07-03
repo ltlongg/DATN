@@ -15,10 +15,17 @@ from app.core.config import get_settings
 from app.core.llm import get_async_openai_client
 from app.core.usage_log import record_usage
 from app.prompts import build_query as bq_prompt
+from app.prompts import guardrails_input as gi_prompt
 from app.prompts import synthesize as syn_prompt
 from app.orchestrator.emitter import Emitter, NullEmitter
+from app.orchestrator.errors import GuardrailsBlocked
+from app.orchestrator.guardrails import check_input
 from app.orchestrator.state import AgentState
-from app.orchestrator.synthesis import emit_text_as_batches, stream_synthesis
+from app.orchestrator.synthesis import (
+    emit_text_as_batches,
+    stream_static_text,
+    stream_synthesis,
+)
 from app.schemas.ask import BuildQueryOutput, Citation, RouteDecision
 from app.schemas.retrieval import RetrievedChunk
 from app.tools.graph_rag.retriever import retrieve_graph
@@ -68,6 +75,30 @@ async def _record_usage_from_completion(
         completion_tokens=getattr(usage, "completion_tokens", 0) or 0,
         total_tokens=getattr(usage, "total_tokens", 0) or 0,
         user_id=user_id,
+    )
+
+
+# --- 0. guard_input (guardrails input layer — chạy TRƯỚC build_query) ---
+
+
+async def guard_input(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
+    """Kiểm câu hỏi qua guardrails. allow -> đi tiếp build_query (ghi debug). block -> emit
+    `token(safe_message)` + `blocked` rồi raise GuardrailsBlocked để DỪNG hẳn flow (không
+    build_query/retrieve/synthesize, không emit done). check_input không bao giờ raise nên
+    lỗi/timeout đã quy về allow/block theo fail_closed."""
+    emitter = _emitter(config)
+    decision = await check_input(
+        state["question"], state["history"], user_id=state.get("user_id")
+    )
+    if decision.action == "allow":
+        return {"debug": {"guard_input": {"action": "allow"}}}
+
+    safe = decision.safe_message or gi_prompt.DEFAULT_SAFE_MESSAGE
+    # Nhả safe message dần từng cụm cho giống câu trả lời thường (rồi mới báo blocked).
+    await stream_static_text(safe, emitter)
+    await emitter.emit("blocked", {"stage": "input", "categories": decision.categories})
+    raise GuardrailsBlocked(
+        reason="input_guardrails", safe_message=safe, categories=decision.categories
     )
 
 
