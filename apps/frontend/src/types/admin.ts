@@ -60,6 +60,40 @@ export interface QualitySummary {
   warning_count: number;
 }
 
+// --- Token theo hội thoại/message (song song chất lượng) ---
+export interface TokenOverall {
+  total_calls: number;
+  total_prompt_tokens: number;
+  total_completion_tokens: number;
+  total_tokens: number;
+  avg_tokens_per_call: number;
+}
+
+export interface ConversationTokens {
+  conversation_id: string;
+  call_count: number;
+  total_tokens: number;
+}
+
+export interface TokenSummary {
+  overall: TokenOverall;
+  by_conversation: ConversationTokens[];
+}
+
+export interface MessageTokenTaskRow {
+  task: string;
+  model: string;
+  prompt_tokens: number;
+  completion_tokens: number;
+  total_tokens: number;
+}
+
+export interface MessageTokens {
+  message_id: string;
+  total_tokens: number;
+  rows: MessageTokenTaskRow[];
+}
+
 // --- Người dùng & quota ---
 export interface UserOut {
   id: string;

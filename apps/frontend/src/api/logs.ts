@@ -2,7 +2,9 @@ import { apiFetch } from "@/api/client";
 import type {
   ConversationLogDetail,
   ConversationLogResponse,
+  MessageTokens,
   QualitySummary,
+  TokenSummary,
 } from "@/types/admin";
 
 export interface LogsFilter {
@@ -26,4 +28,15 @@ export function getQualitySummary(range: {
   to_date?: string;
 }): Promise<QualitySummary> {
   return apiFetch<QualitySummary>("/api/admin/logs/quality-summary", { query: { ...range } });
+}
+
+export function getTokenSummary(range: {
+  from_date?: string;
+  to_date?: string;
+}): Promise<TokenSummary> {
+  return apiFetch<TokenSummary>("/api/admin/logs/token-summary", { query: { ...range } });
+}
+
+export function getConversationTokens(id: string): Promise<MessageTokens[]> {
+  return apiFetch<MessageTokens[]>(`/api/admin/logs/conversations/${id}/tokens`);
 }
