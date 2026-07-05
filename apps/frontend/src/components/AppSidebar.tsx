@@ -1,14 +1,20 @@
-import type { ComponentType, ReactNode } from "react";
+import { Fragment, type ComponentType, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import {
+  CalendarClock,
+  Coins,
+  FileStack,
   FileText,
   Landmark,
-  Library,
   LogOut,
+  MessagesSquare,
   MessageSquare,
   PanelLeft,
+  Share2,
   SlidersHorizontal,
+  Users,
+  Wand2,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useUiStore } from "@/store/uiStore";
@@ -19,13 +25,21 @@ interface NavItem {
   icon: ComponentType<{ size?: number | string; className?: string }>;
   end: boolean;
   adminOnly: boolean;
+  /** Nhãn nhóm (viết hoa) — `undefined` = mục không nhóm ở đầu. Item cùng group đứng liền kề. */
+  group?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
   { to: "/", label: "Hỏi đáp", icon: MessageSquare, end: true, adminOnly: false },
-  { to: "/admin/documents", label: "Tài liệu", icon: FileText, end: false, adminOnly: true },
-  { to: "/admin/kb", label: "Kho tri thức", icon: Library, end: false, adminOnly: true },
-  { to: "/admin/advanced", label: "Nâng cao", icon: SlidersHorizontal, end: false, adminOnly: true },
+  { to: "/admin/documents", label: "Tài liệu", icon: FileText, end: false, adminOnly: true, group: "NỘI DUNG" },
+  { to: "/admin/kb/chunks", label: "Đoạn tài liệu", icon: FileStack, end: false, adminOnly: true, group: "KHO TRI THỨC" },
+  { to: "/admin/kb/graph", label: "Đồ thị tri thức", icon: Share2, end: false, adminOnly: true, group: "KHO TRI THỨC" },
+  { to: "/admin/kb/timeline", label: "Dòng thời gian", icon: CalendarClock, end: false, adminOnly: true, group: "KHO TRI THỨC" },
+  { to: "/admin/logs", label: "Hội thoại", icon: MessagesSquare, end: false, adminOnly: true, group: "QUẢN TRỊ" },
+  { to: "/admin/users", label: "Người dùng & quota", icon: Users, end: false, adminOnly: true, group: "QUẢN TRỊ" },
+  { to: "/admin/cost", label: "Chi phí", icon: Coins, end: false, adminOnly: true, group: "QUẢN TRỊ" },
+  { to: "/admin/prompts", label: "Quản lý Prompt", icon: Wand2, end: false, adminOnly: true, group: "QUẢN TRỊ" },
+  { to: "/admin/config", label: "Cấu hình hệ thống", icon: SlidersHorizontal, end: false, adminOnly: true, group: "QUẢN TRỊ" },
 ];
 
 const iconOnlyButtonClass =
@@ -135,14 +149,22 @@ export function AppSidebar() {
             open ? "flex-1 space-y-1 px-2 py-3" : "flex flex-1 flex-col items-center gap-2 py-3"
           }
         >
-          {items.map((item) => (
-            <SidebarLink
-              key={item.to}
-              item={item}
-              open={open}
-              active={isItemActive(location.pathname, item)}
-            />
-          ))}
+          {items.map((item, i) => {
+            const groupChanged = item.group !== items[i - 1]?.group;
+            return (
+              <Fragment key={item.to}>
+                {groupChanged &&
+                  (open
+                    ? item.group && (
+                        <p className="px-3 pb-1 pt-3 text-[10px] font-semibold uppercase tracking-wide text-ink-soft/70">
+                          {item.group}
+                        </p>
+                      )
+                    : i > 0 && <div className="my-1 h-px w-6 bg-paper-border" />)}
+                <SidebarLink item={item} open={open} active={isItemActive(location.pathname, item)} />
+              </Fragment>
+            );
+          })}
         </nav>
 
         <div

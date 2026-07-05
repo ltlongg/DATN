@@ -3,6 +3,7 @@ import { ApiError } from "@/api/client";
 import type { DocumentInput } from "@/api/documents";
 import { Modal } from "@/components/Modal";
 import { EmptyState } from "@/components/EmptyState";
+import { PageHeader } from "@/components/PageHeader";
 import { Spinner } from "@/components/Spinner";
 import { DocumentFormModal } from "@/features/admin/DocumentFormModal";
 import { DocumentTable } from "@/features/admin/DocumentTable";
@@ -49,18 +50,21 @@ export default function AdminDocumentsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-ink">Quản lý tài liệu</h2>
-        <button
-          onClick={() => {
-            setFormError(null);
-            setForm({ open: true, doc: null });
-          }}
-          className="rounded-md bg-brand px-4 py-2 text-sm text-brand-fg hover:bg-brand-dark"
-        >
-          + Thêm tài liệu
-        </button>
-      </div>
+      <PageHeader
+        title="Quản lý tài liệu"
+        desc="Danh mục tài liệu nguồn của hệ thống."
+        actions={
+          <button
+            onClick={() => {
+              setFormError(null);
+              setForm({ open: true, doc: null });
+            }}
+            className="rounded-md bg-brand px-4 py-2 text-sm text-brand-fg hover:bg-brand-dark"
+          >
+            + Thêm tài liệu
+          </button>
+        }
+      />
 
       {isLoading ? (
         <Spinner />
