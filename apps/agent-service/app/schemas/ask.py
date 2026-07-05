@@ -36,6 +36,10 @@ class AskRequest(BaseModel):
     # id user backend (đã decode từ JWT) — để gắn usage vào đúng user. KHÔNG phải field FE
     # gửi trực tiếp; backend tự điền.
     user_id: str | None = None
+    # conversation_id + message_id (assistant) backend tự điền để quy usage LLM về đúng
+    # hội thoại/message (token per hội thoại). Giống user_id: FE không gửi trực tiếp.
+    conversation_id: str | None = None
+    message_id: str | None = None
 
 
 class Citation(BaseModel):

@@ -214,6 +214,8 @@ async def ask(
         stream=True,
         debug=debug,
         user_id=user.id,
+        conversation_id=conv.id,
+        message_id=assistant_id,
     )
     stream = await open_ask_stream(agent_request)
 

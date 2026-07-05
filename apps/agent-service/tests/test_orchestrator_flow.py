@@ -26,7 +26,7 @@ def _allow_guardrails(monkeypatch):
     """guard_input chạy đầu graph -> mặc định cho qua để test flow hiện có không gọi LLM
     guardrails thật. Test guardrails riêng ở test_guardrails.py."""
 
-    async def allow(question, history, *, user_id=None):
+    async def allow(question, history, **_kwargs):
         return GuardrailDecision(action="allow")
 
     monkeypatch.setattr(nodes, "check_input", allow)

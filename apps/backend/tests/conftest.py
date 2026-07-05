@@ -33,6 +33,7 @@ _DB_MODULES = (
     "app.models.inspect",
     "app.models.logs",
     "app.models.cost",
+    "app.models.prompt",
 )
 
 

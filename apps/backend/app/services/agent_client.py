@@ -38,6 +38,10 @@ class AgentAskRequest(BaseModel):
     debug: bool = False
     # id user đã xác thực (từ JWT) — agent gắn usage LLM vào đúng user cho cost dashboard.
     user_id: str | None = None
+    # conversation_id + message_id (assistant, pre-generate) — agent gắn usage về đúng
+    # hội thoại/message để đo token per hội thoại.
+    conversation_id: str | None = None
+    message_id: str | None = None
 
 
 @dataclass(frozen=True)

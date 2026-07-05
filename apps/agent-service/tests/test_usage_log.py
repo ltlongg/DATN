@@ -57,11 +57,14 @@ def test_record_usage_inserts_correct_columns(monkeypatch) -> None:
         yield _FakeConn(log)
 
     monkeypatch.setattr(usage_log, "connection", fake_connection)
-    usage_log.record_usage("build_query", "gpt", 10, 5, 15, user_id="u-1")
+    usage_log.record_usage(
+        "build_query", "gpt", 10, 5, 15,
+        user_id="u-1", conversation_id="conv-1", message_id="msg-1",
+    )
     insert = next(e for e in log if "INSERT INTO llm_usage" in e[0])
-    _id, task, model, prompt, completion, total, user_id = insert[1]
-    assert (task, model, prompt, completion, total, user_id) == (
-        "build_query", "gpt", 10, 5, 15, "u-1",
+    _id, task, model, prompt, completion, total, user_id, conv_id, msg_id = insert[1]
+    assert (task, model, prompt, completion, total, user_id, conv_id, msg_id) == (
+        "build_query", "gpt", 10, 5, 15, "u-1", "conv-1", "msg-1",
     )
 
 
@@ -101,12 +104,23 @@ async def test_build_query_records_usage_when_present(monkeypatch) -> None:
     captured: dict = {}
     monkeypatch.setattr(nodes, "record_usage", lambda **kw: captured.update(kw))
 
-    await nodes.build_query({"question": "q", "history": [], "user_id": "u-1"}, {})
+    await nodes.build_query(
+        {
+            "question": "q",
+            "history": [],
+            "user_id": "u-1",
+            "conversation_id": "conv-1",
+            "message_id": "msg-1",
+        },
+        {},
+    )
     assert captured["task"] == "build_query"
     assert (captured["prompt_tokens"], captured["completion_tokens"], captured["total_tokens"]) == (
         10, 5, 15,
     )
     assert captured["user_id"] == "u-1"
+    assert captured["conversation_id"] == "conv-1"
+    assert captured["message_id"] == "msg-1"
 
 
 async def test_build_query_skips_usage_when_absent(monkeypatch) -> None:

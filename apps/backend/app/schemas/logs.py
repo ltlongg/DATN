@@ -73,3 +73,47 @@ class QualitySummary(BaseModel):
     low_confidence_count: int
     clarification_count: int
     warning_count: int
+
+
+# --- Token theo hội thoại/message (song song chất lượng, xem admin-restructure-plan §Item 3) ---
+
+
+class TokenOverall(BaseModel):
+    """Tổng hợp token của các lượt gọi LLM ĐÃ gắn conversation_id trong khoảng ngày (card đầu
+    tab). Row usage cũ conversation_id=NULL không tính ở đây — xem tab Chi phí cho tổng honest."""
+
+    total_calls: int
+    total_prompt_tokens: int
+    total_completion_tokens: int
+    total_tokens: int
+    avg_tokens_per_call: float
+
+
+class ConversationTokens(BaseModel):
+    """Token cộng dồn của 1 hội thoại (cho cột token ở danh sách)."""
+
+    conversation_id: str
+    call_count: int
+    total_tokens: int
+
+
+class TokenSummary(BaseModel):
+    overall: TokenOverall
+    by_conversation: list[ConversationTokens]
+
+
+class MessageTokenTaskRow(BaseModel):
+    """1 dòng phân rã theo task trong 1 message. `model` ở mức task vì mỗi task có thể dùng
+    model khác nhau (build_query/synthesize vs guardrail_input)."""
+
+    task: str
+    model: str
+    prompt_tokens: int
+    completion_tokens: int
+    total_tokens: int
+
+
+class MessageTokens(BaseModel):
+    message_id: str
+    total_tokens: int
+    rows: list[MessageTokenTaskRow]

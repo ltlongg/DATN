@@ -30,6 +30,7 @@ from app.schemas.ask import BuildQueryOutput, Citation, RouteDecision
 from app.schemas.retrieval import RetrievedChunk
 from app.tools.graph_rag.retriever import retrieve_graph
 from app.tools.hybrid.retriever import retrieve_hybrid
+from app.tools.prompts.prompt_store import get_active_prompt
 from app.tools.reorder import reorder_for_context
 from app.tools.traditional_rag.retriever import retrieve_traditional
 from app.tools.visualization.builder import build_visualization as build_visualization_payload
@@ -60,10 +61,11 @@ def _orchestrator_model() -> str:
 
 
 async def _record_usage_from_completion(
-    completion: Any, task: str, user_id: str | None
+    completion: Any, task: str, state: AgentState
 ) -> None:
     """Ghi usage của 1 lệnh gọi LLM online (fire-and-forget). Completion không có `.usage`
-    (vd mock cũ) -> bỏ qua êm. record_usage tự nuốt lỗi nên không làm fail flow."""
+    (vd mock cũ) -> bỏ qua êm. record_usage tự nuốt lỗi nên không làm fail flow. Gắn
+    user_id/conversation_id/message_id từ state để quy usage về đúng user + hội thoại + message."""
     usage = getattr(completion, "usage", None)
     if usage is None:
         return
@@ -74,7 +76,9 @@ async def _record_usage_from_completion(
         prompt_tokens=getattr(usage, "prompt_tokens", 0) or 0,
         completion_tokens=getattr(usage, "completion_tokens", 0) or 0,
         total_tokens=getattr(usage, "total_tokens", 0) or 0,
-        user_id=user_id,
+        user_id=state.get("user_id"),
+        conversation_id=state.get("conversation_id"),
+        message_id=state.get("message_id"),
     )
 
 
@@ -88,7 +92,11 @@ async def guard_input(state: AgentState, config: RunnableConfig) -> dict[str, An
     lỗi/timeout đã quy về allow/block theo fail_closed."""
     emitter = _emitter(config)
     decision = await check_input(
-        state["question"], state["history"], user_id=state.get("user_id")
+        state["question"],
+        state["history"],
+        user_id=state.get("user_id"),
+        conversation_id=state.get("conversation_id"),
+        message_id=state.get("message_id"),
     )
     if decision.action == "allow":
         return {"debug": {"guard_input": {"action": "allow"}}}
@@ -115,7 +123,10 @@ async def build_query(state: AgentState, config: RunnableConfig) -> dict[str, An
         completion = await client.chat.completions.parse(
             model=_orchestrator_model(),
             messages=[
-                {"role": "system", "content": bq_prompt.SYSTEM_PROMPT},
+                {
+                    "role": "system",
+                    "content": get_active_prompt("build_query", fallback=bq_prompt.SYSTEM_PROMPT),
+                },
                 {"role": "user", "content": bq_prompt.build_user_prompt(question, history)},
             ],
             response_format=BuildQueryOutput,
@@ -124,9 +135,7 @@ async def build_query(state: AgentState, config: RunnableConfig) -> dict[str, An
         parsed = completion.choices[0].message.parsed
         if parsed is None:
             raise ValueError("build_query trả parsed None")
-        await _record_usage_from_completion(
-            completion, "build_query", state.get("user_id")
-        )
+        await _record_usage_from_completion(completion, "build_query", state)
         return {
             "standalone_query": parsed.standalone_query.strip() or question,
             "seed_mentions": parsed.mentioned_entities,
@@ -221,7 +230,10 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
     # middle". Thuần layout prompt — KHÔNG đổi retrieval.chunks lưu ở state (citation/viz giữ nguyên).
     chunks_for_prompt = reorder_for_context(retrieval.chunks)
     messages = [
-        {"role": "system", "content": syn_prompt.SYSTEM_PROMPT},
+        {
+            "role": "system",
+            "content": get_active_prompt("synthesize", fallback=syn_prompt.SYSTEM_PROMPT),
+        },
         {
             "role": "user",
             "content": syn_prompt.build_user_prompt(
@@ -233,6 +245,8 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
         },
     ]
     user_id = state.get("user_id")
+    conversation_id = state.get("conversation_id")
+    message_id = state.get("message_id")
 
     async def _on_usage(prompt: int, completion: int, total: int) -> None:
         await asyncio.to_thread(
@@ -243,6 +257,8 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
             completion_tokens=completion,
             total_tokens=total,
             user_id=user_id,
+            conversation_id=conversation_id,
+            message_id=message_id,
         )
 
     result = await stream_synthesis(

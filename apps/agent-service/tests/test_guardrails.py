@@ -165,10 +165,12 @@ async def test_check_input_records_usage(monkeypatch) -> None:
         recorded.update(kw)
 
     monkeypatch.setattr(guardrails, "record_usage", fake_record)
-    await guardrails.check_input("x", [], user_id="u1")
+    await guardrails.check_input("x", [], user_id="u1", conversation_id="c1", message_id="m1")
     assert recorded["task"] == "guardrail_input"
     assert recorded["model"] == "gpt-4o-mini"
     assert recorded["user_id"] == "u1"
+    assert recorded["conversation_id"] == "c1"
+    assert recorded["message_id"] == "m1"
     assert recorded["total_tokens"] == 12
     # Model guardrails riêng — KHÔNG phải orchestrator/llm_model.
     assert capture["model"] == "gpt-4o-mini"
@@ -187,7 +189,7 @@ async def test_block_stream_emits_token_then_blocked_no_done(monkeypatch) -> Non
         "lịch sử Việt Nam nhé."
     )
 
-    async def block(question, history, *, user_id=None):
+    async def block(question, history, **_kwargs):
         return GuardrailDecision(
             action="block", categories=["harmful_instructions"], safe_message=safe
         )
@@ -228,7 +230,7 @@ async def test_allow_stream_proceeds_to_build_query(monkeypatch) -> None:
     # allow -> build_query được gọi (đánh dấu qua flag).
     called: dict = {}
 
-    async def allow(question, history, *, user_id=None):
+    async def allow(question, history, **_kwargs):
         return GuardrailDecision(action="allow")
 
     monkeypatch.setattr(nodes, "check_input", allow)

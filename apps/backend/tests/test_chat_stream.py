@@ -125,6 +125,10 @@ def test_ask_sends_question_and_first_turn_history_empty(client, auth, mock_agen
     assert payload["question"] == "Câu hỏi 1"
     assert payload["history"] == []
     assert payload["stream"] is True
+    # Item 3: backend luồn conversation_id + message_id (assistant pre-generate) sang agent
+    # để quy token về đúng hội thoại/message.
+    assert payload["conversation_id"] == cid
+    assert isinstance(payload["message_id"], str) and payload["message_id"]
 
 
 def test_ask_forwards_selected_mode(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]

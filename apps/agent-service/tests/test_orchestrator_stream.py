@@ -21,7 +21,7 @@ from app.schemas.visualization import VisualizationPayload
 def _allow_guardrails(monkeypatch):
     """Mặc định guardrails allow để test luồng SSE hiện có (test block ở test_guardrails.py)."""
 
-    async def allow(question, history, *, user_id=None):
+    async def allow(question, history, **_kwargs):
         return GuardrailDecision(action="allow")
 
     monkeypatch.setattr(nodes, "check_input", allow)

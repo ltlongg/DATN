@@ -22,6 +22,8 @@ def initial_state(request: AskRequest) -> AgentState:
         "question": request.question,
         "history": list(request.history),
         "user_id": request.user_id,
+        "conversation_id": request.conversation_id,
+        "message_id": request.message_id,
         "standalone_query": "",
         "seed_mentions": [],
         "requested_mode": request.mode,

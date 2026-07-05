@@ -22,6 +22,7 @@ from app.core.config import get_settings
 from app.core.llm import get_async_openai_client
 from app.core.usage_log import record_usage
 from app.prompts import guardrails_input as gi_prompt
+from app.tools.prompts.prompt_store import get_active_prompt
 from app.schemas.ask import ChatMessage
 from app.schemas.guardrails import GuardrailDecision
 
@@ -39,7 +40,13 @@ def _fail_closed_decision() -> GuardrailDecision:
     )
 
 
-async def _record_usage(completion: Any, model: str, user_id: str | None) -> None:
+async def _record_usage(
+    completion: Any,
+    model: str,
+    user_id: str | None,
+    conversation_id: str | None,
+    message_id: str | None,
+) -> None:
     usage = getattr(completion, "usage", None)
     if usage is None:
         return
@@ -51,6 +58,8 @@ async def _record_usage(completion: Any, model: str, user_id: str | None) -> Non
         completion_tokens=getattr(usage, "completion_tokens", 0) or 0,
         total_tokens=getattr(usage, "total_tokens", 0) or 0,
         user_id=user_id,
+        conversation_id=conversation_id,
+        message_id=message_id,
     )
 
 
@@ -61,7 +70,12 @@ async def _call_llm(
     completion = await client.chat.completions.parse(
         model=model,
         messages=[
-            {"role": "system", "content": gi_prompt.SYSTEM_PROMPT},
+            {
+                "role": "system",
+                "content": get_active_prompt(
+                    "guardrails_input", fallback=gi_prompt.SYSTEM_PROMPT
+                ),
+            },
             {"role": "user", "content": gi_prompt.build_user_prompt(question, history)},
         ],
         response_format=GuardrailDecision,
@@ -78,6 +92,8 @@ async def check_input(
     history: list[ChatMessage],
     *,
     user_id: str | None = None,
+    conversation_id: str | None = None,
+    message_id: str | None = None,
 ) -> GuardrailDecision:
     """Kiểm 1 câu hỏi -> GuardrailDecision. Không bao giờ raise: lỗi/timeout được nuốt và
     quy về fail-closed (block) hoặc fail-open (allow) theo `guardrails_fail_closed`.
@@ -104,7 +120,7 @@ async def check_input(
             action="allow"
         )
 
-    await _record_usage(completion, model, user_id)
+    await _record_usage(completion, model, user_id, conversation_id, message_id)
     # Model chặn nhưng quên safe_message -> vá bằng mặc định để luôn có gì đó stream cho user.
     if decision.action == "block" and not decision.safe_message.strip():
         decision.safe_message = gi_prompt.DEFAULT_SAFE_MESSAGE

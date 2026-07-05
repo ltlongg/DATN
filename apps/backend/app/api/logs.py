@@ -17,9 +17,12 @@ from app.schemas.logs import (
     ConversationLogItem,
     ConversationLogResponse,
     MessageLogItem,
+    MessageTokens,
     QualitySummary,
+    TokenSummary,
 )
 from app.services.quality_service import compute_quality_summary, message_quality_flags
+from app.services.token_service import build_message_tokens, compute_token_summary
 
 router = APIRouter(dependencies=[Depends(require_admin)])
 
@@ -68,3 +71,23 @@ async def quality_summary(
 ) -> QualitySummary:
     rows = await anyio.to_thread.run_sync(repo.list_quality_rows, from_date, to_date)
     return compute_quality_summary(rows)
+
+
+@router.get("/token-summary", response_model=TokenSummary)
+async def token_summary(
+    from_date: str | None = Query(default=None),
+    to_date: str | None = Query(default=None),
+) -> TokenSummary:
+    """Card token đầu tab + map token theo hội thoại (chỉ usage đã gắn conversation_id trong
+    khoảng ngày). Chỉ lọc theo ngày (giống quality-summary), không theo user_email."""
+    rows = await anyio.to_thread.run_sync(
+        repo.list_attributed_usage_rows, from_date, to_date
+    )
+    return compute_token_summary(rows)
+
+
+@router.get("/conversations/{conversation_id}/tokens", response_model=list[MessageTokens])
+async def conversation_tokens(conversation_id: str) -> list[MessageTokens]:
+    """Phân rã token theo message + task cho 1 hội thoại (chi tiết)."""
+    rows = await anyio.to_thread.run_sync(repo.get_message_token_rows, conversation_id)
+    return build_message_tokens(rows)

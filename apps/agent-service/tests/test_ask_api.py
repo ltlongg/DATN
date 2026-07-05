@@ -28,7 +28,7 @@ def _allow_guardrails(monkeypatch):
     """guard_input đứng đầu graph; mặc định allow để test /ask không gọi LLM guardrails thật
     (guard_input dùng client riêng trong module guardrails, không bị _patch_graph phủ)."""
 
-    async def allow(question, history, *, user_id=None):
+    async def allow(question, history, **_kwargs):
         return GuardrailDecision(action="allow")
 
     monkeypatch.setattr(nodes, "check_input", allow)

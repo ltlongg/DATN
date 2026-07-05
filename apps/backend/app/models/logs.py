@@ -9,6 +9,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import psycopg
+
 from app.core.db import connection
 
 # Cột thô của message (không tính chất lượng ở SQL — để service thuần xử lý).
@@ -110,3 +112,50 @@ def list_quality_rows(
             params,
         )
         return cur.fetchall()
+
+
+# --- Token usage (đọc thẳng llm_usage; agent-service sở hữu DDL, tạo lazy) -----------------
+# Cả 2 hàm bắt UndefinedTable -> [] (y hệt models/cost.py): admin có thể mở tab Hội thoại
+# TRƯỚC câu hỏi đầu tiên (llm_usage chưa tồn tại) mà không 500.
+
+
+def list_attributed_usage_rows(
+    from_date: str | None = None, to_date: str | None = None
+) -> list[dict[str, Any]]:
+    """Usage rows CÓ conversation_id (bỏ row cũ NULL — không backfill) trong khoảng ngày.
+    Nguồn cho card tổng + cột token theo hội thoại. Bảng chưa tồn tại -> []."""
+    where, params = _date_filters(from_date, to_date, "created_at")
+    where.append("conversation_id IS NOT NULL")
+    where_sql = "WHERE " + " AND ".join(where)
+    try:
+        with connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                f"SELECT conversation_id, prompt_tokens, completion_tokens, total_tokens "
+                f"FROM llm_usage {where_sql}",
+                params,
+            )
+            return cur.fetchall()
+    except psycopg.errors.UndefinedTable:
+        return []
+
+
+def get_message_token_rows(conversation_id: str) -> list[dict[str, Any]]:
+    """Usage của 1 hội thoại, gộp theo (message_id, task, model) cho breakdown chi tiết.
+    Đọc thẳng llm_usage theo conversation_id (không JOIN messages) nên orphan usage vẫn ra —
+    FE map theo message_id, dòng nào không khớp message hiển thị vẫn gom được. Bảng chưa tồn
+    tại -> []."""
+    try:
+        with connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                "SELECT message_id, task, model, "
+                "sum(prompt_tokens) AS prompt_tokens, "
+                "sum(completion_tokens) AS completion_tokens, "
+                "sum(total_tokens) AS total_tokens "
+                "FROM llm_usage WHERE conversation_id = %s AND message_id IS NOT NULL "
+                "GROUP BY message_id, task, model "
+                "ORDER BY message_id, task",
+                (conversation_id,),
+            )
+            return cur.fetchall()
+    except psycopg.errors.UndefinedTable:
+        return []

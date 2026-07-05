@@ -27,6 +27,9 @@ class AgentState(TypedDict):
     history: list[ChatMessage]
     # id user backend (từ AskRequest.user_id) — gắn usage LLM vào đúng user cho cost dashboard.
     user_id: str | None
+    # conversation_id + message_id (assistant) — gắn usage LLM về đúng hội thoại/message.
+    conversation_id: str | None
+    message_id: str | None
     standalone_query: str
     seed_mentions: list[str]
     # Mode user chọn (traditional/graph/hybrid); node retrieve dispatch theo field này.
