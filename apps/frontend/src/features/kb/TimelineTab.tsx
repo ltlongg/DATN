@@ -10,18 +10,12 @@ import { Pagination } from "@/features/kb/Pagination";
 
 const LIMIT = 20;
 
-export function TimelineTab({
-  selectedEventId,
-  onSelectEvent,
-  onNavChunk,
-}: {
-  selectedEventId: string | null;
-  onSelectEvent: (eventId: string) => void;
-  onNavChunk: (chunkId: string) => void;
-}) {
+/** Trang độc lập: tự quản sự kiện đang chọn (không điều hướng chéo sang tab khác). */
+export function TimelineTab() {
   const [q, setQ] = useState("");
   const [confidence, setConfidence] = useState("");
   const [offset, setOffset] = useState(0);
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
 
   const list = useQuery({
     queryKey: ["kb-events", q, confidence, offset],
@@ -71,7 +65,7 @@ export function TimelineTab({
             <EventTable
               items={list.data.items}
               selectedId={selectedEventId}
-              onSelect={onSelectEvent}
+              onSelect={setSelectedEventId}
             />
           )}
         </div>
@@ -93,7 +87,7 @@ export function TimelineTab({
         ) : detail.isError || !detail.data ? (
           <p className="text-sm text-rose-700">Không tải được chi tiết sự kiện.</p>
         ) : (
-          <EventDetail detail={detail.data} onNavChunk={onNavChunk} />
+          <EventDetail detail={detail.data} />
         )}
       </div>
     </div>

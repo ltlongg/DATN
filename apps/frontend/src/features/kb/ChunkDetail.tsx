@@ -6,13 +6,9 @@ import type { ChunkDetail as ChunkDetailData, EntityListItem } from "@/types/kb"
 export function ChunkDetail({
   detail,
   referencingEntities,
-  onNavEntity,
-  onNavEvent,
 }: {
   detail: ChunkDetailData;
   referencingEntities: EntityListItem[];
-  onNavEntity: (normName: string) => void;
-  onNavEvent: (eventId: string) => void;
 }) {
   return (
     <div className="space-y-4">
@@ -50,14 +46,9 @@ export function ChunkDetail({
         ) : (
           <ul className="space-y-1">
             {detail.referencing_events.map((e) => (
-              <li key={e.event_id}>
-                <button
-                  onClick={() => onNavEvent(e.event_id)}
-                  className="flex items-center gap-2 text-left text-sm text-brand hover:underline"
-                >
-                  <span>{e.label}</span>
-                  <ConfidenceBadge confidence={e.confidence} />
-                </button>
+              <li key={e.event_id} className="flex items-center gap-2 text-sm text-ink">
+                <span>{e.label}</span>
+                <ConfidenceBadge confidence={e.confidence} />
               </li>
             ))}
           </ul>
@@ -73,13 +64,11 @@ export function ChunkDetail({
         ) : (
           <ul className="flex flex-wrap gap-2">
             {referencingEntities.map((ent) => (
-              <li key={ent.norm_name}>
-                <button
-                  onClick={() => onNavEntity(ent.norm_name)}
-                  className="rounded-full border border-paper-border px-2 py-0.5 text-xs text-brand hover:border-brand"
-                >
-                  {ent.name}
-                </button>
+              <li
+                key={ent.norm_name}
+                className="rounded-full border border-paper-border px-2 py-0.5 text-xs text-ink"
+              >
+                {ent.name}
               </li>
             ))}
           </ul>

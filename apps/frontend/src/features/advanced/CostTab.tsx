@@ -25,8 +25,7 @@ export function CostTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-ink">Chi phí (token LLM online)</h3>
+      <div className="flex justify-end">
         <CostFilterBar initial={range} onApply={setRange} />
       </div>
 

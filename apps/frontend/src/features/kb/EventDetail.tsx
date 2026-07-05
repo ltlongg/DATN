@@ -7,15 +7,9 @@ function timeLabel(e: EventDetailData): string {
   return e.time_start;
 }
 
-/** Chi tiết event: summary + thời gian + locations + link chunk nguồn. Gazetteer hoãn ->
- * không có toạ độ (đúng chủ ý). */
-export function EventDetail({
-  detail,
-  onNavChunk,
-}: {
-  detail: EventDetailData;
-  onNavChunk: (chunkId: string) => void;
-}) {
+/** Chi tiết event: summary + thời gian + locations + chunk nguồn (id để tra cứu). Gazetteer
+ * hoãn -> không có toạ độ (đúng chủ ý). */
+export function EventDetail({ detail }: { detail: EventDetailData }) {
   return (
     <div className="space-y-4">
       <div>
@@ -48,13 +42,12 @@ export function EventDetail({
         ) : (
           <div className="flex flex-wrap gap-1">
             {detail.source_chunk_ids.map((id) => (
-              <button
+              <span
                 key={id}
-                onClick={() => onNavChunk(id)}
-                className="rounded-full border border-paper-border px-2 py-0.5 text-[11px] text-brand hover:border-brand"
+                className="rounded-full border border-paper-border px-2 py-0.5 text-[11px] text-ink"
               >
                 {id}
-              </button>
+              </span>
             ))}
           </div>
         )}

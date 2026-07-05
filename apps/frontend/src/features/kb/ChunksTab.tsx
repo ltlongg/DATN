@@ -10,19 +10,11 @@ import { Pagination } from "@/features/kb/Pagination";
 
 const LIMIT = 20;
 
-export function ChunksTab({
-  selectedChunkId,
-  onSelectChunk,
-  onNavEntity,
-  onNavEvent,
-}: {
-  selectedChunkId: string | null;
-  onSelectChunk: (chunkId: string) => void;
-  onNavEntity: (normName: string) => void;
-  onNavEvent: (eventId: string) => void;
-}) {
+/** Trang độc lập: tự quản chunk đang chọn (không điều hướng chéo sang tab khác). */
+export function ChunksTab() {
   const [q, setQ] = useState("");
   const [offset, setOffset] = useState(0);
+  const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
 
   const list = useQuery({
     queryKey: ["kb-chunks", q, offset],
@@ -62,7 +54,7 @@ export function ChunksTab({
             <ChunkTable
               items={list.data.items}
               selectedId={selectedChunkId}
-              onSelect={onSelectChunk}
+              onSelect={setSelectedChunkId}
             />
           )}
         </div>
@@ -87,8 +79,6 @@ export function ChunksTab({
           <ChunkDetail
             detail={detail.data}
             referencingEntities={refEntities.data?.items ?? []}
-            onNavEntity={onNavEntity}
-            onNavEvent={onNavEvent}
           />
         )}
       </div>

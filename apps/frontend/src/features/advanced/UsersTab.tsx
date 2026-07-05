@@ -52,8 +52,7 @@ export function UsersTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-ink">Người dùng & quota</h3>
+      <div className="flex justify-end">
         <button
           onClick={() => {
             setError(null);

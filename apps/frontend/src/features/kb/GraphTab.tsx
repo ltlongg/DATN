@@ -20,17 +20,12 @@ const ENTITY_TYPES = [
   "Chức danh",
 ] as const;
 
-export function GraphTab({
-  selectedNorm,
-  onSelectEntity,
-  onNavChunk,
-}: {
-  selectedNorm: string | null;
-  onSelectEntity: (normName: string) => void;
-  onNavChunk: (chunkId: string) => void;
-}) {
+/** Trang độc lập: tự quản thực thể đang chọn. `onSelectEntity` chỉ đổi selection NỘI BỘ
+ * (click node ego-graph mở thực thể khác trong cùng trang), không nhảy sang tab khác. */
+export function GraphTab() {
   const [q, setQ] = useState("");
   const [type, setType] = useState("");
+  const [selectedNorm, setSelectedNorm] = useState<string | null>(null);
 
   const list = useInfiniteQuery({
     queryKey: ["kb-entities", q, type],
@@ -114,7 +109,7 @@ export function GraphTab({
               ref={scrollRef}
               className="max-h-[70vh] overflow-y-auto rounded-lg border border-paper-border bg-paper-card"
             >
-              <EntityTable items={items} selectedNorm={selectedNorm} onSelect={onSelectEntity} />
+              <EntityTable items={items} selectedNorm={selectedNorm} onSelect={setSelectedNorm} />
               <div ref={sentinelRef} className="h-px" />
               {isFetchingNextPage && (
                 <div className="p-3">
@@ -138,11 +133,7 @@ export function GraphTab({
         ) : detail.isError || !detail.data ? (
           <p className="text-sm text-rose-700">Không tải được chi tiết thực thể.</p>
         ) : (
-          <EntityDetail
-            detail={detail.data}
-            onNavChunk={onNavChunk}
-            onSelectEntity={onSelectEntity}
-          />
+          <EntityDetail detail={detail.data} onSelectEntity={setSelectedNorm} />
         )}
       </div>
     </div>

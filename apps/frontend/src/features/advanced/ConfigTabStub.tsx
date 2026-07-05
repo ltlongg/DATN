@@ -6,7 +6,7 @@
 export function ConfigTabStub() {
   return (
     <div className="rounded-lg border border-dashed border-paper-border p-8 text-center">
-      <p className="text-lg font-semibold text-ink">Cấu hình hệ thống — Sắp cập nhật</p>
+      <p className="text-lg font-semibold text-ink">Sắp cập nhật</p>
       <p className="mx-auto mt-2 max-w-md text-sm text-ink-soft">
         Chọn chế độ truy hồi mặc định (Traditional / GraphRAG / Hybrid) và tinh chỉnh
         retrieval/synthesize. Tính năng đã có thiết kế đầy đủ, đang chờ tới lượt triển khai.

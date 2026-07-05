@@ -1,37 +1,28 @@
 import { EgoGraph } from "@/features/kb/EgoGraph";
 import type { EntityDetail as EntityDetailData } from "@/types/kb";
 
-function ChunkChips({
-  ids,
-  onNavChunk,
-}: {
-  ids: string[];
-  onNavChunk: (chunkId: string) => void;
-}) {
+function ChunkChips({ ids }: { ids: string[] }) {
   if (ids.length === 0) return <span className="text-xs text-ink-soft">—</span>;
   return (
     <div className="flex flex-wrap gap-1">
       {ids.map((id) => (
-        <button
+        <span
           key={id}
-          onClick={() => onNavChunk(id)}
-          className="rounded-full border border-paper-border px-2 py-0.5 text-[11px] text-brand hover:border-brand"
+          className="rounded-full border border-paper-border px-2 py-0.5 text-[11px] text-ink"
         >
           {id}
-        </button>
+        </span>
       ))}
     </div>
   );
 }
 
-/** Chi tiết entity: mô tả gộp + ego-graph 1-hop + bảng quan hệ + link chunk nguồn. */
+/** Chi tiết entity: mô tả gộp + ego-graph 1-hop + bảng quan hệ + chunk nguồn (id để tra cứu). */
 export function EntityDetail({
   detail,
-  onNavChunk,
   onSelectEntity,
 }: {
   detail: EntityDetailData;
-  onNavChunk: (chunkId: string) => void;
   onSelectEntity: (normName: string) => void;
 }) {
   return (
@@ -85,7 +76,7 @@ export function EntityDetail({
 
       <section>
         <p className="mb-1 text-xs font-semibold uppercase text-ink-soft">Chunk nguồn</p>
-        <ChunkChips ids={detail.source_chunk_ids} onNavChunk={onNavChunk} />
+        <ChunkChips ids={detail.source_chunk_ids} />
       </section>
     </div>
   );
