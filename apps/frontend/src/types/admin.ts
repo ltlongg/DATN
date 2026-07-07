@@ -146,3 +146,24 @@ export interface TopUserCost {
   total_tokens: number;
   call_count: number;
 }
+
+// --- Hoạt động hệ thống (activity log) — mirror apps/backend/app/schemas/activity.py ---
+export interface ActivityLogItem {
+  id: string;
+  created_at: string;
+  request_id: string | null;
+  user_id: string | null;
+  method: string;
+  path: string;
+  status_code: number;
+  severity: "ok" | "error";
+  latency_ms: number | null;
+  error: string | null;
+}
+
+export interface ActivityLogResponse {
+  items: ActivityLogItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}

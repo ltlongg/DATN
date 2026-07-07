@@ -32,7 +32,7 @@ describe("AppSidebar", () => {
       expect(screen.getByText(group)).toBeInTheDocument();
     }
     // Vài mục đại diện mỗi nhóm
-    for (const label of ["Hỏi đáp", "Đoạn tài liệu", "Hội thoại", "Chi phí", "Quản lý Prompt", "Cấu hình hệ thống"]) {
+    for (const label of ["Hỏi đáp", "Đoạn tài liệu", "Hội thoại", "Chi phí", "Hoạt động hệ thống", "Quản lý Prompt", "Cấu hình hệ thống"]) {
       expect(screen.getByRole("link", { name: label })).toBeInTheDocument();
     }
   });

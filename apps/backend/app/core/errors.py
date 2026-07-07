@@ -43,12 +43,15 @@ def _body(code: str, message: str) -> dict[str, str]:
 
 
 def register_error_handlers(app: FastAPI) -> None:
+    # Mỗi handler ghi `code` lên request.state để ActivityLogMiddleware đọc lại sau call_next
+    # (nó chỉ thấy response, không thấy exception đã bị handler nuốt). Xem activity-log-plan §4.3.
     @app.exception_handler(AppError)
-    async def _app_error(_: Request, exc: AppError) -> JSONResponse:
+    async def _app_error(request: Request, exc: AppError) -> JSONResponse:
+        request.state.error_code = exc.code
         return JSONResponse(status_code=exc.status_code, content=_body(exc.code, exc.message))
 
     @app.exception_handler(StarletteHTTPException)
-    async def _http_error(_: Request, exc: StarletteHTTPException) -> JSONResponse:
+    async def _http_error(request: Request, exc: StarletteHTTPException) -> JSONResponse:
         # detail có thể là dict {code,message} (ta tự ném) hoặc str (mặc định FastAPI).
         detail = exc.detail
         if isinstance(detail, dict) and "code" in detail:
@@ -57,13 +60,15 @@ def register_error_handlers(app: FastAPI) -> None:
         else:
             code = _DEFAULT_CODE.get(exc.status_code, "error")
             message = str(detail)
+        request.state.error_code = code
         return JSONResponse(status_code=exc.status_code, content=_body(code, message))
 
     @app.exception_handler(RequestValidationError)
-    async def _validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
+    async def _validation_error(request: Request, exc: RequestValidationError) -> JSONResponse:
         # Gộp lỗi đầu tiên cho gọn — frontend MVP chỉ cần message hiển thị được.
         first = exc.errors()[0] if exc.errors() else {}
         loc = ".".join(str(p) for p in first.get("loc", []) if p != "body")
         msg = first.get("msg", "Dữ liệu không hợp lệ.")
         message = f"{loc}: {msg}" if loc else msg
+        request.state.error_code = "validation_error"
         return JSONResponse(status_code=422, content=_body("validation_error", message))

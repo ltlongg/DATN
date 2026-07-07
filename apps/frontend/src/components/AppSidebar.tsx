@@ -2,6 +2,7 @@ import { Fragment, type ComponentType, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import {
+  Activity,
   CalendarClock,
   Coins,
   FileStack,
@@ -38,6 +39,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: "/admin/logs", label: "Hội thoại", icon: MessagesSquare, end: false, adminOnly: true, group: "QUẢN TRỊ" },
   { to: "/admin/users", label: "Người dùng & quota", icon: Users, end: false, adminOnly: true, group: "QUẢN TRỊ" },
   { to: "/admin/cost", label: "Chi phí", icon: Coins, end: false, adminOnly: true, group: "QUẢN TRỊ" },
+  { to: "/admin/activity", label: "Hoạt động hệ thống", icon: Activity, end: false, adminOnly: true, group: "QUẢN TRỊ" },
   { to: "/admin/prompts", label: "Quản lý Prompt", icon: Wand2, end: false, adminOnly: true, group: "QUẢN TRỊ" },
   { to: "/admin/config", label: "Cấu hình hệ thống", icon: SlidersHorizontal, end: false, adminOnly: true, group: "QUẢN TRỊ" },
 ];

@@ -11,6 +11,7 @@ import AdminKbChunksPage from "@/pages/AdminKbChunksPage";
 import AdminKbTimelinePage from "@/pages/AdminKbTimelinePage";
 import AdminLogsPage from "@/pages/AdminLogsPage";
 import AdminUsersPage from "@/pages/AdminUsersPage";
+import AdminActivityPage from "@/pages/AdminActivityPage";
 import AdminConfigPage from "@/pages/AdminConfigPage";
 
 // Lazy: chỉ các trang nặng (graph = react-force-graph-2d, cost = recharts) — tách khỏi bundle
@@ -52,6 +53,7 @@ export const routes: RouteObject[] = [
                   { path: "logs", element: <AdminLogsPage /> },
                   { path: "users", element: <AdminUsersPage /> },
                   { path: "cost", element: <AdminCostPage /> },
+                  { path: "activity", element: <AdminActivityPage /> },
                   { path: "prompts", element: <AdminPromptsPage /> },
                   { path: "config", element: <AdminConfigPage /> },
                   // Back-compat: route gộp cũ -> mục đầu nhóm tương ứng

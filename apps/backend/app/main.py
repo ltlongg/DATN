@@ -8,18 +8,24 @@ streaming sang agent-service (xem docs/plan/backend-plan.md).
 from __future__ import annotations
 
 import logging
+import time
 import uuid
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from functools import partial
 
+import anyio
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
+from starlette.responses import Response
 
-from app.api import auth, chat, cost, documents, health, inspect, logs, prompts, users
+from app.api import activity, auth, chat, cost, documents, health, inspect, logs, prompts, users
 from app.core.config import get_settings
 from app.core.db import close_pool, get_pool
 from app.core.errors import register_error_handlers
+from app.core.security import TokenError, decode_access_token
+from app.models.activity import record_activity
 
 logger = logging.getLogger("backend.startup")
 
@@ -47,10 +53,79 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         return response
 
 
+def _should_log_activity(request: Request) -> bool:
+    """Chỉ log request /api/* có ý nghĩa: bỏ CORS preflight, non-API (health/static), và
+    chính feed activity (tránh admin refresh tự làm ngập log)."""
+    if request.method == "OPTIONS":
+        return False
+    path = request.url.path
+    return path.startswith("/api/") and not path.startswith("/api/admin/activity")
+
+
+def _user_id_from_request(request: Request) -> str | None:
+    """Best-effort lấy user_id từ Bearer token (KHÔNG đụng deps.py — request chưa auth vẫn
+    log được với user NULL). Token thiếu/không hợp lệ -> None."""
+    header = request.headers.get("Authorization", "")
+    if not header.startswith("Bearer "):
+        return None
+    try:
+        payload = decode_access_token(header.removeprefix("Bearer "))
+    except TokenError:
+        return None
+    sub = payload.get("sub")
+    return str(sub) if sub is not None else None
+
+
+class ActivityLogMiddleware(BaseHTTPMiddleware):
+    """Ghi 1 dòng activity_log cho mỗi request /api/*. Phải chạy TRONG RequestIDMiddleware
+    (thêm TRƯỚC nó ở create_app) để đọc được request.state.request_id. Xem activity-log-plan.md."""
+
+    async def dispatch(
+        self, request: Request, call_next: RequestResponseEndpoint
+    ) -> Response:
+        if not _should_log_activity(request):
+            return await call_next(request)
+        start = time.perf_counter()
+        try:
+            response = await call_next(request)
+        except Exception as exc:  # lỗi CHƯA được handler bắt (vd ProgrammingError 500 thô)
+            await self._record(request, 500, start, f"{type(exc).__name__}: {str(exc)[:200]}")
+            raise  # re-raise để ServerErrorMiddleware xử lý như cũ
+        error = None
+        if response.status_code >= 400:
+            # Lỗi đã handled: handler ghi code lên request.state (core/errors.py). Fallback
+            # phòng khi status >= 400 đến từ nơi không set (vd Response thô của framework).
+            error = getattr(request.state, "error_code", None) or f"HTTP {response.status_code}"
+        await self._record(request, response.status_code, start, error)
+        return response
+
+    @staticmethod
+    async def _record(
+        request: Request, status_code: int, start: float, error: str | None
+    ) -> None:
+        await anyio.to_thread.run_sync(
+            partial(
+                record_activity,
+                request_id=getattr(request.state, "request_id", None),
+                user_id=_user_id_from_request(request),
+                method=request.method,
+                path=request.url.path,
+                status_code=status_code,
+                severity="error" if status_code >= 400 else "ok",
+                latency_ms=round((time.perf_counter() - start) * 1000),
+                error=error,
+            )
+        )
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(title="Agentic RAG Backend", version="0.1.0", lifespan=lifespan)
 
+    # Thứ tự QUAN TRỌNG: Starlette chạy middleware thêm-sau = bọc-ngoài = chạy-trước. Thêm
+    # ActivityLog TRƯỚC RequestID -> ActivityLog nằm TRONG -> chạy SAU khi RequestID đã set
+    # request.state.request_id. CORS thêm cuối -> ngoài cùng.
+    app.add_middleware(ActivityLogMiddleware)
     app.add_middleware(RequestIDMiddleware)
     app.add_middleware(
         CORSMiddleware,
@@ -71,6 +146,7 @@ def create_app() -> FastAPI:
     app.include_router(users.router, prefix="/api/admin/users", tags=["admin-users"])
     app.include_router(cost.router, prefix="/api/admin/cost", tags=["admin-cost"])
     app.include_router(prompts.router, prefix="/api/admin/prompts", tags=["admin-prompts"])
+    app.include_router(activity.router, prefix="/api/admin/activity", tags=["admin-activity"])
 
     return app
 

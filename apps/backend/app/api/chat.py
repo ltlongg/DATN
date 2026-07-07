@@ -7,13 +7,14 @@ import uuid
 from collections.abc import AsyncIterator
 
 import anyio
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 
 from app.api.deps import get_current_user, get_owned_conversation
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.models import conversation as conv_repo
+from app.models.activity import record_activity
 from app.models.conversation import Conversation
 from app.models.user import User
 from app.schemas.chat import (
@@ -115,7 +116,12 @@ async def _persist_assistant(
 
 
 async def _proxy_stream(
-    stream: AgentStream, collector: SseCollector, conversation_id: str, assistant_id: str
+    stream: AgentStream,
+    collector: SseCollector,
+    conversation_id: str,
+    assistant_id: str,
+    request_id: str | None,
+    user_id: str,
 ) -> AsyncIterator[str]:
     """Proxy event SSE xuống frontend, gom vào collector, lưu message cuối khi `done`.
 
@@ -153,15 +159,29 @@ async def _proxy_stream(
         else:
             yield format_sse(event.event, event.data)
             if event.event == "error":
-                logger.info(
-                    "ask error conversation=%s code=%s",
-                    conversation_id,
-                    (collector.error or {}).get("code"),
+                code = (collector.error or {}).get("code")
+                logger.info("ask error conversation=%s code=%s", conversation_id, code)
+                # HTTP response đã mở 200 từ trước (xem ask()) — lỗi này chỉ lộ giữa stream
+                # SSE nên middleware activity log không bắt được. Ghi thêm 1 dòng riêng để
+                # admin thấy trên trang Hoạt động hệ thống (activity-log-plan.md không cover
+                # ca này — bổ sung theo yêu cầu 2026-07-05).
+                await anyio.to_thread.run_sync(
+                    lambda: record_activity(
+                        request_id=request_id,
+                        user_id=user_id,
+                        method="POST",
+                        path=f"/api/conversations/{conversation_id}/ask (stream)",
+                        status_code=200,
+                        severity="error",
+                        latency_ms=None,
+                        error=str(code) if code else "stream_error",
+                    )
                 )
 
 
 @router.post("/conversations/{conversation_id}/ask")
 async def ask(
+    request: Request,
     body: AskRequest,
     conv: Conversation = Depends(get_owned_conversation),
     user: User = Depends(get_current_user),
@@ -220,8 +240,9 @@ async def ask(
     stream = await open_ask_stream(agent_request)
 
     collector = SseCollector()
+    request_id = getattr(request.state, "request_id", None)
     return StreamingResponse(
-        _proxy_stream(stream, collector, conv.id, assistant_id),
+        _proxy_stream(stream, collector, conv.id, assistant_id, request_id, user.id),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )

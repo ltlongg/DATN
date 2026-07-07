@@ -100,6 +100,33 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
         updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
     );
     """,
+    # activity_log — mỗi request /api/* ghi 1 dòng (ActivityLogMiddleware). Theo dõi hoạt
+    # động hệ thống ở mức endpoint: phần nào OK/lỗi, mất bao lâu, lỗi gì. clock_timestamp()
+    # (KHÔNG now()) để nhiều dòng ghi gần nhau giữ đúng thứ tự — cùng lý do bảng messages.
+    # KHÔNG index trên path: filter path dùng ILIKE '%...%' nên btree vô dụng (xem
+    # activity-log-plan.md §3). Xem activity-log-plan.md để biết toàn bộ thiết kế.
+    """
+    CREATE TABLE IF NOT EXISTS activity_log (
+        id          UUID PRIMARY KEY,
+        created_at  TIMESTAMPTZ NOT NULL DEFAULT clock_timestamp(),
+        request_id  TEXT,
+        user_id     TEXT,
+        method      TEXT NOT NULL,
+        path        TEXT NOT NULL,
+        status_code INTEGER NOT NULL,
+        severity    TEXT NOT NULL,
+        latency_ms  INTEGER,
+        error       TEXT
+    );
+    """,
+    """
+    CREATE INDEX IF NOT EXISTS idx_activity_log_created_at
+    ON activity_log (created_at DESC);
+    """,
+    """
+    CREATE INDEX IF NOT EXISTS idx_activity_log_severity
+    ON activity_log (severity);
+    """,
 )
 
 

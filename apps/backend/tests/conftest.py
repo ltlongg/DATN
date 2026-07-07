@@ -34,6 +34,7 @@ _DB_MODULES = (
     "app.models.logs",
     "app.models.cost",
     "app.models.prompt",
+    "app.models.activity",
 )
 
 
