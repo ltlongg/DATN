@@ -1,7 +1,8 @@
 """Module 4 — Người dùng & quota router (admin) — prefix /api/admin/users.
 
-CRUD tối thiểu: list, tạo (hash password), PATCH role/is_active/question_quota. Có guard
-chặn admin tự khóa chính mình. Xem backend-additions-plan.md §3.2.
+CRUD tối thiểu: list, tạo (hash password), PATCH role/is_active/question_quota. Guard:
+admin không tự khóa (self_lock_forbidden) và không tự hạ quyền chính mình
+(self_demote_forbidden). Xem backend-additions-plan.md §3.2.
 """
 
 from __future__ import annotations
@@ -59,6 +60,10 @@ async def update_user(
     # Guard tự khóa: admin không được đặt is_active=False cho CHÍNH MÌNH (tránh mất quyền).
     if user_id == admin.id and fields.get("is_active") is False:
         raise AppError(400, "self_lock_forbidden", "Không thể tự khóa tài khoản của mình.")
+    # Guard tự hạ quyền: admin không được đổi role của CHÍNH MÌNH sang non-admin
+    # (tránh lặp lại sự cố tự khóa mình ra khỏi khu quản trị).
+    if user_id == admin.id and fields.get("role") not in (None, "admin"):
+        raise AppError(400, "self_demote_forbidden", "Không thể tự hạ quyền admin của mình.")
     user = await anyio.to_thread.run_sync(user_repo.update_user, user_id, fields)
     if user is None:
         raise AppError(404, "not_found", "Không tìm thấy người dùng.")

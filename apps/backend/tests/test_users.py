@@ -82,6 +82,27 @@ def test_admin_cannot_self_lock(client, auth, db_conn, users) -> None:  # type: 
     assert r.json()["code"] == "self_lock_forbidden"
 
 
+def test_admin_cannot_self_demote(client, auth, db_conn, users) -> None:  # type: ignore[no-untyped-def]
+    admin_id = users["admin"].id
+    r = client.patch(
+        f"/api/admin/users/{admin_id}", json={"role": "teacher"}, headers=auth("admin")
+    )
+    assert r.status_code == 400
+    assert r.json()["code"] == "self_demote_forbidden"
+
+
+def test_admin_can_demote_another_admin(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
+    # Hạ quyền admin KHÁC vẫn cho phép (chỉ chặn tự hạ quyền chính mình).
+    uid = _create_user(client, auth("admin"), "other-admin-zz@example.com", role="admin").json()[
+        "id"
+    ]
+    r = client.patch(
+        f"/api/admin/users/{uid}", json={"role": "teacher"}, headers=auth("admin")
+    )
+    assert r.status_code == 200
+    assert r.json()["role"] == "teacher"
+
+
 # --- account lock -----------------------------------------------------------
 
 
