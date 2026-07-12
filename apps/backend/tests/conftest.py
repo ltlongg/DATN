@@ -35,6 +35,7 @@ _DB_MODULES = (
     "app.models.cost",
     "app.models.prompt",
     "app.models.activity",
+    "app.models.config",
 )
 
 

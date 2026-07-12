@@ -20,7 +20,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.responses import Response
 
-from app.api import activity, auth, chat, cost, documents, health, inspect, logs, prompts, users
+from app.api import (
+    activity,
+    auth,
+    chat,
+    config,
+    cost,
+    documents,
+    health,
+    inspect,
+    internal,
+    logs,
+    prompts,
+    users,
+)
 from app.core.config import get_settings
 from app.core.db import close_pool, get_pool
 from app.core.errors import register_error_handlers
@@ -147,6 +160,9 @@ def create_app() -> FastAPI:
     app.include_router(cost.router, prefix="/api/admin/cost", tags=["admin-cost"])
     app.include_router(prompts.router, prefix="/api/admin/prompts", tags=["admin-prompts"])
     app.include_router(activity.router, prefix="/api/admin/activity", tags=["admin-activity"])
+    app.include_router(config.router, prefix="/api/admin/config", tags=["admin-config"])
+    # Nội bộ (agent-service gọi) — KHÔNG /api/admin, KHÔNG auth. Xem api/internal.py.
+    app.include_router(internal.router, prefix="/internal", tags=["internal"])
 
     return app
 
