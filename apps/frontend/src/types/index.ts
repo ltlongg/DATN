@@ -96,9 +96,21 @@ export interface Document {
   name: string;
   type: string;
   status: DocumentStatus;
+  /** Khóa nối xuống kho tri thức (`rag_chunks.metadata.source_file`). null = chưa gắn nguồn. */
+  source_file: string | null;
+  /** Đếm THẬT từ kho, không phải số nhập tay. */
   chunk_count: number;
+  event_count: number;
   created_at: string;
   updated_at: string;
+}
+
+/** Nguồn có thật trong kho tri thức. `document_id = null` = chưa khai báo ở danh mục. */
+export interface KbSource {
+  source_file: string;
+  chunk_count: number;
+  event_count: number;
+  document_id: string | null;
 }
 
 // --- SSE debug payload (chỉ admin, gom 1 lần trước `done`) ---

@@ -5,7 +5,11 @@ import type { Document, DocumentStatus } from "@/types";
 
 const STATUSES: DocumentStatus[] = ["draft", "indexing", "indexed", "failed"];
 
-/** Form tạo/sửa tài liệu (metadata mock — KHÔNG upload file, theo scope Module 3). */
+/** Form tạo/sửa tài liệu.
+ *
+ * KHÔNG có ô "Số chunk" (đếm thật từ kho) lẫn ô chọn nguồn (tài liệu đã index tự hiện ở
+ * danh mục). Form này chỉ đặt phần thông tin do người quản trị quyết: tên, loại, trạng thái.
+ */
 export function DocumentFormModal({
   open,
   initial,
@@ -24,27 +28,29 @@ export function DocumentFormModal({
   const [name, setName] = useState("");
   const [type, setType] = useState("markdown");
   const [status, setStatus] = useState<DocumentStatus>("draft");
-  const [chunkCount, setChunkCount] = useState(0);
 
   useEffect(() => {
     if (open) {
       setName(initial?.name ?? "");
       setType(initial?.type ?? "markdown");
       setStatus(initial?.status ?? "draft");
-      setChunkCount(initial?.chunk_count ?? 0);
     }
   }, [open, initial]);
 
   function submit(e: FormEvent) {
     e.preventDefault();
     if (name.trim() === "") return;
-    onSubmit({ name: name.trim(), type: type.trim() || "markdown", status, chunk_count: chunkCount });
+    onSubmit({ name: name.trim(), type: type.trim() || "markdown", status });
   }
 
   return (
-    <Modal open={open} onOpenChange={(o) => !o && onClose()} title={initial ? "Sửa tài liệu" : "Thêm tài liệu"}>
+    <Modal
+      open={open}
+      onOpenChange={(o) => !o && onClose()}
+      title={initial ? "Sửa tài liệu" : "Thêm tài liệu"}
+    >
       <form onSubmit={submit} className="space-y-3">
-        <Field label="Tên">
+        <Field label="Tên hiển thị">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -72,15 +78,15 @@ export function DocumentFormModal({
             ))}
           </select>
         </Field>
-        <Field label="Số chunk">
-          <input
-            type="number"
-            min={0}
-            value={chunkCount}
-            onChange={(e) => setChunkCount(Math.max(0, Number(e.target.value)))}
-            className="w-full rounded-md border border-paper-border px-3 py-2 outline-none focus:border-brand"
-          />
-        </Field>
+
+        {initial?.source_file && (
+          <p className="rounded-md border border-paper-border bg-paper px-3 py-2 text-xs text-ink-soft">
+            Nguồn trong kho: <code>{initial.source_file}</code> —{" "}
+            {initial.chunk_count.toLocaleString("vi-VN")} chunk,{" "}
+            {initial.event_count.toLocaleString("vi-VN")} sự kiện. Nguồn là khóa nối, không đổi
+            được.
+          </p>
+        )}
 
         {error && <p className="text-sm text-rose-700">{error}</p>}
 

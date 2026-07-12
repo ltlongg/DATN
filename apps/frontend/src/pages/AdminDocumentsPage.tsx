@@ -52,7 +52,7 @@ export default function AdminDocumentsPage() {
     <div className="space-y-4">
       <PageHeader
         title="Quản lý tài liệu"
-        desc="Danh mục tài liệu nguồn của hệ thống."
+        desc="Tài liệu đã index tự hiện ở đây; số chunk và sự kiện là số đếm thật từ kho tri thức."
         actions={
           <button
             onClick={() => {
@@ -96,7 +96,7 @@ export default function AdminDocumentsPage() {
         title="Xoá tài liệu"
       >
         <p className="text-sm text-ink-soft">
-          Xoá tài liệu “{toDelete?.name}”? Hành động không thể hoàn tác.
+          Xoá tài liệu “{toDelete?.name}” khỏi danh mục? Hành động không thể hoàn tác.
         </p>
         <div className="mt-4 flex justify-end gap-2">
           <button
