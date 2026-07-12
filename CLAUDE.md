@@ -53,6 +53,20 @@ Agent-service (FastAPI + LangGraph, :9000)  ← orchestrate RAG + GraphRAG + hyb
 
 **Nguyên tắc quan trọng**: backend KHÔNG trực tiếp là agent. Backend chỉ là API gateway gọi sang `agent-service` qua HTTP client (`apps/backend/app/services/agent_client.py`). Mọi logic LLM/retrieval nằm trong `agent-service`.
 
+> **⚠️ TODO trước khi deploy thật (chưa làm) — chưa có auth giữa 2 service**: cả 2 chiều gọi
+> HTTP nội bộ hiện **KHÔNG có auth** (không JWT, không API key, không shared secret) —
+> `backend → agent-service` (`agent_client.py` gọi `POST /ask`) VÀ `agent-service → backend`
+> (`core/runtime_config.py` gọi `GET /internal/config`, xem `system-config-plan.md`) đều dựa
+> hoàn toàn vào giả định "2 service chạy cùng máy/cùng mạng riêng tư" — hiện đúng vì đang chạy
+> local (`localhost:8000` ↔ `localhost:9000`). Giả định này **SẼ VỠ ngay khi deploy ra khỏi
+> localhost** (lên server thật, expose port ra ngoài, tách host, hay cho người ngoài test/dùng
+> thử) — ai gọi được port đó cũng đọc/kích hoạt được các endpoint nội bộ này (kể cả `/ask` lẫn
+> `/internal/config`). **TRƯỚC KHI deploy ra ngoài máy dev** (kể cả chỉ để demo/cho người
+> ngoài test), cần thêm 1 lớp bảo vệ tối thiểu — ví dụ shared-secret header (`X-Internal-Key`
+> so khớp giá trị trong `.env`) cho mọi route nội bộ, hoặc cô lập mạng (docker network riêng,
+> không map port service nội bộ ra ngoài host/internet). **CHƯA làm** — ghi chú lại để không
+> quên khi tới lúc deploy, đừng để lộ khi đã public.
+
 ### Hạ tầng đã chạy sẵn (KHÔNG cần docker compose up)
 Neo4j + Qdrant + Redis + Postgres **đã cài và chạy sẵn trên remote dev server** qua Docker. URL + credentials đã có trong **root `.env`**. **KHÔNG cần** cài đặt, tải, hay `docker compose up` gì nữa — cứ đọc config từ `.env` mà dùng. Hai bẫy đã xử lý sẵn:
 - **Qdrant**: remote chạy HTTP thuần nhưng có API key → client mặc định `https=True` và vỡ SSL. Đã ép `https=False` trong `app/core/qdrant.py`. Point id = `uuid5(NS, chunk_id)`.
@@ -69,6 +83,20 @@ Neo4j + Qdrant + Redis + Postgres **đã cài và chạy sẵn trên remote dev 
 - **Redis**: cache + lightweight queue.
 
 **Khóa nối DUY NHẤT giữa các store là `chunk_id`** (Postgres PK ↔ Qdrant payload ↔ Neo4j `source_chunk_ids` ↔ `timeline_events.source_chunk_ids`).
+
+> **Định hướng tương lai (chưa code, mới chốt hướng đi 2026-07-08)**: hiện agent-service tự
+> mở kết nối `psycopg` trực tiếp tới Postgres cho mọi module (`tools/graph_rag/chunk_store.py`
+> → `rag_chunks`, `tools/visualization/event_store.py` → `timeline_events`,
+> `tools/visualization/gazetteer_store.py` → `gazetteer`, `tools/prompts/prompt_store.py` →
+> `managed_prompts`/`prompt_versions`, `core/usage_log.py` → `llm_usage`) — pattern này **giữ
+> nguyên, KHÔNG đổi cho các module đã code**. Module Postgres MỚI đầu tiên
+> (`system_config`, xem `docs/plan/system-config-plan.md`) đi theo hướng khác theo quyết định
+> user: agent-service **KHÔNG** tự query bảng đó — gọi qua endpoint nội bộ
+> `GET /internal/config` của backend. Đây là điểm khởi đầu cho định hướng đồng bộ hoá về sau:
+> khi có dịp, cân nhắc chuyển dần các module kể trên sang cùng pattern (backend sở hữu
+> DDL + đọc/ghi, agent-service gọi API thay vì `psycopg` trực tiếp). **CHƯA có plan/lịch
+> trình cụ thể cho việc này** — chỉ là định hướng đã chốt, làm khi nào tới lượt, đừng tự ý bắt
+> đầu refactor nếu chưa có plan riêng được duyệt.
 
 ### GraphRAG — pipeline DIY (offline indexing)
 `scripts/run_graph_index.py`: đọc `dataset/chunks_llm.json` → Postgres `rag_chunks` (source of truth) → embed + upsert Qdrant → trích entity/quan hệ (song song) → cache `dataset/graph_extractions.json` → merge Neo4j. Flags: `--limit --workers --overwrite --remerge --skip-vectors --skip-graph`.
@@ -168,12 +196,15 @@ created_at` dùng `clock_timestamp()` (không `now()`) để thứ tự message 
   - Trang Hội thoại (`/admin/logs`) redesign sang **bố cục 3 cột inline** (mượn từ Socratic,
     KHÔNG mượn metric không có như downvote/mastery): trái = danh sách phiên, giữa = replay
     hội thoại, phải = tab Chất lượng/Token cho phiên đang chọn.
-- `docs/plan/system-config-plan.md` — nhóm **Cấu hình hệ thống** (retrieval mode mặc định +
-  tinh chỉnh retrieval/synthesize), tách riêng vì đụng orchestrator đang chạy ổn định.
-  **CHƯA code** (vẫn stub "Sắp cập nhật"). **Retrieval mode (traditional/graph/hybrid) là 1
-  field lựa chọn — LUÔN có sẵn cả 3, KHÔNG phải toggle bật/tắt từng cái riêng.** Cả admin (đặt
-  mặc định hệ thống) lẫn user (override per-câu-hỏi ngay trong khung chat) đều chọn được mode.
-  KHÔNG quản lý model qua config.
+- `docs/plan/system-config-plan.md` — nhóm **Cấu hình hệ thống** (14 field tinh chỉnh
+  retrieval/synthesize đang hardcode trong `Settings`), tách riêng vì đụng orchestrator đang
+  chạy ổn định. **CHƯA code** (vẫn stub "Sắp cập nhật"). **Retrieval mode
+  (traditional/graph/hybrid) KHÔNG thuộc phạm vi nhóm này** (chốt 2026-07-07) — mode vẫn
+  hardcode mặc định `"hybrid"`, chỉ user tự chọn per-câu-hỏi ngay trong khung chat
+  (`Composer.tsx`, đã chạy sẵn từ trước); admin KHÔNG có ô đặt mode mặc định hệ thống (tránh
+  phức tạp hoá không cần thiết). KHÔNG quản lý model qua config. **Điểm kiến trúc riêng của
+  nhóm này**: agent-service đọc `system_config` qua gọi HTTP `GET /internal/config` của
+  backend, KHÔNG tự query Postgres trực tiếp như các module khác — xem `### Storage roles`.
 
 ### Frontend layout (`apps/frontend/src/`) — đã build
 Vite+React 18+TS. TanStack Query (server state) + Zustand (auth/UI) + Tailwind v3 (tokens:
