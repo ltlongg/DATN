@@ -33,7 +33,7 @@ Nếu thư viện hiện có không đủ → ghi rõ lý do trước khi viết
 Repo là **git repository** (branch `main`). Không còn ở scaffold stage:
 
 - **`agent-service`**: đã có pipeline indexing thực (preprocessing → chunking → graph extraction → timeline extraction → geocoding) **và** answer flow online — `api/ask.py` (FastAPI `/ask`) + `orchestrator/` (LangGraph: build_query → retrieve → synthesize → validate → visualization, stream SSE). Đây là nơi tập trung gần như toàn bộ logic LLM/retrieval.
-- **`backend`**: đã build API gateway (auth JWT, conversation/message, `/ask` streaming proxy, admin documents mock) — xem layout dưới. Module 4 (admin nâng cao) **3/4 nhóm đã code xong** (Hội thoại & chất lượng, Người dùng & quota, Chi phí) + KB Inspector (Module 5) + debug streaming, **cộng thêm 2 hạng mục mới từ `admin-restructure-plan.md`**: **token theo hội thoại/message** (song song chất lượng, không thay thế) và **quản lý Prompt đầy đủ** (sửa/version/promote, agent đọc production lúc chạy + fallback code) — xem `### Admin nâng cao` dưới. Chỉ còn **Cấu hình hệ thống** (retrieval mode mặc định + tinh chỉnh, `system-config-plan.md`) là CHƯA code. **`frontend`**: đã build thật (Vite+React+TS) phủ cả 2 role — auth/chat streaming SSE/multi-turn sidebar/debug panel admin/map+timeline/quản lý tài liệu/KB Inspector/Module 4 (logs+token+users+cost+prompts). Nav admin là **sidebar dọc theo nhóm** (không còn tab ngang). Chỉ mục Cấu hình hệ thống là stub "Sắp cập nhật". Xem `### Frontend layout` dưới + `docs/plan/frontend-plan.md` + `docs/plan/admin-restructure-plan.md` (nav dọc + token + prompt, đã code xong cả 3 hạng mục).
+- **`backend`**: đã build API gateway (auth JWT, conversation/message, `/ask` streaming proxy, admin documents — **hết mock**, danh mục nối kho tri thức thật, xem `### Tài liệu (Module 3)`) — xem layout dưới. Module 4 (admin nâng cao) **3/4 nhóm đã code xong** (Hội thoại & chất lượng, Người dùng & quota, Chi phí) + KB Inspector (Module 5) + debug streaming, **cộng thêm 2 hạng mục mới từ `admin-restructure-plan.md`**: **token theo hội thoại/message** (song song chất lượng, không thay thế) và **quản lý Prompt đầy đủ** (sửa/version/promote, agent đọc production lúc chạy + fallback code) — xem `### Admin nâng cao` dưới. Chỉ còn **Cấu hình hệ thống** (retrieval mode mặc định + tinh chỉnh, `system-config-plan.md`) là CHƯA code. **`frontend`**: đã build thật (Vite+React+TS) phủ cả 2 role — auth/chat streaming SSE/multi-turn sidebar/debug panel admin/map+timeline/quản lý tài liệu/KB Inspector/Module 4 (logs+token+users+cost+prompts). Nav admin là **sidebar dọc theo nhóm** (không còn tab ngang). Chỉ mục Cấu hình hệ thống là stub "Sắp cập nhật". Xem `### Frontend layout` dưới + `docs/plan/frontend-plan.md` + `docs/plan/admin-restructure-plan.md` (nav dọc + token + prompt, đã code xong cả 3 hạng mục).
 
 `requirements.txt`, `docker-compose.yml` đã cấu hình. Khi commit, dùng tiếng Việt theo phong cách lịch sử commit hiện có.
 
@@ -142,7 +142,8 @@ tay + `CREATE TABLE IF NOT EXISTS`). Plan: `docs/plan/backend-plan.md`.
   bảng + `connection()`/`init_schema()`), `security.py` (bcrypt + PyJWT), `errors.py`
   (`AppError` → body `{code,message}`).
 - `models/` — data access psycopg trực tiếp: `user.py` (+ `is_active`/`question_quota`),
-  `conversation.py` (conversations + messages + `count_user_messages_today`), `document.py`,
+  `conversation.py` (conversations + messages + `count_user_messages_today`), `document.py`
+  (danh mục tài liệu — nối kho thật qua `source_file`, xem `### Tài liệu` dưới),
   `inspect.py` (chunks/events cho KB Inspector), `logs.py` (conversation logs admin +
   `list_attributed_usage_rows`/`get_message_token_rows` cho token theo hội thoại),
   `cost.py` (đọc `llm_usage`, tự bắt `UndefinedTable` → `[]`), `prompt.py` (CRUD
@@ -153,7 +154,8 @@ tay + `CREATE TABLE IF NOT EXISTS`). Plan: `docs/plan/backend-plan.md`.
   `inspect.py`, `logs.py` (+ `TokenSummary`/`MessageTokens`), `user.py`, `cost.py`, `prompt.py`.
 - `api/` — router: `health.py` (`/health`,`/ready`), `auth.py` (login/me/logout, check
   `is_active`), `chat.py` (conversation CRUD + `/ask` streaming — truyền `conversation_id`/
-  `message_id` sang agent, gác `debug`, check quota), `documents.py` (admin mock),
+  `message_id` sang agent, gác `debug`, check quota), `documents.py` (`/api/admin/documents*`
+  — CRUD danh mục + `GET /sources` liệt kê nguồn thật trong kho),
   `inspect.py` (`/api/admin/kb/*` — chunks/events Postgres trực tiếp + proxy entities sang
   agent-service), `logs.py` (`/api/admin/logs/*` — hội thoại & chất lượng + `token-summary`/
   `conversations/{id}/tokens`), `users.py` (`/api/admin/users*` — CRUD + quota + khóa),
@@ -215,6 +217,43 @@ stream hỏng/blocked trước token đầu → UI hiện "—", và trung bình
   nhóm này**: agent-service đọc `system_config` qua gọi HTTP `GET /internal/config` của
   backend, KHÔNG tự query Postgres trực tiếp như các module khác — xem `### Storage roles`.
 
+### Tài liệu (Module 3) — danh mục nối kho tri thức thật ("Bước 0", xong 2026-07-12)
+Trước đây bảng `documents` là **sổ tay mock**: `chunk_count`/`status` do admin gõ tay, không
+liên quan gì tới 1213 chunk thật trong kho. Giờ đã nối:
+
+- **Khóa nối = `documents.source_file` ↔ `rag_chunks.metadata->>'source_file'`** (giá trị
+  `lichsu.clean.md`). Chọn field này vì nó **có sẵn** trong metadata mọi chunk → **KHÔNG
+  đụng `rag_chunks`/Qdrant/Neo4j/`timeline_events` một dòng nào**, không tốn API, không
+  re-index. Chỉ sửa bảng `documents` (bảng backend tự quản). `metadata` cũng có
+  `document_title` (= `lichsu.md`, tên tài liệu gốc) — **cân nhắc rồi và KHÔNG dùng**.
+- `source_file` **immutable** (không có trong `DocumentUpdate`/`UPDATABLE_COLS`): đổi nguồn =
+  đổi luôn kho chunk mà document sở hữu. UNIQUE partial index → 2 document không cùng nhận
+  một nguồn (API trả 409 `source_taken`). Cột `name` chỉ là **nhãn hiển thị**, sửa thoải mái.
+- **`chunk_count`/`event_count` bỏ khỏi bảng, ĐẾM THẬT lúc đọc** (`models/document.py::
+  kb_counts`, event dùng toán tử mảng `&&` trên `source_chunk_ids` — cùng cơ chế
+  `builder.py`). Bảng `rag_chunks` chưa tồn tại → bắt `UndefinedTable` → count 0 (pattern
+  `cost.py`). Form nhập liệu **không còn ô "Số chunk"**.
+- **Nguồn trong kho TỰ hiện ở danh mục** (`sync_kb_documents`, chạy đầu mỗi
+  `list_documents`): chunk vào kho bằng script indexing offline chứ không qua UI, nên danh
+  mục tự lấp phần thiếu — INSERT document cho `source_file` chưa có (name = tên file,
+  status = `indexed`), idempotent nhờ UNIQUE index (partial → `ON CONFLICT ... WHERE
+  source_file IS NOT NULL`). **KHÔNG có bước "khai báo" thủ công**, và `DocumentCreate`
+  KHÔNG nhận `source_file` — form chỉ tạo tài liệu chưa gắn nguồn.
+- **Xoá tài liệu còn chunk trong kho bị chặn (409 `document_indexed`)**: xoá khỏi danh mục
+  là vô nghĩa vì lần load sau `sync_kb_documents` dựng lại ngay. Xoá thật = gỡ chunk khỏi
+  kho → Bước 1. UI ẩn luôn nút Xoá với tài liệu có nguồn.
+- `GET /api/admin/documents/sources` liệt kê nguồn CÓ THẬT trong kho → dropdown lọc ở KB
+  Chunks (`GET /api/admin/kb/chunks?source_file=...`).
+
+> **Nợ lại — "Bước 1" CHƯA code**: upload file thật (PDF/DOCX/TXT), indexing async có tiến
+> độ, và **xoá cascade** (chưa có → tài liệu đã index hiện KHÔNG xoá được, xem trên).
+> Hướng đã chốt cho
+> Bước 1 (2026-07-12): backend **không tự chạy pipeline** (logic LLM thuộc agent-service →
+> thêm endpoint `POST /index` bên agent, backend poll trạng thái); phạm vi index cho tài
+> liệu mới = **vector bắt buộc, graph + timeline là checkbox tuỳ chọn** (graph extraction
+> đắt nhất). Xoá cascade phải đi theo `chunk_id` qua 4 store, và ở Neo4j **chỉ xoá entity/rel
+> khi mồ côi** (entity như "Hồ Chí Minh" dùng chung nhiều tài liệu).
+
 ### Frontend layout (`apps/frontend/src/`) — đã build
 Vite+React 18+TS. TanStack Query (server state) + Zustand (auth/UI) + Tailwind v3 (tokens:
 brand `#A4161A`, nền kem, serif+sans) + Radix + `@vis.gl/react-google-maps` +
@@ -233,7 +272,8 @@ là **sidebar dọc theo nhóm** (`AppSidebar.tsx`, KHÔNG còn tab ngang).
   Composer/Citation/Clarification/DebugPanel(admin)/VizPanel.
 - `features/map` + `features/timeline` — EventMap/EventMarker/MapEmptyState + Timeline/Row,
   honest fallback (gazetteer hoãn → markers rỗng → empty-state).
-- `features/admin` — DocumentTable/StatusBadge/DocumentFormModal (CRUD mock).
+- `features/admin` — Module 3 Tài liệu: DocumentTable/StatusBadge/DocumentFormModal +
+  `useDocuments` (`useKbSources` dùng chung cho dropdown lọc ở KB Chunks).
 - `features/kb` — Module 5 inspector: Chunk/Entity/Event Table+Detail, EgoGraph. Mỗi trang
   (Chunks/Graph/Timeline) **độc lập, tự quản selection nội bộ** — KHÔNG còn điều hướng chéo
   qua tab (bỏ theo Item 1 admin-restructure-plan, chunk_id/entity/event chỉ còn text tra cứu).
