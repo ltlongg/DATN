@@ -167,3 +167,23 @@ export interface ActivityLogResponse {
   limit: number;
   offset: number;
 }
+
+// --- Cấu hình hệ thống — mirror apps/backend/app/schemas/config.py (13 field áp dụng LIVE) ---
+export interface SystemConfig {
+  rag_top_k: number;
+  graph_top_k: number;
+  hybrid_candidate_k: number;
+  hybrid_rrf_k: number;
+  rerank_top_k: number;
+  bm25_top_k: number;
+  graph_max_seed_entities: number;
+  graph_max_chunks_per_seed: number;
+  graph_hub_source_count_threshold: number;
+  graph_max_context_items: number;
+  graph_max_path_hops: number;
+  graph_path_hit_weight: number;
+  llm_temperature: number;
+  updated_at: string;
+}
+
+export type SystemConfigUpdate = Partial<Omit<SystemConfig, "updated_at">>;

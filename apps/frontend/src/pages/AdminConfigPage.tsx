@@ -1,14 +1,14 @@
 import { PageHeader } from "@/components/PageHeader";
-import { ConfigTabStub } from "@/features/advanced/ConfigTabStub";
+import { ConfigForm } from "@/features/advanced/ConfigForm";
 
 export default function AdminConfigPage() {
   return (
     <div className="space-y-4">
       <PageHeader
         title="Cấu hình hệ thống"
-        desc="Chế độ truy hồi mặc định và tinh chỉnh retrieval/synthesize."
+        desc="Tinh chỉnh retrieval + synthesize, áp dụng LIVE cho agent-service (hiệu lực tối đa 60 giây)."
       />
-      <ConfigTabStub />
+      <ConfigForm />
     </div>
   );
 }
