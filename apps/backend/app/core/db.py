@@ -94,16 +94,28 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
     # build_query, retrieval, không chỉ riêng LLM. NULL = không đo được (stream lỗi/blocked
     # trước token đầu, hoặc message user).
     "ALTER TABLE messages ADD COLUMN IF NOT EXISTS ttft_ms INTEGER;",
+    # documents — danh mục tài liệu nguồn. `source_file` là KHÓA NỐI xuống kho tri thức
+    # thật: khớp `rag_chunks.metadata->>'source_file'` (vd 'lichsu.clean.md'). Nhờ nó,
+    # chunk_count/event_count được ĐẾM THẬT lúc đọc (xem models/document.py) thay vì lưu
+    # số admin gõ tay -> cột chunk_count cũ bị bỏ. NULL = tài liệu khai báo trước, chưa
+    # index (chunk_count = 0). UNIQUE (partial, bỏ qua NULL) để 2 document không cùng
+    # nhận một nguồn. `name` chỉ là nhãn hiển thị, sửa thoải mái, KHÔNG phải khóa.
     """
     CREATE TABLE IF NOT EXISTS documents (
         id          UUID PRIMARY KEY,
         name        TEXT NOT NULL,
         type        TEXT NOT NULL,
         status      TEXT NOT NULL,
-        chunk_count INTEGER NOT NULL DEFAULT 0,
+        source_file TEXT,
         created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
         updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
     );
+    """,
+    "ALTER TABLE documents ADD COLUMN IF NOT EXISTS source_file TEXT;",
+    "ALTER TABLE documents DROP COLUMN IF EXISTS chunk_count;",
+    """
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_documents_source_file
+    ON documents (source_file) WHERE source_file IS NOT NULL;
     """,
     # activity_log — mỗi request /api/* ghi 1 dòng (ActivityLogMiddleware). Theo dõi hoạt
     # động hệ thống ở mức endpoint: phần nào OK/lỗi, mất bao lâu, lỗi gì. clock_timestamp()
