@@ -89,6 +89,11 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
     CREATE INDEX IF NOT EXISTS idx_messages_conversation_created_at
     ON messages (conversation_id, created_at);
     """,
+    # TTFT (mili-giây) của assistant message: đo Ở BACKEND, từ lúc nhận POST /ask tới event
+    # `token` ĐẦU TIÊN proxy xuống frontend — gồm cả quota check, load history, guardrails,
+    # build_query, retrieval, không chỉ riêng LLM. NULL = không đo được (stream lỗi/blocked
+    # trước token đầu, hoặc message user).
+    "ALTER TABLE messages ADD COLUMN IF NOT EXISTS ttft_ms INTEGER;",
     """
     CREATE TABLE IF NOT EXISTS documents (
         id          UUID PRIMARY KEY,

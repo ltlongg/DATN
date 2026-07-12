@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import uuid
 from collections.abc import AsyncIterator
+from time import perf_counter
 
 import anyio
 from fastapi import APIRouter, Depends, Request
@@ -122,30 +123,42 @@ async def _proxy_stream(
     assistant_id: str,
     request_id: str | None,
     user_id: str,
+    started_at: float,
 ) -> AsyncIterator[str]:
     """Proxy event SSE xuống frontend, gom vào collector, lưu message cuối khi `done`.
 
     - event != done/blocked: forward nguyên (không sửa nội dung token).
+    - event == token: chốt TTFT ở token ĐẦU TIÊN (mốc `started_at` bấm từ đầu handler ask()),
+      tức đúng khoảng người dùng chờ từ lúc hỏi tới lúc thấy chữ đầu tiên.
     - event == done: lưu assistant message rồi forward done đã thêm conversation_id/
-      message_id (message_id=None nếu không lưu) để frontend link được message.
+      message_id (message_id=None nếu không lưu) + ttft_ms để frontend hiện ngay, khỏi reload.
     - event == blocked: guardrails chặn input -> agent KHÔNG emit done. Persist safe message
       (nếu có content) NGAY tại đây rồi forward blocked nguyên (event realtime, không kèm id).
     """
     async for event in stream.events():
+        if event.event == "token" and collector.ttft_ms is None:
+            collector.mark_first_token(int((perf_counter() - started_at) * 1000))
         collector.feed(event.event, event.data)
         if event.event == "done":
             saved_id = await _persist_assistant(conversation_id, assistant_id, collector)
             logger.info(
-                "ask done conversation=%s confidence=%s mode=%s citations=%d warnings=%d",
+                "ask done conversation=%s confidence=%s mode=%s citations=%d warnings=%d "
+                "ttft_ms=%s",
                 conversation_id,
                 collector.confidence,
                 collector.retrieval_mode,
                 len(collector.citations),
                 len(collector.warnings),
+                collector.ttft_ms,
             )
             yield format_sse(
                 "done",
-                {**event.data, "conversation_id": conversation_id, "message_id": saved_id},
+                {
+                    **event.data,
+                    "conversation_id": conversation_id,
+                    "message_id": saved_id,
+                    "ttft_ms": collector.ttft_ms,
+                },
             )
         elif event.event == "blocked":
             saved_id = await _persist_assistant(conversation_id, assistant_id, collector)
@@ -187,6 +200,9 @@ async def ask(
     user: User = Depends(get_current_user),
 ) -> StreamingResponse:
     settings = get_settings()
+    # Mốc TTFT: bấm giờ NGAY đầu handler (trước quota/history/mở stream agent) để con số đo
+    # đúng cái người dùng chờ, không chỉ phần LLM. Chốt ở token đầu trong _proxy_stream.
+    started_at = perf_counter()
 
     # Gác server-side: chỉ admin được bật debug. User gửi debug=true bị ép False (phòng thủ
     # kép với FE) — event `debug` chỉ agent phát khi request.debug=True nên ép ở đây là đủ.
@@ -242,7 +258,9 @@ async def ask(
     collector = SseCollector()
     request_id = getattr(request.state, "request_id", None)
     return StreamingResponse(
-        _proxy_stream(stream, collector, conv.id, assistant_id, request_id, user.id),
+        _proxy_stream(
+            stream, collector, conv.id, assistant_id, request_id, user.id, started_at
+        ),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )

@@ -36,6 +36,9 @@ class Message(BaseModel):
     retrieval_mode: str = "none"
     confidence: str | None = None
     warnings: list[Any] = Field(default_factory=list)
+    # TTFT (ms) đo ở backend: nhận /ask -> token đầu tiên. None với message user hoặc khi
+    # stream hỏng trước token đầu.
+    ttft_ms: int | None = None
     created_at: datetime
 
 
@@ -61,6 +64,7 @@ def _to_message(row: dict[str, Any]) -> Message:
         retrieval_mode=row["retrieval_mode"],
         confidence=row["confidence"],
         warnings=row["warnings"] or [],
+        ttft_ms=row["ttft_ms"],
         created_at=row["created_at"],
     )
 
@@ -68,7 +72,7 @@ def _to_message(row: dict[str, Any]) -> Message:
 _CONV_COLS = "id, user_id, title, created_at, updated_at"
 _MSG_COLS = (
     "id, conversation_id, role, content, clarification_needed, citations, "
-    "visualization, retrieval_mode, confidence, warnings, created_at"
+    "visualization, retrieval_mode, confidence, warnings, ttft_ms, created_at"
 )
 
 
@@ -149,14 +153,15 @@ def add_message(
     retrieval_mode: str = "none",
     confidence: str | None = None,
     warnings: list[Any] | None = None,
+    ttft_ms: int | None = None,
 ) -> Message:
     msg_id = message_id or str(uuid.uuid4())
     with connection() as conn, conn.cursor() as cur:
         cur.execute(
             f"INSERT INTO messages (id, conversation_id, role, content, "
             f"clarification_needed, citations, visualization, retrieval_mode, "
-            f"confidence, warnings) "
-            f"VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING {_MSG_COLS}",
+            f"confidence, warnings, ttft_ms) "
+            f"VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING {_MSG_COLS}",
             (
                 msg_id,
                 conversation_id,
@@ -168,6 +173,7 @@ def add_message(
                 retrieval_mode,
                 confidence,
                 Jsonb(warnings or []),
+                ttft_ms,
             ),
         )
         row = cur.fetchone()

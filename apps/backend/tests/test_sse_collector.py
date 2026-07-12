@@ -35,6 +35,27 @@ def test_regenerating_clears_previous_tokens() -> None:
     assert col.content == "câu trả lời mới"
 
 
+def test_ttft_keeps_first_mark_and_survives_regenerating() -> None:
+    """TTFT chốt ở chữ ĐẦU TIÊN người dùng thấy: mark sau không ghi đè, `regenerating` xoá
+    token nhưng KHÔNG xoá mốc (người dùng đã chờ đúng chừng đó rồi)."""
+    col = SseCollector()
+    col.mark_first_token(1200)
+    col.feed("token", {"text": "câu cũ"})
+    col.feed("regenerating", {})
+    col.mark_first_token(9999)
+    col.feed("token", {"text": "câu mới"})
+    col.feed("done", {"confidence": "cao", "retrieval_mode": "hybrid", "warnings": []})
+    assert col.ttft_ms == 1200
+    assert col.message_fields()["ttft_ms"] == 1200
+
+
+def test_ttft_none_when_no_token() -> None:
+    col = SseCollector()
+    col.feed("clarification", {"question": "Bạn hỏi giai đoạn nào?"})
+    assert col.ttft_ms is None
+    assert col.message_fields()["ttft_ms"] is None
+
+
 def test_clarification_persisted_as_content() -> None:
     col = SseCollector()
     col.feed("clarification", {"question": "Bạn hỏi giai đoạn nào?"})

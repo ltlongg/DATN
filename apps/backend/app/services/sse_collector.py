@@ -14,6 +14,9 @@ from typing import Any
 class SseCollector:
     def __init__(self) -> None:
         self._tokens: list[str] = []
+        # TTFT (ms) do endpoint bấm giờ và set qua mark_first_token(); collector chỉ giữ hộ để
+        # message_fields() lưu kèm. None = chưa có token nào (stream lỗi/blocked sớm).
+        self.ttft_ms: int | None = None
         self.citations: list[dict[str, Any]] = []
         self.visualization: dict[str, Any] | None = None
         self.clarification_needed: bool = False
@@ -27,6 +30,13 @@ class SseCollector:
     @property
     def content(self) -> str:
         return "".join(self._tokens)
+
+    def mark_first_token(self, ttft_ms: int) -> None:
+        """Ghi TTFT lần ĐẦU tiên gọi, các lần sau bỏ qua. `regenerating` xoá token đã gom nhưng
+        KHÔNG xoá mốc này: người dùng đã thấy chữ đầu tiên tại thời điểm đó, dù nội dung sau bị
+        soạn lại."""
+        if self.ttft_ms is None:
+            self.ttft_ms = ttft_ms
 
     def feed(self, event: str, data: dict[str, Any]) -> None:
         if event == "token":
@@ -78,6 +88,7 @@ class SseCollector:
                 "content": self.clarification_question or "",
                 "clarification_needed": True,
                 "retrieval_mode": "none",
+                "ttft_ms": self.ttft_ms,
             }
         return {
             "role": "assistant",
@@ -88,4 +99,5 @@ class SseCollector:
             "retrieval_mode": self.retrieval_mode,
             "confidence": self.confidence,
             "warnings": self.warnings,
+            "ttft_ms": self.ttft_ms,
         }

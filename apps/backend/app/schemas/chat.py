@@ -41,6 +41,9 @@ class MessageOut(BaseModel):
     retrieval_mode: str
     confidence: str | None
     warnings: list[Any]
+    # TTFT (ms): nhận /ask -> token đầu tiên. None với message user / message lưu trước khi
+    # có tính năng này.
+    ttft_ms: int | None
     created_at: datetime
 
 

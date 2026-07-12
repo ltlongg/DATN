@@ -65,6 +65,30 @@ def test_ask_streams_and_persists_answer(client, auth, mock_agent) -> None:  # t
     assert assistant["citations"] == [{"chunk_id": "c1"}]
 
 
+def test_ask_reports_ttft_in_done_and_persists_it(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
+    """TTFT đo ở backend (nhận /ask -> token đầu) đi kèm event done VÀ lưu vào message để
+    còn thấy sau khi reload. Không assert giá trị cụ thể (phụ thuộc máy), chỉ đòi >= 0 và khớp
+    nhau giữa done và DB."""
+    teacher = auth("teacher")
+    cid = _new_conversation(client, teacher)
+    mock_agent.configure(
+        events=(
+            format_sse("token", {"text": "Trương Định "})
+            + format_sse("token", {"text": "chống Pháp."})
+            + format_sse("done", {"confidence": "cao", "retrieval_mode": "hybrid", "warnings": []})
+        )
+    )
+    r = client.post(
+        f"/api/chat/conversations/{cid}/ask", json={"question": "Trương Định?"}, headers=teacher
+    )
+    done = _parse_stream(r.text)[-1][1]
+    assert isinstance(done["ttft_ms"], int) and done["ttft_ms"] >= 0
+
+    detail = client.get(f"/api/chat/conversations/{cid}", headers=teacher).json()
+    assert detail["messages"][1]["ttft_ms"] == done["ttft_ms"]
+    assert detail["messages"][0]["ttft_ms"] is None  # message user không có TTFT
+
+
 def test_ask_blocked_persists_safe_message_and_forwards_events(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     """Guardrails chặn: agent stream token(safe) rồi blocked, KHÔNG done. Backend forward đúng
     thứ tự + persist safe message như assistant message thường (thấy lại khi reload)."""
