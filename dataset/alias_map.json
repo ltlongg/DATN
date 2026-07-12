@@ -251,8 +251,8 @@
       "canonical_name": "Paul Ely"
     },
     "phnompenh": {
-      "canonical_norm": "phnôm pênh",
-      "canonical_name": "Phnôm Pênh"
+      "canonical_norm": "phnom penh",
+      "canonical_name": "Phnom Penh"
     },
     "phnom penh": {
       "canonical_norm": "phnôm pênh",
@@ -367,8 +367,8 @@
       "canonical_name": "Sư đoàn 23"
     },
     "sư đoàn 23bb": {
-      "canonical_norm": "sư đoàn 23",
-      "canonical_name": "Sư đoàn 23"
+      "canonical_norm": "sư đoàn 23 bb",
+      "canonical_name": "Sư đoàn 23 BB"
     },
     "sư đoàn 320a": {
       "canonical_norm": "sư đoàn 320",
@@ -479,8 +479,8 @@
       "canonical_name": "Việt Nam Cách mệnh Đồng minh Hội"
     },
     "washington dc": {
-      "canonical_norm": "washington",
-      "canonical_name": "Washington"
+      "canonical_norm": "washington d. c.",
+      "canonical_name": "Washington D. C."
     },
     "washington d. c.": {
       "canonical_norm": "washington",
@@ -533,6 +533,62 @@
     "bác hồ": {
       "canonical_norm": "hồ chí minh",
       "canonical_name": "Hồ Chí Minh"
+    },
+    "chủ tịch hồ chí minh": {
+      "canonical_norm": "hồ chí minh",
+      "canonical_name": "Hồ Chí Minh"
+    },
+    "thủ đô hà nội": {
+      "canonical_norm": "hà nội",
+      "canonical_name": "Hà Nội"
+    },
+    "thủ đô": {
+      "canonical_norm": "hà nội",
+      "canonical_name": "Hà Nội"
+    },
+    "nước việt nam": {
+      "canonical_norm": "việt nam",
+      "canonical_name": "Việt Nam"
+    },
+    "đất nước việt nam": {
+      "canonical_norm": "việt nam",
+      "canonical_name": "Việt Nam"
+    },
+    "quân đội nhân dân": {
+      "canonical_norm": "quân đội nhân dân việt nam",
+      "canonical_name": "Quân đội Nhân dân Việt Nam"
+    },
+    "quân giải phóng miền nam": {
+      "canonical_norm": "quân giải phóng miền nam việt nam",
+      "canonical_name": "Quân Giải phóng miền Nam Việt Nam"
+    },
+    "mặt trận dân tộc giải phóng miền nam": {
+      "canonical_norm": "mặt trận dân tộc giải phóng miền nam việt nam",
+      "canonical_name": "Mặt trận Dân tộc Giải phóng miền Nam Việt Nam"
+    },
+    "đảng cộng sản": {
+      "canonical_norm": "đảng cộng sản việt nam",
+      "canonical_name": "Đảng Cộng sản Việt Nam"
+    },
+    "đảng lao động": {
+      "canonical_norm": "đảng lao động việt nam",
+      "canonical_name": "Đảng Lao động Việt Nam"
+    },
+    "đảng dân chủ": {
+      "canonical_norm": "đảng dân chủ việt nam",
+      "canonical_name": "Đảng Dân chủ Việt Nam"
+    },
+    "đảng xã hội": {
+      "canonical_norm": "đảng xã hội việt nam",
+      "canonical_name": "Đảng Xã hội Việt Nam"
+    },
+    "mặt trận việt minh": {
+      "canonical_norm": "việt minh",
+      "canonical_name": "Việt Minh"
+    },
+    "mặt trận dân tộc giải phóng miền nam việt nam": {
+      "canonical_norm": "việt cộng",
+      "canonical_name": "Việt Cộng"
     },
     "505": {
       "canonical_norm": "505a",
@@ -670,6 +726,18 @@
       "canonical_norm": "ban bí thư trung ương đảng cộng sản việt nam",
       "canonical_name": "Ban Bí thư Trung ương Đảng Cộng sản Việt Nam"
     },
+    "ban thường vụ trung ương": {
+      "canonical_norm": "ban thường vụ trung ương đảng",
+      "canonical_name": "Ban Thường vụ Trung ương Đảng"
+    },
+    "ban thường vụ trung ương đcsđd": {
+      "canonical_norm": "ban thường vụ trung ương đảng",
+      "canonical_name": "Ban Thường vụ Trung ương Đảng"
+    },
+    "ban thường vụ trung ương đảng cộng sản việt nam": {
+      "canonical_norm": "ban thường vụ trung ương đảng",
+      "canonical_name": "Ban Thường vụ Trung ương Đảng"
+    },
     "quân việt nam": {
       "canonical_norm": "quân đội việt nam",
       "canonical_name": "Quân đội Việt Nam"
@@ -677,6 +745,166 @@
     "tiểu đoàn lê dương dù 1": {
       "canonical_norm": "tiểu đoàn dù lê dương 1",
       "canonical_name": "Tiểu đoàn Dù Lê dương 1"
+    },
+    "biên giới thái cam": {
+      "canonical_norm": "biên giới thái lan campuchia",
+      "canonical_name": "Biên giới Thái Lan - Campuchia"
+    },
+    "de lattre de tassigny": {
+      "canonical_norm": "jean de lattre de tassigny",
+      "canonical_name": "Jean de Lattre de Tassigny"
+    },
+    "de lattre": {
+      "canonical_norm": "jean de lattre de tassigny",
+      "canonical_name": "Jean de Lattre de Tassigny"
+    },
+    "john f kennedy": {
+      "canonical_norm": "john f. kennedy",
+      "canonical_name": "John F. Kennedy"
+    },
+    "kennedy": {
+      "canonical_norm": "john f. kennedy",
+      "canonical_name": "John F. Kennedy"
+    },
+    "kennydy": {
+      "canonical_norm": "john f. kennedy",
+      "canonical_name": "John F. Kennedy"
+    },
+    "john f kennydy": {
+      "canonical_norm": "john f. kennedy",
+      "canonical_name": "John F. Kennedy"
+    },
+    "biên hòa": {
+      "canonical_norm": "biên hòa",
+      "canonical_name": "Biên Hoà"
+    },
+    "hòa bình": {
+      "canonical_norm": "hòa bình",
+      "canonical_name": "Hoà Bình"
+    },
+    "hướng hóa": {
+      "canonical_norm": "hướng hóa",
+      "canonical_name": "Hướng Hoá"
+    },
+    "mỹ hòa": {
+      "canonical_norm": "mỹ hòa",
+      "canonical_name": "Mỹ Hoà"
+    },
+    "tuy hòa": {
+      "canonical_norm": "tuy hòa",
+      "canonical_name": "Tuy Hoà"
+    },
+    "việt nam cộng hòa": {
+      "canonical_norm": "việt nam cộng hòa",
+      "canonical_name": "Việt Nam Cộng hoà"
+    },
+    "việt nam dân chủ cộng hòa": {
+      "canonical_norm": "việt nam dân chủ cộng hòa",
+      "canonical_name": "Việt Nam Dân chủ Cộng hoà"
+    },
+    "quân lực việt nam cộng hòa": {
+      "canonical_norm": "quân lực việt nam cộng hòa",
+      "canonical_name": "Quân lực Việt Nam Cộng hoà"
+    },
+    "chính quyền việt nam cộng hòa": {
+      "canonical_norm": "chính quyền việt nam cộng hòa",
+      "canonical_name": "Chính quyền Việt Nam Cộng hoà"
+    },
+    "chính phủ cách mạng lâm thời cộng hòa miền nam việt nam": {
+      "canonical_norm": "chính phủ cách mạng lâm thời cộng hòa miền nam việt nam",
+      "canonical_name": "Chính phủ Cách mạng lâm thời Cộng hoà miền Nam Việt Nam"
+    },
+    "phnôm pênh": {
+      "canonical_norm": "phnom penh",
+      "canonical_name": "Phnom Penh"
+    },
+    "plei me": {
+      "canonical_norm": "plei me",
+      "canonical_name": "Plei Me"
+    },
+    "sê pôn": {
+      "canonical_norm": "sê pôn",
+      "canonical_name": "Sê Pôn"
+    },
+    "biên giới việt trung": {
+      "canonical_norm": "biên giới việt trung",
+      "canonical_name": "Biên giới Việt - Trung"
+    },
+    "bình trị thiên": {
+      "canonical_norm": "bình trị thiên",
+      "canonical_name": "Bình Trị Thiên"
+    },
+    "quảng đà": {
+      "canonical_norm": "quảng đà",
+      "canonical_name": "Quảng - Đà"
+    },
+    "trị thiên": {
+      "canonical_norm": "trị thiên",
+      "canonical_name": "Trị - Thiên"
+    },
+    "trị thiên huế": {
+      "canonical_norm": "trị thiên huế",
+      "canonical_name": "Trị - Thiên - Huế"
+    },
+    "thừa thiên huế": {
+      "canonical_norm": "thừa thiên huế",
+      "canonical_name": "Thừa Thiên - Huế"
+    },
+    "sài gòn chợ lớn": {
+      "canonical_norm": "sài gòn chợ lớn",
+      "canonical_name": "Sài Gòn - Chợ Lớn"
+    },
+    "chiến dịch huế đà nẵng": {
+      "canonical_norm": "chiến dịch huế đà nẵng",
+      "canonical_name": "Chiến dịch Huế - Đà Nẵng"
+    },
+    "chiến dịch trị thiên": {
+      "canonical_norm": "chiến dịch trị thiên",
+      "canonical_name": "Chiến dịch Trị - Thiên"
+    },
+    "chiến dịch nam ngãi": {
+      "canonical_norm": "chiến dịch nam ngãi",
+      "canonical_name": "Chiến dịch Nam - Ngãi"
+    },
+    "xô viết nghệ tĩnh": {
+      "canonical_norm": "xô viết nghệ tĩnh",
+      "canonical_name": "Xô Viết - Nghệ Tĩnh"
+    },
+    "dân quân, tự vệ": {
+      "canonical_norm": "dân quân tự vệ",
+      "canonical_name": "Dân quân tự vệ"
+    },
+    "quân ủy trung ương": {
+      "canonical_norm": "quân ủy trung ương",
+      "canonical_name": "Quân uỷ Trung ương"
+    },
+    "tổng quân ủy": {
+      "canonical_norm": "tổng quân ủy",
+      "canonical_name": "Tổng Quân uỷ"
+    },
+    "xứ ủy": {
+      "canonical_norm": "xứ ủy",
+      "canonical_name": "Xứ uỷ"
+    },
+    "xứ ủy nam bộ": {
+      "canonical_norm": "xứ ủy nam bộ",
+      "canonical_name": "Xứ uỷ Nam Bộ"
+    },
+    "quân đoàn ii vnch": {
+      "canonical_norm": "quân đoàn ii vnch",
+      "canonical_name": "Quân đoàn II VNCH"
+    },
+    "sư đoàn dù vnch": {
+      "canonical_norm": "sư đoàn dù qlvnch",
+      "canonical_name": "Sư đoàn Dù QLVNCH"
+    },
+    "harry truman": {
+      "canonical_norm": "harry s. truman",
+      "canonical_name": "Harry S. Truman"
+    },
+    "mcnamara": {
+      "canonical_norm": "mc namara",
+      "canonical_name": "Mc Namara"
     }
   }
 }
