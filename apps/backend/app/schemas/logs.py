@@ -50,6 +50,7 @@ class MessageLogItem(BaseModel):
     retrieval_mode: str
     confidence: str | None
     warnings: list[Any]
+    ttft_ms: int | None
     created_at: datetime
     quality: MessageQuality
 
@@ -73,6 +74,11 @@ class QualitySummary(BaseModel):
     low_confidence_count: int
     clarification_count: int
     warning_count: int
+    # TTFT: mẫu số riêng = ttft_measured_count (message chưa đo được có ttft_ms NULL, không
+    # tính vào trung bình). Cả hai None khi chưa message nào có số.
+    ttft_measured_count: int
+    avg_ttft_ms: float | None
+    p95_ttft_ms: int | None
 
 
 # --- Token theo hội thoại/message (song song chất lượng, xem admin-restructure-plan §Item 3) ---

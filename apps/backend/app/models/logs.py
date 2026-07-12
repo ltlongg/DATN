@@ -16,7 +16,7 @@ from app.core.db import connection
 # Cột thô của message (không tính chất lượng ở SQL — để service thuần xử lý).
 _MSG_COLS = (
     "id, role, content, clarification_needed, citations, visualization, "
-    "retrieval_mode, confidence, warnings, created_at"
+    "retrieval_mode, confidence, warnings, ttft_ms, created_at"
 )
 
 
@@ -108,7 +108,7 @@ def list_quality_rows(
     with connection() as conn, conn.cursor() as cur:
         cur.execute(
             f"SELECT confidence, citations, clarification_needed, warnings, "
-            f"retrieval_mode, created_at FROM messages {where_sql}",
+            f"retrieval_mode, ttft_ms, created_at FROM messages {where_sql}",
             params,
         )
         return cur.fetchall()

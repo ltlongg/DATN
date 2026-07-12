@@ -1,4 +1,5 @@
 import { StatCard } from "@/components/StatCard";
+import { formatTtft } from "@/lib/format";
 import type { QualitySummary } from "@/types/admin";
 
 function pct(num: number, den: number): string {
@@ -14,8 +15,17 @@ function pct(num: number, den: number): string {
 export function QualitySummaryCard({ summary }: { summary: QualitySummary }) {
   const t = summary.total_assistant_messages;
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
       <StatCard label="Message trả lời" value={String(t)} sub="tổng cộng" />
+      <StatCard
+        label="TTFT trung bình"
+        value={formatTtft(summary.avg_ttft_ms)}
+        sub={
+          summary.ttft_measured_count === 0
+            ? "chưa có số đo"
+            : `p95 ${formatTtft(summary.p95_ttft_ms)} · ${summary.ttft_measured_count} message`
+        }
+      />
       <StatCard
         label="Thiếu citation"
         value={`${summary.no_citation_count} / ${summary.retrieval_attempted_count}`}

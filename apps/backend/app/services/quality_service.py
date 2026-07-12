@@ -32,6 +32,20 @@ def message_quality_flags(row: dict[str, Any]) -> MessageQuality:
     )
 
 
+def _ttft_stats(rows: list[dict[str, Any]]) -> tuple[int, float | None, int | None]:
+    """(số message đo được, TTFT trung bình ms, p95 ms). Bỏ qua row ttft_ms NULL — message
+    lưu trước khi có tính năng này hoặc stream hỏng trước token đầu. p95 lấy theo phương pháp
+    nearest-rank (không nội suy): phần tử thứ ceil(0.95 * n) của dãy đã sắp."""
+    values = sorted(
+        int(r["ttft_ms"]) for r in rows if isinstance(r.get("ttft_ms"), int)
+    )
+    if not values:
+        return 0, None, None
+    n = len(values)
+    rank = -(-95 * n // 100)  # ceil(0.95 * n), tối thiểu 1
+    return n, sum(values) / n, values[rank - 1]
+
+
 def compute_quality_summary(rows: list[dict[str, Any]]) -> QualitySummary:
     """Tổng hợp đếm trên các assistant message. Mẫu số khác nhau theo field (xem docstring)."""
     total = len(rows)
@@ -52,6 +66,7 @@ def compute_quality_summary(rows: list[dict[str, Any]]) -> QualitySummary:
             clarification += 1
         if flags.has_warning:
             warning += 1
+    ttft_count, avg_ttft, p95_ttft = _ttft_stats(rows)
     return QualitySummary(
         total_assistant_messages=total,
         retrieval_attempted_count=retrieval_attempted,
@@ -59,4 +74,7 @@ def compute_quality_summary(rows: list[dict[str, Any]]) -> QualitySummary:
         low_confidence_count=low_confidence,
         clarification_count=clarification,
         warning_count=warning,
+        ttft_measured_count=ttft_count,
+        avg_ttft_ms=avg_ttft,
+        p95_ttft_ms=p95_ttft,
     )

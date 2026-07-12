@@ -37,6 +37,7 @@ export interface MessageLogItem {
   retrieval_mode: string;
   confidence: string | null;
   warnings: string[];
+  ttft_ms: number | null;
   created_at: string;
   quality: MessageQuality;
 }
@@ -58,6 +59,10 @@ export interface QualitySummary {
   low_confidence_count: number;
   clarification_count: number;
   warning_count: number;
+  /** TTFT: mẫu số riêng — message không đo được (ttft_ms null) không tính vào trung bình. */
+  ttft_measured_count: number;
+  avg_ttft_ms: number | null;
+  p95_ttft_ms: number | null;
 }
 
 // --- Token theo hội thoại/message (song song chất lượng) ---

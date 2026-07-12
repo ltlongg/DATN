@@ -15,7 +15,13 @@ _TEACHER_EMAIL = "teacher-test@example.com"
 
 
 def _asst(
-    *, retrieval_mode="hybrid", citations=None, confidence=None, clarification=False, warnings=None
+    *,
+    retrieval_mode="hybrid",
+    citations=None,
+    confidence=None,
+    clarification=False,
+    warnings=None,
+    ttft_ms=None,
 ):
     return {
         "retrieval_mode": retrieval_mode,
@@ -23,6 +29,7 @@ def _asst(
         "confidence": confidence,
         "clarification_needed": clarification,
         "warnings": warnings or [],
+        "ttft_ms": ttft_ms,
     }
 
 
@@ -55,6 +62,22 @@ def test_quality_summary_low_confidence_and_warning_count_all_rows() -> None:
 def test_quality_summary_empty() -> None:
     s = compute_quality_summary([])
     assert s.total_assistant_messages == 0 and s.no_citation_count == 0
+    assert s.ttft_measured_count == 0
+    assert s.avg_ttft_ms is None and s.p95_ttft_ms is None
+
+
+def test_quality_summary_ttft_ignores_unmeasured_rows() -> None:
+    # Message không đo được TTFT (ttft_ms None) KHÔNG kéo trung bình xuống — mẫu số riêng.
+    rows = [
+        _asst(ttft_ms=1000),
+        _asst(ttft_ms=3000),
+        _asst(ttft_ms=None),
+    ]
+    s = compute_quality_summary(rows)
+    assert s.total_assistant_messages == 3
+    assert s.ttft_measured_count == 2
+    assert s.avg_ttft_ms == 2000
+    assert s.p95_ttft_ms == 3000  # nearest-rank trên 2 giá trị -> lớn nhất
 
 
 # --- endpoints --------------------------------------------------------------
