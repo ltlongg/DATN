@@ -9,6 +9,7 @@ import json
 from collections.abc import AsyncIterator
 from typing import Any
 
+from app.core.runtime_config import get_runtime_config
 from app.orchestrator.emitter import Emitter, NullEmitter, QueueEmitter
 from app.orchestrator.errors import GuardrailsBlocked, SynthesisError
 from app.orchestrator.graph import get_graph
@@ -21,6 +22,9 @@ def initial_state(request: AskRequest) -> AgentState:
     return {
         "question": request.question,
         "history": list(request.history),
+        # Điền default rỗng ({} -> RuntimeConfig mặc định khi node model_validate); giá trị
+        # thật do prepare_state() nhét vào trước khi vào graph.
+        "runtime_config": {},
         "user_id": request.user_id,
         "conversation_id": request.conversation_id,
         "message_id": request.message_id,
@@ -41,6 +45,15 @@ def initial_state(request: AskRequest) -> AgentState:
         "warnings": [],
         "debug": {},
     }
+
+
+async def prepare_state(request: AskRequest) -> AgentState:
+    """State khởi tạo + snapshot runtime_config (gọi backend đúng 1 LẦN/request, cache TTL).
+    Mọi node sau chỉ đọc từ state["runtime_config"], không gọi lại/không I/O."""
+    state = initial_state(request)
+    cfg = await asyncio.to_thread(get_runtime_config)
+    state["runtime_config"] = cfg.model_dump()
+    return state
 
 
 def build_response(request: AskRequest, state: dict[str, Any]) -> AskResponse:
@@ -72,7 +85,7 @@ async def run_ask(request: AskRequest, *, emitter: Emitter | None = None) -> Ask
     emitter = emitter or NullEmitter()
     try:
         final = await get_graph().ainvoke(
-            initial_state(request), config={"configurable": {"emitter": emitter}}
+            await prepare_state(request), config={"configurable": {"emitter": emitter}}
         )
     except GuardrailsBlocked as blocked:
         return AskResponse(answer=blocked.safe_message, retrieval_mode="none")
@@ -114,11 +127,12 @@ async def run_ask_stream(request: AskRequest) -> AsyncIterator[str]:
     emitter = QueueEmitter()
     final_state: dict[str, Any] = {}
     captured: dict[str, BaseException] = {}
+    state = await prepare_state(request)
 
     async def _run() -> None:
         try:
             result = await get_graph().ainvoke(
-                initial_state(request), config={"configurable": {"emitter": emitter}}
+                state, config={"configurable": {"emitter": emitter}}
             )
             final_state.update(result)
         except Exception as exc:  # noqa: BLE001 — sau khi SSE mở, lỗi đi qua event error

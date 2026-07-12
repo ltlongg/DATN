@@ -30,3 +30,17 @@ def _isolate_prompt_store(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(prompt_store, "connection", _no_db)
     yield
     prompt_store.clear_cache()
+
+
+@pytest.fixture(autouse=True)
+def _isolate_runtime_config(monkeypatch: pytest.MonkeyPatch):
+    """Giữ test hermetic: runner.prepare_state gọi get_runtime_config (HTTP tới backend). Patch
+    về RuntimeConfig() mặc định để không gọi mạng thật. Test runtime_config riêng import trực
+    tiếp app.core.runtime_config nên KHÔNG bị fixture này ảnh hưởng (nó tự mock httpx)."""
+    from app.core import runtime_config
+    from app.orchestrator import runner
+
+    runtime_config.clear_cache()
+    monkeypatch.setattr(runner, "get_runtime_config", lambda: runtime_config.RuntimeConfig())
+    yield
+    runtime_config.clear_cache()

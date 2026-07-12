@@ -86,3 +86,14 @@ async def test_search_vector_raises_embedding_failed(monkeypatch) -> None:
     with pytest.raises(RetrievalBackendError) as exc:
         await V.search_vector("x", client=_FakeQdrant([]))
     assert exc.value.code == "embedding_failed"
+
+
+async def test_search_dense_sparse_prefetch_limits_use_top_k_and_bm25_top_k(monkeypatch) -> None:
+    # top_k áp cho dense prefetch + fusion limit; bm25_top_k áp cho sparse prefetch.
+    monkeypatch.setattr(V, "encode_query", lambda q: ([1, 2], [0.5, 0.4]))
+    client = _FakeQdrant([_point("u1", 0.9, {"chunk_id": "c-1"})])
+    await V.search_dense_sparse("x", top_k=7, bm25_top_k=9, client=client)
+    call = client.calls[0]
+    assert call["prefetch"][0].limit == 7  # dense prefetch dùng top_k (không còn hardcode)
+    assert call["prefetch"][1].limit == 9  # sparse prefetch dùng bm25_top_k
+    assert call["limit"] == 7  # limit fusion cuối

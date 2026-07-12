@@ -174,15 +174,21 @@ def match_seed_entities(
     *,
     seed_mentions: list[str] | None = None,
     limit: int,
+    hub_source_count_threshold: int | None = None,
     index: EntityIndex | None = None,
 ) -> list[GraphSeed]:
     """Sinh + ground seed (bước A) rồi sort/hub-guard/cap (bước B đối xứng indexing).
 
     `seed_mentions != None` -> ground trực tiếp từng mention (chiến lược 1, từ LLM).
     `seed_mentions is None`  -> token-match từ query (chiến lược 2, fallback deterministic).
+    `hub_source_count_threshold` None -> fallback settings (Cấu hình hệ thống truyền vào).
     """
     index = index or get_entity_index()
-    threshold = get_settings().graph_hub_source_count_threshold
+    threshold = (
+        hub_source_count_threshold
+        if hub_source_count_threshold is not None
+        else get_settings().graph_hub_source_count_threshold
+    )
 
     raw: list[GraphSeed] = []
     if seed_mentions is not None:
@@ -238,19 +244,33 @@ def search_graph(
     *,
     seed_mentions: list[str] | None = None,
     top_k: int | None = None,
+    max_seed_entities: int | None = None,
+    max_chunks_per_seed: int | None = None,
+    hub_source_count_threshold: int | None = None,
+    max_context_items: int | None = None,
+    max_path_hops: int | None = None,
+    path_hit_weight: float | None = None,
     driver: Driver | None = None,
     index: EntityIndex | None = None,
 ) -> tuple[list[RetrievalCandidate], list[GraphContextItem]]:
     """Trả CẢ candidate (provenance, để RRF gộp) LẪN graph_context (content cho LLM).
 
     Không match seed -> trả ([], []) (KHÔNG raise; orchestrator/honest answer xử lý).
+
+    Các kwarg tinh chỉnh None -> fallback settings (Cấu hình hệ thống truyền giá trị admin).
     """
     settings = get_settings()
     index = index or get_entity_index()
+    hub_threshold = (
+        hub_source_count_threshold
+        if hub_source_count_threshold is not None
+        else settings.graph_hub_source_count_threshold
+    )
     seeds = match_seed_entities(
         query,
         seed_mentions=seed_mentions,
-        limit=settings.graph_max_seed_entities,
+        limit=max_seed_entities if max_seed_entities is not None else settings.graph_max_seed_entities,
+        hub_source_count_threshold=hub_threshold,
         index=index,
     )
     if not seeds:
@@ -258,7 +278,9 @@ def search_graph(
 
     driver = driver or get_neo4j_driver()
     k = top_k if top_k is not None else settings.graph_top_k
-    per_seed_cap = settings.graph_max_chunks_per_seed
+    per_seed_cap = (
+        max_chunks_per_seed if max_chunks_per_seed is not None else settings.graph_max_chunks_per_seed
+    )
 
     scores: dict[str, float] = {}
     chunk_seeds: dict[str, set[str]] = {}
@@ -280,7 +302,7 @@ def search_graph(
                 continue
             weight = (
                 _HUB_WEIGHT
-                if seed.info.source_count > settings.graph_hub_source_count_threshold
+                if seed.info.source_count > hub_threshold
                 else 1.0
             )
             seed_name = record["seed_name"] or seed.info.name
@@ -325,8 +347,12 @@ def search_graph(
         # --- C2: path-finding giữa từng cặp seed (chỉ khi >=2 seed) ---
         # Số cặp = C(n,2), cap seed=5 -> tối đa 10 cặp; shortestPath = 1 đường/cặp -> không bùng nổ.
         if len(seeds) >= 2:
-            path_cypher = _path_cypher(settings.graph_max_path_hops)
-            path_weight = settings.graph_path_hit_weight
+            path_cypher = _path_cypher(
+                max_path_hops if max_path_hops is not None else settings.graph_max_path_hops
+            )
+            path_weight = (
+                path_hit_weight if path_hit_weight is not None else settings.graph_path_hit_weight
+            )
             path_counted: set[str] = set()  # cap TỔNG chunk path (chung mọi cặp)
             for a, b in itertools.combinations(seeds, 2):
                 rec = session.run(
@@ -388,7 +414,8 @@ def search_graph(
     deduped: dict[tuple[str, ...], GraphContextItem] = {}
     for item in context:
         deduped.setdefault(item.dedup_key(), item)
-    graph_context = list(deduped.values())[: settings.graph_max_context_items]
+    max_ctx = max_context_items if max_context_items is not None else settings.graph_max_context_items
+    graph_context = list(deduped.values())[:max_ctx]
 
     return candidates, graph_context
 

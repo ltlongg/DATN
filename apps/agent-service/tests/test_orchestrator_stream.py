@@ -49,7 +49,7 @@ def _patch_build_query(monkeypatch, *, route="needs_retrieval"):
 
 
 def _patch_retrieve(monkeypatch, result=None, *, error=None):
-    async def fake(question, *, seed_mentions=None):
+    async def fake(question, *, seed_mentions=None, **kwargs):
         if error:
             raise error
         return result if result is not None else _retrieval(["c-1"])
@@ -58,7 +58,9 @@ def _patch_retrieve(monkeypatch, result=None, *, error=None):
 
 
 def _patch_synthesize(monkeypatch, *, answer="Đáp án ngắn.", used=("c-1",), confidence="cao"):
-    async def fake(messages, *, emitter, model, batch_chars, client=None, on_usage=None):
+    async def fake(
+        messages, *, emitter, model, batch_chars, temperature=0.0, client=None, on_usage=None
+    ):
         from app.orchestrator.synthesis import emit_text_as_batches
 
         await emit_text_as_batches(answer, emitter, batch_chars)

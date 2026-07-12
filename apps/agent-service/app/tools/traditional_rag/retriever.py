@@ -20,10 +20,17 @@ __all__ = ["retrieve_traditional"]
 
 
 async def retrieve_traditional(
-    question: str, *, top_k: int | None = None
+    question: str,
+    *,
+    top_k: int | None = None,
+    bm25_top_k: int | None = None,
+    rerank_top_k: int | None = None,
 ) -> RetrievalResult:
-    """Dense+sparse fuse -> hydrate Postgres (một lần) -> rerank + cắt `rerank_top_k`."""
-    candidates = await search_dense_sparse(question, top_k=top_k)
+    """Dense+sparse fuse -> hydrate Postgres (một lần) -> rerank + cắt `rerank_top_k`.
+
+    Các kwarg None -> fallback settings (Cấu hình hệ thống truyền giá trị admin vào).
+    """
+    candidates = await search_dense_sparse(question, top_k=top_k, bm25_top_k=bm25_top_k)
     if not candidates:
         return RetrievalResult(mode="traditional", query=question, chunks=[])
 
@@ -50,7 +57,8 @@ async def retrieve_traditional(
         )
 
     chunks = await rerank(question, chunks)
-    chunks = chunks[: get_settings().rerank_top_k]
+    cut = rerank_top_k if rerank_top_k is not None else get_settings().rerank_top_k
+    chunks = chunks[:cut]
     return RetrievalResult(
         mode="traditional", query=question, chunks=chunks, warnings=warnings
     )

@@ -140,6 +140,7 @@ async def search_dense_sparse(
     query: str,
     *,
     top_k: int | None = None,
+    bm25_top_k: int | None = None,
     client: QdrantClient | None = None,
 ) -> list[RetrievalCandidate]:
     """Dense + sparse BM25 fuse RRF SERVER-SIDE (Qdrant Query API) -> candidate đã gộp.
@@ -147,9 +148,13 @@ async def search_dense_sparse(
     Dùng cho traditional mode: 1 call, Qdrant tự RRF dense (default) + sparse (`bm25`).
     `source="vector"` vì sau fusion không tách được đóng góp dense/sparse. Hybrid mode KHÔNG
     dùng hàm này (nó fuse client-side để gộp thêm graph — xem `tools/hybrid`).
+
+    `top_k`/`bm25_top_k` None -> fallback settings (Cấu hình hệ thống truyền giá trị admin).
+    `top_k` áp cho CẢ dense prefetch lẫn limit fusion cuối (giữ 2 giá trị bằng nhau như trước).
     """
     settings = get_settings()
     k = top_k if top_k is not None else settings.rag_top_k
+    bm25_k = bm25_top_k if bm25_top_k is not None else settings.bm25_top_k
 
     try:
         vectors = await embed_texts([query])
@@ -165,11 +170,11 @@ async def search_dense_sparse(
             client.query_points,
             collection_name=settings.qdrant_collection,
             prefetch=[
-                Prefetch(query=vectors[0].tolist(), limit=settings.rag_top_k),
+                Prefetch(query=vectors[0].tolist(), limit=k),
                 Prefetch(
                     query=SparseVector(indices=sparse_indices, values=sparse_values),
                     using=settings.sparse_vector_name,
-                    limit=settings.bm25_top_k,
+                    limit=bm25_k,
                 ),
             ],
             query=FusionQuery(fusion=Fusion.RRF),

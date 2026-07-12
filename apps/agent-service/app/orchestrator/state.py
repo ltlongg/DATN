@@ -25,6 +25,9 @@ def _merge_debug(
 class AgentState(TypedDict):
     question: str
     history: list[ChatMessage]
+    # Snapshot system_config (RuntimeConfig.model_dump()) — ghi 1 lần đầu request ở runner
+    # trước khi vào graph, các node chỉ ĐỌC (không I/O thêm). Xem app/core/runtime_config.py.
+    runtime_config: dict[str, object]
     # id user backend (từ AskRequest.user_id) — gắn usage LLM vào đúng user cho cost dashboard.
     user_id: str | None
     # conversation_id + message_id (assistant) — gắn usage LLM về đúng hội thoại/message.

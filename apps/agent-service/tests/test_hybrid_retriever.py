@@ -238,3 +238,96 @@ async def test_hybrid_sparse_only_contributes_candidate(monkeypatch) -> None:
     result = await H.retrieve_hybrid("q")
     c9 = next(c for c in result.chunks if c.chunk_id == "c-9")
     assert c9.sources == ["sparse"]
+
+
+# --- Cấu hình hệ thống: forward tham số tinh chỉnh + cutoff ---
+
+
+async def test_hybrid_forwards_tuning_to_candidate_sources(monkeypatch) -> None:
+    seen: dict = {}
+
+    async def fake_vector(question, *, top_k=None, client=None):
+        seen["vector_top_k"] = top_k
+        return [_vc("c-1", 1)]
+
+    async def fake_bm25(question, *, top_k=None, client=None):
+        seen["bm25_top_k"] = top_k
+        return []
+
+    def fake_graph(
+        query,
+        *,
+        seed_mentions=None,
+        top_k=None,
+        max_seed_entities=None,
+        max_chunks_per_seed=None,
+        hub_source_count_threshold=None,
+        max_context_items=None,
+        max_path_hops=None,
+        path_hit_weight=None,
+    ):
+        seen.update(
+            graph_top_k=top_k,
+            max_seed_entities=max_seed_entities,
+            max_chunks_per_seed=max_chunks_per_seed,
+            hub_source_count_threshold=hub_source_count_threshold,
+            max_context_items=max_context_items,
+            max_path_hops=max_path_hops,
+            path_hit_weight=path_hit_weight,
+        )
+        return ([], [])
+
+    async def passthrough_rerank(question, chunks):
+        return chunks
+
+    monkeypatch.setattr(H, "search_vector", fake_vector)
+    monkeypatch.setattr(H, "search_bm25", fake_bm25)
+    monkeypatch.setattr(H, "search_graph", fake_graph)
+    monkeypatch.setattr(H, "get_rag_chunks_by_ids", lambda ids: [_row(i) for i in ids])
+    monkeypatch.setattr(H, "rerank", passthrough_rerank)
+
+    await H.retrieve_hybrid(
+        "q",
+        rag_top_k=11,
+        bm25_top_k=9,
+        graph_top_k=12,
+        graph_max_seed_entities=4,
+        graph_max_chunks_per_seed=15,
+        graph_hub_source_count_threshold=90,
+        graph_max_context_items=10,
+        graph_max_path_hops=2,
+        graph_path_hit_weight=2.5,
+    )
+    assert seen["vector_top_k"] == 11
+    assert seen["bm25_top_k"] == 9
+    assert seen["graph_top_k"] == 12
+    assert seen["max_seed_entities"] == 4
+    assert seen["max_chunks_per_seed"] == 15
+    assert seen["hub_source_count_threshold"] == 90
+    assert seen["max_context_items"] == 10
+    assert seen["max_path_hops"] == 2
+    assert seen["path_hit_weight"] == 2.5
+
+
+async def test_hybrid_candidate_k_limits_fused_pool(monkeypatch) -> None:
+    ids = [f"c-{i}" for i in range(1, 6)]
+    _patch(
+        monkeypatch,
+        vector=[_vc(cid, i + 1) for i, cid in enumerate(ids)],
+        graph=([], []),
+        rows=[_row(cid) for cid in ids],
+    )
+    result = await H.retrieve_hybrid("q", hybrid_candidate_k=2)
+    assert len(result.chunks) == 2  # pool fuse bị cắt còn 2 trước rerank
+
+
+async def test_hybrid_rerank_top_k_cuts_result(monkeypatch) -> None:
+    ids = [f"c-{i}" for i in range(1, 6)]
+    _patch(
+        monkeypatch,
+        vector=[_vc(cid, i + 1) for i, cid in enumerate(ids)],
+        graph=([], []),
+        rows=[_row(cid) for cid in ids],
+    )
+    result = await H.retrieve_hybrid("q", rerank_top_k=2)
+    assert len(result.chunks) == 2  # rerank cắt còn 2

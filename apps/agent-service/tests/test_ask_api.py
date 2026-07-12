@@ -59,14 +59,16 @@ def _patch_graph(monkeypatch, *, route="needs_retrieval", retrieve_error=None):
         ),
     )
 
-    async def fake_retrieve(question, *, seed_mentions=None):
+    async def fake_retrieve(question, *, seed_mentions=None, **kwargs):
         if retrieve_error:
             raise retrieve_error
         return _retrieval(["c-1"])
 
     monkeypatch.setattr(nodes, "retrieve_hybrid", fake_retrieve)
 
-    async def fake_synth(messages, *, emitter, model, batch_chars, client=None, on_usage=None):
+    async def fake_synth(
+        messages, *, emitter, model, batch_chars, temperature=0.0, client=None, on_usage=None
+    ):
         from app.orchestrator.synthesis import emit_text_as_batches
 
         await emit_text_as_batches("Đáp án.", emitter, batch_chars)

@@ -84,6 +84,56 @@ async def test_retrieve_graph_falls_back_to_token_match_when_none(monkeypatch) -
     assert seen["seed_mentions"] is None  # search_graph tự token-match
 
 
+async def test_retrieve_graph_forwards_tuning_to_search_graph(monkeypatch) -> None:
+    seen: dict = {}
+
+    def fake_search(
+        q,
+        *,
+        seed_mentions=None,
+        top_k=None,
+        max_seed_entities=None,
+        max_chunks_per_seed=None,
+        hub_source_count_threshold=None,
+        max_context_items=None,
+        max_path_hops=None,
+        path_hit_weight=None,
+    ):
+        seen.update(
+            top_k=top_k,
+            max_seed_entities=max_seed_entities,
+            max_chunks_per_seed=max_chunks_per_seed,
+            hub_source_count_threshold=hub_source_count_threshold,
+            max_context_items=max_context_items,
+            max_path_hops=max_path_hops,
+            path_hit_weight=path_hit_weight,
+        )
+        return [], []
+
+    monkeypatch.setattr(GR, "search_graph", fake_search)
+    monkeypatch.setattr(GR, "get_rag_chunks_by_ids", lambda ids: [])
+    await GR.retrieve_graph(
+        "x",
+        seed_mentions=["A"],
+        graph_top_k=12,
+        graph_max_seed_entities=4,
+        graph_max_chunks_per_seed=15,
+        graph_hub_source_count_threshold=90,
+        graph_max_context_items=10,
+        graph_max_path_hops=2,
+        graph_path_hit_weight=2.5,
+    )
+    assert seen == {
+        "top_k": 12,
+        "max_seed_entities": 4,
+        "max_chunks_per_seed": 15,
+        "hub_source_count_threshold": 90,
+        "max_context_items": 10,
+        "max_path_hops": 2,
+        "path_hit_weight": 2.5,
+    }
+
+
 async def test_retrieve_graph_raises_neo4j_unavailable_on_backend_error(monkeypatch) -> None:
     def boom(q, **kw):
         raise ConnectionError("neo4j down")

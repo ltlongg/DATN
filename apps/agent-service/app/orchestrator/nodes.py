@@ -13,6 +13,7 @@ from langchain_core.runnables import RunnableConfig
 
 from app.core.config import get_settings
 from app.core.llm import get_async_openai_client
+from app.core.runtime_config import RuntimeConfig
 from app.core.usage_log import record_usage
 from app.prompts import build_query as bq_prompt
 from app.prompts import guardrails_input as gi_prompt
@@ -178,18 +179,46 @@ def route_intent(state: AgentState) -> str:
 async def retrieve(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     emitter = _emitter(config)
     mode = state["requested_mode"]
+    cfg = RuntimeConfig.model_validate(state["runtime_config"])
     await emitter.emit("status", {"node": "retrieve", "msg": f"đang tìm tài liệu ({mode})"})
     # Retriever raise RetrievalBackendError khi backend chết -> propagate (API 503).
     # traditional KHÔNG dùng seed_mentions (đúng thiết kế); build_query vẫn chạy bình thường.
+    # Mỗi mode chỉ nhận subset tham số tinh chỉnh của nó (Cấu hình hệ thống).
     if mode == "traditional":
-        result = await retrieve_traditional(state["standalone_query"])
+        result = await retrieve_traditional(
+            state["standalone_query"],
+            top_k=cfg.rag_top_k,
+            bm25_top_k=cfg.bm25_top_k,
+            rerank_top_k=cfg.rerank_top_k,
+        )
     elif mode == "graph":
         result = await retrieve_graph(
-            state["standalone_query"], seed_mentions=state["seed_mentions"]
+            state["standalone_query"],
+            seed_mentions=state["seed_mentions"],
+            graph_top_k=cfg.graph_top_k,
+            graph_max_seed_entities=cfg.graph_max_seed_entities,
+            graph_max_chunks_per_seed=cfg.graph_max_chunks_per_seed,
+            graph_hub_source_count_threshold=cfg.graph_hub_source_count_threshold,
+            graph_max_context_items=cfg.graph_max_context_items,
+            graph_max_path_hops=cfg.graph_max_path_hops,
+            graph_path_hit_weight=cfg.graph_path_hit_weight,
         )
     else:  # hybrid
         result = await retrieve_hybrid(
-            state["standalone_query"], seed_mentions=state["seed_mentions"]
+            state["standalone_query"],
+            seed_mentions=state["seed_mentions"],
+            rag_top_k=cfg.rag_top_k,
+            graph_top_k=cfg.graph_top_k,
+            hybrid_candidate_k=cfg.hybrid_candidate_k,
+            hybrid_rrf_k=cfg.hybrid_rrf_k,
+            rerank_top_k=cfg.rerank_top_k,
+            bm25_top_k=cfg.bm25_top_k,
+            graph_max_seed_entities=cfg.graph_max_seed_entities,
+            graph_max_chunks_per_seed=cfg.graph_max_chunks_per_seed,
+            graph_hub_source_count_threshold=cfg.graph_hub_source_count_threshold,
+            graph_max_context_items=cfg.graph_max_context_items,
+            graph_max_path_hops=cfg.graph_max_path_hops,
+            graph_path_hit_weight=cfg.graph_path_hit_weight,
         )
     return {
         "retrieval": result,
@@ -224,6 +253,7 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
         await emitter.emit("regenerating", {})
     await emitter.emit("status", {"node": "synthesize", "msg": "đang soạn câu trả lời"})
     settings = get_settings()
+    cfg = RuntimeConfig.model_validate(state["runtime_config"])
     retrieval = state["retrieval"]
     assert retrieval is not None  # has_context đảm bảo có chunk trước khi vào đây
     # Document reordering (Phần F): xếp chunk điểm cao ra đầu/cuối prompt, chống "lost in the
@@ -266,6 +296,7 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
         emitter=emitter,
         model=_orchestrator_model(),
         batch_chars=settings.stream_batch_chars,
+        temperature=cfg.llm_temperature,
         on_usage=_on_usage,
     )
     return {

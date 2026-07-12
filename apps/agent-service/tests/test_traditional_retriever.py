@@ -24,7 +24,7 @@ def _row(chunk_id, text="t"):
 
 
 def _patch(monkeypatch, candidates, rows, *, rerank_fn=None, rerank_top_k=8):
-    async def fake_search(question, *, top_k=None, client=None):
+    async def fake_search(question, *, top_k=None, bm25_top_k=None, client=None):
         return candidates
 
     async def passthrough_rerank(question, chunks):
@@ -64,6 +64,28 @@ async def test_retrieve_traditional_empty_when_no_candidates(monkeypatch) -> Non
     result = await R.retrieve_traditional("câu hỏi mơ hồ")
     assert result.chunks == []
     assert result.graph_context == []
+
+
+async def test_retrieve_traditional_forwards_tuning(monkeypatch) -> None:
+    seen: dict = {}
+
+    async def fake_search(question, *, top_k=None, bm25_top_k=None, client=None):
+        seen["top_k"] = top_k
+        seen["bm25_top_k"] = bm25_top_k
+        return [_cand("c-1", 1, 0.9), _cand("c-2", 2, 0.8), _cand("c-3", 3, 0.7)]
+
+    async def passthrough(question, chunks):
+        return chunks
+
+    monkeypatch.setattr(R, "search_dense_sparse", fake_search)
+    monkeypatch.setattr(
+        R, "get_rag_chunks_by_ids", lambda ids: [_row("c-1"), _row("c-2"), _row("c-3")]
+    )
+    monkeypatch.setattr(R, "rerank", passthrough)
+    # rerank_top_k=2 truyền thẳng -> KHÔNG chạm get_settings; forward top_k/bm25_top_k xuống search.
+    result = await R.retrieve_traditional("q", top_k=11, bm25_top_k=9, rerank_top_k=2)
+    assert seen == {"top_k": 11, "bm25_top_k": 9}
+    assert [c.chunk_id for c in result.chunks] == ["c-1", "c-2"]  # cắt còn rerank_top_k=2
 
 
 async def test_retrieve_traditional_reranks_then_cuts(monkeypatch) -> None:

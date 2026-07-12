@@ -61,12 +61,16 @@ async def stream_synthesis(
     emitter: Emitter,
     model: str,
     batch_chars: int,
+    temperature: float = 0.0,
     client: AsyncOpenAI | None = None,
     on_usage: Callable[[int, int, int], Awaitable[None]] | None = None,
 ) -> SynthesizedAnswer:
     """Stream structured output `SynthesizedAnswer`; emit delta của `answer` THÔ (không
     batch/guardrails). Trả về SynthesizedAnswer cuối. `answer` là field đầu nên token ra
     trước, `used_chunk_ids`/`confidence` về ở cuối.
+
+    `temperature` do admin chỉnh qua Cấu hình hệ thống (RuntimeConfig.llm_temperature); mặc
+    định 0.0. build_query GIỮ 0.0 cứng (cần deterministic), chỉ synthesize dùng field này.
 
     `on_usage(prompt, completion, total)` (nếu truyền) được await đúng 1 lần sau khi có
     usage. Mặc định None = giữ nguyên hành vi cũ (không đọc usage). `stream_options=
@@ -80,7 +84,7 @@ async def stream_synthesis(
         model=model,
         messages=messages,  # type: ignore[arg-type]
         response_format=SynthesizedAnswer,
-        temperature=0.0,
+        temperature=temperature,
         stream_options={"include_usage": True},
     ) as stream:
         async for event in stream:

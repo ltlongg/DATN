@@ -18,11 +18,30 @@ __all__ = ["retrieve_graph"]
 
 
 async def retrieve_graph(
-    query: str, *, seed_mentions: list[str] | None = None
+    query: str,
+    *,
+    seed_mentions: list[str] | None = None,
+    graph_top_k: int | None = None,
+    graph_max_seed_entities: int | None = None,
+    graph_max_chunks_per_seed: int | None = None,
+    graph_hub_source_count_threshold: int | None = None,
+    graph_max_context_items: int | None = None,
+    graph_max_path_hops: int | None = None,
+    graph_path_hit_weight: float | None = None,
 ) -> RetrievalResult:
+    """Các kwarg tinh chỉnh None -> search_graph fallback settings (Cấu hình hệ thống)."""
     try:
         candidates, graph_context = await asyncio.to_thread(
-            search_graph, query, seed_mentions=seed_mentions
+            search_graph,
+            query,
+            seed_mentions=seed_mentions,
+            top_k=graph_top_k,
+            max_seed_entities=graph_max_seed_entities,
+            max_chunks_per_seed=graph_max_chunks_per_seed,
+            hub_source_count_threshold=graph_hub_source_count_threshold,
+            max_context_items=graph_max_context_items,
+            max_path_hops=graph_max_path_hops,
+            path_hit_weight=graph_path_hit_weight,
         )
     except RetrievalBackendError:
         raise
