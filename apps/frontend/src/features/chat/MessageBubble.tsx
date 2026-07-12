@@ -4,7 +4,14 @@ import { CitationList } from "@/features/chat/CitationList";
 import { ClarificationPrompt } from "@/features/chat/ClarificationPrompt";
 import { DebugPanel } from "@/features/chat/DebugPanel";
 import type { ChatItem } from "@/features/chat/chatReducer";
+import { formatTtft } from "@/lib/format";
 import { useAuthStore } from "@/store/authStore";
+
+/** Số từ của câu trả lời — tính tại chỗ từ content, không lưu DB. */
+function countWords(text: string): number {
+  const t = text.trim();
+  return t === "" ? 0 : t.split(/\s+/).length;
+}
 
 /** 1 dòng chat. User: bong bóng phải. Assistant: khối trái + citations/confidence/lỗi. */
 export function MessageBubble({
@@ -64,6 +71,17 @@ export function MessageBubble({
             {!item.streaming && (
               <div className="mt-2 flex flex-wrap items-center gap-2">
                 <ConfidenceBadge confidence={item.confidence} />
+                {item.ttftMs !== null && (
+                  <span
+                    className="text-xs text-ink-soft"
+                    title="Thời gian chờ tới chữ đầu tiên (gồm truy hồi + LLM)"
+                  >
+                    ⏱ {formatTtft(item.ttftMs)}
+                  </span>
+                )}
+                <span className="text-xs text-ink-soft">
+                  {countWords(item.content)} từ
+                </span>
                 {item.warnings.map((w, i) => (
                   <span key={i} className="text-xs text-amber-700">
                     {w}

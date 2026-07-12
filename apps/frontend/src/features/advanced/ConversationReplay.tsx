@@ -1,6 +1,6 @@
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { Markdown } from "@/components/Markdown";
-import { formatDateTime } from "@/lib/format";
+import { formatDateTime, formatTtft } from "@/lib/format";
 import type { ConversationLogDetail as Detail } from "@/types/admin";
 
 /** Cột giữa: replay hội thoại inline — bong bóng user (phải) + assistant (trái, render markdown
@@ -28,6 +28,11 @@ export function ConversationReplay({ detail }: { detail: Detail }) {
               <div className="mb-0.5 flex items-center gap-2 text-[11px] text-ink-soft">
                 <span>AI</span>
                 <ConfidenceBadge confidence={m.confidence} />
+                {m.ttft_ms !== null && (
+                  <span title="TTFT: từ lúc user hỏi tới chữ đầu tiên">
+                    ⏱ {formatTtft(m.ttft_ms)}
+                  </span>
+                )}
               </div>
               <div className="inline-block max-w-[92%] rounded-lg border border-paper-border bg-paper-card px-3 py-2 text-sm text-ink">
                 <Markdown content={m.content} />

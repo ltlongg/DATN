@@ -80,6 +80,8 @@ export interface Message {
   retrieval_mode: string;
   confidence: string | null;
   warnings: string[];
+  /** TTFT (ms): từ lúc gửi câu hỏi tới token đầu tiên. null với message user. */
+  ttft_ms: number | null;
   created_at: string;
 }
 

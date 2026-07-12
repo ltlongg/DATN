@@ -20,6 +20,8 @@ export interface ChatItem {
   confidence: string | null;
   retrievalMode: string | null;
   warnings: string[];
+  /** TTFT (ms) từ event done / message đã lưu; null khi chưa xong hoặc không đo được. */
+  ttftMs: number | null;
   debug: DebugInfo | null;
   error: { code: string; message: string } | null;
   blocked: boolean;
@@ -54,6 +56,7 @@ function assistantBase(id: string): ChatItem {
     confidence: null,
     retrievalMode: null,
     warnings: [],
+    ttftMs: null,
     debug: null,
     error: null,
     blocked: false,
@@ -76,6 +79,7 @@ export function messageToItem(m: Message): ChatItem {
     confidence: m.confidence,
     retrievalMode: m.retrieval_mode,
     warnings: m.warnings,
+    ttftMs: m.ttft_ms,
     debug: null,
     error: null,
     blocked: false,
@@ -153,6 +157,7 @@ export function chatReducer(state: ChatItem[], action: ChatAction): ChatItem[] {
         confidence: action.done.confidence,
         retrievalMode: action.done.retrieval_mode,
         warnings: action.done.warnings,
+        ttftMs: action.done.ttft_ms,
       }));
 
     default:

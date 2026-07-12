@@ -20,6 +20,8 @@ export interface DonePayload {
   warnings: string[];
   conversation_id: string;
   message_id: string | null;
+  /** TTFT (ms) backend đo: nhận /ask -> token đầu tiên. null nếu chưa có token nào. */
+  ttft_ms: number | null;
 }
 
 export interface AskHandlers {
@@ -187,6 +189,7 @@ function dispatch(evt: SseEvent | null, h: AskHandlers): void {
         warnings: (d.warnings as string[]) ?? [],
         conversation_id: String(d.conversation_id ?? ""),
         message_id: (d.message_id as string | null) ?? null,
+        ttft_ms: typeof d.ttft_ms === "number" ? d.ttft_ms : null,
       });
       break;
     // event lạ -> bỏ qua (không vỡ)
