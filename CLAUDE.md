@@ -174,6 +174,15 @@ agent-service, gom token lưu `messages`. Lỗi TRƯỚC khi mở stream → HTT
 SAU khi mở → event `error`. Bảng: `users/conversations/messages/documents`; `messages.
 created_at` dùng `clock_timestamp()` (không `now()`) để thứ tự message ổn định trong 1 txn.
 
+**TTFT** (`messages.ttft_ms`): đo Ở BACKEND, KHÔNG phải agent — bấm giờ đầu handler `ask()`,
+chốt ở event `token` ĐẦU TIÊN proxy xuống FE (`api/chat.py::_proxy_stream` → `SseCollector.
+mark_first_token`). Vậy con số gồm cả quota check + history + guardrails + build_query +
+retrieval + LLM = đúng khoảng người dùng chờ tới chữ đầu tiên, KHÔNG phải TTFT riêng của LLM
+(OpenAI không trả metric này; muốn tách riêng phần LLM thì phải đo thêm trong `synthesis.py`).
+Đi kèm event `done` (FE hiện ngay) + lưu DB (thấy lại sau reload). NULL = message user, hoặc
+stream hỏng/blocked trước token đầu → UI hiện "—", và trung bình/p95 ở
+`quality_service::_ttft_stats` bỏ qua row NULL (mẫu số riêng `ttft_measured_count`).
+
 ### Admin nâng cao — 3 file plan, KHÔNG trùng nội dung, sửa gì thì sửa đúng file
 - `docs/plan/backend-additions-plan.md` — **đã code xong** Phần 1–4: debug streaming, read
   endpoints Module 5 (KB Inspector), 3/4 nhóm Module 4 gốc (logs & chất lượng, users & quota,
