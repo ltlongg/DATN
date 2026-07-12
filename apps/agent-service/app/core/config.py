@@ -115,6 +115,10 @@ class Settings(BaseSettings):
     guardrails_timeout_seconds: int = 8
     guardrails_fail_closed: bool = True
 
+    # --- Backend gateway (đọc system_config qua GET /internal/config). Mirror field
+    # agent_service_url phía backend, hướng ngược lại. Xem app/core/runtime_config.py. ---
+    backend_base_url: str = "http://localhost:8000"
+
     # --- Storage backends (đọc từ .env) ---
     neo4j_uri: str = ""
     neo4j_user: str = "neo4j"
