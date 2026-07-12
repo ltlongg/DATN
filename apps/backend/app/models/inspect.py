@@ -21,10 +21,11 @@ _PREVIEW_CHARS = 200
 
 
 def list_chunks(
-    q: str | None, heading: str | None, limit: int, offset: int
+    q: str | None, heading: str | None, source_file: str | None, limit: int, offset: int
 ) -> tuple[list[dict[str, Any]], int]:
     """List chunk (preview) + tổng count. Search text ILIKE %q%; lọc heading_path chứa
-    `heading`. Sort theo chunk_index (thứ tự đọc), fallback chunk_id."""
+    `heading`; lọc theo tài liệu nguồn (`source_file` — cùng khóa nối bảng `documents`
+    dùng). Sort theo chunk_index (thứ tự đọc), fallback chunk_id."""
     where: list[str] = []
     params: list[Any] = []
     if q:
@@ -33,6 +34,11 @@ def list_chunks(
     if heading:
         where.append("heading_path @> ARRAY[%s]::text[]")
         params.append(heading)
+    if source_file:
+        # Dạng `@>` (không phải `->>`) để tận dụng GIN index trên metadata (xem
+        # chunk_store.py::CREATE_INDEX_SQLS).
+        where.append("metadata @> jsonb_build_object('source_file', %s::text)")
+        params.append(source_file)
     where_sql = ("WHERE " + " AND ".join(where)) if where else ""
 
     with connection() as conn, conn.cursor() as cur:

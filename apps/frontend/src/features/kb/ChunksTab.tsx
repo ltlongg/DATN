@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getChunk, listChunks, listEntities } from "@/api/kb";
 import { EmptyState } from "@/components/EmptyState";
 import { Spinner } from "@/components/Spinner";
+import { useKbSources } from "@/features/admin/useDocuments";
 import { ChunkDetail } from "@/features/kb/ChunkDetail";
 import { ChunkTable } from "@/features/kb/ChunkTable";
 import { KbSearchBar } from "@/features/kb/KbSearchBar";
@@ -10,15 +11,26 @@ import { Pagination } from "@/features/kb/Pagination";
 
 const LIMIT = 20;
 
-/** Trang độc lập: tự quản chunk đang chọn (không điều hướng chéo sang tab khác). */
+/** Trang độc lập: tự quản chunk đang chọn (không điều hướng chéo sang tab khác).
+ *
+ * Lọc theo tài liệu nguồn dùng chung khóa `source_file` với danh mục Tài liệu. Kho chỉ có
+ * 1 nguồn -> không hiện ô lọc (vô nghĩa). */
 export function ChunksTab() {
   const [q, setQ] = useState("");
+  const [sourceFile, setSourceFile] = useState("");
   const [offset, setOffset] = useState(0);
   const [selectedChunkId, setSelectedChunkId] = useState<string | null>(null);
 
+  const sources = useKbSources();
   const list = useQuery({
-    queryKey: ["kb-chunks", q, offset],
-    queryFn: () => listChunks({ q: q || undefined, limit: LIMIT, offset }),
+    queryKey: ["kb-chunks", q, sourceFile, offset],
+    queryFn: () =>
+      listChunks({
+        q: q || undefined,
+        source_file: sourceFile || undefined,
+        limit: LIMIT,
+        offset,
+      }),
   });
   const detail = useQuery({
     queryKey: ["kb-chunk", selectedChunkId],
@@ -40,7 +52,26 @@ export function ChunksTab() {
             setQ(v);
             setOffset(0);
           }}
-        />
+        >
+          {(sources.data?.length ?? 0) > 1 && (
+            <select
+              value={sourceFile}
+              onChange={(e) => {
+                setSourceFile(e.target.value);
+                setOffset(0);
+                setSelectedChunkId(null);
+              }}
+              className="rounded-md border border-paper-border px-2 py-1.5 text-sm outline-none focus:border-brand"
+            >
+              <option value="">Mọi tài liệu</option>
+              {sources.data?.map((s) => (
+                <option key={s.source_file} value={s.source_file}>
+                  {s.source_file}
+                </option>
+              ))}
+            </select>
+          )}
+        </KbSearchBar>
         <div className="rounded-lg border border-paper-border bg-paper-card">
           {list.isLoading ? (
             <div className="p-4">

@@ -14,7 +14,7 @@ export interface Page {
 }
 
 export function listChunks(
-  params: { q?: string; heading?: string } & Page,
+  params: { q?: string; heading?: string; source_file?: string } & Page,
 ): Promise<ChunkListResponse> {
   return apiFetch<ChunkListResponse>("/api/admin/kb/chunks", { query: { ...params } });
 }

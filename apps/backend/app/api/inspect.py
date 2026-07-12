@@ -34,10 +34,13 @@ router = APIRouter(dependencies=[Depends(require_admin)])
 async def list_chunks(
     q: str | None = Query(default=None),
     heading: str | None = Query(default=None),
+    source_file: str | None = Query(default=None),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
 ) -> ChunkListResponse:
-    rows, total = await anyio.to_thread.run_sync(repo.list_chunks, q, heading, limit, offset)
+    rows, total = await anyio.to_thread.run_sync(
+        repo.list_chunks, q, heading, source_file, limit, offset
+    )
     return ChunkListResponse(
         items=[ChunkListItem(**r) for r in rows], total=total, limit=limit, offset=offset
     )
