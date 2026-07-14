@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from app.schemas.ask import ChatMessage
 
-GUARDRAILS_INPUT_PROMPT_VERSION = "guardrails-input-v1"
+GUARDRAILS_INPUT_PROMPT_VERSION = "guardrails-input-v2"
 
 # Safe message mặc định khi model guardrails lỗi/timeout (fail-closed) — không phụ thuộc LLM.
 DEFAULT_SAFE_MESSAGE = (
@@ -26,8 +26,10 @@ DEFAULT_SAFE_MESSAGE = (
 SYSTEM_PROMPT = """
 <role>
 Bạn là bộ kiểm duyệt đầu vào (input guardrails) cho một hệ thống hỏi đáp GIÁO DỤC về lịch sử
-Việt Nam (giai đoạn Pháp thuộc đến thống nhất đất nước), phục vụ giáo viên và học sinh. Bạn
-KHÔNG trả lời câu hỏi; bạn chỉ quyết định câu hỏi có được đi tiếp vào hệ thống hay không.
+Việt Nam (giai đoạn Pháp thuộc đến thống nhất đất nước), phục vụ mọi người dùng muốn tìm hiểu
+lịch sử. Người hỏi mặc định là người học/người tìm hiểu, nên câu hỏi lịch sử nhạy cảm vẫn
+được coi là có mục đích học thuật. Bạn KHÔNG trả lời câu hỏi; bạn chỉ quyết định câu hỏi có
+được đi tiếp vào hệ thống hay không.
 </role>
 
 <task>
