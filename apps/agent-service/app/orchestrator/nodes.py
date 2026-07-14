@@ -49,6 +49,11 @@ GRAPH_EMPTY_MESSAGE = (
     "tài liệu nhé."
 )
 
+# Độ dài trích đoạn kèm mỗi citation (hover ở frontend). Đủ dài để nhận ra đoạn nói gì,
+# đủ ngắn để không phình payload SSE lẫn `messages.citations` JSONB. Full text lấy qua
+# GET /api/chat/sources/{chunk_id} lúc user click — xem docs/plan/citation-viewer-plan.md.
+CITATION_QUOTE_CHARS = 240
+
 
 def _emitter(config: RunnableConfig | None) -> Emitter:
     cfg = (config or {}).get("configurable", {}) or {}
@@ -318,6 +323,22 @@ def _as_str(value: object) -> str | None:
     return value if isinstance(value, str) else None
 
 
+def _make_quote(text: str) -> str | None:
+    """Trích đoạn ngắn LẤY TỪ chunk text (không nhờ LLM — xem orchestrator-plan §citation).
+
+    Frontend hover citation là thấy ngay, không cần gọi API. Cắt ở ranh giới từ để không
+    đứt giữa chữ tiếng Việt có dấu.
+    """
+    stripped = " ".join(text.split())
+    if not stripped:
+        return None
+    if len(stripped) <= CITATION_QUOTE_CHARS:
+        return stripped
+    head = stripped[:CITATION_QUOTE_CHARS]
+    cut = head.rfind(" ")
+    return f"{head[:cut] if cut > 0 else head}…"
+
+
 def _build_citation(chunk: RetrievedChunk) -> Citation:
     meta = chunk.metadata
     return Citation(
@@ -327,7 +348,7 @@ def _build_citation(chunk: RetrievedChunk) -> Citation:
         start_line=_as_int(meta.get("start_line")),
         end_line=_as_int(meta.get("end_line")),
         heading_path=chunk.heading_path,
-        quote=None,
+        quote=_make_quote(chunk.text),
     )
 
 

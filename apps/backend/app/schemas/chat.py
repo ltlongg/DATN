@@ -57,3 +57,19 @@ class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=get_settings().ask_max_question_chars)
     mode: Literal["traditional", "graph", "hybrid"] = "hybrid"
     debug: bool = False
+
+
+class SourceDetail(BaseModel):
+    """Toàn văn 1 chunk cho modal "xem nguồn" khi user nhấn citation.
+
+    Chỉ đúng những gì modal hiện: text + tiêu đề mục + số dòng (số dòng CHỈ có nghĩa ở đây,
+    danh sách nguồn không in — xem docs/plan/citation-viewer-plan.md §3). KHÔNG trả
+    `source_file`/`chunk_index` (UI không bao giờ hiện tên file) lẫn `referencing_events`
+    (thông tin soi kho của KB Inspector, người dùng không cần).
+    """
+
+    chunk_id: str
+    text: str
+    heading_path: list[str]
+    start_line: int | None
+    end_line: int | None

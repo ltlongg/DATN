@@ -11,6 +11,8 @@ from __future__ import annotations
 
 from typing import Any
 
+import psycopg
+
 from app.core.db import connection
 
 # Số ký tự preview text cắt cho danh sách chunk (đủ để nhận ra nội dung, không kéo cả chunk).
@@ -61,14 +63,23 @@ def list_chunks(
 
 
 def get_chunk(chunk_id: str) -> dict[str, Any] | None:
-    """Full text + metadata JSONB + heading_path của một chunk."""
-    with connection() as conn, conn.cursor() as cur:
-        cur.execute(
-            "SELECT chunk_id, text, metadata, heading_path FROM rag_chunks "
-            "WHERE chunk_id = %s",
-            (chunk_id,),
-        )
-        return cur.fetchone()
+    """Full text + metadata JSONB + heading_path của một chunk.
+
+    Dùng chung cho KB Inspector (admin) và xem nguồn trong chat (user) — cùng là đọc 1 chunk.
+    `rag_chunks` do script indexing offline tạo nên có thể CHƯA TỒN TẠI trên DB trống ->
+    bắt `UndefinedTable` trả None (caller map thành 404 "không tìm thấy"), tránh 500 thô.
+    Cùng pattern `models/cost.py`.
+    """
+    try:
+        with connection() as conn, conn.cursor() as cur:
+            cur.execute(
+                "SELECT chunk_id, text, metadata, heading_path FROM rag_chunks "
+                "WHERE chunk_id = %s",
+                (chunk_id,),
+            )
+            return cur.fetchone()
+    except psycopg.errors.UndefinedTable:
+        return None
 
 
 def list_events_for_chunk(chunk_id: str) -> list[dict[str, Any]]:

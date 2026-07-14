@@ -229,6 +229,49 @@ async def test_citation_built_from_chunk_metadata(monkeypatch) -> None:
     assert cit.heading_path == ["II", "2.1"]
 
 
+# --- quote kèm citation (citation-viewer-plan Pha 1) ---
+
+
+def test_make_quote_keeps_short_text_whole() -> None:
+    assert nodes._make_quote("Năm 1858, Pháp nổ súng ở Đà Nẵng.") == (
+        "Năm 1858, Pháp nổ súng ở Đà Nẵng."
+    )
+
+
+def test_make_quote_collapses_whitespace() -> None:
+    assert nodes._make_quote("  Năm 1858\n\nPháp nổ súng.  ") == "Năm 1858 Pháp nổ súng."
+
+
+def test_make_quote_cuts_long_text_at_word_boundary() -> None:
+    text = "Nguyễn " * 100  # dài hơn hẳn CITATION_QUOTE_CHARS
+    quote = nodes._make_quote(text)
+    assert quote is not None
+    assert quote.endswith("…")
+    assert len(quote) <= nodes.CITATION_QUOTE_CHARS + 1  # +1 cho dấu "…"
+    # Cắt ở ranh giới từ: không đứt giữa chữ, không để lại khoảng trắng thừa trước "…".
+    assert quote.removesuffix("…").endswith("Nguyễn")
+
+
+def test_make_quote_hard_cuts_token_longer_than_limit() -> None:
+    # Không có khoảng trắng để cắt -> đành cắt cứng, vẫn phải có "…" báo còn nữa.
+    quote = nodes._make_quote("a" * 500)
+    assert quote == "a" * nodes.CITATION_QUOTE_CHARS + "…"
+
+
+@pytest.mark.parametrize("text", ["", "   \n\t  "])
+def test_make_quote_blank_text_returns_none(text: str) -> None:
+    assert nodes._make_quote(text) is None
+
+
+async def test_citation_carries_quote_from_chunk_text(monkeypatch) -> None:
+    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    _patch_synthesize(monkeypatch, used=("c-1",))
+    _patch_viz(monkeypatch)
+    resp = await run_ask(AskRequest(question="hỏi", stream=False))
+    assert resp.citations[0].quote == "text c-1"
+
+
 # --- seed_mentions handoff ---
 
 

@@ -15,6 +15,7 @@ from app.api.deps import get_current_user, get_owned_conversation
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.models import conversation as conv_repo
+from app.models import inspect as inspect_repo
 from app.models.activity import record_activity
 from app.models.conversation import Conversation
 from app.models.user import User
@@ -25,6 +26,7 @@ from app.schemas.chat import (
     ConversationOut,
     ConversationUpdate,
     MessageOut,
+    SourceDetail,
 )
 from app.services.agent_client import (
     AgentAskRequest,
@@ -97,6 +99,30 @@ async def get_conversation(
         messages=[
             MessageOut(**m.model_dump(exclude={"conversation_id"})) for m in messages
         ],
+    )
+
+
+# --- xem nguồn (citation-viewer-plan §4) ---
+
+
+@router.get("/sources/{chunk_id}", response_model=SourceDetail)
+async def get_source(chunk_id: str, user: User = Depends(get_current_user)) -> SourceDetail:
+    """Toàn văn chunk đứng sau 1 citation — user nhấn `[n]` ở khối Nguồn thì gọi vào đây.
+
+    CHỈ cần đăng nhập (KHÔNG `require_admin`): corpus là SGK lịch sử, không phải dữ liệu
+    mật, và user vốn đã đọc được nội dung đó qua chính câu trả lời. Router
+    `/api/admin/kb/*` vẫn gác admin như cũ — xem plan §4.
+    """
+    chunk = await anyio.to_thread.run_sync(inspect_repo.get_chunk, chunk_id)
+    if chunk is None:
+        raise AppError(404, "not_found", "Không tìm thấy nguồn.")
+    meta = chunk["metadata"] or {}
+    return SourceDetail(
+        chunk_id=chunk["chunk_id"],
+        text=chunk["text"],
+        heading_path=chunk["heading_path"] or [],
+        start_line=meta.get("start_line"),
+        end_line=meta.get("end_line"),
     )
 
 
