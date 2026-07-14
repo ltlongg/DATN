@@ -1,5 +1,5 @@
 import { apiFetch } from "@/api/client";
-import type { Conversation, ConversationDetail } from "@/types";
+import type { Conversation, ConversationDetail, SourceDetail } from "@/types";
 
 export function listConversations(): Promise<Conversation[]> {
   return apiFetch<Conversation[]>("/api/chat/conversations");
@@ -25,4 +25,10 @@ export function renameConversation(id: string, title: string): Promise<Conversat
 
 export function deleteConversation(id: string): Promise<void> {
   return apiFetch<void>(`/api/chat/conversations/${id}`, { method: "DELETE" });
+}
+
+/** Toàn văn chunk sau 1 citation — gọi LƯỜI lúc user nhấn chip `[n]`, không kèm sẵn theo
+ * câu trả lời (full text ~700 token, nhồi vào mọi message là phí). */
+export function getSource(chunkId: string): Promise<SourceDetail> {
+  return apiFetch<SourceDetail>(`/api/chat/sources/${encodeURIComponent(chunkId)}`);
 }

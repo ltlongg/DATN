@@ -40,6 +40,16 @@ export interface Citation {
   quote?: string | null;
 }
 
+/** Toàn văn chunk cho modal xem nguồn (GET /api/chat/sources/{chunk_id}). Không có
+ * `source_file`/`chunk_index`: UI không bao giờ hiện tên file. */
+export interface SourceDetail {
+  chunk_id: string;
+  text: string;
+  heading_path: string[];
+  start_line: number | null;
+  end_line: number | null;
+}
+
 export interface MapMarker {
   event_id: string;
   label: string;
