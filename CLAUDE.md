@@ -154,7 +154,8 @@ tay + `CREATE TABLE IF NOT EXISTS`). Plan: `docs/plan/backend-plan.md`.
   `inspect.py`, `logs.py` (+ `TokenSummary`/`MessageTokens`), `user.py`, `cost.py`, `prompt.py`.
 - `api/` — router: `health.py` (`/health`,`/ready`), `auth.py` (login/me/logout, check
   `is_active`), `chat.py` (conversation CRUD + `/ask` streaming — truyền `conversation_id`/
-  `message_id` sang agent, gác `debug`, check quota), `documents.py` (`/api/admin/documents*`
+  `message_id` sang agent, gác `debug`, check quota + `GET /sources/{chunk_id}` xem toàn văn
+  nguồn, xem `### Xem nguồn` dưới), `documents.py` (`/api/admin/documents*`
   — CRUD danh mục + `GET /sources` liệt kê nguồn thật trong kho),
   `inspect.py` (`/api/admin/kb/*` — chunks/events Postgres trực tiếp + proxy entities sang
   agent-service), `logs.py` (`/api/admin/logs/*` — hội thoại & chất lượng + `token-summary`/
@@ -217,6 +218,24 @@ stream hỏng/blocked trước token đầu → UI hiện "—", và trung bình
   nhóm này**: agent-service đọc `system_config` qua gọi HTTP `GET /internal/config` của
   backend, KHÔNG tự query Postgres trực tiếp như các module khác — xem `### Storage roles`.
 
+### Xem nguồn (Citation Viewer) — xong 2026-07-12
+Khối **Nguồn** dưới câu trả lời trước đây là chữ tĩnh (`lichsu.clean.md:7349-7352`), không
+kiểm chứng được. Giờ 2 tầng, cùng khoá `chunk_id`. Plan: `docs/plan/citation-viewer-plan.md`.
+
+- **Hover chip `[n]` → trích đoạn**, KHÔNG tốn request: `nodes.py::_make_quote` cắt 240 ký tự
+  đầu chunk text (`CITATION_QUOTE_CHARS`, cắt ở ranh giới từ) → `Citation.quote` → đi kèm SSE →
+  lưu luôn `messages.citations` JSONB. **Đây là trả nợ** `orchestrator-plan.md:493` (schema +
+  prompt + chỗ render đã có sẵn từ lâu, chỉ thiếu code điền). KHÔNG nhờ LLM chọn quote.
+- **Click chip → modal toàn văn**: `GET /api/chat/sources/{chunk_id}` (`api/chat.py`, chỉ cần
+  đăng nhập — corpus là SGK, KHÔNG mật; router `/api/admin/kb/*` vẫn gác admin như cũ). Fetch
+  LƯỜI lúc click vì full chunk ~2.6K ký tự, gấp ~11 lần quote — nhồi vào mọi citation của mọi
+  message là phí cả SSE lẫn DB.
+- **UI (`CitationList.tsx` + `groupCitations.ts` + `SourceModal.tsx`)**: KHÔNG in tên file (cả
+  kho 1 file → in ra là rác) và KHÔNG in số dòng ở danh sách (chỉ hiện trong modal, cạnh toàn
+  văn mới có nghĩa). Bỏ 2 thứ đó thì 2 citation cùng mục trông y hệt nhau → **buộc phải gộp
+  theo `heading_path`** (gộp để ĐÚNG, không phải để đẹp), breadcrumb chung rút ra 1 dòng chân.
+  Chip giữ **số thứ tự gốc** (không đánh số lại — `[n]` phải khớp `[n]` trong câu trả lời).
+
 ### Tài liệu (Module 3) — danh mục nối kho tri thức thật ("Bước 0", xong 2026-07-12)
 Trước đây bảng `documents` là **sổ tay mock**: `chunk_count`/`status` do admin gõ tay, không
 liên quan gì tới 1213 chunk thật trong kho. Giờ đã nối:
@@ -269,7 +288,9 @@ là **sidebar dọc theo nhóm** (`AppSidebar.tsx`, KHÔNG còn tab ngang).
 - `store/` — `authStore` (persist), `chatUiStore` (`selectedEventId` link map↔timeline, debugOpen).
 - `features/auth` — RequireAuth/RoleGuard/LoginForm.
 - `features/chat` — `chatReducer` (thuần, test) + `useChat` + ChatPanel/MessageList/Bubble/
-  Composer/Citation/Clarification/DebugPanel(admin)/VizPanel.
+  Composer/Clarification/DebugPanel(admin)/VizPanel + **xem nguồn**: `CitationList` (gộp theo
+  mục, chip `[n]` hover ra quote) + `groupCitations.ts` (thuần, test kỹ — luật gộp + tiền tố
+  chung) + `SourceModal` (click → toàn văn, fetch lười).
 - `features/map` + `features/timeline` — EventMap/EventMarker/MapEmptyState + Timeline/Row,
   honest fallback (gazetteer hoãn → markers rỗng → empty-state).
 - `features/admin` — Module 3 Tài liệu: DocumentTable/StatusBadge/DocumentFormModal +
@@ -396,6 +417,6 @@ Giá trị **thực tế** trong code (đừng tin mù `.env.example`, có chỗ
 - `dataset/chunks_llm.json` — 1213 chunk (`source_file=lichsu.clean.md`, có `start_line`/`end_line`).
 - `dataset/*.json|*.md` — cache + review của các pipeline: `graph_extractions.json`, `alias_map.json`/`alias_review.md`, `timeline_units.json`, `timeline_extractions.json`, `gazetteer.json`/`gazetteer_review.md`, `entities_by_type.md`.
 - `README.md` — đặc tả chức năng đầy đủ (admin, teacher, RAG, GraphRAG, hybrid, map, timeline, MVP scope). Nguồn truth cho scope.
-- `docs/plan/` — plan đã duyệt: `chunking-embedding-plan.md` (lý do gỡ LightRAG + DIY pipeline), `llm-chunking-plan.md`, `timeline-map-plan.md` (source-of-truth timeline/map), `lichsu-headings.md`, `backend-plan.md` (kiến trúc backend gốc), `frontend-plan.md` (kế hoạch frontend đầy đủ 2 role), `backend-additions-plan.md` (Module 4 build ngay + KB Inspector + debug streaming), `admin-restructure-plan.md` (nav dọc + token theo hội thoại + quản lý Prompt — **đã code xong cả 3**, xem `### Admin nâng cao` ở trên), `system-config-plan.md` (Cấu hình hệ thống — retrieval mode + tinh chỉnh, tách riêng vì rủi ro cao, CHƯA code).
+- `docs/plan/` — plan đã duyệt: `chunking-embedding-plan.md` (lý do gỡ LightRAG + DIY pipeline), `llm-chunking-plan.md`, `timeline-map-plan.md` (source-of-truth timeline/map), `lichsu-headings.md`, `backend-plan.md` (kiến trúc backend gốc), `frontend-plan.md` (kế hoạch frontend đầy đủ 2 role), `backend-additions-plan.md` (Module 4 build ngay + KB Inspector + debug streaming), `admin-restructure-plan.md` (nav dọc + token theo hội thoại + quản lý Prompt — **đã code xong cả 3**, xem `### Admin nâng cao` ở trên), `system-config-plan.md` (Cấu hình hệ thống — retrieval mode + tinh chỉnh, tách riêng vì rủi ro cao, CHƯA code), `citation-viewer-plan.md` (xem nguồn: hover ra trích đoạn + click ra toàn văn, gộp citation theo mục — **đã code xong cả 3 pha**, xem `### Xem nguồn` ở trên).
 - `docs/reference/google-maps-api.md` — tham chiếu Google Geocoding/Maps + ToS caching.
 - `docs/design/frontend-scope.md`, `docs/brainstorming/` — scope frontend + session notes kiến trúc.
