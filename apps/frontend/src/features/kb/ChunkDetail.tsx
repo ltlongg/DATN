@@ -1,6 +1,19 @@
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import type { ChunkDetail as ChunkDetailData, EntityListItem } from "@/types/kb";
 
+/** Metadata là JSONB tự do: ngoài scalar/mảng còn có dict (`headings` = {h1, h2...}) —
+ * String() trên dict ra "[object Object]" nên phải duyệt đệ quy. */
+function formatMetaValue(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  if (Array.isArray(v)) return v.map(formatMetaValue).join(", ");
+  if (typeof v === "object") {
+    return Object.entries(v as Record<string, unknown>)
+      .map(([k, val]) => `${k}: ${formatMetaValue(val)}`)
+      .join(" · ");
+  }
+  return String(v);
+}
+
 /** Chi tiết chunk: full text + metadata + "được tham chiếu bởi" (event: Postgres,
  * entity: proxy Neo4j qua listEntities?chunk_id — 2 cơ chế khác store). */
 export function ChunkDetail({
@@ -24,13 +37,12 @@ export function ChunkDetail({
       {Object.keys(detail.metadata).length > 0 && (
         <section>
           <p className="mb-1 text-xs font-semibold uppercase text-ink-soft">Metadata</p>
-          <dl className="space-y-1 text-xs">
+          {/* grid thay vì width cứng: key dài (extracted_prompt_version) tự nới cột, không đè giá trị */}
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs">
             {Object.entries(detail.metadata).map(([k, v]) => (
-              <div key={k} className="flex gap-2">
-                <dt className="w-28 shrink-0 text-ink-soft">{k}</dt>
-                <dd className="text-ink">
-                  {Array.isArray(v) ? v.join(", ") : String(v ?? "")}
-                </dd>
+              <div key={k} className="contents">
+                <dt className="text-ink-soft">{k}</dt>
+                <dd className="min-w-0 break-words text-ink">{formatMetaValue(v)}</dd>
               </div>
             ))}
           </dl>

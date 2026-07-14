@@ -93,7 +93,10 @@ export default function AskPage() {
         <div className="flex flex-1 overflow-hidden">
           <div
             className={
-              showViz ? "flex w-1/2 flex-col overflow-hidden" : "mx-auto flex w-full max-w-3xl flex-1 flex-col overflow-hidden"
+              showViz
+                ? "flex w-1/2 flex-col overflow-hidden"
+                : // Không có viz -> cột chat giới hạn bề ngang + mx-auto: chỗ thừa chia đều 2 bên.
+                  "mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden"
             }
           >
             <ChatPanel items={items} streaming={streaming} onSend={handleSend} />

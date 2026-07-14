@@ -3,6 +3,7 @@ import { Markdown } from "@/components/Markdown";
 import { CitationList } from "@/features/chat/CitationList";
 import { ClarificationPrompt } from "@/features/chat/ClarificationPrompt";
 import { DebugPanel } from "@/features/chat/DebugPanel";
+import { AssistantAvatar, UserAvatar } from "@/features/chat/MessageAvatar";
 import type { ChatItem } from "@/features/chat/chatReducer";
 import { formatTtft } from "@/lib/format";
 import { useAuthStore } from "@/store/authStore";
@@ -22,20 +23,23 @@ export function MessageBubble({
   onReply: (text: string) => void;
 }) {
   const isAdmin = useAuthStore((s) => s.user?.role === "admin");
+  const userName = useAuthStore((s) => s.user?.name ?? "");
 
   if (item.role === "user") {
     return (
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
         <div className="max-w-[80%] whitespace-pre-wrap rounded-2xl rounded-br-sm bg-brand px-4 py-2 text-brand-fg">
           {item.content}
         </div>
+        <UserAvatar name={userName} />
       </div>
     );
   }
 
   return (
-    <div className="flex justify-start">
-      <div className="w-full max-w-[95%] rounded-2xl rounded-bl-sm border border-paper-border bg-paper-card px-4 py-3">
+    <div className="flex justify-start gap-2">
+      <AssistantAvatar />
+      <div className="min-w-0 flex-1 rounded-2xl rounded-bl-sm border border-paper-border bg-paper-card px-4 py-3">
         {item.error ? (
           <p className="text-sm text-rose-700">⚠ {item.error.message}</p>
         ) : item.blocked ? (
