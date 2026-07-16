@@ -94,14 +94,22 @@ def lookup_coords(
 
     Địa danh không có trong bảng -> không xuất hiện trong dict (builder coi như
     không có toạ độ -> chỉ lên timeline, không marker).
+
+    Bảng CHƯA TỒN TẠI (khâu geocoding đang hoãn, `build_gazetteer.py` chưa chạy lần
+    nào) -> coi như chưa geocode được địa danh nào. Không để lỗi này giết cả
+    `build_visualization`: timeline vốn độc lập với toạ độ, mất nó là mất trắng phần
+    trực quan hoá dù dữ liệu thời gian vẫn đủ.
     """
     if not location_norms:
         return {}
 
-    with connection(database_url) as conn:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT * FROM gazetteer WHERE location_norm = ANY(%s::text[])",
-                (location_norms,),
-            )
-            return {row["location_norm"]: row for row in cur.fetchall()}
+    try:
+        with connection(database_url) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT * FROM gazetteer WHERE location_norm = ANY(%s::text[])",
+                    (location_norms,),
+                )
+                return {row["location_norm"]: row for row in cur.fetchall()}
+    except psycopg.errors.UndefinedTable:
+        return {}
