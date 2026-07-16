@@ -116,6 +116,8 @@ Pipeline offline 3 bước rời (verify từng bước):
 Online: `app/tools/visualization/builder.py::build_visualization(retrieved_chunk_ids)` → `select_events_by_chunks` (toán tử mảng giao `&&`) → join `gazetteer` lấy lat/lon → trả `VisualizationPayload` (map markers + timeline items, link 2 chiều bằng `event_id`), honest fallback (thiếu nơi → chỉ timeline; thiếu time → chỉ map).
 
 > **⚠️ Khâu toạ độ (gazetteer + lat/lon) đang TẠM HOÃN — làm CUỐI** (quyết định user 2026-06-22). Lý do: độ chính xác địa điểm quan trọng + cần review kĩ (điểm yếu: địa danh trùng tên khác tỉnh bị provider chấm "cao" nhưng sai). **Tạm KHÔNG chạy `build_gazetteer.py`** (cả Google lẫn LLM). KHÔNG cần sửa/disable code: pipeline timeline (`run_timeline_index.py`) không phụ thuộc `app/indexing/geocoding/`, vẫn cho time + `locations` (tên). Builder gặp `gazetteer` rỗng → fallback chỉ-timeline, không vỡ. Nếu thấy `gazetteer` rỗng/dở dang: đó là CỐ Ý.
+>
+> **Đã sửa 2026-07-14 (bug thật, phát hiện khi verify UI)**: câu trên chỉ đúng khi bảng RỖNG. Thực tế `build_gazetteer.py` chưa chạy lần nào nên bảng **CHƯA TỒN TẠI** → `lookup_coords` ném `UndefinedTable` → giết CẢ `build_visualization` → mọi câu trả lời báo `Visualization lỗi: UndefinedTable` và timeline KHÔNG BAO GIỜ hiện, dù `timeline_events` có 3.674 dòng thật. Nay `lookup_coords` bắt `UndefinedTable` → trả `{}` (pattern `cost.py`), đúng tinh thần honest fallback: mất toạ độ chứ không mất timeline.
 
 ### Agent-service internal layout (`apps/agent-service/app/`)
 - `indexing/preprocessing/` — chuẩn hóa text (cleaner.py). Idempotent + non-destructive.
@@ -285,14 +287,31 @@ là **sidebar dọc theo nhóm** (`AppSidebar.tsx`, KHÔNG còn tab ngang).
   (recharts), `prompts`; redirect back-compat từ path gộp cũ `/admin/kb`, `/admin/advanced`).
 - `api/` — `client.ts` (fetch wrapper Bearer + `{code,message}`→ApiError + 401 clear),
   `askStream.ts` (⭐ parser SSE), `auth/chat/documents/kb/logs/users/cost/prompts.ts`.
-- `store/` — `authStore` (persist), `chatUiStore` (`selectedEventId` link map↔timeline, debugOpen).
+- `store/` — `authStore` (persist), `chatUiStore` (`selectedEventId` link map↔timeline,
+  `layoutMode` **persist** (float/split), `convDrawerOpen`, `tourPlaying`, debugOpen).
 - `features/auth` — RequireAuth/RoleGuard/LoginForm.
 - `features/chat` — `chatReducer` (thuần, test) + `useChat` + ChatPanel/MessageList/Bubble/
-  Composer/Clarification/DebugPanel(admin)/VizPanel + **xem nguồn**: `CitationList` (gộp theo
-  mục, chip `[n]` hover ra quote) + `groupCitations.ts` (thuần, test kỹ — luật gộp + tiền tố
-  chung) + `SourceModal` (click → toàn văn, fetch lười).
-- `features/map` + `features/timeline` — EventMap/EventMarker/MapEmptyState + Timeline/Row,
-  honest fallback (gazetteer hoãn → markers rỗng → empty-state).
+  Composer/Clarification/DebugPanel(admin)/VizPanel/`ConversationDrawer` (drawer phiên ở
+  layout float) + **xem nguồn**: `CitationList` (gộp theo mục, chip `[n]` hover ra quote) +
+  `groupCitations.ts` (thuần, test kỹ — luật gộp + tiền tố chung) + `SourceModal` (click →
+  toàn văn, fetch lười). `useChat` KHÔNG đụng panel bản đồ — AskPage mở theo dữ liệu.
+- `features/map` + `features/timeline` — EventMap (+ `CameraController` nội bộ)/EventMarker/
+  MapEmptyState + TimelineBar (prop `variant` docked|overlay) + `useEventTour` (engine trình
+  chiếu, có test). Honest fallback: gazetteer hoãn → markers rỗng → map nền vẫn render
+  (base map là trạng thái hợp lệ), chỉ timeline có dữ liệu.
+
+**Trang hỏi đáp (`AskPage`) — 2 bố cục, map-first** (plan: `docs/plan/map-first-layout-plan.md`):
+- `float` (MẶC ĐỊNH): **bản đồ làm NỀN toàn màn hình**, card chat ĐỤC nổi bên trái (~520px),
+  danh sách phiên thu vào drawer ☰, TimelineBar nổi ở đáy. `split`: layout cũ (sidebar phiên
+  + chat + VizPanel + timeline docked). Nút toggle góc phải trên, `layoutMode` nhớ qua reload.
+- **Camera theo DỮ LIỆU, không theo UI**: `CameraController` (trong `<APIProvider>`, vì
+  `useMap()` chỉ chạy được ở đó) — viz mới → `fitBounds` cụm marker; `selectedEventId` đổi →
+  `panTo`; đang tour (`tourPlaying`) → dí sát `TOUR_FOCUS_ZOOM=9`; bỏ chọn → về toàn cảnh.
+  Nhờ vậy `useEventTour` KHÔNG cần chạm map instance, chỉ đẩy `selectedEventId`.
+- **Trình chiếu (nút ▶ ở TimelineBar)**: kể lần lượt sự kiện theo thứ tự trục thời gian, mỗi
+  bước `TOUR_STEP_MS=2500`. Tay thắng máy: user click marker/mốc khác → tour dừng. Bước "chờ
+  rồi đi tiếp" là móc để cắm **text-to-speech** sau này (thay timer bằng `utterance.onend`;
+  hook expose `currentEvent`) — CHƯA làm.
 - `features/admin` — Module 3 Tài liệu: DocumentTable/StatusBadge/DocumentFormModal +
   `useDocuments` (`useKbSources` dùng chung cho dropdown lọc ở KB Chunks).
 - `features/kb` — Module 5 inspector: Chunk/Entity/Event Table+Detail, EgoGraph. Mỗi trang
@@ -390,6 +409,13 @@ python scripts/reset_stores.py
 ### Map POC
 Render map = **Google Maps JavaScript API** (AdvancedMarkerElement), dùng `GOOGLE_MAPS_API_KEY`. POC: `google_map_test.py` (root) + `scripts/show_google_map.py`. *(`trackasia-map-test.html` cũ chỉ còn làm tham khảo — đã chuyển hẳn sang Google.)*
 
+**Style bản đồ ở frontend = Cloud-based styling gắn Map ID, KHÔNG style JSON trong code**
+(`styles` MapOption chỉ chạy trên raster map KHÔNG có `mapId`, mà `AdvancedMarker` lại BẮT
+BUỘC `mapId` → xung khắc). Map ID **vector** tạo trên Cloud Console, style ẩn đường gắn vào
+đó, code chỉ đọc `VITE_GOOGLE_MAPS_MAP_ID` (`apps/frontend/.env`). Đổi style = sửa trên
+console, không cần deploy. `<APIProvider>` BẮT BUỘC `language="vi"` + `region="VN"` — mặc
+định Google render "Paracel/Spratly Islands", không chấp nhận được cho đồ án lịch sử VN.
+
 ## Configuration
 
 `.env` ở root là **nguồn cấu hình DUY NHẤT** cho monorepo; `app/core/config.py` trỏ tuyệt đối tới file đó. Mỗi app cũng có `.env.example` riêng cho local dev.
@@ -417,6 +443,6 @@ Giá trị **thực tế** trong code (đừng tin mù `.env.example`, có chỗ
 - `dataset/chunks_llm.json` — 1213 chunk (`source_file=lichsu.clean.md`, có `start_line`/`end_line`).
 - `dataset/*.json|*.md` — cache + review của các pipeline: `graph_extractions.json`, `alias_map.json`/`alias_review.md`, `timeline_units.json`, `timeline_extractions.json`, `gazetteer.json`/`gazetteer_review.md`, `entities_by_type.md`.
 - `README.md` — đặc tả chức năng đầy đủ (admin, teacher, RAG, GraphRAG, hybrid, map, timeline, MVP scope). Nguồn truth cho scope.
-- `docs/plan/` — plan đã duyệt: `chunking-embedding-plan.md` (lý do gỡ LightRAG + DIY pipeline), `llm-chunking-plan.md`, `timeline-map-plan.md` (source-of-truth timeline/map), `lichsu-headings.md`, `backend-plan.md` (kiến trúc backend gốc), `frontend-plan.md` (kế hoạch frontend đầy đủ 2 role), `backend-additions-plan.md` (Module 4 build ngay + KB Inspector + debug streaming), `admin-restructure-plan.md` (nav dọc + token theo hội thoại + quản lý Prompt — **đã code xong cả 3**, xem `### Admin nâng cao` ở trên), `system-config-plan.md` (Cấu hình hệ thống — retrieval mode + tinh chỉnh, tách riêng vì rủi ro cao, CHƯA code), `citation-viewer-plan.md` (xem nguồn: hover ra trích đoạn + click ra toàn văn, gộp citation theo mục — **đã code xong cả 3 pha**, xem `### Xem nguồn` ở trên).
+- `docs/plan/` — plan đã duyệt: `chunking-embedding-plan.md` (lý do gỡ LightRAG + DIY pipeline), `llm-chunking-plan.md`, `timeline-map-plan.md` (source-of-truth timeline/map), `lichsu-headings.md`, `backend-plan.md` (kiến trúc backend gốc), `frontend-plan.md` (kế hoạch frontend đầy đủ 2 role), `backend-additions-plan.md` (Module 4 build ngay + KB Inspector + debug streaming), `admin-restructure-plan.md` (nav dọc + token theo hội thoại + quản lý Prompt — **đã code xong cả 3**, xem `### Admin nâng cao` ở trên), `system-config-plan.md` (Cấu hình hệ thống — retrieval mode + tinh chỉnh, tách riêng vì rủi ro cao, CHƯA code), `citation-viewer-plan.md` (xem nguồn: hover ra trích đoạn + click ra toàn văn, gộp citation theo mục — **đã code xong cả 3 pha**, xem `### Xem nguồn` ở trên), `map-first-layout-plan.md` (map nền + chat nổi + toggle split + trình chiếu sự kiện — **đã code xong cả 4 phase**, xem `### Frontend layout` ở trên; còn nợ user 1 việc trên Cloud Console: ẩn road ở MỌI zoom).
 - `docs/reference/google-maps-api.md` — tham chiếu Google Geocoding/Maps + ToS caching.
 - `docs/design/frontend-scope.md`, `docs/brainstorming/` — scope frontend + session notes kiến trúc.
