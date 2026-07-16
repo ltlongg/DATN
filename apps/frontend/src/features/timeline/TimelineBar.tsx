@@ -1,14 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Play, Square } from "lucide-react";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import { useEventTour } from "@/features/timeline/useEventTour";
 import { useChatUiStore } from "@/store/chatUiStore";
 import type { TimelineItem } from "@/types";
 
 /**
- * Thanh timeline NGANG full-width dưới khung chat (tham khảo time-horizon.pages.dev).
- * Trên trục chỉ có icon + thời gian; click icon mới mở popover chi tiết. Sự kiện sát
- * nhau gom thành cluster (icon số đếm -> popover danh sách); LĂN CHUỘT phóng to tại vị
- * trí con trỏ để tách cluster, KÉO để di chuyển, double-click / nút "Toàn cảnh" reset.
+ * Thanh timeline NGANG (tham khảo time-horizon.pages.dev). Trên trục chỉ có icon +
+ * thời gian; click icon mới mở popover chi tiết. Sự kiện sát nhau gom thành cluster
+ * (icon số đếm -> popover danh sách); LĂN CHUỘT phóng to tại vị trí con trỏ để tách
+ * cluster, KÉO để di chuyển, double-click / nút "Toàn cảnh" reset.
  * Liên kết 2 chiều với map qua `selectedEventId`.
+ *
+ * `variant`: `docked` = dải full-width dưới khung chat (layout split);
+ * `overlay` = thẻ bo góc nổi trên map (layout float).
  */
 
 // --- time helpers (time_start dạng "YYYY" | "YYYY-MM" | "YYYY-MM-DD") ---
@@ -150,7 +155,23 @@ const POPOVER_LEFT = (pct: number) => ({
   left: `clamp(168px, ${pct}%, calc(100% - 168px))`,
 });
 
-export function TimelineBar({ items }: { items: TimelineItem[] }) {
+type TimelineVariant = "docked" | "overlay";
+
+const FRAME_CLASS: Record<TimelineVariant, string> = {
+  docked: "border-t border-paper-border bg-paper-card",
+  overlay: "rounded-xl border border-paper-border bg-paper-card shadow-lg",
+};
+
+export function TimelineBar({
+  items,
+  variant = "docked",
+  streaming = false,
+}: {
+  items: TimelineItem[];
+  variant?: TimelineVariant;
+  /** Đang chờ câu trả lời -> không cho bật trình chiếu (sự kiện sắp bị thay). */
+  streaming?: boolean;
+}) {
   const selectedEventId = useChatUiStore((s) => s.selectedEventId);
   const setSelected = useChatUiStore((s) => s.setSelectedEvent);
   const [collapsed, setCollapsed] = useState(false);
@@ -164,6 +185,9 @@ export function TimelineBar({ items }: { items: TimelineItem[] }) {
     () => (placed.length > 0 ? fitDomain(placed) : null),
     [placed],
   );
+  // Tour đi đúng thứ tự đang vẽ trên trục (placed đã sort theo thời gian).
+  const tourEvents = useMemo(() => placed.map((p) => p.item), [placed]);
+  const tour = useEventTour(tourEvents);
   const domain = view ?? base;
   const { clusters, ticks, toPct } = useMemo(
     () => (domain ? layout(placed, domain) : { clusters: [], ticks: [], toPct: () => 0 }),
@@ -250,7 +274,7 @@ export function TimelineBar({ items }: { items: TimelineItem[] }) {
   }
 
   return (
-    <div className="relative border-t border-paper-border bg-paper-card">
+    <div className={`relative ${FRAME_CLASS[variant]}`}>
       {/* header */}
       <div className="flex items-center justify-between px-4 py-1.5">
         <div className="flex items-center gap-2">
@@ -264,6 +288,25 @@ export function TimelineBar({ items }: { items: TimelineItem[] }) {
           </span>
         </div>
         <div className="flex items-center gap-3">
+          {/* Trình chiếu: tự chạy lần lượt các mốc theo thời gian, map bám theo. */}
+          <button
+            onClick={tour.playing ? tour.stop : tour.start}
+            disabled={streaming && !tour.playing}
+            title={
+              tour.playing
+                ? "Dừng trình chiếu"
+                : "Lần lượt kể các sự kiện theo dòng thời gian"
+            }
+            aria-pressed={tour.playing}
+            className={`flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+              tour.playing
+                ? "border-brand bg-brand text-brand-fg hover:bg-brand-dark"
+                : "border-paper-border text-ink-soft hover:border-brand hover:text-brand"
+            }`}
+          >
+            {tour.playing ? <Square size={12} /> : <Play size={12} />}
+            {tour.playing ? "Dừng" : "Trình chiếu"}
+          </button>
           {view !== null && (
             <button
               onClick={() => setView(null)}

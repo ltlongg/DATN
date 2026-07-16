@@ -7,7 +7,6 @@ import {
 } from "@/api/askStream";
 import { chatReducer } from "@/features/chat/chatReducer";
 import { useAuthStore } from "@/store/authStore";
-import { useChatUiStore } from "@/store/chatUiStore";
 import type { Message } from "@/types";
 
 /**
@@ -20,14 +19,14 @@ import type { Message } from "@/types";
  * Abort stream chỉ khi unmount hoặc CHUYỂN PHIÊN tường minh (`selectConversation`/
  * `resetConversation`) — KHÔNG abort khi id null→mới do lazy-create.
  *
- * Debug chỉ bật cho admin (BE cũng ép false cho user). Viz panel tự mở khi có markers/timeline.
+ * Debug chỉ bật cho admin (BE cũng ép false cho user). Hook KHÔNG đụng tới panel bản đồ:
+ * AskPage tự mở panel theo DỮ LIỆU (viz mới, dù từ SSE hay từ phiên nạp lại từ DB).
  */
 export function useChat() {
   const [items, dispatch] = useReducer(chatReducer, []);
   const [streaming, setStreaming] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const isAdmin = useAuthStore((s) => s.user?.role === "admin");
-  const openViz = useChatUiStore((s) => s.openViz);
   const controllerRef = useRef<AskStreamController | null>(null);
 
   const buildHandlers = useCallback(
@@ -36,12 +35,8 @@ export function useChat() {
       onToken: (t) => dispatch({ type: "token", id: assistantId, text: t }),
       onRegenerating: () => dispatch({ type: "regenerating", id: assistantId }),
       onCitations: (citations) => dispatch({ type: "citations", id: assistantId, citations }),
-      onVisualization: (visualization) => {
-        dispatch({ type: "visualization", id: assistantId, visualization });
-        if (visualization && (visualization.markers.length || visualization.timeline.length)) {
-          openViz();
-        }
-      },
+      onVisualization: (visualization) =>
+        dispatch({ type: "visualization", id: assistantId, visualization }),
       onClarification: (question) =>
         dispatch({ type: "clarification", id: assistantId, question }),
       onBlocked: () => dispatch({ type: "blocked", id: assistantId }),
@@ -49,7 +44,7 @@ export function useChat() {
       onDebug: (debug) => dispatch({ type: "debug", id: assistantId, debug }),
       onDone: (done) => dispatch({ type: "done", id: assistantId, done }),
     }),
-    [openViz],
+    [],
   );
 
   /**

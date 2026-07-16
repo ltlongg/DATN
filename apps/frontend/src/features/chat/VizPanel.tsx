@@ -12,7 +12,8 @@ export function VizPanel({ visualization }: { visualization: VisualizationPayloa
 
   return (
     <div className="flex flex-1 flex-col border-l border-paper-border">
-      <div className="flex items-center justify-between border-b border-paper-border bg-paper-card px-4 py-2">
+      {/* pr-44: chừa chỗ cho nút chuyển bố cục nổi ở góc phải trên (AskPage). */}
+      <div className="flex items-center justify-between border-b border-paper-border bg-paper-card py-2 pl-4 pr-44">
         <span className="text-sm font-medium text-ink">
           {visualization.event_count} sự kiện
           {visualization.unplaced_count > 0 && (
