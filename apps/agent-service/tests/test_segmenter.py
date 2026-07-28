@@ -100,6 +100,53 @@ def test_idempotent_va_phu_du() -> None:
     )  # unit 1-chunk có thể vượt cap (1 chunk không cắt nhỏ hơn được)
 
 
+def _doc_chunk(src: str, idx: int, text: str, **headings: str) -> dict:
+    """Chunk có `source_file` — file chunks dùng chung cho nhiều tài liệu."""
+    return {
+        "chunk_id": f"{src}-{idx:03d}",
+        "text": text,
+        "metadata": {"headings": headings, "chunk_index": idx, "source_file": src},
+    }
+
+
+def test_khong_tron_hai_tai_lieu_vao_mot_unit() -> None:
+    """Hai tài liệu nhỏ gộp lại vẫn dưới cap, nhưng KHÔNG được thành một unit."""
+    chunks = [
+        _doc_chunk("docA", 0, "Nội dung A một.", h1="A", h2="B"),
+        _doc_chunk("docA", 1, "Nội dung A hai.", h1="A", h2="B"),
+        _doc_chunk("docB", 0, "Nội dung B một.", h1="B", h2="C"),
+        _doc_chunk("docB", 1, "Nội dung B hai.", h1="B", h2="C"),
+    ]
+    units = build_units(chunks, cap=10_000)
+    assert len(units) == 2
+    assert units[0].source_chunk_ids == ["docA-000", "docA-001"]
+    assert units[1].source_chunk_ids == ["docB-000", "docB-001"]
+    for u in units:
+        assert len({cid.split("-")[0] for cid in u.source_chunk_ids}) == 1
+
+
+def test_chunk_index_lap_lai_khong_lam_xen_ke_tai_lieu() -> None:
+    """`chunk_index` đếm lại từ 0 mỗi tài liệu -> sort toàn cục sẽ xen kẽ, phải tránh."""
+    chunks = [
+        _doc_chunk("docA", 0, "A0 " * 20, h1="A"),
+        _doc_chunk("docA", 1, "A1 " * 20, h1="A"),
+        _doc_chunk("docB", 0, "B0 " * 20, h1="B"),
+        _doc_chunk("docB", 1, "B1 " * 20, h1="B"),
+    ]
+    ids = [cid for u in build_units(chunks, cap=100) for cid in u.source_chunk_ids]
+    assert ids == ["docA-000", "docA-001", "docB-000", "docB-001"]
+
+
+def test_thu_tu_tai_lieu_theo_vi_tri_trong_file() -> None:
+    """Tài liệu xuất hiện sau trong file thì unit của nó cũng đứng sau."""
+    chunks = [
+        _doc_chunk("docB", 0, "B trước.", h1="B"),
+        _doc_chunk("docA", 0, "A sau.", h1="A"),
+    ]
+    units = build_units(chunks, cap=10_000)
+    assert [u.source_chunk_ids[0] for u in units] == ["docB-000", "docA-000"]
+
+
 def test_chunk_thieu_text_bi_bo_qua() -> None:
     chunks = [
         _chunk(0, "có nội dung", h1="A", h2="B"),

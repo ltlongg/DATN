@@ -59,9 +59,14 @@ class Unit:
         return len(self.text)
 
 
-def _prepare(chunks: list[dict]) -> list[_Chunk]:
-    """Lọc + sắp theo `chunk_index` -> danh sách _Chunk theo đúng thứ tự văn bản."""
-    rows: list[tuple[int, _Chunk]] = []
+def _prepare(chunks: list[dict]) -> list[list[_Chunk]]:
+    """Lọc + gom theo TÀI LIỆU (`source_file`), mỗi khối sắp theo `chunk_index`.
+
+    File chunks dùng CHUNG cho nhiều tài liệu, mà `chunk_index` đếm lại từ 0 ở mỗi tài
+    liệu -> sort toàn cục sẽ xen kẽ các tài liệu, unit thành hổ lốn text của hai cuốn
+    sách. Khối tài liệu giữ thứ tự xuất hiện trong file; trong khối sắp theo chunk_index.
+    """
+    blocks: dict[str, list[tuple[int, _Chunk]]] = {}
     for c in chunks:
         meta = c.get("metadata") or {}
         cid = c.get("chunk_id")
@@ -71,9 +76,14 @@ def _prepare(chunks: list[dict]) -> list[_Chunk]:
         path = tuple(build_heading_path(meta))
         idx = meta.get("chunk_index")
         idx = idx if isinstance(idx, int) else 0
-        rows.append((idx, _Chunk(cid, text, path)))
-    rows.sort(key=lambda r: r[0])
-    return [r[1] for r in rows]
+        src = str(meta.get("source_file") or "")
+        blocks.setdefault(src, []).append((idx, _Chunk(cid, text, path)))
+
+    out: list[list[_Chunk]] = []
+    for rows in blocks.values():  # dict giữ thứ tự chèn = thứ tự tài liệu trong file
+        rows.sort(key=lambda r: r[0])  # stable -> hoà chunk_index thì giữ thứ tự file
+        out.append([r[1] for r in rows])
+    return out
 
 
 def _total(items: list[_Chunk]) -> int:
@@ -167,10 +177,14 @@ def _segment(items: list[_Chunk], depth: int, cap: int, out: list[Unit]) -> None
 
 
 def build_units(chunks: list[dict], cap: int = CAP_CHARS) -> list[Unit]:
-    """Gom danh sách chunk (dạng `chunks_llm.json`) thành các unit ≤ cap ký tự."""
-    items = _prepare(chunks)
+    """Gom danh sách chunk (dạng `chunks_llm.json`) thành các unit ≤ cap ký tự.
+
+    Mỗi tài liệu (`source_file`) phân đoạn RIÊNG: một unit không bao giờ trộn text của
+    hai tài liệu, kể cả khi cả hai gộp lại vẫn dưới cap.
+    """
     out: list[Unit] = []
-    _segment(items, 0, cap, out)
+    for block in _prepare(chunks):
+        _segment(block, 0, cap, out)
     return out
 
 

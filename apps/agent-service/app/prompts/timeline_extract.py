@@ -14,7 +14,7 @@ thực thể rời rạc.
 
 from __future__ import annotations
 
-TIMELINE_PROMPT_VERSION = "timeline-extract-v2"
+TIMELINE_PROMPT_VERSION = "timeline-extract-v3"
 
 
 SYSTEM_PROMPT = """
@@ -66,8 +66,14 @@ khi chính nó là mốc đáng lên timeline.
 </time_rules>
 
 <location_rules>
-- `locations`: địa danh gắn với mốc này, GIỮ NGUYÊN surface form như văn bản ("Gia Định",
-  "Gò Công", "Đông Khê").
+- `locations`: CHỈ là nơi DIỄN BIẾN CỦA EVENT NÀY thực sự xảy ra, GIỮ NGUYÊN surface
+  form như văn bản ("Gia Định", "Gò Công", "Đông Khê"). KHÔNG coi mọi địa danh được
+  nhắc trong câu là địa điểm event.
+- BỎ địa danh chỉ thuộc bối cảnh, điều kiện hoặc diễn biến KHÁC: nơi của sự kiện xảy ra
+  trước đó ("sau khi chiếm Quảng Châu..."), nơi làm ví dụ/so sánh, nơi xuất phát/đích
+  đến, hay đối tượng/mục tiêu của kế hoạch. Đặc biệt, với event ban lệnh, quyết định,
+  kế hoạch hoặc đe doạ: chỉ ghi nơi ban lệnh nếu văn bản nói rõ; KHÔNG ghi nơi mà hành
+  động được lệnh/dự kiến sẽ diễn ra. Không biết nơi diễn ra event -> `locations = []`.
 - THỨ TỰ: giữ theo thứ tự XUẤT HIỆN trong văn bản. `locations[0]` là nơi chấm marker
   chính và là KHÓA định danh event -> chỉ đảo một nơi lên đầu khi văn bản nói RÕ sự kiện
   diễn ra chủ yếu ở đó; KHÔNG dựa vào kiến thức ngoài để xếp.
