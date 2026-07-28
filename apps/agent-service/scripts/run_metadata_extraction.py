@@ -102,9 +102,12 @@ def main() -> int:
 
     def _write() -> None:
         # Ghi atomic: file tạm cùng thư mục rồi os.replace (an toàn cho ghi in-place).
-        ordered = sorted(by_id.values(), key=lambda c: c["metadata"]["chunk_index"])
+        # GIỮ NGUYÊN thứ tự file (all_chunks là chính các dict đang được sửa tại chỗ).
+        # KHÔNG sort theo chunk_index: file gộp nhiều tài liệu thì chunk_index lặp lại
+        # theo từng tài liệu, sort toàn cục sẽ XEN KẼ các tài liệu -> segmenter gom run
+        # liên tiếp (build_units) sẽ cắt sai ranh giới section.
         tmp = file_path.with_suffix(file_path.suffix + ".tmp")
-        tmp.write_text(json.dumps(ordered, ensure_ascii=False, indent=2), encoding="utf-8")
+        tmp.write_text(json.dumps(all_chunks, ensure_ascii=False, indent=2), encoding="utf-8")
         os.replace(tmp, file_path)
 
     client = get_openai_client()

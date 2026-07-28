@@ -82,6 +82,26 @@ def _save_verdicts(verdicts: dict) -> None:
     tmp.replace(_VERDICTS)
 
 
+def _load_seed() -> dict:
+    """Đọc seed thủ công, chịu lỗi như verdict: thiếu/rỗng/hỏng -> {} (chạy tiếp, không seed).
+
+    Cảnh báo TO khi rỗng/hỏng chứ không im lặng: seed là phán quyết của người, mất nó
+    thì alias ngữ nghĩa ("Nguyễn Ái Quốc"->"Hồ Chí Minh") biến khỏi map mà map vẫn ghi ra
+    bình thường — dễ tưởng là chạy ngon.
+    """
+    if not _SEED.exists():
+        return {}
+    raw = _SEED.read_text(encoding="utf-8").strip()
+    if not raw:
+        log.warning("%s RỖNG -> bỏ qua seed thủ công (map sẽ thiếu alias ngữ nghĩa).", _SEED.name)
+        return {}
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError as exc:
+        log.warning("%s HỎNG (%s) -> bỏ qua seed thủ công.", _SEED.name, exc)
+        return {}
+
+
 def _strip_strong(s: str) -> str:
     """Dạng rút gọn CHỈ để tìm ứng viên: bỏ dấu + gạch nối + khoảng trắng. KHÔNG làm khóa."""
     s = unicodedata.normalize("NFD", s.lower())
@@ -253,18 +273,16 @@ def main() -> None:
 
     # Seed thủ công (cụm [[canonical, alias, ...], ...]) — ưu tiên ghi đè.
     n_seed = 0
-    if _SEED.exists():
-        seed = json.loads(_SEED.read_text(encoding="utf-8"))
-        for cluster in seed.get("clusters", []):
-            if not cluster:
-                continue
-            can_name = cluster[0]
-            can_norm = normalize_name(can_name)
-            for alias_name in cluster[1:]:
-                alias_map[normalize_name(alias_name)] = {
-                    "canonical_norm": can_norm, "canonical_name": can_name,
-                }
-                n_seed += 1
+    for cluster in _load_seed().get("clusters", []):
+        if not cluster:
+            continue
+        can_name = cluster[0]
+        can_norm = normalize_name(can_name)
+        for alias_name in cluster[1:]:
+            alias_map[normalize_name(alias_name)] = {
+                "canonical_norm": can_norm, "canonical_name": can_name,
+            }
+            n_seed += 1
 
     _OUT_MAP.write_text(
         json.dumps({"version": 1, "judge_version": ALIAS_JUDGE_VERSION, "map": alias_map},
