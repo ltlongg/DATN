@@ -74,16 +74,23 @@ def _split_with_slumber(text: str, abs_start: int, max_tokens: int, settings: Se
     Trả [] nếu không cắt được (để fallback).
     """
     from chonkie import OpenAIGenie, SlumberChunker
+    from chonkie.types import RecursiveLevel, RecursiveRules
 
     genie = OpenAIGenie(
         model=settings.llm_model,
         base_url=str(settings.openai_base_url) if settings.openai_base_url else None,
         api_key=settings.openai_api_key,
     )
+    rules = RecursiveRules(levels=[
+        RecursiveLevel(delimiters=["\n\n"]),
+        RecursiveLevel(delimiters=["\n"]),
+        RecursiveLevel(delimiters=[". ", "! ", "? "]),
+    ])
     chunker = SlumberChunker(
         genie=genie,
         tokenizer=_chonkie_token_counter,  # đo bằng token VN, khớp phần còn lại của pipeline
         chunk_size=max_tokens,
+        rules=rules,
         min_characters_per_chunk=settings.min_characters_per_chunk,
         verbose=False,
     )
@@ -176,6 +183,15 @@ def _chunk_block(
     return spans
 
 
+def _chunk_id_prefix(source_file: str) -> str:
+    """Suy prefix chunk_id từ source_file: bỏ '.md', đổi '.' -> '_'.
+
+    'lichsu.clean.md' -> 'lichsu_clean' (GIỮ NGUYÊN id kho cũ), 'tap1.clean.md' ->
+    'tap1_clean'. Nhờ vậy mỗi source_file có prefix riêng -> chunk_id không đụng nhau.
+    """
+    return source_file.removesuffix(".md").replace(".", "_")
+
+
 def chunk_document(
     clean_text: str,
     *,
@@ -192,6 +208,7 @@ def chunk_document(
     """
     settings = settings or get_settings()
     stats = ChunkStats()
+    chunk_id_prefix = _chunk_id_prefix(source_file)
     line_starts = build_line_starts(clean_text)
     sections = parse_sections(clean_text)
     stats.sections = len(sections)
@@ -225,6 +242,7 @@ def chunk_document(
                 index,
                 document_title=document_title,
                 source_file=source_file,
+                chunk_id_prefix=chunk_id_prefix,
             )
             if chunk is not None:
                 chunks.append(chunk)
