@@ -53,6 +53,37 @@ Agent-service (FastAPI + LangGraph, :9000)  ← orchestrate RAG + GraphRAG + hyb
 
 **Nguyên tắc quan trọng**: backend KHÔNG trực tiếp là agent. Backend chỉ là API gateway gọi sang `agent-service` qua HTTP client (`apps/backend/app/services/agent_client.py`). Mọi logic LLM/retrieval nằm trong `agent-service`.
 
+### Cổng vào hệ thống — đăng ký công khai + đăng nhập Google (xong 2026-07-30)
+Plan: `docs/plan/auth-landing-plan.md`. **Landing page + đổi cây route `/` → `/chat` (pha B)
+HOÃN theo yêu cầu user** — `/` vẫn là `AskPage` sau `RequireAuth`; `/login` + `/register` là 2
+route công khai duy nhất.
+
+- **`POST /api/auth/register`** — mở, không admin duyệt: `role` **hardcode `"user"`** trong
+  handler (`RegisterRequest` KHÔNG có field role), trả `LoginResponse` 201 → auto-login.
+  Trùng email → `409 email_taken`.
+- **Chuẩn hoá email đặt ở TẦNG REPO** (`models/user.py::normalize_email`, gọi trong
+  `get_user_by_email` + `create_user`), KHÔNG ở handler: có 4 cửa cùng chạm email, sót một cửa
+  là tài khoản nhân đôi (`TEXT UNIQUE` so byte). Tiện thể sửa bug `/login` cũ tra email
+  nguyên văn. Chỉ `strip().lower()` — CỐ Ý không bỏ dấu chấm/`+tag` (luật riêng Gmail).
+- **Mật khẩu đếm BYTE, không đếm ký tự**: `security.validate_bcrypt_password` (≤72 byte) gọi
+  ở `RegisterRequest` + `UserCreate` (cửa admin) + `hash_password`. `hash_password` KHÔNG còn
+  cắt im lặng; `verify_password` **vẫn cắt** (hash cũ sinh từ bản đã cắt — bỏ cắt là khoá cửa
+  chính những tài khoản đó).
+- **`POST /api/auth/google`** — luồng **ID token** (không client secret / redirect URI /
+  PKCE). `users` thêm `google_sub TEXT UNIQUE` + `password_hash` nullable (2 ALTER idempotent).
+  **KHÔNG tự ghép Google vào tài khoản mật khẩu cùng email** → `409 account_link_required`
+  (`email_verified` chỉ chứng minh Google tin email, không chứng minh cùng người → lỗ hổng
+  pre-hijacking). Thứ tự `except` **không được đảo**: `TransportError` (subclass của
+  `GoogleAuthError`) → `503`, rồi `(ValueError, GoogleAuthError)` → `401`.
+  `GOOGLE_CLIENT_ID` rỗng → `503 google_login_disabled`; frontend không render nút.
+- **Sửa bug `client.ts` đang chạy**: 401 chỉ coi là "hết phiên" khi request **có token** và
+  **không phải** `/api/auth/{login,register,google}` — trước đó gõ sai mật khẩu hiện "Phiên
+  đăng nhập đã hết hạn". `state.from` của `RequireAuth` nay **được đọc** qua
+  `features/auth/redirectTarget.ts` (mặc định `"/"`; đổi hằng đó khi làm pha B).
+- ⏳ **Còn nợ**: Google Cloud Console (plan §4.3.1, user tự bấm) · landing page · rate limit
+  (plan §6b, làm trước khi mở ra ngoài localhost) · liên kết Google vào tài khoản có sẵn (cần
+  trang cá nhân).
+
 ### Auth nội bộ giữa 2 service — shared secret `X-Internal-Key` (xong 2026-07-30)
 Cả 2 chiều gọi HTTP nội bộ **đã có auth**, dùng shared secret `INTERNAL_API_KEY` (root `.env`)
 qua header `X-Internal-Key`. Trước đây cả 2 chiều đều trần, chỉ dựa vào giả định "2 service
@@ -83,7 +114,12 @@ cùng máy" — giả định đó vỡ ngay khi `--host 0.0.0.0` hoặc deploy.
 > docker-compose.yml` map **mọi** port ra host (`9000`, `5432`, `7474/7687`, `6333`, `6379`)
 > + bind-mount source → là compose DEV, KHÔNG dùng cho production; production cần bản chỉ
 > map port backend. Shared secret ở trên là lớp thứ 2 (defense in depth), KHÔNG thay thế việc
-> cô lập mạng.
+> cô lập mạng. **(3) Rate limit — HOÃN có chủ ý (quyết định user 2026-07-30)**: `/login` hiện
+> **không giới hạn số lần thử** (mời brute-force) và quota chỉ tính **theo tài khoản**
+> ([db.py](apps/backend/app/core/db.py) `question_quota`) nên khi mở đăng ký công khai, ai
+> muốn vượt quota chỉ cần tạo thêm tài khoản. Chấp nhận được khi chạy localhost để demo;
+> **phải làm trước khi mở ra internet**. Thiết kế + 4 mức đã soạn sẵn ở
+> `docs/plan/auth-landing-plan.md` §6b, chỉ việc code.
 
 ### Role: `admin` | `user` (đổi tên từ `teacher`, 2026-07-30)
 Hệ thống có đúng **2 role**: `admin` và `user`. Role người dùng thường trước đây tên
@@ -185,8 +221,8 @@ tay + `CREATE TABLE IF NOT EXISTS`). Plan: `docs/plan/backend-plan.md`.
   gọi qua `anyio.to_thread`.
 - `schemas/` — Pydantic request/response: `auth.py`, `chat.py`, `document.py`, `common.py`,
   `inspect.py`, `logs.py` (+ `TokenSummary`/`MessageTokens`), `user.py`, `cost.py`, `prompt.py`.
-- `api/` — router: `health.py` (`/health`,`/ready`), `auth.py` (login/me/logout, check
-  `is_active`), `chat.py` (conversation CRUD + `/ask` streaming — truyền `conversation_id`/
+- `api/` — router: `health.py` (`/health`,`/ready`), `auth.py` (register/login/google/me/
+  logout, check `is_active` ở CẢ login lẫn google), `chat.py` (conversation CRUD + `/ask` streaming — truyền `conversation_id`/
   `message_id` sang agent, gác `debug`, check quota + `GET /sources/{chunk_id}` xem toàn văn
   nguồn, xem `### Xem nguồn` dưới), `documents.py` (`/api/admin/documents*`
   — CRUD danh mục + `GET /sources` liệt kê nguồn thật trong kho),
@@ -309,8 +345,10 @@ liên quan gì tới 1213 chunk thật trong kho. Giờ đã nối:
 ### Frontend layout (`apps/frontend/src/`) — đã build
 Vite+React 18+TS. TanStack Query (server state) + Zustand (auth/UI) + Tailwind v3 (tokens:
 brand `#A4161A`, nền kem, serif+sans) + Radix + `@vis.gl/react-google-maps` +
-`react-force-graph-2d` + `recharts`. Test: Vitest + Testing Library. SSE `/ask` qua
-`fetch`+`ReadableStream` tay. Route cứng `/` (user) vs `/admin/*` (RoleGuard admin), nav admin
+`react-force-graph-2d` + `recharts` + `@react-oauth/google` (**PIN cứng `0.13.5`, không `^`**
+— wrapper cộng đồng nằm ngay trên đường đăng nhập). Test: Vitest + Testing Library. SSE `/ask`
+qua `fetch`+`ReadableStream` tay. Route công khai `/login` + `/register`; route cứng `/`
+(user, sau `RequireAuth`) vs `/admin/*` (RoleGuard admin), nav admin
 là **sidebar dọc theo nhóm** (`AppSidebar.tsx`, KHÔNG còn tab ngang).
 - `app/` — `App.tsx` (providers + router + boot getMe), `routes.tsx` (route tree, export array;
   mỗi chức năng admin 1 route con riêng — `admin/kb/{chunks,graph,timeline}`,
@@ -320,7 +358,9 @@ là **sidebar dọc theo nhóm** (`AppSidebar.tsx`, KHÔNG còn tab ngang).
   `askStream.ts` (⭐ parser SSE), `auth/chat/documents/kb/logs/users/cost/prompts.ts`.
 - `store/` — `authStore` (persist), `chatUiStore` (`selectedEventId` link map↔timeline,
   `layoutMode` **persist** (float/split), `convDrawerOpen`, `tourPlaying`, debugOpen).
-- `features/auth` — RequireAuth/RoleGuard/LoginForm.
+- `features/auth` — RequireAuth/RoleGuard/`AuthLayout` (bố cục 2 cột dùng chung 2 trang) +
+  LoginForm/`RegisterForm`+`useRegister`/`GoogleButton` (bọc `GoogleOAuthProvider` TẠI CHỖ,
+  không bọc toàn app) + `redirectTarget.ts` (đọc `state.from`, chặn URL ngoài).
 - `features/chat` — `chatReducer` (thuần, test) + `useChat` + ChatPanel/MessageList/Bubble/
   Composer/Clarification/DebugPanel(admin)/VizPanel/`ConversationDrawer` (drawer phiên ở
   layout float) + **xem nguồn**: `CitationList` (gộp theo mục, chip `[n]` hover ra quote) +
@@ -397,14 +437,18 @@ Venv riêng `apps/backend/venv/`. Lần đầu: tạo bảng + seed user demo. T
 Postgres remote thật (cô lập bằng transaction rollback, **cần DB tới được** — nếu không sẽ
 timeout ở fixture `_ensure_schema` autouse); agent-service được mock qua `httpx.MockTransport`,
 không cần agent chạy. `test_inspect.py` cần bảng `rag_chunks`/`timeline_events` đã index sẵn
-— DB mới trống sẽ fail 7 test đó (không phải lỗi code, chỉ thiếu data).
+— DB mới trống sẽ fail 7 test đó (không phải lỗi code, chỉ thiếu data). **4 test
+`test_activity.py` đang FAIL sẵn** vì lý do ngược lại: chúng `assert len(rows) == 1` trên
+`activity_log` mà bảng đó đã tích luỹ hàng trăm dòng THẬT từ lúc chạy server (rollback của
+fixture không xoá được data đã commit trước đó). Không phải lỗi code — muốn xanh thì test
+phải lọc theo `request_id`, không phải theo `path`.
 ```powershell
 $env:PYTHONIOENCODING="utf-8"
 cd apps/backend
 .\venv\Scripts\python.exe scripts/init_db.py        # CREATE TABLE IF NOT EXISTS 4 bảng (idempotent)
 .\venv\Scripts\python.exe scripts/seed_users.py     # admin@example.com/admin123, user@example.com/user123 (dev)
 .\venv\Scripts\python.exe -m uvicorn app.main:app --port 8000   # chạy server
-.\venv\Scripts\python.exe -m pytest tests                       # 116 test
+.\venv\Scripts\python.exe -m pytest tests                       # 174 test
 ```
 
 ### Tiền xử lý dataset (preprocessing)
