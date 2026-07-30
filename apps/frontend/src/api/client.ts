@@ -41,8 +41,17 @@ export function buildUrl(path: string, query?: Record<string, QueryValue>): stri
 }
 
 /**
+ * Endpoint auth: 401 ở đây là "sai thông tin đăng nhập", KHÔNG phải "hết phiên" — phải giữ
+ * nguyên `code`/`message` backend trả về (invalid_credentials, invalid_google_token,
+ * google_email_unverified) thay vì nuốt thành "Phiên đăng nhập đã hết hạn".
+ */
+const AUTH_PATHS = ["/api/auth/login", "/api/auth/register", "/api/auth/google"];
+
+/**
  * Fetch wrapper: gắn Bearer, gửi/nhận JSON, map lỗi `{code,message}` -> ApiError.
- * 401 -> clear auth store (RequireAuth sẽ điều hướng về /login), rồi ném ApiError.
+ * 401 CÓ token + KHÔNG phải endpoint auth -> phiên hết hạn thật: clear auth store
+ * (RequireAuth điều hướng về /login). Các 401 còn lại rơi xuống nhánh `!res.ok` để giữ
+ * message thật của backend.
  */
 export async function apiFetch<T>(path: string, opts: RequestOptions = {}): Promise<T> {
   const { method = "GET", body, query, signal } = opts;
@@ -59,7 +68,9 @@ export async function apiFetch<T>(path: string, opts: RequestOptions = {}): Prom
 
   const res = await fetch(buildUrl(path, query), { method, headers, body: payload, signal });
 
-  if (res.status === 401) {
+  // `token &&`: chưa đăng nhập mà gọi API thì clear() là vô nghĩa, và nó xoá luôn cơ hội
+  // hiện message thật của backend.
+  if (res.status === 401 && token && !AUTH_PATHS.some((p) => path.startsWith(p))) {
     useAuthStore.getState().clear();
     throw new ApiError(401, "unauthorized", "Phiên đăng nhập đã hết hạn.");
   }

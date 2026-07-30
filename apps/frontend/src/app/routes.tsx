@@ -4,6 +4,7 @@ import AppShell from "@/components/AppShell";
 import { RequireAuth } from "@/features/auth/RequireAuth";
 import { RoleGuard } from "@/features/auth/RoleGuard";
 import LoginPage from "@/pages/LoginPage";
+import RegisterPage from "@/pages/RegisterPage";
 import AskPage from "@/pages/AskPage";
 import AdminLayout from "@/pages/AdminLayout";
 import AdminDocumentsPage from "@/pages/AdminDocumentsPage";
@@ -21,12 +22,14 @@ const AdminCostPage = lazy(() => import("@/pages/AdminCostPage"));
 const AdminPromptsPage = lazy(() => import("@/pages/AdminPromptsPage"));
 
 /**
- * Route cứng: `/` khu user (mọi role), `/admin/*` chỉ admin (RoleGuard). Mỗi chức năng admin
+ * Route cứng: `/login` + `/register` công khai, `/` khu user (mọi role), `/admin/*` chỉ
+ * admin (RoleGuard). Mỗi chức năng admin
  * là 1 route con riêng (nav dọc ở AppSidebar), không còn tab ngang gộp. Redirect back-compat
  * cho path gộp cũ (`/admin/kb`, `/admin/advanced`). Export array để test bằng memory router.
  */
 export const routes: RouteObject[] = [
   { path: "/login", element: <LoginPage /> },
+  { path: "/register", element: <RegisterPage /> },
   {
     path: "/",
     element: <RequireAuth />,

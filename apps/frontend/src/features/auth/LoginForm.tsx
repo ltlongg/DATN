@@ -1,4 +1,6 @@
 import { useState, type FormEvent } from "react";
+import { Lock, Mail } from "lucide-react";
+import { AuthInput } from "@/features/auth/AuthInput";
 import { useLogin } from "@/features/auth/useLogin";
 
 export function LoginForm() {
@@ -13,33 +15,35 @@ export function LoginForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
-      <div className="space-y-1">
-        <label htmlFor="email" className="block text-sm font-medium text-ink-soft">
+      <div className="space-y-1.5">
+        <label htmlFor="email" className="block text-sm font-semibold text-ink">
           Email
         </label>
-        <input
+        <AuthInput
           id="email"
           type="email"
           autoComplete="username"
           required
+          placeholder="email@example.com"
+          icon={<Mail size={18} />}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-md border border-paper-border bg-white px-3 py-2 outline-none focus:border-brand"
         />
       </div>
 
-      <div className="space-y-1">
-        <label htmlFor="password" className="block text-sm font-medium text-ink-soft">
+      <div className="space-y-1.5">
+        <label htmlFor="password" className="block text-sm font-semibold text-ink">
           Mật khẩu
         </label>
-        <input
+        <AuthInput
           id="password"
           type="password"
           autoComplete="current-password"
           required
+          placeholder="Nhập mật khẩu"
+          icon={<Lock size={18} />}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-md border border-paper-border bg-white px-3 py-2 outline-none focus:border-brand"
         />
       </div>
 
