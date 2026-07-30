@@ -59,6 +59,11 @@ class Settings(BaseSettings):
 
     # --- Agent-service gateway ---
     agent_service_url: str = "http://localhost:9000"
+    # Shared secret cho 2 chiều gọi nội bộ (header X-Internal-Key): gửi kèm khi gọi
+    # agent-service, và dùng để gác /internal/* của chính backend. Phải TRÙNG giá trị
+    # INTERNAL_API_KEY của agent-service. Rỗng = chưa cấu hình -> core/internal_auth.py từ
+    # chối (fail-closed, KHÔNG bỏ qua check). Xem CLAUDE.md §Architecture.
+    internal_api_key: str = ""
     # Với SSE KHÔNG đặt giới hạn tổng; chỉ chặn lúc connect + idle giữa 2 token.
     agent_connect_timeout_seconds: float = 5.0
     agent_read_idle_timeout_seconds: float = 30.0

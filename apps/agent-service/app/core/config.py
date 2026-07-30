@@ -119,6 +119,12 @@ class Settings(BaseSettings):
     # agent_service_url phía backend, hướng ngược lại. Xem app/core/runtime_config.py. ---
     backend_base_url: str = "http://localhost:8000"
 
+    # --- Auth nội bộ giữa 2 service (header X-Internal-Key). Dùng cho CẢ 2 chiều: gác
+    # /ask + /kb/* của service này, và gửi kèm khi gọi GET /internal/config của backend.
+    # Mặc định RỖNG = chưa cấu hình -> core/internal_auth.py TỪ CHỐI mọi request nội bộ
+    # (fail-closed, có chủ đích: thiếu 1 dòng .env phải vỡ ồn ào chứ không mở cửa im lặng). ---
+    internal_api_key: str = ""
+
     # --- Storage backends (đọc từ .env) ---
     neo4j_uri: str = ""
     neo4j_user: str = "neo4j"
