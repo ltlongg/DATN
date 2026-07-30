@@ -1,4 +1,6 @@
-"""Router /ask + /health + /ready. `/ask` là internal endpoint cho backend gọi.
+"""Router /ask — internal endpoint CHỈ dành cho backend gọi (gác `X-Internal-Key` ở
+app/main.py, xem app/core/internal_auth.py). `/health` + `/ready` đã tách sang api/health.py
+vì probe phải public.
 
 stream=True -> SSE (lỗi sau khi mở đi qua event `error`). stream=False -> 1 AskResponse
 JSON, lỗi dependency/timeout map về HTTP status sạch (422/503/504/500).
@@ -42,22 +44,3 @@ async def ask(request: AskRequest):  # type: ignore[no-untyped-def]
         raise HTTPException(
             status_code=503, detail={"code": error_code(exc), "message": error_message(exc)}
         )
-
-
-@router.get("/health")
-async def health() -> dict[str, str]:
-    return {"status": "ok"}
-
-
-@router.get("/ready")
-async def ready() -> dict[str, object]:
-    settings = get_settings()
-    checks = {
-        "openai_api_key": bool(settings.openai_api_key),
-        "database_url": bool(settings.database_url),
-        "qdrant_host": bool(settings.qdrant_host),
-        "neo4j_uri": bool(settings.neo4j_uri),
-    }
-    if not all(checks.values()):
-        raise HTTPException(status_code=503, detail={"code": "not_ready", "checks": checks})
-    return {"status": "ready", "checks": checks}

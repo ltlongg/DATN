@@ -1,7 +1,7 @@
 """Test /ask + /health + /ready qua FastAPI TestClient (retrieval/LLM/viz mock).
 
 Phủ: happy path stream=False, validation 422, dependency 503, timeout 504, SSE stream=True,
-health/ready.
+health/ready, và auth nội bộ `X-Internal-Key` (thiếu/sai key -> 401).
 """
 
 from __future__ import annotations
@@ -13,6 +13,9 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.api import ask as ask_module
+from app.api import health as health_module
+from app.core.config import get_settings
+from app.core.internal_auth import INTERNAL_KEY_HEADER
 from app.main import app
 from app.orchestrator import nodes
 from app.schemas.ask import BuildQueryOutput, SynthesizedAnswer
@@ -20,7 +23,9 @@ from app.schemas.guardrails import GuardrailDecision
 from app.schemas.retrieval import RetrievalBackendError, RetrievalResult, RetrievedChunk
 from app.schemas.visualization import VisualizationPayload
 
-client = TestClient(app)
+# `/ask` gác X-Internal-Key -> client mặc định mang key thật (đọc root .env) để mọi test cũ
+# chạy như trước; đường auth vẫn được đi qua thật chứ không bị dependency_override tắt.
+client = TestClient(app, headers={INTERNAL_KEY_HEADER: get_settings().internal_api_key})
 
 
 @pytest.fixture(autouse=True)
@@ -144,10 +149,14 @@ def test_health() -> None:
 
 def test_ready_ok_when_config_present(monkeypatch) -> None:
     monkeypatch.setattr(
-        ask_module,
+        health_module,
         "get_settings",
         lambda: SimpleNamespace(
-            openai_api_key="k", database_url="d", qdrant_host="h", neo4j_uri="n"
+            openai_api_key="k",
+            database_url="d",
+            qdrant_host="h",
+            neo4j_uri="n",
+            internal_api_key="key",
         ),
     )
     resp = client.get("/ready")
@@ -157,12 +166,51 @@ def test_ready_ok_when_config_present(monkeypatch) -> None:
 
 def test_ready_503_when_config_missing(monkeypatch) -> None:
     monkeypatch.setattr(
-        ask_module,
+        health_module,
         "get_settings",
         lambda: SimpleNamespace(
-            openai_api_key="", database_url="", qdrant_host="", neo4j_uri=""
+            openai_api_key="",
+            database_url="",
+            qdrant_host="",
+            neo4j_uri="",
+            internal_api_key="",
         ),
     )
     resp = client.get("/ready")
     assert resp.status_code == 503
     assert resp.json()["detail"]["code"] == "not_ready"
+
+
+def test_probes_public_no_internal_key_needed() -> None:
+    """Probe KHÔNG gác key — backend `_ping_agent` gọi /ready mà không mang header."""
+    bare = TestClient(app)
+    assert bare.get("/health").status_code == 200
+    assert bare.get("/ready").status_code in (200, 503)  # tuỳ .env, miễn KHÔNG phải 401
+
+
+# --- auth nội bộ X-Internal-Key ---
+
+
+def test_ask_401_without_internal_key() -> None:
+    bare = TestClient(app)
+    resp = bare.post("/ask", json={"question": "hỏi", "stream": False})
+    assert resp.status_code == 401
+    assert resp.json()["detail"]["code"] == "unauthenticated"
+
+
+def test_ask_401_with_wrong_internal_key() -> None:
+    wrong = TestClient(app, headers={INTERNAL_KEY_HEADER: "sai-key"})
+    resp = wrong.post("/ask", json={"question": "hỏi", "stream": False})
+    assert resp.status_code == 401
+
+
+def test_ask_500_when_server_key_not_configured(monkeypatch) -> None:
+    """Key rỗng ở server = chưa cấu hình -> 500 (fail-closed), KHÔNG phải bỏ qua check."""
+    from app.core import internal_auth
+
+    monkeypatch.setattr(
+        internal_auth, "get_settings", lambda: SimpleNamespace(internal_api_key="")
+    )
+    resp = client.post("/ask", json={"question": "hỏi", "stream": False})
+    assert resp.status_code == 500
+    assert resp.json()["detail"]["code"] == "internal_key_not_configured"

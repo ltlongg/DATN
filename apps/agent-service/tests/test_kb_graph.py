@@ -10,6 +10,8 @@ from __future__ import annotations
 from fastapi.testclient import TestClient
 
 from app.api import kb as kb_module
+from app.core.config import get_settings
+from app.core.internal_auth import INTERNAL_KEY_HEADER
 from app.main import app
 from app.tools.graph_rag import graph_store as G
 
@@ -140,7 +142,12 @@ def test_get_entity_none_when_missing() -> None:
 
 # --- endpoint /kb/entities* -------------------------------------------------
 
-_client = TestClient(app)
+# /kb/* gác X-Internal-Key như /ask -> client mang key thật (xem core/internal_auth.py).
+_client = TestClient(app, headers={INTERNAL_KEY_HEADER: get_settings().internal_api_key})
+
+
+def test_endpoint_kb_401_without_internal_key() -> None:
+    assert TestClient(app).get("/kb/entities").status_code == 401
 
 
 def test_endpoint_list_entities_empty_state(monkeypatch) -> None:

@@ -39,12 +39,17 @@ async def ready() -> JSONResponse:
     db_ok = await anyio.to_thread.run_sync(check_connection)
     checks = {
         "secret_key": settings.backend_secret_key != "change-me-to-a-long-random-string",
+        # Thiếu key này thì MỌI request nội bộ 2 chiều bị từ chối (fail-closed) -> /ask chết.
+        # Đưa vào ready để lộ ngay lúc deploy, không đợi câu hỏi đầu tiên của user.
+        "internal_api_key": bool(settings.internal_api_key),
         "database_url": bool(settings.database_url),
         "postgres": db_ok,
         "agent_service": await _ping_agent(settings.agent_service_url),  # informational
     }
     # agent_service không tính vào điều kiện ready (optional theo plan).
-    required_ok = checks["database_url"] and checks["postgres"]
+    required_ok = (
+        checks["database_url"] and checks["postgres"] and checks["internal_api_key"]
+    )
     status_code = 200 if required_ok else 503
     return JSONResponse(
         status_code=status_code,

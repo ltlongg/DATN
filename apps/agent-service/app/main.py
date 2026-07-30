@@ -7,11 +7,13 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 
 from app.api.ask import router as ask_router
+from app.api.health import router as health_router
 from app.api.kb import router as kb_router
 from app.core.embedding import embed_texts
+from app.core.internal_auth import verify_internal_key
 from app.core.postgres import close_pool, get_pool
 from app.core.reranker import rerank
 from app.core.sparse import encode_query
@@ -59,8 +61,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Agent Service", version="0.1.0", lifespan=lifespan)
-    app.include_router(ask_router)
-    app.include_router(kb_router)
+    # Gác `X-Internal-Key` ở CẤP ROUTER (không phải cấp app) để `health_router` ở dưới còn
+    # public cho probe. Route thêm sau vào 2 router này tự động được gác — xem internal_auth.py.
+    guarded = [Depends(verify_internal_key)]
+    app.include_router(ask_router, dependencies=guarded)
+    app.include_router(kb_router, dependencies=guarded)
+    app.include_router(health_router)
     return app
 
 
