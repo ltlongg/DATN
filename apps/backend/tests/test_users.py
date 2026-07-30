@@ -11,7 +11,7 @@ from app.services.agent_client import format_sse
 _DONE = format_sse("done", {"confidence": "cao", "retrieval_mode": "hybrid", "warnings": []})
 
 
-def _create_user(client: TestClient, admin_h, email, *, role="teacher", password="secret123"):  # type: ignore[no-untyped-def]
+def _create_user(client: TestClient, admin_h, email, *, role="user", password="secret123"):  # type: ignore[no-untyped-def]
     return client.post(
         "/api/admin/users",
         json={"email": email, "name": "U", "role": role, "password": password},
@@ -70,7 +70,7 @@ def test_patch_user_404(client, auth) -> None:  # type: ignore[no-untyped-def]
 
 
 def test_users_require_admin(client, auth) -> None:  # type: ignore[no-untyped-def]
-    assert client.get("/api/admin/users", headers=auth("teacher")).status_code == 403
+    assert client.get("/api/admin/users", headers=auth("user")).status_code == 403
 
 
 def test_admin_cannot_self_lock(client, auth, db_conn, users) -> None:  # type: ignore[no-untyped-def]
@@ -85,7 +85,7 @@ def test_admin_cannot_self_lock(client, auth, db_conn, users) -> None:  # type: 
 def test_admin_cannot_self_demote(client, auth, db_conn, users) -> None:  # type: ignore[no-untyped-def]
     admin_id = users["admin"].id
     r = client.patch(
-        f"/api/admin/users/{admin_id}", json={"role": "teacher"}, headers=auth("admin")
+        f"/api/admin/users/{admin_id}", json={"role": "user"}, headers=auth("admin")
     )
     assert r.status_code == 400
     assert r.json()["code"] == "self_demote_forbidden"
@@ -97,10 +97,10 @@ def test_admin_can_demote_another_admin(client, auth, db_conn) -> None:  # type:
         "id"
     ]
     r = client.patch(
-        f"/api/admin/users/{uid}", json={"role": "teacher"}, headers=auth("admin")
+        f"/api/admin/users/{uid}", json={"role": "user"}, headers=auth("admin")
     )
     assert r.status_code == 200
-    assert r.json()["role"] == "teacher"
+    assert r.json()["role"] == "user"
 
 
 # --- account lock -----------------------------------------------------------

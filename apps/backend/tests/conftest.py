@@ -74,18 +74,18 @@ def users(db_conn: psycopg.Connection) -> dict[str, object]:
 
     # Email test riêng (không đụng seed thật); txn rollback nên không tích luỹ.
     admin = create_user("admin-test@example.com", "Admin Test", "admin", hash_password("adminpw"))
-    teacher = create_user(
-        "teacher-test@example.com", "Teacher Test", "teacher", hash_password("teachpw")
+    user = create_user(
+        "user-test@example.com", "User Test", "user", hash_password("userpw")
     )
-    return {"admin": admin, "teacher": teacher}
+    return {"admin": admin, "user": user}
 
 
 @pytest.fixture
 def auth(client: TestClient, users: dict[str, object]):  # type: ignore[no-untyped-def]
-    """Trả header Authorization cho role 'admin' | 'teacher'."""
+    """Trả header Authorization cho role 'admin' | 'user'."""
     creds = {
         "admin": ("admin-test@example.com", "adminpw"),
-        "teacher": ("teacher-test@example.com", "teachpw"),
+        "user": ("user-test@example.com", "userpw"),
     }
 
     def headers_for(role: str) -> dict[str, str]:

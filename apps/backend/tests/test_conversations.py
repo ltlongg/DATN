@@ -15,24 +15,24 @@ from app.services.conversation_service import (
 
 
 def test_create_conversation_default_title(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
-    r = client.post("/api/chat/conversations", json={}, headers=auth("teacher"))
+    r = client.post("/api/chat/conversations", json={}, headers=auth("user"))
     assert r.status_code == 201
     assert r.json()["title"] == DEFAULT_TITLE
 
 
 def test_create_conversation_with_title(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
     r = client.post(
-        "/api/chat/conversations", json={"title": "Trương Định"}, headers=auth("teacher")
+        "/api/chat/conversations", json={"title": "Trương Định"}, headers=auth("user")
     )
     assert r.status_code == 201
     assert r.json()["title"] == "Trương Định"
 
 
 def test_list_only_own_conversations(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
-    teacher = auth("teacher")
-    client.post("/api/chat/conversations", json={}, headers=teacher)
-    client.post("/api/chat/conversations", json={}, headers=teacher)
-    r = client.get("/api/chat/conversations", headers=teacher)
+    user = auth("user")
+    client.post("/api/chat/conversations", json={}, headers=user)
+    client.post("/api/chat/conversations", json={}, headers=user)
+    r = client.get("/api/chat/conversations", headers=user)
     assert r.status_code == 200
     assert len(r.json()) == 2
 
@@ -42,10 +42,10 @@ def test_get_conversation_detail_includes_messages(
 ) -> None:
     from app.models import conversation as cr
 
-    cid = client.post("/api/chat/conversations", json={}, headers=auth("teacher")).json()["id"]
+    cid = client.post("/api/chat/conversations", json={}, headers=auth("user")).json()["id"]
     cr.add_message(cid, "user", "Câu hỏi")
     cr.add_message(cid, "assistant", "Trả lời", confidence="cao", citations=[{"chunk_id": "c1"}])
-    r = client.get(f"/api/chat/conversations/{cid}", headers=auth("teacher"))
+    r = client.get(f"/api/chat/conversations/{cid}", headers=auth("user"))
     body = r.json()
     assert len(body["messages"]) == 2
     assert body["messages"][0]["role"] == "user"
@@ -53,40 +53,40 @@ def test_get_conversation_detail_includes_messages(
 
 
 def test_rename_conversation(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
-    teacher = auth("teacher")
-    cid = client.post("/api/chat/conversations", json={}, headers=teacher).json()["id"]
+    user = auth("user")
+    cid = client.post("/api/chat/conversations", json={}, headers=user).json()["id"]
     r = client.patch(
-        f"/api/chat/conversations/{cid}", json={"title": "  Trương Định  "}, headers=teacher
+        f"/api/chat/conversations/{cid}", json={"title": "  Trương Định  "}, headers=user
     )
     assert r.status_code == 200
     assert r.json()["title"] == "Trương Định"  # đã trim
     # Đọc lại xác nhận đã lưu.
-    detail = client.get(f"/api/chat/conversations/{cid}", headers=teacher).json()
+    detail = client.get(f"/api/chat/conversations/{cid}", headers=user).json()
     assert detail["title"] == "Trương Định"
 
 
 def test_rename_rejects_blank_title(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
-    teacher = auth("teacher")
-    cid = client.post("/api/chat/conversations", json={}, headers=teacher).json()["id"]
-    r = client.patch(f"/api/chat/conversations/{cid}", json={"title": "   "}, headers=teacher)
+    user = auth("user")
+    cid = client.post("/api/chat/conversations", json={}, headers=user).json()["id"]
+    r = client.patch(f"/api/chat/conversations/{cid}", json={"title": "   "}, headers=user)
     assert r.status_code == 422
 
 
 def test_delete_conversation_removes_it(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
     from app.models import conversation as cr
 
-    teacher = auth("teacher")
-    cid = client.post("/api/chat/conversations", json={}, headers=teacher).json()["id"]
+    user = auth("user")
+    cid = client.post("/api/chat/conversations", json={}, headers=user).json()["id"]
     cr.add_message(cid, "user", "Câu hỏi")
-    r = client.delete(f"/api/chat/conversations/{cid}", headers=teacher)
+    r = client.delete(f"/api/chat/conversations/{cid}", headers=user)
     assert r.status_code == 204
     # Đã biến mất khỏi danh sách + GET trả 404.
-    assert client.get(f"/api/chat/conversations/{cid}", headers=teacher).status_code == 404
+    assert client.get(f"/api/chat/conversations/{cid}", headers=user).status_code == 404
 
 
 def test_admin_can_delete_others_conversation(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
     # get_owned_conversation cho admin đi qua kể cả khi không sở hữu -> admin xóa được.
-    cid = client.post("/api/chat/conversations", json={}, headers=auth("teacher")).json()["id"]
+    cid = client.post("/api/chat/conversations", json={}, headers=auth("user")).json()["id"]
     r = client.delete(f"/api/chat/conversations/{cid}", headers=auth("admin"))
     assert r.status_code == 204
 

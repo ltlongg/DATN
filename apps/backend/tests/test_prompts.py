@@ -126,7 +126,7 @@ def test_create_then_promote_endpoint_flow(client, auth, db_conn) -> None:  # ty
 
 
 def test_prompts_require_admin(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
-    r = client.get("/api/admin/prompts", headers=auth("teacher"))
+    r = client.get("/api/admin/prompts", headers=auth("user"))
     assert r.status_code == 403
 
 

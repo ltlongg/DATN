@@ -3,7 +3,7 @@ import { Modal } from "@/components/Modal";
 import type { Role } from "@/types";
 import type { UserCreateInput, UserOut, UserUpdateInput } from "@/types/admin";
 
-const ROLES: Role[] = ["teacher", "admin"];
+const ROLES: Role[] = ["user", "admin"];
 
 /**
  * Tạo/sửa user. Sửa: đổi role/khóa/quota. Chặn tự khóa (BE trả 400 self_lock_forbidden) ->
@@ -33,7 +33,7 @@ export function UserFormModal({
 
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const [role, setRole] = useState<Role>("teacher");
+  const [role, setRole] = useState<Role>("user");
   const [password, setPassword] = useState("");
   const [isActive, setIsActive] = useState(true);
   const [quota, setQuota] = useState("");
@@ -42,7 +42,7 @@ export function UserFormModal({
     if (!open) return;
     setEmail(initial?.email ?? "");
     setName(initial?.name ?? "");
-    setRole(initial?.role ?? "teacher");
+    setRole(initial?.role ?? "user");
     setPassword("");
     setIsActive(initial?.is_active ?? true);
     setQuota(initial?.question_quota == null ? "" : String(initial.question_quota));

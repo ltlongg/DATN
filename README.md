@@ -67,7 +67,7 @@ Chức năng chính:
 
 Phạm vi ban đầu:
 
-- Chỉ cần hai role: admin và teacher.
+- Chỉ cần hai role: admin và user.
 - Chưa cần đăng ký tài khoản công khai.
 - Chưa cần quên mật khẩu.
 
@@ -328,7 +328,7 @@ Giai đoạn đầu có thể mock để dựng nhanh luồng chính.
 Mock cần có:
 
 - User admin mẫu.
-- User teacher mẫu.
+- User thường (role `user`) mẫu.
 - Danh sách tài liệu mẫu.
 - Câu trả lời mẫu.
 - Citation mẫu.
@@ -450,7 +450,7 @@ Các chức năng chưa cần làm ở MVP:
 
 ## 19. Luồng Chính Cần Hoàn Thành Trước
 
-Luồng teacher:
+Luồng user (người dùng thường):
 
 - Đăng nhập.
 - Nhập câu hỏi.

@@ -39,7 +39,7 @@ def test_get_config_returns_all_fields(client, auth, db_conn) -> None:  # type: 
 
 
 def test_get_config_requires_admin(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
-    assert client.get("/api/admin/config", headers=auth("teacher")).status_code == 403
+    assert client.get("/api/admin/config", headers=auth("user")).status_code == 403
 
 
 # --- PUT --------------------------------------------------------------------
@@ -95,7 +95,7 @@ def test_put_config_rejects_explicit_null(client, auth, db_conn) -> None:  # typ
 
 
 def test_put_config_requires_admin(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
-    r = client.put("/api/admin/config", json={"rag_top_k": 15}, headers=auth("teacher"))
+    r = client.put("/api/admin/config", json={"rag_top_k": 15}, headers=auth("user"))
     assert r.status_code == 403
 
 

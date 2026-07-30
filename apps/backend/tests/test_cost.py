@@ -122,8 +122,8 @@ def test_cost_by_day_and_by_task_endpoints(client, auth, db_conn) -> None:  # ty
 
 def test_cost_top_users_join(client, auth, db_conn, users) -> None:  # type: ignore[no-untyped-def]
     _ensure_table(db_conn)
-    teacher = users["teacher"]
-    _insert(db_conn, "synthesize", 100, created_at="2020-01-01 10:00", user_id=teacher.id)
+    user = users["user"]
+    _insert(db_conn, "synthesize", 100, created_at="2020-01-01 10:00", user_id=user.id)
     r = client.get(
         "/api/admin/cost/top-users",
         params={"from_date": _FROM, "to_date": _TO},
@@ -131,7 +131,7 @@ def test_cost_top_users_join(client, auth, db_conn, users) -> None:  # type: ign
     )
     assert r.status_code == 200
     top = r.json()
-    assert top[0]["email"] == "teacher-test@example.com"
+    assert top[0]["email"] == "user-test@example.com"
     assert top[0]["total_tokens"] == 100
 
 
@@ -145,4 +145,4 @@ def test_cost_overview_when_table_missing_returns_empty(client, auth, db_conn) -
 
 
 def test_cost_requires_admin(client, auth) -> None:  # type: ignore[no-untyped-def]
-    assert client.get("/api/admin/cost/overview", headers=auth("teacher")).status_code == 403
+    assert client.get("/api/admin/cost/overview", headers=auth("user")).status_code == 403

@@ -29,16 +29,16 @@ def test_verify_password_bad_hash_returns_false() -> None:
 
 
 def test_create_and_decode_token_roundtrip() -> None:
-    token = create_access_token(user_id="u1", role="teacher")
+    token = create_access_token(user_id="u1", role="user")
     payload = decode_access_token(token)
     assert payload["sub"] == "u1"
-    assert payload["role"] == "teacher"
+    assert payload["role"] == "user"
 
 
 def test_decode_expired_token_raises() -> None:
     settings = get_settings()
     expired = jwt.encode(
-        {"sub": "u1", "role": "teacher", "exp": datetime.now(tz=timezone.utc) - timedelta(minutes=1)},
+        {"sub": "u1", "role": "user", "exp": datetime.now(tz=timezone.utc) - timedelta(minutes=1)},
         settings.backend_secret_key,
         algorithm=settings.jwt_algorithm,
     )

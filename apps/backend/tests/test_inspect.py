@@ -189,5 +189,5 @@ def test_entity_detail_proxy(client, auth, monkeypatch) -> None:  # type: ignore
 
 def test_kb_requires_admin(client, auth) -> None:  # type: ignore[no-untyped-def]
     for path in ("/api/admin/kb/chunks", "/api/admin/kb/events", "/api/admin/kb/entities"):
-        r = client.get(path, headers=auth("teacher"))
+        r = client.get(path, headers=auth("user"))
         assert r.status_code == 403, path

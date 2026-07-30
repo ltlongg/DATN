@@ -85,6 +85,19 @@ cùng máy" — giả định đó vỡ ngay khi `--host 0.0.0.0` hoặc deploy.
 > map port backend. Shared secret ở trên là lớp thứ 2 (defense in depth), KHÔNG thay thế việc
 > cô lập mạng.
 
+### Role: `admin` | `user` (đổi tên từ `teacher`, 2026-07-30)
+Hệ thống có đúng **2 role**: `admin` và `user`. Role người dùng thường trước đây tên
+`teacher`, đã đổi thành `user` toàn hệ thống (`Role` literal ở BE + FE, seed, 18 file test,
++ `UPDATE users SET role='user' WHERE role='teacher'` idempotent trong `SCHEMA_STATEMENTS`).
+Chi tiết + lý do: `docs/plan/auth-landing-plan.md` §0.
+- **Các plan doc CŨ vẫn viết "teacher"** (`backend-plan.md`, `frontend-plan.md`,
+  `citation-viewer-plan.md`, `backend-additions-plan.md`, `system-config-plan.md`) — giữ
+  nguyên làm bản ghi lịch sử, đọc là role `user` hiện nay. (`README.md` +
+  `docs/design/frontend-scope.md` đã đổi vì là doc scope đang sống.)
+- **Email seed `teacher@example.com` CỐ Ý giữ nguyên** (chỉ cột `role` mới có ý nghĩa với
+  phân quyền; đổi email = sinh tài khoản demo thứ hai và làm mồ côi hội thoại dev đang gắn
+  với tài khoản cũ).
+
 ### Hạ tầng đã chạy sẵn (KHÔNG cần docker compose up)
 Neo4j + Qdrant + Redis + Postgres **đã cài và chạy sẵn trên remote dev server** qua Docker. URL + credentials đã có trong **root `.env`**. **KHÔNG cần** cài đặt, tải, hay `docker compose up` gì nữa — cứ đọc config từ `.env` mà dùng. Hai bẫy đã xử lý sẵn:
 - **Qdrant**: remote chạy HTTP thuần nhưng có API key → client mặc định `https=True` và vỡ SSL. Đã ép `https=False` trong `app/core/qdrant.py`. Point id = `uuid5(NS, chunk_id)`.
@@ -389,7 +402,7 @@ không cần agent chạy. `test_inspect.py` cần bảng `rag_chunks`/`timeline
 $env:PYTHONIOENCODING="utf-8"
 cd apps/backend
 .\venv\Scripts\python.exe scripts/init_db.py        # CREATE TABLE IF NOT EXISTS 4 bảng (idempotent)
-.\venv\Scripts\python.exe scripts/seed_users.py     # admin@example.com/admin123, teacher@example.com/teacher123 (dev)
+.\venv\Scripts\python.exe scripts/seed_users.py     # admin@example.com/admin123, teacher@example.com/teacher123 (dev; role của tk thứ 2 là `user`, email giữ tên cũ — xem auth-landing-plan.md §0)
 .\venv\Scripts\python.exe -m uvicorn app.main:app --port 8000   # chạy server
 .\venv\Scripts\python.exe -m pytest tests                       # 116 test
 ```
@@ -460,7 +473,7 @@ Giá trị **thực tế** trong code (đừng tin mù `.env.example`, có chỗ
 - `lichsu.clean.md` — corpus chính đã preprocess (~3.1MB, 7.623 dòng; 3 h1, 33 h2, 75 h3, 106 h4...). `lichsu.md` là bản gốc. Không index lại nhiều lần (tốn API cost).
 - `dataset/chunks_llm.json` — 1213 chunk (`source_file=lichsu.clean.md`, có `start_line`/`end_line`).
 - `dataset/*.json|*.md` — cache + review của các pipeline: `graph_extractions.json`, `alias_map.json`/`alias_review.md`, `timeline_units.json`, `timeline_extractions.json`, `gazetteer.json`/`gazetteer_review.md`, `entities_by_type.md`.
-- `README.md` — đặc tả chức năng đầy đủ (admin, teacher, RAG, GraphRAG, hybrid, map, timeline, MVP scope). Nguồn truth cho scope.
-- `docs/plan/` — plan đã duyệt: `chunking-embedding-plan.md` (lý do gỡ LightRAG + DIY pipeline), `llm-chunking-plan.md`, `timeline-map-plan.md` (source-of-truth timeline/map), `lichsu-headings.md`, `backend-plan.md` (kiến trúc backend gốc), `frontend-plan.md` (kế hoạch frontend đầy đủ 2 role), `backend-additions-plan.md` (Module 4 build ngay + KB Inspector + debug streaming), `admin-restructure-plan.md` (nav dọc + token theo hội thoại + quản lý Prompt — **đã code xong cả 3**, xem `### Admin nâng cao` ở trên), `system-config-plan.md` (Cấu hình hệ thống — retrieval mode + tinh chỉnh, tách riêng vì rủi ro cao, CHƯA code), `citation-viewer-plan.md` (xem nguồn: hover ra trích đoạn + click ra toàn văn, gộp citation theo mục — **đã code xong cả 3 pha**, xem `### Xem nguồn` ở trên), `map-first-layout-plan.md` (map nền + chat nổi + toggle split + trình chiếu sự kiện — **đã code xong cả 4 phase**, xem `### Frontend layout` ở trên; còn nợ user 1 việc trên Cloud Console: ẩn road ở MỌI zoom).
+- `README.md` — đặc tả chức năng đầy đủ (admin, user, RAG, GraphRAG, hybrid, map, timeline, MVP scope). Nguồn truth cho scope.
+- `docs/plan/` — plan đã duyệt: `chunking-embedding-plan.md` (lý do gỡ LightRAG + DIY pipeline), `llm-chunking-plan.md`, `timeline-map-plan.md` (source-of-truth timeline/map), `lichsu-headings.md`, `backend-plan.md` (kiến trúc backend gốc), `frontend-plan.md` (kế hoạch frontend đầy đủ 2 role), `backend-additions-plan.md` (Module 4 build ngay + KB Inspector + debug streaming), `admin-restructure-plan.md` (nav dọc + token theo hội thoại + quản lý Prompt — **đã code xong cả 3**, xem `### Admin nâng cao` ở trên), `system-config-plan.md` (Cấu hình hệ thống — retrieval mode + tinh chỉnh, tách riêng vì rủi ro cao, CHƯA code), `citation-viewer-plan.md` (xem nguồn: hover ra trích đoạn + click ra toàn văn, gộp citation theo mục — **đã code xong cả 3 pha**, xem `### Xem nguồn` ở trên), `map-first-layout-plan.md` (map nền + chat nổi + toggle split + trình chiếu sự kiện — **đã code xong cả 4 phase**, xem `### Frontend layout` ở trên; còn nợ user 1 việc trên Cloud Console: ẩn road ở MỌI zoom), `auth-landing-plan.md` (đăng ký công khai + landing page + đăng nhập Google — **CHƯA code**, trừ §0 rename role đã xong; xem `### Role` dưới).
 - `docs/reference/google-maps-api.md` — tham chiếu Google Geocoding/Maps + ToS caching.
 - `docs/design/frontend-scope.md`, `docs/brainstorming/` — scope frontend + session notes kiến trúc.

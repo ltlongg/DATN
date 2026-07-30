@@ -8,7 +8,7 @@ from __future__ import annotations
 from app.models.conversation import add_message, create_conversation
 from app.services.quality_service import compute_quality_summary
 
-_TEACHER_EMAIL = "teacher-test@example.com"
+_USER_EMAIL = "user-test@example.com"
 
 
 # --- pure compute_quality_summary ------------------------------------------
@@ -84,27 +84,27 @@ def test_quality_summary_ttft_ignores_unmeasured_rows() -> None:
 
 
 def test_list_conversations_admin_filter_by_email(client, auth, db_conn, users) -> None:  # type: ignore[no-untyped-def]
-    teacher = users["teacher"]
-    conv = create_conversation(teacher.id, "Cuộc trò chuyện test")
+    user = users["user"]
+    conv = create_conversation(user.id, "Cuộc trò chuyện test")
     add_message(conv.id, "user", "câu hỏi")
     add_message(conv.id, "assistant", "trả lời", retrieval_mode="hybrid")
     r = client.get(
         "/api/admin/logs/conversations",
-        params={"user_email": _TEACHER_EMAIL},
+        params={"user_email": _USER_EMAIL},
         headers=auth("admin"),
     )
     assert r.status_code == 200
     body = r.json()
-    assert body["total"] == 1  # chỉ conversation của teacher test (lọc email tất định)
+    assert body["total"] == 1  # chỉ conversation của user test (lọc email tất định)
     item = body["items"][0]
-    assert item["user_email"] == _TEACHER_EMAIL
-    assert item["user_name"] == "Teacher Test"
+    assert item["user_email"] == _USER_EMAIL
+    assert item["user_name"] == "User Test"
     assert item["message_count"] == 2
 
 
 def test_conversation_detail_admin_with_quality_flags(client, auth, db_conn, users) -> None:  # type: ignore[no-untyped-def]
-    teacher = users["teacher"]
-    conv = create_conversation(teacher.id, "t")
+    user = users["user"]
+    conv = create_conversation(user.id, "t")
     add_message(conv.id, "user", "câu hỏi")
     add_message(
         conv.id,
@@ -117,7 +117,7 @@ def test_conversation_detail_admin_with_quality_flags(client, auth, db_conn, use
     r = client.get(f"/api/admin/logs/conversations/{conv.id}", headers=auth("admin"))
     assert r.status_code == 200
     body = r.json()
-    assert body["user_email"] == _TEACHER_EMAIL
+    assert body["user_email"] == _USER_EMAIL
     user_msg, asst_msg = body["messages"]
     assert user_msg["quality"]["retrieval_attempted"] is False  # user message -> False
     # assistant hybrid + citations rỗng -> no_citation + low_confidence.
@@ -137,7 +137,7 @@ def test_conversation_detail_admin_404(client, auth) -> None:  # type: ignore[no
 def test_quality_summary_endpoint_delta(client, auth, db_conn, users) -> None:  # type: ignore[no-untyped-def]
     # Delta để tất định dù DB có sẵn assistant message thật.
     before = client.get("/api/admin/logs/quality-summary", headers=auth("admin")).json()
-    conv = create_conversation(users["teacher"].id, "t")
+    conv = create_conversation(users["user"].id, "t")
     add_message(conv.id, "assistant", "a", retrieval_mode="hybrid", citations=[{"c": 1}], confidence="cao")
     add_message(conv.id, "assistant", "b", retrieval_mode="hybrid", citations=[], confidence="thấp")
     add_message(conv.id, "assistant", "c", retrieval_mode="none", citations=[])  # không tính no_citation
@@ -150,5 +150,5 @@ def test_quality_summary_endpoint_delta(client, auth, db_conn, users) -> None:  
 
 def test_logs_require_admin(client, auth) -> None:  # type: ignore[no-untyped-def]
     for path in ("/api/admin/logs/conversations", "/api/admin/logs/quality-summary"):
-        r = client.get(path, headers=auth("teacher"))
+        r = client.get(path, headers=auth("user"))
         assert r.status_code == 403, path

@@ -17,7 +17,7 @@ from app.models.document import Document
 from app.schemas.common import OkResponse
 from app.schemas.document import DocumentCreate, DocumentOut, DocumentUpdate, KbSourceOut
 
-# require_admin áp cho toàn router -> teacher gọi bất kỳ route nào đều nhận 403.
+# require_admin áp cho toàn router -> user thường gọi bất kỳ route nào đều nhận 403.
 router = APIRouter(dependencies=[Depends(require_admin)])
 
 

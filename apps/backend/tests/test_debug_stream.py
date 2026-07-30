@@ -1,4 +1,4 @@
-"""Gác debug server-side: chỉ admin được bật debug; user (teacher) bị ép debug=False.
+"""Gác debug server-side: chỉ admin được bật debug; user (user) bị ép debug=False.
 
 Kiểm qua payload backend gửi sang agent (mock_agent.captured) — event `debug` chỉ do
 agent phát khi request.debug=True, nên ép cờ ở backend là đủ.
@@ -17,14 +17,14 @@ def _new_conversation(client: TestClient, headers: dict[str, str]) -> str:
     return client.post("/api/chat/conversations", json={}, headers=headers).json()["id"]
 
 
-def test_debug_forced_false_for_teacher(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
-    teacher = auth("teacher")
-    cid = _new_conversation(client, teacher)
+def test_debug_forced_false_for_user(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
+    user = auth("user")
+    cid = _new_conversation(client, user)
     mock_agent.configure(events=format_sse("token", {"text": "x"}) + _DONE)
     client.post(
         f"/api/chat/conversations/{cid}/ask",
         json={"question": "q", "debug": True},
-        headers=teacher,
+        headers=user,
     )
     assert mock_agent.captured["payload"]["debug"] is False
 

@@ -1,7 +1,7 @@
 """API test xem nguồn trong chat: GET /api/chat/sources/{chunk_id}.
 
 Postgres thật, cô lập bằng txn rollback (fixture `db_conn`). Khác `/api/admin/kb/*`: route
-này CHỈ cần đăng nhập — teacher phải gọi được. Xem docs/plan/citation-viewer-plan.md §4.
+này CHỈ cần đăng nhập — user phải gọi được. Xem docs/plan/citation-viewer-plan.md §4.
 """
 
 from __future__ import annotations
@@ -34,9 +34,9 @@ def _insert_chunk(conn: psycopg.Connection, chunk_id: str) -> None:
         )
 
 
-def test_teacher_reads_source_full_text(client: TestClient, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
+def test_user_reads_source_full_text(client: TestClient, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     _insert_chunk(db_conn, "zz-src-1")
-    r = client.get("/api/chat/sources/zz-src-1", headers=auth("teacher"))
+    r = client.get("/api/chat/sources/zz-src-1", headers=auth("user"))
     assert r.status_code == 200
     body = r.json()
     assert body["chunk_id"] == "zz-src-1"
@@ -56,7 +56,7 @@ def test_admin_reads_source_too(client: TestClient, auth, db_conn) -> None:  # t
 
 
 def test_unknown_chunk_returns_404(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
-    r = client.get("/api/chat/sources/khong-ton-tai", headers=auth("teacher"))
+    r = client.get("/api/chat/sources/khong-ton-tai", headers=auth("user"))
     assert r.status_code == 404
     assert r.json()["code"] == "not_found"
 
@@ -66,9 +66,9 @@ def test_requires_auth(client: TestClient) -> None:
 
 
 def test_kb_inspector_still_admin_only(client: TestClient, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
-    """Mở đường xem nguồn cho teacher KHÔNG được nới lỏng router admin."""
+    """Mở đường xem nguồn cho user KHÔNG được nới lỏng router admin."""
     _insert_chunk(db_conn, "zz-src-guard")
     assert (
-        client.get("/api/admin/kb/chunks/zz-src-guard", headers=auth("teacher")).status_code
+        client.get("/api/admin/kb/chunks/zz-src-guard", headers=auth("user")).status_code
         == 403
     )

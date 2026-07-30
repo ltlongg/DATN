@@ -38,7 +38,7 @@ describe("AppSidebar", () => {
   });
 
   it("non-admin chỉ thấy Hỏi đáp, không có nhóm/mục quản trị", () => {
-    renderSidebar("teacher");
+    renderSidebar("user");
     expect(screen.getByRole("link", { name: "Hỏi đáp" })).toBeInTheDocument();
     expect(screen.queryByText("QUẢN TRỊ")).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Chi phí" })).not.toBeInTheDocument();

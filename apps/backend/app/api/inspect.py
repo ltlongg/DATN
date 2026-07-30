@@ -23,7 +23,7 @@ from app.schemas.inspect import (
 )
 from app.services.agent_client import agent_get
 
-# require_admin áp cho toàn router -> teacher gọi bất kỳ route nào đều nhận 403.
+# require_admin áp cho toàn router -> user thường gọi bất kỳ route nào đều nhận 403.
 router = APIRouter(dependencies=[Depends(require_admin)])
 
 

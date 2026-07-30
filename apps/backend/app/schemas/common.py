@@ -6,7 +6,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-Role = Literal["admin", "teacher"]
+Role = Literal["admin", "user"]
 
 
 class ErrorResponse(BaseModel):

@@ -159,5 +159,5 @@ def test_conversation_tokens_endpoint_breakdown_by_task(client, auth, db_conn) -
 
 
 def test_token_summary_requires_admin(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
-    r = client.get("/api/admin/logs/token-summary", headers=auth("teacher"))
+    r = client.get("/api/admin/logs/token-summary", headers=auth("user"))
     assert r.status_code == 403

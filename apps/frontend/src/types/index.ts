@@ -6,7 +6,7 @@
  * (logs/users/cost) khai báo ở phase tương ứng để giữ file tập trung.
  */
 
-export type Role = "admin" | "teacher";
+export type Role = "admin" | "user";
 
 export type AnswerConfidence = "cao" | "vừa" | "thấp" | "không đủ dữ liệu";
 

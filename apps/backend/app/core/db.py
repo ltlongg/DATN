@@ -54,6 +54,12 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
     # §3.2: dùng ADD COLUMN thay vì drop+recreate để giữ dev data đã có).
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS question_quota INTEGER;",
+    # Backfill MỘT LẦN: role 'teacher' đổi tên thành 'user' (2026-07-30, xem
+    # auth-landing-plan.md §0). Đây là DML giữa danh sách DDL — cố ý: `Role` giờ là
+    # Literal["admin","user"] nên row cũ còn 'teacher' sẽ làm Pydantic ném ValidationError
+    # ngay khi đọc (`/admin/users` 500, login của chính user đó 500). Idempotent, no-op từ
+    # lần chạy thứ hai; xoá được sau khi mọi DB dev đã chạy init_db.py.
+    "UPDATE users SET role = 'user' WHERE role = 'teacher';",
     """
     CREATE TABLE IF NOT EXISTS conversations (
         id         UUID PRIMARY KEY,

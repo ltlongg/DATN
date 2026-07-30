@@ -79,9 +79,9 @@ def test_source_file_immutable_qua_patch(client: TestClient, auth) -> None:  # t
 
 
 def test_documents_requires_admin(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
-    teacher = auth("teacher")
-    assert client.get("/api/admin/documents", headers=teacher).status_code == 403
-    assert client.get("/api/admin/documents/sources", headers=teacher).status_code == 403
+    user = auth("user")
+    assert client.get("/api/admin/documents", headers=user).status_code == 403
+    assert client.get("/api/admin/documents/sources", headers=user).status_code == 403
 
 
 # --- nối kho thật (cần rag_chunks đã index; DB trống -> skip) ---

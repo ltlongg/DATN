@@ -54,9 +54,9 @@ def test_success_request_logged_ok(client, auth, db_conn) -> None:  # type: igno
 
 
 def test_handled_error_logs_error_code(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
-    # teacher gọi endpoint admin -> 403 forbidden (AppError handled). Middleware đọc
+    # user gọi endpoint admin -> 403 forbidden (AppError handled). Middleware đọc
     # error_code do handler set lên request.state.
-    r = client.get("/api/admin/cost/overview", headers=auth("teacher"))
+    r = client.get("/api/admin/cost/overview", headers=auth("user"))
     assert r.status_code == 403
     rows = _rows_for_path(db_conn, "/api/admin/cost/overview")
     assert len(rows) == 1
@@ -109,7 +109,7 @@ def test_user_id_null_without_token(client, db_conn) -> None:  # type: ignore[no
 
 
 def test_list_activity_requires_admin(client, auth) -> None:  # type: ignore[no-untyped-def]
-    assert client.get("/api/admin/activity", headers=auth("teacher")).status_code == 403
+    assert client.get("/api/admin/activity", headers=auth("user")).status_code == 403
 
 
 def test_list_activity_filter_severity(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]

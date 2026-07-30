@@ -20,18 +20,18 @@ Xác thực & Phân quyền  (nền tảng)
     └─ 4. Quản trị & Vận hành (sau)   
 ```
 
-## ⚠️ Nguyên tắc bắt buộc: tách biệt Admin và Teacher
+## ⚠️ Nguyên tắc bắt buộc: tách biệt Admin và User
 
-Giao diện admin và giao diện teacher **phải tách biệt rõ ràng**, không trộn lẫn:
+Giao diện admin và giao diện user **phải tách biệt rõ ràng**, không trộn lẫn:
 
-- **Khu vực / route riêng**: teacher và admin vào hai vùng khác nhau (ví dụ `/` cho hỏi đáp, `/admin/*` cho quản trị). Không nhét chức năng admin chung trang với hỏi đáp.
-- **Điều hướng riêng**: teacher KHÔNG nhìn thấy menu/nút dẫn tới khu admin (Quản lý tài liệu, Quản trị & Vận hành).
-- **Gác cổng theo role**: route admin chặn cứng ở cả frontend lẫn backend — teacher truy cập thẳng URL admin vẫn bị từ chối.
-- **Admin là vai cộng thêm, không phải trang gộp**: admin dùng được trang Hỏi đáp *như một teacher*, nhưng đó là vào đúng khu teacher; còn chức năng quản trị nằm ở khu admin tách riêng. Hai khu không hiển thị đồng thời trên cùng một màn hình.
+- **Khu vực / route riêng**: user và admin vào hai vùng khác nhau (ví dụ `/` cho hỏi đáp, `/admin/*` cho quản trị). Không nhét chức năng admin chung trang với hỏi đáp.
+- **Điều hướng riêng**: user KHÔNG nhìn thấy menu/nút dẫn tới khu admin (Quản lý tài liệu, Quản trị & Vận hành).
+- **Gác cổng theo role**: route admin chặn cứng ở cả frontend lẫn backend — user truy cập thẳng URL admin vẫn bị từ chối.
+- **Admin là vai cộng thêm, không phải trang gộp**: admin dùng được trang Hỏi đáp *như một user*, nhưng đó là vào đúng khu user; còn chức năng quản trị nằm ở khu admin tách riêng. Hai khu không hiển thị đồng thời trên cùng một màn hình.
 
 ## Module chung — Xác thực & Phân quyền
 
-Đăng nhập/đăng xuất, xác định role, chặn teacher vào khu admin, admin dùng được cả 2 vai. 2 role: `admin`, `teacher`. Chưa cần đăng ký công khai / quên mật khẩu.
+Đăng nhập/đăng xuất, xác định role, chặn user thường vào khu admin, admin dùng được cả 2 vai. 2 role: `admin`, `user`. Chưa cần đăng ký công khai / quên mật khẩu.
 → **Trang Đăng nhập** + logic gác cổng.
 
 ## GIÁO VIÊN
@@ -64,7 +64,7 @@ Một khu "Admin nâng cao", nhiều tab
 ## 3 trang cần vẽ cho MVP
 
 1. **Đăng nhập** (chung)
-2. **Hỏi đáp** (teacher + admin) — chat + map + timeline + citation + confidence
+2. **Hỏi đáp** (user + admin) — chat + map + timeline + citation + confidence
 3. **Quản lý tài liệu** (admin) — list + thêm/xóa + trạng thái
 
 Admin nâng cao (Module 4) chỉ cần 1 dòng "Sắp ra mắt" trong menu.
