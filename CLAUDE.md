@@ -87,16 +87,16 @@ cùng máy" — giả định đó vỡ ngay khi `--host 0.0.0.0` hoặc deploy.
 
 ### Role: `admin` | `user` (đổi tên từ `teacher`, 2026-07-30)
 Hệ thống có đúng **2 role**: `admin` và `user`. Role người dùng thường trước đây tên
-`teacher`, đã đổi thành `user` toàn hệ thống (`Role` literal ở BE + FE, seed, 18 file test,
-+ `UPDATE users SET role='user' WHERE role='teacher'` idempotent trong `SCHEMA_STATEMENTS`).
+`teacher`, đã đổi thành `user` toàn hệ thống (`Role` literal ở BE + FE, seed, 18 file test).
 Chi tiết + lý do: `docs/plan/auth-landing-plan.md` §0.
+- **KHÔNG có migration/backfill nào trong code** — thay vì `UPDATE role`, đã **xoá thẳng tài
+  khoản demo cũ** `teacher@example.com` (kéo theo 13 hội thoại/50 message/220 activity của
+  riêng nó, quyết định user 2026-07-30 vì dev data tạo lại được) rồi seed lại
+  `user@example.com`. Dữ liệu của `admin@example.com` giữ nguyên.
 - **Các plan doc CŨ vẫn viết "teacher"** (`backend-plan.md`, `frontend-plan.md`,
   `citation-viewer-plan.md`, `backend-additions-plan.md`, `system-config-plan.md`) — giữ
   nguyên làm bản ghi lịch sử, đọc là role `user` hiện nay. (`README.md` +
   `docs/design/frontend-scope.md` đã đổi vì là doc scope đang sống.)
-- **Email seed `teacher@example.com` CỐ Ý giữ nguyên** (chỉ cột `role` mới có ý nghĩa với
-  phân quyền; đổi email = sinh tài khoản demo thứ hai và làm mồ côi hội thoại dev đang gắn
-  với tài khoản cũ).
 
 ### Hạ tầng đã chạy sẵn (KHÔNG cần docker compose up)
 Neo4j + Qdrant + Redis + Postgres **đã cài và chạy sẵn trên remote dev server** qua Docker. URL + credentials đã có trong **root `.env`**. **KHÔNG cần** cài đặt, tải, hay `docker compose up` gì nữa — cứ đọc config từ `.env` mà dùng. Hai bẫy đã xử lý sẵn:
@@ -402,7 +402,7 @@ không cần agent chạy. `test_inspect.py` cần bảng `rag_chunks`/`timeline
 $env:PYTHONIOENCODING="utf-8"
 cd apps/backend
 .\venv\Scripts\python.exe scripts/init_db.py        # CREATE TABLE IF NOT EXISTS 4 bảng (idempotent)
-.\venv\Scripts\python.exe scripts/seed_users.py     # admin@example.com/admin123, teacher@example.com/teacher123 (dev; role của tk thứ 2 là `user`, email giữ tên cũ — xem auth-landing-plan.md §0)
+.\venv\Scripts\python.exe scripts/seed_users.py     # admin@example.com/admin123, user@example.com/user123 (dev)
 .\venv\Scripts\python.exe -m uvicorn app.main:app --port 8000   # chạy server
 .\venv\Scripts\python.exe -m pytest tests                       # 116 test
 ```

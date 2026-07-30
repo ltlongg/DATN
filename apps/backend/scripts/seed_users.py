@@ -1,8 +1,4 @@
-"""Seed 2 user demo cho dev: admin@example.com / teacher@example.com.
-
-Email `teacher@example.com` giữ nguyên dù role đã đổi `teacher` -> `user` (2026-07-30):
-đổi email = sinh thêm một tài khoản demo thứ hai, còn hội thoại/message dev đang gắn với
-tài khoản cũ thì mồ côi. Chỉ giá trị `role` trong DB là thứ có ý nghĩa với phân quyền.
+"""Seed 2 user demo cho dev: admin@example.com / user@example.com.
 
 Idempotent: bỏ qua user đã tồn tại. CHỈ dùng cho dev/demo — production phải tạo user
 qua flow thật, không hardcode mật khẩu.
@@ -23,7 +19,7 @@ from app.schemas.common import Role  # noqa: E402
 
 _SEED_USERS: list[tuple[str, str, Role, str]] = [
     ("admin@example.com", "Admin Demo", "admin", "admin123"),
-    ("teacher@example.com", "User Demo", "user", "teacher123"),
+    ("user@example.com", "User Demo", "user", "user123"),
 ]
 
 

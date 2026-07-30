@@ -24,7 +24,7 @@ export function LogsFilterBar({ onApply }: { onApply: (v: LogsFilterValue) => vo
         <input
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="teacher@example.com"
+          placeholder="user@example.com"
           className="rounded-md border border-paper-border px-2 py-1.5 outline-none focus:border-brand"
         />
       </label>
