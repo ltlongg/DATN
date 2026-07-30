@@ -25,6 +25,7 @@ import httpx
 from pydantic import BaseModel, ConfigDict
 
 from app.core.config import get_settings
+from app.core.internal_auth import internal_headers
 
 logger = logging.getLogger("agent.runtime_config")
 
@@ -69,11 +70,18 @@ def clear_cache() -> None:
 
 def _fetch() -> RuntimeConfig:
     """GET /internal/config từ backend. Lỗi mạng/status != 200/parse lỗi -> RuntimeConfig()
-    mặc định (nuốt lỗi, để answer flow không vỡ khi backend chưa lên)."""
+    mặc định (nuốt lỗi, để answer flow không vỡ khi backend chưa lên).
+
+    Gửi kèm `X-Internal-Key` — endpoint này của backend đã gác auth nội bộ. Key sai/thiếu ->
+    401 -> `raise_for_status` -> rơi vào nhánh fallback mặc định như backend down (đúng tinh
+    thần honest fallback, nhưng log WARNING nêu tên lỗi để phân biệt khi debug).
+    """
     settings = get_settings()
     url = f"{settings.backend_base_url.rstrip('/')}/internal/config"
     try:
-        with httpx.Client(timeout=_HTTP_TIMEOUT_SECONDS) as client:
+        with httpx.Client(
+            timeout=_HTTP_TIMEOUT_SECONDS, headers=internal_headers()
+        ) as client:
             resp = client.get(url)
         resp.raise_for_status()
         return RuntimeConfig.model_validate(resp.json())

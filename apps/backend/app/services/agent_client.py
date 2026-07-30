@@ -24,6 +24,7 @@ from pydantic import BaseModel, Field
 
 from app.core.config import get_settings
 from app.core.errors import AppError
+from app.core.internal_auth import internal_headers
 
 logger = logging.getLogger("backend.agent_client")
 
@@ -135,7 +136,7 @@ async def agent_get(
     # Bỏ param None để agent nhận đúng "không lọc" thay vì chuỗi rỗng.
     clean = {k: v for k, v in (params or {}).items() if v is not None}
     async with httpx.AsyncClient(
-        timeout=timeout, base_url=settings.agent_service_url
+        timeout=timeout, base_url=settings.agent_service_url, headers=internal_headers()
     ) as client:
         try:
             response = await client.get(path, params=clean)
@@ -164,7 +165,10 @@ async def open_ask_stream(request: AgentAskRequest) -> AgentStream:
         write=settings.agent_connect_timeout_seconds,
         pool=settings.agent_connect_timeout_seconds,
     )
-    client = httpx.AsyncClient(timeout=timeout, base_url=settings.agent_service_url)
+    # headers ở CLIENT (không ở build_request) -> áp cho mọi request kể cả redirect/retry.
+    client = httpx.AsyncClient(
+        timeout=timeout, base_url=settings.agent_service_url, headers=internal_headers()
+    )
     req = client.build_request("POST", "/ask", json=request.model_dump())
 
     try:

@@ -1,9 +1,12 @@
 """Cấu hình hệ thống: GET/PUT /api/admin/config (require_admin) + GET /internal/config
-(không auth). Validate range + ràng buộc chéo rerank_top_k <= hybrid_candidate_k (schema +
-DB CHECK). Xem docs/plan/system-config-plan.md.
+(không JWT — xác thực bằng shared secret X-Internal-Key). Validate range + ràng buộc chéo
+rerank_top_k <= hybrid_candidate_k (schema + DB CHECK). Xem docs/plan/system-config-plan.md.
 """
 
 from __future__ import annotations
+
+from app.core.config import get_settings
+from app.core.internal_auth import INTERNAL_KEY_HEADER
 
 _ALL_FIELDS = {
     "rag_top_k",
@@ -96,16 +99,39 @@ def test_put_config_requires_admin(client, auth, db_conn) -> None:  # type: igno
     assert r.status_code == 403
 
 
-# --- internal (agent-service gọi, không auth) -------------------------------
+# --- internal (agent-service gọi: KHÔNG JWT, xác thực bằng X-Internal-Key) ---------------
 
 
-def test_internal_config_no_auth_required(client, db_conn) -> None:  # type: ignore[no-untyped-def]
-    r = client.get("/internal/config")  # KHÔNG gửi Authorization
+def _internal() -> dict[str, str]:
+    """Header shared secret mà agent-service gửi (core/internal_auth.py)."""
+    return {INTERNAL_KEY_HEADER: get_settings().internal_api_key}
+
+
+def test_internal_config_accepts_internal_key(client, db_conn) -> None:  # type: ignore[no-untyped-def]
+    r = client.get("/internal/config", headers=_internal())  # KHÔNG gửi Authorization
     assert r.status_code == 200
     assert set(r.json()) == _ALL_FIELDS
+
+
+def test_internal_config_401_without_key(client, db_conn) -> None:  # type: ignore[no-untyped-def]
+    r = client.get("/internal/config")
+    assert r.status_code == 401
+    assert r.json()["code"] == "unauthenticated"
+
+
+def test_internal_config_401_with_wrong_key(client, db_conn) -> None:  # type: ignore[no-untyped-def]
+    r = client.get("/internal/config", headers={INTERNAL_KEY_HEADER: "sai-key"})
+    assert r.status_code == 401
+
+
+def test_internal_config_rejects_user_jwt(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
+    """JWT admin KHÔNG mở được endpoint nội bộ — 2 loại credential khác nhau, không thay thế
+    nhau (xem core/internal_auth.py)."""
+    r = client.get("/internal/config", headers=auth("admin"))
+    assert r.status_code == 401
 
 
 def test_internal_config_reflects_admin_update(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     client.put("/api/admin/config", json={"graph_top_k": 7}, headers=auth("admin"))
     # agent-service đọc cùng nguồn -> thấy giá trị admin vừa đặt.
-    assert client.get("/internal/config").json()["graph_top_k"] == 7
+    assert client.get("/internal/config", headers=_internal()).json()["graph_top_k"] == 7
