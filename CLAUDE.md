@@ -53,19 +53,37 @@ Agent-service (FastAPI + LangGraph, :9000)  ← orchestrate RAG + GraphRAG + hyb
 
 **Nguyên tắc quan trọng**: backend KHÔNG trực tiếp là agent. Backend chỉ là API gateway gọi sang `agent-service` qua HTTP client (`apps/backend/app/services/agent_client.py`). Mọi logic LLM/retrieval nằm trong `agent-service`.
 
-> **⚠️ TODO trước khi deploy thật (chưa làm) — chưa có auth giữa 2 service**: cả 2 chiều gọi
-> HTTP nội bộ hiện **KHÔNG có auth** (không JWT, không API key, không shared secret) —
-> `backend → agent-service` (`agent_client.py` gọi `POST /ask`) VÀ `agent-service → backend`
-> (`core/runtime_config.py` gọi `GET /internal/config`, xem `system-config-plan.md`) đều dựa
-> hoàn toàn vào giả định "2 service chạy cùng máy/cùng mạng riêng tư" — hiện đúng vì đang chạy
-> local (`localhost:8000` ↔ `localhost:9000`). Giả định này **SẼ VỠ ngay khi deploy ra khỏi
-> localhost** (lên server thật, expose port ra ngoài, tách host, hay cho người ngoài test/dùng
-> thử) — ai gọi được port đó cũng đọc/kích hoạt được các endpoint nội bộ này (kể cả `/ask` lẫn
-> `/internal/config`). **TRƯỚC KHI deploy ra ngoài máy dev** (kể cả chỉ để demo/cho người
-> ngoài test), cần thêm 1 lớp bảo vệ tối thiểu — ví dụ shared-secret header (`X-Internal-Key`
-> so khớp giá trị trong `.env`) cho mọi route nội bộ, hoặc cô lập mạng (docker network riêng,
-> không map port service nội bộ ra ngoài host/internet). **CHƯA làm** — ghi chú lại để không
-> quên khi tới lúc deploy, đừng để lộ khi đã public.
+### Auth nội bộ giữa 2 service — shared secret `X-Internal-Key` (xong 2026-07-30)
+Cả 2 chiều gọi HTTP nội bộ **đã có auth**, dùng shared secret `INTERNAL_API_KEY` (root `.env`)
+qua header `X-Internal-Key`. Trước đây cả 2 chiều đều trần, chỉ dựa vào giả định "2 service
+cùng máy" — giả định đó vỡ ngay khi `--host 0.0.0.0` hoặc deploy.
+
+- **Module đối xứng, 2 file cùng tên khác vai**: `agent-service/app/core/internal_auth.py` gác
+  `/ask` + `/kb/*` và **gửi** key khi `runtime_config.py` gọi `GET /internal/config`;
+  `backend/app/core/internal_auth.py` gác `/internal/*` và **gửi** key từ `agent_client.py`.
+  Mỗi file có `verify_internal_key` (dependency) + `internal_headers()` (bên gửi).
+- **Dùng `APIKeyHeader`** (không tự đọc `Request.headers`) → scheme vào OpenAPI → Swagger
+  `:9000/docs` có nút **Authorize**, dán key 1 lần là test được. Gác ở **cấp router**, không
+  phải cấp app.
+- **CỐ Ý KHÔNG dùng JWT ở tầng này**: JWT trả lời "user nào" và nằm trong tay user
+  (localStorage) → user tự gọi thẳng `:9000` được, đi vòng qua quota + `debug=False` + log ở
+  backend. Key này trả lời "service nào". Test `test_internal_config_rejects_user_jwt` chốt
+  điều đó: JWT admin **không** mở được `/internal/*`.
+- **Fail-closed, KHÔNG có nhánh "key rỗng thì bỏ qua"**: thiếu/sai key → 401; server chưa
+  cấu hình key → 500 `internal_key_not_configured`. Cả 2 `/ready` (backend + agent) đưa
+  `internal_api_key` vào checks để thiếu key lộ lúc deploy, không đợi câu hỏi đầu tiên.
+- **`/health` + `/ready` của agent-service TÁCH sang `api/health.py` và để PUBLIC** — gác cả
+  router `ask` thì backend `api/health.py::_ping_agent` (gọi `/ready` không mang header) sẽ
+  báo `agent_service: false` vĩnh viễn, nhìn như agent sập.
+
+> **⚠️ Còn lại trước khi deploy thật**: (1) `BACKEND_SECRET_KEY` trong `.env` vẫn là
+> placeholder `generate_some_secure_hex_key_here` → ai đọc `.env.example` cũng ký được JWT
+> `role=admin`; check `secret_key` trong backend `/ready` so với hằng KHÁC
+> (`change-me-to-a-long-random-string`) nên đang báo xanh sai. (2) `infra/compose/
+> docker-compose.yml` map **mọi** port ra host (`9000`, `5432`, `7474/7687`, `6333`, `6379`)
+> + bind-mount source → là compose DEV, KHÔNG dùng cho production; production cần bản chỉ
+> map port backend. Shared secret ở trên là lớp thứ 2 (defense in depth), KHÔNG thay thế việc
+> cô lập mạng.
 
 ### Hạ tầng đã chạy sẵn (KHÔNG cần docker compose up)
 Neo4j + Qdrant + Redis + Postgres **đã cài và chạy sẵn trên remote dev server** qua Docker. URL + credentials đã có trong **root `.env`**. **KHÔNG cần** cài đặt, tải, hay `docker compose up` gì nữa — cứ đọc config từ `.env` mà dùng. Hai bẫy đã xử lý sẵn:
