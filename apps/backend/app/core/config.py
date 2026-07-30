@@ -48,6 +48,10 @@ class Settings(BaseSettings):
     backend_secret_key: str = "change-me-to-a-long-random-string"
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 60
+    # Đăng nhập Google (luồng ID token — KHÔNG cần client secret / redirect URI). Client ID
+    # là PUBLIC (frontend cũng nhúng nó); bảo mật nằm ở origin allowlist trên Cloud Console
+    # + chữ ký của Google. Rỗng = chưa cấu hình -> POST /api/auth/google trả 503.
+    google_client_id: str = ""
 
     # --- Postgres (dạng SQLAlchemy URL +psycopg; psycopg.connect cần strip — xem db.py) ---
     database_url: str = ""

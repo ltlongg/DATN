@@ -14,22 +14,40 @@ import jwt
 
 from app.core.config import get_settings
 
-# bcrypt chỉ dùng 72 byte đầu của mật khẩu; cắt cho nhất quán giữa hash và verify
-# (mật khẩu dài hơn 72 byte sẽ không bị bcrypt 5.x ném lỗi).
+# bcrypt chỉ dùng 72 BYTE đầu của mật khẩu (không phải 72 ký tự — tiếng Việt có dấu
+# tốn 2-3 byte/ký tự).
 _BCRYPT_MAX_BYTES = 72
 
 
-def _prepared(password: str) -> bytes:
-    return password.encode("utf-8")[:_BCRYPT_MAX_BYTES]
+def validate_bcrypt_password(password: str) -> str:
+    """Từ chối mật khẩu vượt giới hạn bcrypt thay vì cắt im lặng.
+
+    Cắt im lặng nghĩa là: đặt mật khẩu 80 byte, hệ thống chỉ lưu 72 byte đầu, người dùng
+    gõ đúng 72 byte đầu CŨNG đăng nhập được — mật khẩu ngắn hơn họ tưởng mà không ai báo.
+    Từ chối thẳng thì người dùng biết mà đổi. Gọi ở cả `RegisterRequest`, `UserCreate`
+    (cửa admin) và `hash_password` (lớp phòng thủ cuối) — xem auth-landing-plan.md §4.2.
+    """
+    if len(password.encode("utf-8")) > _BCRYPT_MAX_BYTES:
+        raise ValueError(f"Mật khẩu quá dài, tối đa {_BCRYPT_MAX_BYTES} byte.")
+    return password
 
 
 def hash_password(password: str) -> str:
-    return bcrypt.hashpw(_prepared(password), bcrypt.gensalt()).decode("utf-8")
+    validate_bcrypt_password(password)
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
-def verify_password(password: str, password_hash: str) -> bool:
+def verify_password(password: str, password_hash: str | None) -> bool:
+    # None = tài khoản Google-only (không có mật khẩu) -> không khớp gì cả.
+    if password_hash is None:
+        return False
+    # CỐ Ý vẫn cắt ở khâu verify (khác hash_password): hash cũ trong DB được sinh từ bản
+    # đã cắt, bỏ cắt ở đây là khóa cửa chính những tài khoản đó. Validate chặn ở đầu vào,
+    # không đụng đường đối chiếu.
     try:
-        return bcrypt.checkpw(_prepared(password), password_hash.encode("utf-8"))
+        return bcrypt.checkpw(
+            password.encode("utf-8")[:_BCRYPT_MAX_BYTES], password_hash.encode("utf-8")
+        )
     except ValueError:
         # password_hash rỗng / sai format -> coi như không khớp, không raise.
         return False

@@ -38,6 +38,13 @@ def test_create_user_duplicate_email_409(client, auth, db_conn) -> None:  # type
     assert r.json()["code"] == "conflict"
 
 
+def test_create_user_password_over_72_bytes_422(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
+    # Cửa admin phải chặn y như /register: 72 ký tự tiếng Việt có dấu = 144 byte, bcrypt
+    # chỉ dùng 72 byte đầu -> nới max_length ở UserCreate là lỗ hổng cắt im lặng quay lại.
+    r = _create_user(client, auth("admin"), "dai-zz@example.com", password="á" * 72)
+    assert r.status_code == 422
+
+
 def test_list_users_contains_created(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     _create_user(client, auth("admin"), "listed-zz@example.com")
     r = client.get("/api/admin/users", headers=auth("admin"))

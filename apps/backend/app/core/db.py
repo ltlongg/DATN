@@ -54,6 +54,14 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
     # §3.2: dùng ADD COLUMN thay vì drop+recreate để giữ dev data đã có).
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT true;",
     "ALTER TABLE users ADD COLUMN IF NOT EXISTS question_quota INTEGER;",
+    # Đăng nhập Google (auth-landing-plan.md §4.3.2). `sub` của Google là khóa định danh
+    # THẬT (bất biến) — email đổi được nên KHÔNG dùng làm khóa. UNIQUE để một tài khoản
+    # Google chỉ gắn được vào một user.
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS google_sub TEXT UNIQUE;",
+    # Tài khoản Google-only không có mật khẩu -> nới NOT NULL. Kéo theo
+    # User.password_hash: str | None và verify_password nhận None (trả False), nhờ đó
+    # /login từ chối tài khoản Google-only bằng đúng message invalid_credentials.
+    "ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;",
     """
     CREATE TABLE IF NOT EXISTS conversations (
         id         UUID PRIMARY KEY,

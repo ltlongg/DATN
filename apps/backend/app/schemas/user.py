@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
+from app.core.security import validate_bcrypt_password
 from app.schemas.common import Role
 
 
@@ -23,7 +24,14 @@ class UserCreate(BaseModel):
     email: EmailStr
     name: str = Field(min_length=1, max_length=200)
     role: Role
-    password: str = Field(min_length=6, max_length=200)
+    # KHÔNG dùng max_length: bcrypt đếm BYTE, max_length đếm KÝ TỰ -> mật khẩu tiếng Việt
+    # có dấu vẫn lọt qua rồi bị cắt im lặng. Xem security.validate_bcrypt_password.
+    password: str = Field(min_length=6)
+
+    @field_validator("password")
+    @classmethod
+    def _fits_bcrypt(cls, v: str) -> str:
+        return validate_bcrypt_password(v)
 
 
 class UserUpdate(BaseModel):

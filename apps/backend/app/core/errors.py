@@ -69,6 +69,16 @@ def register_error_handlers(app: FastAPI) -> None:
         first = exc.errors()[0] if exc.errors() else {}
         loc = ".".join(str(p) for p in first.get("loc", []) if p != "body")
         msg = first.get("msg", "Dữ liệu không hợp lệ.")
-        message = f"{loc}: {msg}" if loc else msg
+        # Pydantic v2 chèn "Value error, " / "Assertion failed, " trước message của validator
+        # mình viết. Message đó đã là câu tiếng Việt đủ ngữ cảnh ("Mật khẩu quá dài, tối đa 72
+        # byte.") -> bỏ tiền tố rác + bỏ luôn tên field tiếng Anh (`password:`). Lỗi framework
+        # còn lại (type/thiếu field) vẫn giữ `loc` để biết field nào sai.
+        message = None
+        for prefix in ("Value error, ", "Assertion failed, "):
+            if msg.startswith(prefix):
+                message = msg[len(prefix) :]
+                break
+        if message is None:
+            message = f"{loc}: {msg}" if loc else msg
         request.state.error_code = "validation_error"
         return JSONResponse(status_code=422, content=_body("validation_error", message))
