@@ -47,6 +47,7 @@ export function PromptEditor({
         value={content}
         onChange={(e) => onContentChange(e.target.value)}
         spellCheck={false}
+        wrap="off"
         className="min-h-[320px] flex-1 resize-y rounded-md border border-paper-border bg-paper-card p-3 font-mono text-xs leading-relaxed text-ink outline-none focus:border-brand"
       />
 
