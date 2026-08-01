@@ -17,12 +17,18 @@ from app.core.runtime_config import RuntimeConfig
 from app.core.usage_log import record_usage
 from app.prompts import guardrails_input as gi_prompt
 from app.prompts import plan as plan_prompt
+from app.prompts import resolve as resolve_prompt
 from app.prompts import synthesize as syn_prompt
 from app.orchestrator.emitter import Emitter, NullEmitter
 from app.orchestrator.errors import GuardrailsBlocked
-from app.orchestrator.fusion import answer_context_chunks, fuse_query_results
+from app.orchestrator.fusion import (
+    answer_context_chunks,
+    dedupe_graph_context,
+    fuse_query_results,
+    merge_across_steps,
+)
 from app.orchestrator.guardrails import check_input
-from app.orchestrator.planning import DEFAULT_STEP_LABEL, normalize_plan
+from app.orchestrator.planning import DEFAULT_STEP_LABEL, fill_placeholders, normalize_plan
 from app.orchestrator import progress
 from app.orchestrator.state import AgentState
 from app.orchestrator.synthesis import (
@@ -36,8 +42,10 @@ from app.schemas.ask import (
     PlanOutput,
     PlanStep,
     RequestedMode,
+    ResolvedFact,
     RouteDecision,
     StepQuery,
+    StepResolveOutput,
 )
 from app.schemas.retrieval import RetrievalMode, RetrievalResult, RetrievedChunk
 from app.tools.graph_rag.retriever import retrieve_graph
@@ -64,11 +72,6 @@ GRAPH_EMPTY_MESSAGE = (
 # đủ ngắn để không phình payload SSE lẫn `messages.citations` JSONB. Full text lấy qua
 # GET /api/chat/sources/{chunk_id} lúc user click — xem docs/plan/citation-viewer-plan.md.
 CITATION_QUOTE_CHARS = 240
-
-# Bậc B1 chạy ĐÚNG một bước todo. CỐ Ý là hằng số chứ không phải knob config: knob
-# `retrieval_max_steps` chỉ có nghĩa khi vòng lặp nhiều bước tồn tại (bậc B4) — thêm sớm thì
-# chỉnh nó không đổi được gì, mà một knob chỉnh không ăn thua còn tệ hơn không có knob.
-MAX_STEPS = 1
 
 
 def _emitter(config: RunnableConfig | None) -> Emitter:
@@ -210,7 +213,7 @@ async def plan(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
         standalone, steps, warnings = normalize_plan(
             parsed,
             question,
-            max_steps=MAX_STEPS,
+            max_steps=settings.retrieval_max_steps,
             max_queries_per_step=settings.max_queries_per_step,
         )
         selected = _resolve_mode(override, parsed.selected_mode)
@@ -350,7 +353,9 @@ async def retrieve(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     mode = state["selected_mode"]
     cfg = RuntimeConfig.model_validate(state["runtime_config"])
     settings = get_settings()
-    step = state["steps"][0]  # B1: `plan` bảo đảm đúng 1 bước
+    # Điền `<N>` bằng mắt xích các bước trước đã trích. Bước 1 không bao giờ có placeholder
+    # (planning.py cưỡng chế), nên `resolved` rỗng ở đây là chuyện bình thường.
+    step = fill_placeholders(state["steps"][state["current_step"]], state["resolved"])
     step_id = progress.todo_step_id(step.id)
     await emitter.emit("status", {"node": "retrieve", "msg": f"đang tìm tài liệu ({mode})"})
     await _emit_step(emitter, step_id, "running")
@@ -363,15 +368,29 @@ async def retrieve(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     chunks, graph_context = fuse_query_results(
         list(results), rrf_k=cfg.hybrid_rrf_k, final_k=settings.multiquery_final_k
     )
+    # Bước cần trích mắt xích mà không lấy được đoạn nào -> DỪNG list ngay. Bỏ qua lượt LLM
+    # chắc chắn trả rỗng chỉ là phần phụ; điều chính là KHÔNG cho bước sau chạy với
+    # placeholder chưa điền (truy vấn rác, §4.3). Đếm chunk của RIÊNG bước này, không đếm tập
+    # tích luỹ — tập tích luỹ không rỗng vẫn có thể là kết quả của bước trước.
+    stop_reason = "unresolved" if (step.resolve and not chunks) else ""
+    previous = state.get("retrieval")
+    if previous is not None:
+        graph_context = dedupe_graph_context([*previous.graph_context, *graph_context])
     merged = RetrievalResult(
         mode=mode,
         query=state["standalone_query"],
-        chunks=chunks,
+        chunks=merge_across_steps(
+            previous.chunks if previous else [],
+            chunks,
+            graph_context=graph_context,
+            final_k=settings.final_context_k,
+        ),
         graph_context=graph_context,
         warnings=[w for r in results for w in r.warnings],
     )
     # Một list dùng cho CẢ hai đường ra (event `step` tầng 2 và `debug` của /ask non-stream)
-    # — dựng hai lần là mở đường cho hai con số lệch nhau.
+    # — dựng hai lần là mở đường cho hai con số lệch nhau. Dùng `step` ĐÃ điền placeholder:
+    # đây phải là truy vấn thật sự chạy, không phải bản khuôn còn `<1>`.
     query_rows = [
         {"query": item.query, "entities": item.entities, "chunks": len(r.chunks)}
         for item, r in zip(step.queries, results)
@@ -379,7 +398,9 @@ async def retrieve(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     await _emit_step(
         emitter,
         step_id,
-        progress.retrieve_state(len(chunks)),
+        # Bước còn phải trích mắt xích thì CHƯA xong: cho tick xanh lúc này là hiện "đã hoàn
+        # thành" cho một việc đang chạy dở (§7.3.1 mục 4). `resolve_step` mới là chỗ chốt.
+        progress.retrieve_state(len(chunks), awaiting_resolve=bool(step.resolve)),
         progress.retrieve_detail(
             mode, query_count=len(step.queries), chunk_count=len(chunks)
         ),
@@ -389,9 +410,12 @@ async def retrieve(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
             graph_context=len(merged.graph_context),
         ),
     )
+    if stop_reason:
+        await _emit_skipped_steps(emitter, state)
     return {
         "retrieval": merged,
         "retrieval_mode": mode,
+        "stop_reason": stop_reason,
         "warnings": merged.warnings,
         "debug": {
             "retrieve": {
@@ -404,6 +428,186 @@ async def retrieve(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     }
 
 
+# --- 3b. resolve_step + advance_step + các edge fn của vòng lặp todo ---
+
+
+async def _emit_skipped_steps(emitter: Emitter, state: AgentState) -> None:
+    """Đánh dấu các bước SAU bước hiện tại là bỏ qua (list dừng sớm).
+
+    Không làm thì chúng nằm mãi ở `pending` — mà `pending` sau khi stream đóng đọc là "không
+    chạy", tức đúng nghĩa nhưng không nói được là hệ thống ĐÃ QUYẾT ĐỊNH bỏ chúng.
+    """
+    for step in state["steps"][state["current_step"] + 1:]:
+        await _emit_step(emitter, progress.todo_step_id(step.id), "skipped")
+
+
+async def resolve_step(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
+    """Trích mắt xích từ context của bước vừa chạy (1 LLM call, output ngắn).
+
+    Chỉ chạy khi bước có `resolve` VÀ đã lấy được đoạn nào đó — `after_retrieve` gác cả hai.
+    """
+    emitter = _emitter(config)
+    step = state["steps"][state["current_step"]]
+    step_id = progress.todo_step_id(step.id)
+    retrieval = state["retrieval"]
+    assert retrieval is not None  # after_retrieve chỉ vào đây khi đã có chunk
+    await emitter.emit(
+        "status", {"node": "resolve_step", "msg": f"đang xác định {step.resolve}"}
+    )
+    try:
+        client = get_async_openai_client()
+        completion = await client.chat.completions.parse(
+            model=_orchestrator_model(),
+            messages=[
+                {
+                    "role": "system",
+                    "content": get_active_prompt(
+                        "resolve", fallback=resolve_prompt.SYSTEM_PROMPT
+                    ),
+                },
+                {
+                    "role": "user",
+                    # `standalone_query`, KHÔNG phải `state["question"]`: prompt resolve không
+                    # có khối lịch sử hội thoại, nên câu nối tiếp ("người kế nhiệm ÔNG ẤY bị
+                    # ai sát hại?") vào đây là đại từ không còn đường nào giải. Model đúng
+                    # luật sẽ trả rỗng -> dừng todo list, mất một hop lẽ ra chạy được.
+                    "content": resolve_prompt.build_user_prompt(
+                        state["standalone_query"],
+                        step.resolve,
+                        answer_context_chunks(retrieval.chunks),
+                        retrieval.graph_context,
+                    ),
+                },
+            ],
+            response_format=StepResolveOutput,
+            temperature=0.0,
+        )
+        parsed = completion.choices[0].message.parsed
+        if parsed is None:
+            raise ValueError("resolve trả parsed None")
+        await _record_usage_from_completion(completion, "resolve", state)
+    except Exception as exc:  # noqa: BLE001 — LLM chết không được làm sập cả câu trả lời
+        await _emit_step(
+            emitter,
+            step_id,
+            "partial",
+            progress.resolve_missing_detail(step.resolve),
+            [{"label": "Lỗi", "value": type(exc).__name__}],
+        )
+        await _emit_skipped_steps(emitter, state)
+        return {
+            "stop_reason": "unresolved",
+            "warnings": [f"resolve lỗi, dừng todo list: {type(exc).__name__}"],
+        }
+
+    value = parsed.value.strip()
+    # "Có thật trong ngữ cảnh" = mọi chunk_id LỘ RA trong prompt resolve: đoạn tài liệu đưa
+    # vào CỘNG chunk nguồn của khối quan hệ (prompt cho phép trích id ở cả hai chỗ). So mỗi
+    # `retrieval.chunks` là hẹp hơn ngữ cảnh thật -> loại nhầm id hợp lệ, và vì guard dưới đây
+    # DỪNG cả todo list nên loại nhầm là mất luôn một hop.
+    available = {c.chunk_id for c in retrieval.chunks} | {
+        cid for item in retrieval.graph_context for cid in item.source_chunk_ids
+    }
+    sources = [cid for cid in parsed.source_chunk_ids if cid in available]
+    dropped = [cid for cid in parsed.source_chunk_ids if cid not in available]
+    internals = progress.resolve_internals(
+        target=step.resolve,
+        value=value,
+        confidence=parsed.confidence,
+        sources=sources,
+        dropped=dropped,
+    )
+    if not value or parsed.confidence in progress.WEAK_CONFIDENCE or not sources:
+        # Ba lý do dừng, cùng một hậu quả nếu đi tiếp: bước sau tra nhầm người rồi trả lời SAI
+        # một cách tự tin, kèm đủ citation — dạng sai nguy hiểm nhất cho domain lịch sử.
+        #
+        # `not sources` là ca tinh vi nhất: LLM khai một cái tên nghe rất chắc ("cao") nhưng
+        # chunk_id chống lưng thì bịa. Không kiểm được value bằng nguồn nào ⇒ coi như không
+        # tìm thấy. Đây cũng chính là bất biến "fact CÓ NGUỒN" mà prompt synthesize dựa vào:
+        # cho qua thì `[MẮT XÍCH ĐÃ XÁC ĐỊNH]` thành một khẳng định trần không nguồn.
+        await _emit_step(
+            emitter,
+            step_id,
+            "partial",
+            progress.resolve_missing_detail(step.resolve),
+            internals,
+        )
+        await _emit_skipped_steps(emitter, state)
+        return {
+            "stop_reason": "unresolved",
+            "debug": {
+                "resolve": {
+                    "step_id": step.id,
+                    "value": value,
+                    "confidence": parsed.confidence,
+                    "sources": sources,
+                    "dropped_sources": dropped,
+                }
+            },
+        }
+
+    fact = ResolvedFact(
+        step_id=step.id,
+        label=step.label,
+        value=value,
+        confidence=parsed.confidence,
+        source_chunk_ids=sources,
+    )
+    await _emit_step(
+        emitter,
+        step_id,
+        "done",
+        progress.resolve_detail(label=step.label, value=value),
+        internals,
+    )
+    return {
+        "resolved": {**state["resolved"], step.id: value},
+        "resolved_facts": [*state["resolved_facts"], fact],
+        "debug": {
+            "resolve": {
+                "step_id": step.id,
+                "value": value,
+                "confidence": parsed.confidence,
+                "sources": sources,
+                "dropped_sources": dropped,
+            }
+        },
+    }
+
+
+def advance_step(state: AgentState) -> dict[str, Any]:
+    """Điểm GHI DUY NHẤT của `current_step`.
+
+    Là NODE chứ không phải conditional edge: edge fn trong LangGraph là hàm thuần chỉ trả tên
+    đích, không ghi được state. Gộp hai việc vào một chỗ là cách chắc chắn để "ai tăng, tăng
+    mấy lần" thành câu hỏi phải suy từ đường đi.
+    """
+    return {"current_step": state["current_step"] + 1}
+
+
+def after_retrieve(state: AgentState) -> str:
+    if state["stop_reason"]:
+        return has_context(state)
+    if state["steps"][state["current_step"]].resolve:
+        return "resolve_step"
+    return "advance_step"
+
+
+def after_resolve(state: AgentState) -> str:
+    if state["stop_reason"]:
+        # Dừng list nhưng KHÔNG vứt phần đã tìm được: trả lời vế có căn cứ, nêu rõ vế chưa tra.
+        return has_context(state)
+    return "advance_step"
+
+
+def after_advance(state: AgentState) -> str:
+    """Chạy SAU khi `advance_step` đã tăng, nên so `<` chứ không phải `+ 1 <` — sai chỗ này
+    là bỏ mất bước cuối."""
+    if state["current_step"] < len(state["steps"]):
+        return "retrieve"
+    return has_context(state)
+
+
 # --- 4. has_context (conditional edge — chỉ check có chunk không) ---
 
 
@@ -413,6 +617,13 @@ def has_context(state: AgentState) -> str:
 
 
 # --- 5. synthesize (stream structured output, answer field đầu) ---
+
+
+def _unresolved_target(state: AgentState) -> str:
+    """Mô tả mắt xích của bước làm todo list dừng lại, "" nếu list chạy hết bình thường."""
+    if state["stop_reason"] != "unresolved":
+        return ""
+    return state["steps"][state["current_step"]].resolve
 
 
 async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
@@ -458,6 +669,10 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
                 state["standalone_query"],
                 chunks_for_prompt,
                 retrieval.graph_context,
+                resolved_facts=state["resolved_facts"],
+                # List dừng giữa chừng -> nói thẳng vế nào chưa tra được thay vì để model tự
+                # lấp bằng suy đoán (§4.7). Mô tả lấy từ chính bước đang dở.
+                unresolved=_unresolved_target(state),
                 is_retry=attempt > 0,
             ),
         },

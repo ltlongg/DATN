@@ -11,7 +11,14 @@ import pytest
 
 from app.orchestrator import nodes
 from app.orchestrator.runner import run_ask_stream
-from app.schemas.ask import AskRequest, PlanOutput, SynthesizedAnswer
+from app.schemas.ask import (
+    AskRequest,
+    PlanOutput,
+    PlanStep,
+    StepQuery,
+    StepResolveOutput,
+    SynthesizedAnswer,
+)
 from app.schemas.guardrails import GuardrailDecision
 from app.schemas.retrieval import RetrievalBackendError, RetrievalResult, RetrievedChunk
 from app.schemas.visualization import VisualizationPayload
@@ -38,20 +45,33 @@ def _retrieval(chunk_ids) -> RetrievalResult:
     )
 
 
-def _patch_plan(monkeypatch, *, route="needs_retrieval"):
-    output = PlanOutput(standalone_query="q", mentioned_entities=[], route=route)
+def _patch_plan(monkeypatch, *, route="needs_retrieval", steps=None, resolve=None):
+    """`resolve` = hàng đợi output cho `resolve_step`; phân biệt với `plan` bằng
+    `response_format`, đúng cách node thật phân biệt."""
+    output = PlanOutput(
+        standalone_query="q", mentioned_entities=[], route=route, steps=list(steps or [])
+    )
+    resolve_queue = list(resolve or [])
 
     async def fake_parse(**kw):
-        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(parsed=output))])
+        parsed = output
+        if kw.get("response_format") is StepResolveOutput:
+            assert resolve_queue, "resolve_step gọi nhiều hơn số output đã mock"
+            parsed = resolve_queue.pop(0)
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(parsed=parsed))])
 
     client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(parse=fake_parse)))
     monkeypatch.setattr(nodes, "get_async_openai_client", lambda: client)
 
 
-def _patch_retrieve(monkeypatch, result=None, *, error=None):
+def _patch_retrieve(monkeypatch, result=None, *, error=None, results=None):
+    queue = list(results or [])
+
     async def fake(question, *, seed_mentions=None, **kwargs):
         if error:
             raise error
+        if queue:
+            return queue.pop(0)
         return result if result is not None else _retrieval(["c-1"])
 
     monkeypatch.setattr(nodes, "retrieve_hybrid", fake)
@@ -253,6 +273,95 @@ async def test_running_update_carries_no_internals_yet(monkeypatch) -> None:
     events = await _collect(AskRequest(question="hỏi", stream=True))
     running = [d for t, d in events if t == "step" and d["state"] == "running"]
     assert running and all("internals" not in d for d in running)
+
+
+MULTIHOP_STEPS = [
+    PlanStep(
+        id=1,
+        label="Xác định người kế nhiệm",
+        queries=[StepQuery(query="ai kế nhiệm")],
+        resolve="tên người kế nhiệm",
+    ),
+    PlanStep(
+        id=2,
+        label="Việc người đó làm sau đó",
+        depends_on=1,
+        queries=[StepQuery(query="<1> làm gì sau đó")],
+    ),
+]
+
+
+async def test_multihop_step_stays_running_until_the_link_is_resolved(monkeypatch) -> None:
+    """Bước 1 chốt `done` ở `resolve_step` chứ không ở `retrieve` — giữa hai mốc đó nó vẫn
+    đang chạy thật, và panel phải nói đúng như vậy."""
+    _patch_plan(
+        monkeypatch,
+        steps=MULTIHOP_STEPS,
+        # `source_chunk_ids` phải trỏ vào chunk CÓ THẬT trong ngữ cảnh bước 1 ("c-1"): mắt
+        # xích không có nguồn hợp lệ nào bị loại, dù confidence "cao" (xem resolve_step).
+        resolve=[
+            StepResolveOutput(
+                value="Đề Thám", confidence="cao", source_chunk_ids=["c-1"]
+            )
+        ],
+    )
+    _patch_retrieve(monkeypatch, results=[_retrieval(["c-1"]), _retrieval(["c-2"])])
+    _patch_synthesize(monkeypatch)
+    _patch_viz(monkeypatch)
+    events = await _collect(AskRequest(question="hỏi", stream=True))
+
+    assert [r["id"] for r in _steps_event(events)] == [
+        "plan",
+        "todo:1",
+        "todo:2",
+        "synthesize:1",
+        "validate:1",
+        "visualization",
+    ]
+    assert _step_updates(events)[:5] == [
+        ("plan", "done"),
+        ("todo:1", "running"),  # mở bước
+        ("todo:1", "running"),  # tìm xong nhưng CHƯA chốt: còn phải trích mắt xích
+        ("todo:1", "done"),  # resolve_step mới là chỗ chốt
+        ("todo:2", "running"),
+    ]
+    resolved = [
+        d for t, d in events if t == "step" and d["id"] == "todo:1" and d["state"] == "done"
+    ]
+    assert resolved[0]["detail"] == "Xác định người kế nhiệm → Đề Thám"
+
+
+async def test_unresolved_link_marks_remaining_steps_skipped(monkeypatch) -> None:
+    """Dừng list thì các bước còn lại phải nói rõ là ĐÃ BỊ BỎ. Để chúng ở `pending` thì sau
+    khi stream đóng, "hệ thống cân nhắc rồi bỏ" trông y hệt "chưa chạy tới"."""
+    _patch_plan(
+        monkeypatch,
+        steps=MULTIHOP_STEPS,
+        resolve=[StepResolveOutput(value="", confidence="thấp")],
+    )
+    _patch_retrieve(monkeypatch, results=[_retrieval(["c-1"])])
+    _patch_synthesize(monkeypatch)
+    _patch_viz(monkeypatch)
+    events = await _collect(AskRequest(question="hỏi", stream=True))
+
+    updates = _step_updates(events)
+    assert ("todo:1", "partial") in updates
+    assert ("todo:2", "skipped") in updates
+    assert ("synthesize:1", "done") in updates  # vẫn trả lời bằng phần đã tìm được
+
+
+async def test_zero_chunk_at_resolve_step_skips_the_rest_without_calling_llm(
+    monkeypatch,
+) -> None:
+    _patch_plan(monkeypatch, steps=MULTIHOP_STEPS, resolve=[])
+    _patch_retrieve(monkeypatch, results=[_retrieval([])])
+    _patch_synthesize(monkeypatch)
+    _patch_viz(monkeypatch)
+    events = await _collect(AskRequest(question="hỏi", stream=True))
+
+    updates = _step_updates(events)
+    assert ("todo:1", "partial") in updates
+    assert ("todo:2", "skipped") in updates
 
 
 async def test_smalltalk_has_no_placeholder_steps_left_hanging(monkeypatch) -> None:
