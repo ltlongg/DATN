@@ -13,6 +13,9 @@ const TASK_LABELS: Record<string, string> = {
   plan: "Dựng truy vấn",
   // Task cũ, giữ để log LỊCH SỬ (trước khi node đổi tên) vẫn có nhãn thay vì hiện raw.
   build_query: "Dựng truy vấn (cũ)",
+  // Chỉ xuất hiện ở câu hỏi nhiều chặng -> phần lớn message KHÔNG có dòng này, và đó là
+  // thông tin chứ không phải thiếu sót.
+  resolve: "Trích mắt xích",
   synthesize: "Tổng hợp",
   guardrail_input: "Kiểm duyệt",
 };

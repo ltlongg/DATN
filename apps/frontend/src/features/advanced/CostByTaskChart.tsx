@@ -15,6 +15,7 @@ const LABELS: Record<string, string> = {
   // Node `plan` từng tên là `build_query`; log cũ vẫn mang task đó nên phải có nhãn riêng,
   // nếu gộp một nhãn thì hai giai đoạn trông như một và không ai biết mốc đổi ở đâu.
   build_query: "Phân tích câu hỏi (cũ)",
+  resolve: "Trích mắt xích",
   synthesize: "Soạn câu trả lời",
 };
 
