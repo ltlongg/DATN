@@ -1,10 +1,11 @@
-"""Test render prompt plan + synthesize: history, graph_context có cấu trúc, retry suffix."""
+"""Test render prompt plan + resolve + synthesize: history, graph_context có cấu trúc,
+fact trung gian, retry suffix."""
 
 from __future__ import annotations
 
-from app.prompts import plan, synthesize
+from app.prompts import plan, resolve, synthesize
 from app.prompts.synthesize import RETRY_INSTRUCTION
-from app.schemas.ask import ChatMessage
+from app.schemas.ask import ChatMessage, ResolvedFact
 from app.schemas.retrieval import GraphContextItem, RetrievedChunk
 
 
@@ -88,3 +89,67 @@ def test_synthesize_handles_empty_blocks_gracefully() -> None:
     prompt = synthesize.build_user_prompt("q", [], [])
     assert "(không có đoạn tài liệu)" in prompt
     assert "(không có quan hệ từ knowledge graph)" in prompt
+
+
+# --- synthesize: fact trung gian từ multi-hop ---
+
+
+def _fact(**kw) -> ResolvedFact:
+    kw.setdefault("step_id", 1)
+    kw.setdefault("label", "Xác định người lãnh đạo")
+    kw.setdefault("value", "Chu Văn Tấn")
+    kw.setdefault("confidence", "cao")
+    kw.setdefault("source_chunk_ids", ["lichsu_clean-000103"])
+    return ResolvedFact(**kw)
+
+
+def test_synthesize_omits_fact_block_when_no_multihop() -> None:
+    """Câu thường không có bước trích -> KHÔNG thêm khối rỗng vào prompt (tốn token + dạy
+    model rằng khối đó luôn có)."""
+    assert "[MẮT XÍCH ĐÃ XÁC ĐỊNH]" not in synthesize.build_user_prompt("q", [], [])
+
+
+def test_synthesize_renders_fact_with_confidence_and_source() -> None:
+    """Fact trung gian vào prompt như fact CÓ NGUỒN, không phải sự thật hiển nhiên (§0.2)."""
+    prompt = synthesize.build_user_prompt("q", [], [], resolved_facts=[_fact()])
+    assert "[MẮT XÍCH ĐÃ XÁC ĐỊNH]" in prompt
+    assert "Chu Văn Tấn" in prompt
+    assert "cao" in prompt
+    assert "lichsu_clean-000103" in prompt
+
+
+def test_synthesize_marks_unresolved_part_when_list_stopped_early() -> None:
+    """Dừng list giữa chừng -> prompt phải nói rõ vế nào chưa tra được, không lấp liếm (§4.7)."""
+    prompt = synthesize.build_user_prompt("q", [], [], unresolved="chức vụ về sau")
+    assert "chức vụ về sau" in prompt
+    assert "chưa" in prompt.lower()
+
+
+# --- resolve ---
+
+
+def test_resolve_prompt_contains_question_target_and_full_chunk_text() -> None:
+    """Toàn văn chunk vào được vì output chỉ là một chuỗi ngắn — đây đúng là chỗ `reflect`
+    (đã bỏ) làm sai khi chỉ đọc 240 ký tự đầu."""
+    chunks = [_chunk("lichsu_clean-000103", "Chu Văn Tấn liên lạc với Xứ ủy.", ["Bắc Sơn"])]
+    prompt = resolve.build_user_prompt("Ai lãnh đạo?", "tên người lãnh đạo chi bộ", chunks, [])
+    assert "Ai lãnh đạo?" in prompt
+    assert "tên người lãnh đạo chi bộ" in prompt
+    assert "Chu Văn Tấn liên lạc với Xứ ủy." in prompt
+    assert "chunk_id: lichsu_clean-000103" in prompt
+
+
+def test_resolve_prompt_renders_graph_context() -> None:
+    items = [
+        GraphContextItem(
+            kind="relation",
+            keyword="lãnh đạo",
+            description="Chu Văn Tấn lãnh đạo chi bộ Bắc Sơn.",
+            source_name="Chu Văn Tấn",
+            target_name="Bắc Sơn",
+            source_chunk_ids=["lichsu_clean-000103"],
+        )
+    ]
+    prompt = resolve.build_user_prompt("q", "mắt xích", [], items)
+    assert "lãnh đạo" in prompt
+    assert "Chu Văn Tấn" in prompt

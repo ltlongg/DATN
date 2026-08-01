@@ -36,7 +36,7 @@ _AGENT_SERVICE = Path(__file__).resolve().parents[1]
 if str(_AGENT_SERVICE) not in sys.path:
     sys.path.insert(0, str(_AGENT_SERVICE))
 
-from app.prompts import alias_judge, geocode, graph_extract, plan  # noqa: E402
+from app.prompts import alias_judge, geocode, graph_extract, plan, resolve  # noqa: E402
 from app.prompts import guardrails_input, metadata_extract, synthesize, timeline_extract  # noqa: E402
 from app.tools.prompts.prompt_store import publish_prompt_version, seed_prompt  # noqa: E402
 
@@ -47,6 +47,10 @@ _REGISTRY: list[tuple[str, str, str, str, str]] = [
     ("build_query", "ONLINE", "Dựng truy vấn",
      "Rewrite câu hỏi + phân tuyến + phân rã truy vấn tìm kiếm (mỗi câu trả lời).",
      plan.SYSTEM_PROMPT),
+    ("resolve", "ONLINE", "Trích mắt xích",
+     "Trích một dữ kiện trung gian từ chunk vừa truy hồi, để tra tiếp bước sau "
+     "(chỉ chạy ở câu hỏi nhiều chặng).",
+     resolve.SYSTEM_PROMPT),
     ("synthesize", "ONLINE", "Tổng hợp câu trả lời",
      "Sinh câu trả lời có căn cứ từ chunk/graph đã truy hồi (mỗi câu trả lời).",
      synthesize.SYSTEM_PROMPT),
