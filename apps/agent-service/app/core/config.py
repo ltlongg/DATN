@@ -86,6 +86,12 @@ class Settings(BaseSettings):
     # max token cho cặp (query, passage); khớp AITeamVN/Vietnamese_Reranker (256 query +
     # 2048 passage). Override qua RERANKER_MAX_LENGTH trong .env nếu cần.
     reranker_max_length: int = 2304
+    # Số cặp mỗi forward cross-encoder. KHÔNG phải knob hiệu năng thông thường "to hơn =
+    # nhanh hơn": GPU dev còn cõng cả model embedding, nên batch to đẩy đỉnh VRAM vượt phần
+    # trống -> đổ sang shared memory -> chậm gấp bội. Đo trên RTX 4060 Laptop 8.6 GB với 27
+    # cặp thật: batch 30 = 25.3s, batch 8 = 2.26s. Chỉnh theo VRAM còn trống của máy chạy,
+    # không chỉnh theo `hybrid_candidate_k`. Xem app/core/reranker.py.
+    rerank_batch_size: int = 8
     graph_max_seed_entities: int = 5
     graph_max_chunks_per_seed: int = 20
     graph_hub_source_count_threshold: int = 80
@@ -105,6 +111,15 @@ class Settings(BaseSettings):
     ask_timeout_seconds: int = 60
     synthesize_max_attempts: int = 2
     stream_batch_chars: int = 160
+
+    # --- Multi-query fan-out (agentic retrieval loop, bậc B1). Node `plan` sinh nhiều query
+    # chạy SONG SONG trong một bước; `retrieve` gộp bằng RRF theo RANK rồi cắt.
+    # KHÔNG đi qua RuntimeConfig/system_config ở V1 — xem
+    # docs/plan/agentic-retrieval-loop-plan.md §8 (nhét vào đó kéo theo DDL + API + UI admin).
+    # `multiquery_final_k` TRÙNG GIÁ TRỊ `rerank_top_k` chứ không buộc phải bằng: mỗi query
+    # đã tự cắt rerank_top_k, đây là lần cắt SAU khi gộp nhiều query. ---
+    multiquery_final_k: int = 8
+    max_queries_per_step: int = 4
 
     # --- Guardrails input layer (v1). 1 lớp kiểm input trước build_query, chỉ LLM structured
     # output (KHÔNG regex/keyword/blocklist). Dùng model riêng nhỏ/rẻ (KHÔNG fallback sang

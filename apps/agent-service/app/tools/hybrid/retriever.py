@@ -5,10 +5,14 @@ mode con): gọi `search_vector` + `search_graph` lấy candidate nhẹ, RRF g�
 (không hòa hai thang đo score gốc), hydrate Postgres một lần rồi rerank tùy chọn.
 
 `graph_context` đi THẲNG lên kết quả, KHÔNG qua RRF (RRF chỉ xếp hạng chunk). Rule B
-(citation): union `source_chunk_ids` của graph_context vào tập hydrate — kể cả khi chúng
-không lọt top RRF — để mọi fact graph dùng đều có chunk tương ứng trong context (validator
-không drop nguồn). Các chunk kéo theo này là PHẦN CỘNG THÊM, không bị `hybrid_candidate_k`
-hay `rerank_top_k` cắt.
+(citation): mọi `source_chunk_ids` của graph_context đều phải có mặt ở kết quả cuối, để mọi
+fact graph dùng đều có chunk tương ứng (validator không drop nguồn). Các chunk kéo theo này
+là PHẦN CỘNG THÊM, không bị `hybrid_candidate_k` hay `rerank_top_k` cắt.
+
+Rule B áp **SAU lần cắt cuối cùng**, không phải trước. Bản trước loại sẵn chunk đã lọt top
+RRF ra khỏi tập bù, nên chunk vừa là nguồn graph vừa lọt top mà rớt sau rerank thì mất trắng
+— hụt đúng cam kết ngay trên. Chunk bù mang `debug={"citation_only": True}`: chúng là
+PROVENANCE, gọi được ở citation nhưng người gọi nên loại khỏi context đưa vào prompt.
 """
 
 from __future__ import annotations
@@ -161,18 +165,15 @@ async def retrieve_hybrid(
 
     fused = sorted(rrf_score, key=lambda cid: (-rrf_score[cid], cid))
     top_fused = fused[:candidate_k]
-    top_fused_set = set(top_fused)
 
-    # --- Rule B: kéo chunk nguồn của graph_context (ngoài top RRF) để giữ citation ---
-    citation_ids: list[str] = []
-    seen_citation: set[str] = set()
-    for item in graph_context:
-        for chunk_id in item.source_chunk_ids:
-            if chunk_id not in top_fused_set and chunk_id not in seen_citation:
-                seen_citation.add(chunk_id)
-                citation_ids.append(chunk_id)
+    # --- Rule B: mọi chunk nguồn của graph_context phải có mặt ở kết quả CUỐI ---
+    # Gom TOÀN BỘ, KHÔNG loại chunk đã lọt top RRF: chunk lọt top vẫn có thể bị rerank cắt
+    # ở dưới, nên phải đợi tới sau lần cắt cuối cùng mới biết chunk nào còn thiếu.
+    graph_source_ids = list(
+        dict.fromkeys(cid for item in graph_context for cid in item.source_chunk_ids)
+    )
 
-    hydrate_ids = [*top_fused, *citation_ids]
+    hydrate_ids = list(dict.fromkeys([*top_fused, *graph_source_ids]))
     if not hydrate_ids:
         return RetrievalResult(
             mode="hybrid", query=question, chunks=[], graph_context=graph_context, warnings=warnings
@@ -181,10 +182,15 @@ async def retrieve_hybrid(
     rows = await asyncio.to_thread(get_rag_chunks_by_ids, hydrate_ids)
     by_id = {row["chunk_id"]: row for row in rows}
 
+    missing_warned: set[str] = set()
+
     def _build(chunk_id: str, *, citation_only: bool) -> RetrievedChunk | None:
         row = by_id.get(chunk_id)
         if row is None:
-            warnings.append(f"chunk thiếu trong Postgres: {chunk_id}")
+            # Warn MỘT lần/chunk: một id vừa ở top_fused vừa là nguồn graph sẽ đi qua đây 2 lần.
+            if chunk_id not in missing_warned:
+                missing_warned.add(chunk_id)
+                warnings.append(f"chunk thiếu trong Postgres: {chunk_id}")
             return None
         src = sources.get(chunk_id, set())
         if citation_only:
@@ -203,15 +209,26 @@ async def retrieve_hybrid(
         )
 
     fused_chunks = [c for c in (_build(cid, citation_only=False) for cid in top_fused) if c]
-    citation_chunks = [
-        c for c in (_build(cid, citation_only=True) for cid in citation_ids) if c
-    ]
 
-    # --- Rerank phần RRF rồi cắt rerank_top_k; citation chunk là phần CỘNG THÊM ---
+    # --- Rerank phần RRF rồi cắt rerank_top_k ---
     fused_chunks = await rerank(question, fused_chunks)
     fused_chunks = fused_chunks[:rerank_k]
+
+    # --- Rule B áp SAU lần cắt cuối cùng: chunk nguồn graph nào chưa có mặt thì bù vào.
+    # Bù ở đây (không phải trước rerank) mới đúng cam kết "PHẦN CỘNG THÊM, không bị
+    # hybrid_candidate_k hay rerank_top_k cắt" — chunk lọt top_fused rồi rớt sau rerank
+    # trước đây bị mất trắng vì không ai bù lại.
     final_ids = {c.chunk_id for c in fused_chunks}
-    final_chunks = fused_chunks + [c for c in citation_chunks if c.chunk_id not in final_ids]
+    citation_chunks = [
+        c
+        for c in (
+            _build(cid, citation_only=True)
+            for cid in graph_source_ids
+            if cid not in final_ids
+        )
+        if c
+    ]
+    final_chunks = fused_chunks + citation_chunks
 
     return RetrievalResult(
         mode="hybrid",

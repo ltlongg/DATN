@@ -331,3 +331,76 @@ async def test_hybrid_rerank_top_k_cuts_result(monkeypatch) -> None:
     )
     result = await H.retrieve_hybrid("q", rerank_top_k=2)
     assert len(result.chunks) == 2  # rerank cắt còn 2
+
+
+# --- Rule B: chunk nguồn graph_context sống sót MỌI lần cắt (B0) ---
+
+
+def _ctx(*chunk_ids):
+    return [
+        GraphContextItem(
+            kind="entity",
+            name="X",
+            norm_name="x",
+            description="d",
+            source_chunk_ids=list(chunk_ids),
+        )
+    ]
+
+
+async def test_hybrid_keeps_graph_source_chunk_dropped_by_rerank(monkeypatch) -> None:
+    """Ca bug B0: chunk nguồn graph LỌT top_fused nhưng bị rerank cắt.
+
+    Trước đây `citation_ids` loại sẵn chunk đã có trong top_fused, nên khi rerank cắt nó đi
+    thì không còn ai bù lại -> mất nguồn của một fact graph đang dùng.
+    `hybrid_candidate_k` mặc định 30 > 5 nên c-5 chắc chắn nằm TRONG top_fused; rerank
+    passthrough giữ thứ tự fused nên `rerank_top_k=2` cắt đúng nó.
+
+    c-5 CỐ Ý chỉ là candidate vector rank 5 (không phải candidate graph): nếu cho nó thêm
+    `_gc("c-5", 1)` thì RRF của nó vọt lên đầu và sống sót lần cắt -> test xanh giả, không
+    chạm tới bug.
+    """
+    ids = [f"c-{i}" for i in range(1, 6)]
+    _patch(
+        monkeypatch,
+        vector=[_vc(cid, i + 1) for i, cid in enumerate(ids)],
+        graph=([], _ctx("c-5")),
+        rows=[_row(cid) for cid in ids],
+    )
+    result = await H.retrieve_hybrid("q", rerank_top_k=2)
+    kept = [c.chunk_id for c in result.chunks]
+    assert "c-5" in kept, "chunk nguồn graph bị rerank cắt phải được bù lại"
+    c5 = next(c for c in result.chunks if c.chunk_id == "c-5")
+    assert c5.debug.get("citation_only") is True  # bù vào với vai PROVENANCE
+    assert kept.count("c-5") == 1  # bù đúng một lần, không nhân đôi
+
+
+async def test_hybrid_keeps_graph_source_chunk_outside_candidate_pool(monkeypatch) -> None:
+    """Ca vốn đã đúng — chốt lại để bản sửa B0 không làm hỏng: chunk nguồn graph nằm NGOÀI
+    top_fused (bị `hybrid_candidate_k` cắt) vẫn phải có mặt."""
+    ids = [f"c-{i}" for i in range(1, 6)]
+    _patch(
+        monkeypatch,
+        vector=[_vc(cid, i + 1) for i, cid in enumerate(ids)],
+        graph=([], _ctx("c-5")),
+        rows=[_row(cid) for cid in ids],
+    )
+    result = await H.retrieve_hybrid("q", hybrid_candidate_k=2)
+    kept = [c.chunk_id for c in result.chunks]
+    assert kept[:2] == ["c-1", "c-2"]  # pool RRF vẫn bị cắt còn 2
+    assert "c-5" in kept  # nhưng nguồn graph là phần CỘNG THÊM
+    assert next(c for c in result.chunks if c.chunk_id == "c-5").debug["citation_only"] is True
+
+
+async def test_hybrid_warns_once_for_missing_graph_source_chunk(monkeypatch) -> None:
+    """chunk vừa ở top_fused vừa là nguồn graph mà thiếu trong Postgres -> đi qua `_build`
+    hai lần, nhưng chỉ được cảnh báo MỘT lần."""
+    _patch(
+        monkeypatch,
+        vector=[_vc("c-1", 1), _vc("c-2", 2)],
+        graph=([], _ctx("c-2")),
+        rows=[_row("c-1")],  # c-2 thiếu
+    )
+    result = await H.retrieve_hybrid("q")
+    assert [c.chunk_id for c in result.chunks] == ["c-1"]
+    assert len([w for w in result.warnings if "c-2" in w]) == 1
