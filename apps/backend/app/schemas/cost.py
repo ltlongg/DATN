@@ -25,7 +25,9 @@ class DailyCost(BaseModel):
 
 
 class TaskCost(BaseModel):
-    task: str  # 'plan' | 'synthesize' | 'guardrail_input' (+ 'build_query' ở log cũ)
+    # 'plan' | 'synthesize' | 'guardrail_input' | 'resolve' (chỉ câu nhiều chặng)
+    # + 'build_query' ở log cũ, từ trước khi node đổi tên.
+    task: str
     calls: int
     total_tokens: int
 

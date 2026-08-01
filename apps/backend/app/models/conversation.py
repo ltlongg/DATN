@@ -213,13 +213,3 @@ def count_user_messages_today(user_id: str) -> int:
         )
         row = cur.fetchone()
     return int(row["n"]) if row else 0
-
-
-def count_messages(conversation_id: str) -> int:
-    with connection() as conn, conn.cursor() as cur:
-        cur.execute(
-            "SELECT count(*) AS n FROM messages WHERE conversation_id = %s",
-            (conversation_id,),
-        )
-        row = cur.fetchone()
-    return int(row["n"]) if row else 0
