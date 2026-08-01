@@ -30,6 +30,10 @@ def initial_state(request: AskRequest) -> AgentState:
         "message_id": request.message_id,
         "standalone_query": "",
         "steps": [],
+        "current_step": 0,
+        "resolved": {},
+        "resolved_facts": [],
+        "stop_reason": "",
         "override_mode": request.mode,
         # Giá trị thật do `plan` giải (auto -> agent chọn; else -> chính override). Đặt
         # "hybrid" làm chỗ giữ chỗ; không node nào đọc trước khi `plan` chạy xong.
