@@ -99,6 +99,15 @@ def test_plan_detail_explains_why_it_stopped_for_non_retrieval_routes() -> None:
     assert progress.plan_detail("out_of_scope", []) == "Ngoài phạm vi tài liệu"
 
 
+def test_plan_detail_leads_with_step_count_for_multihop() -> None:
+    """Nhiều bước là thông tin đắt hơn số truy vấn song song — và là lời giải thích cho việc
+    câu này chờ lâu hơn thường lệ."""
+    steps = [_step(1, "Xác định mắt xích", ["q1", "q2"]), _step(2, "Tra tiếp", ["q3"])]
+    assert progress.plan_detail("needs_retrieval", steps) == (
+        "Phát hiện 2 ý phụ thuộc nhau · tra 2 bước"
+    )
+
+
 # --- retrieve ---
 
 
@@ -137,6 +146,69 @@ def test_zero_chunks_is_partial_and_says_so() -> None:
 
 def test_some_chunks_is_done() -> None:
     assert progress.retrieve_state(1) == "done"
+
+
+# --- resolve (B4) ---
+
+
+def test_step_awaiting_resolve_stays_running_after_retrieval() -> None:
+    """Tìm được đoạn mới xong nửa việc — tick xanh lúc `resolve_step` còn đang chạy là hiện
+    "đã hoàn thành" cho việc chưa xong (§7.3.1 mục 4)."""
+    assert progress.retrieve_state(8, awaiting_resolve=True) == "running"
+    assert progress.retrieve_state(8, awaiting_resolve=False) == "done"
+
+
+def test_step_awaiting_resolve_with_no_chunk_is_partial_not_running() -> None:
+    """0 đoạn thì resolve không chạy nữa -> dòng phải chốt luôn, không treo spinner."""
+    assert progress.retrieve_state(0, awaiting_resolve=True) == "partial"
+
+
+def test_resolve_detail_names_the_link_it_found() -> None:
+    assert progress.resolve_detail(label="Xác định người kế nhiệm", value="Đề Thám") == (
+        "Xác định người kế nhiệm → Đề Thám"
+    )
+
+
+def test_resolve_missing_detail_says_what_was_not_found() -> None:
+    assert progress.resolve_missing_detail("tên người kế nhiệm") == (
+        "Chưa xác định được tên người kế nhiệm"
+    )
+
+
+def test_resolve_internals_show_the_ask_and_the_answer() -> None:
+    rows = progress.resolve_internals(
+        target="tên người", value="", confidence="thấp", sources=[], dropped=[]
+    )
+    assert [r["label"] for r in rows] == [
+        "Cần trích",
+        "Trích được",
+        "Độ tin cậy",
+        "Nguồn hợp lệ",
+    ]
+    assert rows[1]["value"] == "—"  # trích trượt vẫn phải đọc được, không để ô trống
+    assert rows[3]["value"] == "—"
+
+
+def test_resolve_internals_expose_fabricated_sources() -> None:
+    """Mắt xích bị loại vì bịa nguồn nhìn y hệt ca "không tìm thấy gì" nếu không nêu id đã
+    loại — mà hai ca đó cần xử lý khác nhau hẳn (một cái là model bịa, một cái là corpus thiếu).
+    """
+    rows = progress.resolve_internals(
+        target="tên người",
+        value="Chu Văn Tấn",
+        confidence="cao",
+        sources=[],
+        dropped=["id-bia"],
+    )
+    assert rows[-1]["label"] == "Nguồn bịa (bị loại)"
+    assert rows[-1]["value"] == "id-bia"
+
+
+def test_resolve_internals_hide_dropped_row_when_nothing_dropped() -> None:
+    rows = progress.resolve_internals(
+        target="t", value="v", confidence="cao", sources=["c-1"], dropped=[]
+    )
+    assert all(r["label"] != "Nguồn bịa (bị loại)" for r in rows)
 
 
 # --- synthesize ---

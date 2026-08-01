@@ -17,6 +17,7 @@ from app.schemas.ask import (
     Citation,
     PlanStep,
     RequestedMode,
+    ResolvedFact,
     RouteDecision,
 )
 from app.schemas.retrieval import RetrievalMode, RetrievalResult
@@ -41,9 +42,21 @@ class AgentState(TypedDict):
     conversation_id: str | None
     message_id: str | None
     standalone_query: str
-    # Todo list do `plan` sinh + `planning.normalize_plan` kiểm. B1 luôn đúng 1 bước; seed
-    # (`entities`) nằm TRONG từng query của bước, không còn field seed_mentions phẳng.
+    # Todo list do `plan` sinh + `planning.normalize_plan` kiểm; seed (`entities`) nằm TRONG
+    # từng query của bước, không có field seed_mentions phẳng. Danh sách TĨNH: sinh một lần ở
+    # `plan`, không bước nào được thêm/sửa bước lúc đang chạy (nếu sau này đổi, phải dựng lại
+    # guard đếm lượt — `current_step` hiện là phanh duy nhất, xem plan §4.5).
     steps: list[PlanStep]
+    # Index bước đang chạy (0-based). Điểm GHI DUY NHẤT là node `advance_step`; `retrieve` và
+    # `resolve_step` chỉ ĐỌC. Một chỗ ghi = một chỗ test, không phải suy "ai tăng, tăng mấy lần".
+    current_step: int
+    # step_id -> mắt xích đã trích, dùng điền placeholder `<N>` của bước sau (execute-time).
+    resolved: dict[int, str]
+    # Cùng dữ liệu nhưng đủ ngữ cảnh để đưa vào prompt synthesize như fact CÓ NGUỒN.
+    resolved_facts: list[ResolvedFact]
+    # "" = todo list chạy hết bình thường; "unresolved" = dừng sớm (không truy hồi được gì ở
+    # bước cần trích, hoặc trích ra rỗng/độ tin cậy thấp) -> trả lời bằng phần đang có.
+    stop_reason: str
     # Mode từ request: "auto" = để `plan` chọn, giá trị cụ thể = user ép (bỏ qua plan).
     override_mode: RequestedMode
     # Mode THẬT dùng để truy hồi, `plan` giải xong mới có. Node retrieve dispatch theo field

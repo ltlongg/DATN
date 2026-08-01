@@ -9,7 +9,10 @@ from app.schemas.ask import (
     AskRequest,
     AskResponse,
     PlanOutput,
+    PlanStep,
     ChatMessage,
+    StepQuery,
+    StepResolveOutput,
     SynthesizedAnswer,
 )
 
@@ -57,6 +60,22 @@ def test_ask_response_defaults() -> None:
 def test_plan_output_defaults() -> None:
     out = PlanOutput(standalone_query="q", route="needs_retrieval")
     assert out.mentioned_entities == []
+
+
+def test_plan_step_defaults_to_no_resolve() -> None:
+    """Bước KHÔNG khai `resolve` là bước chỉ truy hồi — không tốn LLM call nào (§2)."""
+    step = PlanStep(id=1, label="L", queries=[StepQuery(query="q")])
+    assert step.resolve == ""
+    assert step.depends_on is None
+
+
+def test_step_resolve_output_defaults_to_not_found() -> None:
+    """Default phải là "không trích được" + confidence thấp: LLM trả thiếu field thì hệ
+    thống dừng list, KHÔNG đi tiếp với giá trị rỗng tưởng là hợp lệ (§4.4)."""
+    out = StepResolveOutput()
+    assert out.value == ""
+    assert out.confidence == "thấp"
+    assert out.source_chunk_ids == []
 
 
 def test_synthesized_answer_field_order_answer_first() -> None:

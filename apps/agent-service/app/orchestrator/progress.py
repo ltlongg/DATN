@@ -20,10 +20,12 @@ agent — agent luôn gửi để bản lưu vào `messages.steps` đủ cho adm
 Event `status` (`nodes.py`, `{"node","msg"}`) GIỮ NGUYÊN nhưng frontend hết đọc: nó còn ích
 khi test bằng curl/Swagger, và `debug` state vẫn là payload của `/ask` non-stream.
 
-**Phạm vi hiện tại** — B4 (multi-step) đã bỏ nên danh sách là `1 + N + 2`: `plan` -> N bước
-todo -> `synthesize:1` -> `validate:1`. Chưa có dòng `resolve` (B4); state `skipped` của
-plan §7.3 mục 1 cũng chưa dựng vì nó chỉ xảy ra khi list bị dừng sớm giữa chừng (B4). Thêm
-khi tới lượt, không dựng sẵn chỗ trống.
+Danh sách là `1 + N + 2`: `plan` -> N bước todo -> `synthesize:1` -> `validate:1` (+ dòng
+`visualization` luôn ở cuối). Câu thường N=1 nên 5 dòng; câu nhiều chặng N=2.
+
+Bước có `resolve` (B4) chốt trạng thái ở `resolve_step` chứ không ở `retrieve` — xem
+`retrieve_state(awaiting_resolve=...)`. Todo list dừng sớm thì các bước còn lại mang state
+`skipped`, khác `pending` ở chỗ hệ thống ĐÃ quyết định bỏ chúng.
 
 Lượt soạn lại (B5) **mọc thêm dòng mới** `synthesize:2`/`validate:2` chứ KHÔNG ghi đè dòng
 cũ (plan §7.3.1 mục 1): người dùng phải thấy được là hệ thống đã soạn lại, đó chính là điều
@@ -38,9 +40,11 @@ from typing import Any, Literal
 from app.schemas.ask import AnswerConfidence, PlanStep, RouteDecision
 from app.schemas.retrieval import RetrievalMode
 
-# State agent PHÁT ra. Frontend còn một state thứ tư `pending` cho dòng đã khai báo trong
+# State agent PHÁT ra. Frontend còn một state nữa là `pending` cho dòng đã khai báo trong
 # `steps` nhưng chưa chạy tới — nó thuần hiển thị, agent không bao giờ emit.
-StepState = Literal["running", "done", "partial"]
+# `skipped` khác `pending` ở chỗ: hệ thống ĐÃ QUYẾT ĐỊNH bỏ bước đó (todo list dừng sớm),
+# chứ không phải chưa chạy tới.
+StepState = Literal["running", "done", "partial", "skipped"]
 
 # Tầng 2 của panel: bảng nhãn/giá trị hiện khi admin mở rộng MỘT bước (thay cho DebugPanel
 # cũ). Value luôn là chuỗi đã format sẵn — frontend render generic, không switch theo bước;
@@ -55,9 +59,10 @@ SYNTHESIZE_STEP_LABEL = "Soạn câu trả lời"
 VALIDATE_STEP_LABEL = "Đối chiếu trích dẫn với nguồn"
 VISUALIZATION_STEP_LABEL = "Dựng bản đồ & dòng thời gian"
 
-# Confidence khiến bước soạn bài về `partial` thay vì `done` (plan §7.3 mục 1): trả lời
-# xong nhưng chính hệ thống không chắc -> không được cho tick xanh.
-_WEAK_CONFIDENCE: frozenset[str] = frozenset({"thấp", "không đủ dữ liệu"})
+# Confidence coi là YẾU. Hai chỗ dùng, cùng một nghĩa: bước soạn bài về `partial` thay vì
+# `done` (trả lời xong nhưng chính hệ thống không chắc -> không được cho tick xanh), và
+# `resolve_step` coi mắt xích là chưa xác định được -> dừng todo list (nodes.py).
+WEAK_CONFIDENCE: frozenset[str] = frozenset({"thấp", "không đủ dữ liệu"})
 
 # Nguồn thật sự chạy ở mỗi mode — nói đúng cái đã làm, không nói chung chung "đang tìm".
 _MODE_SOURCES: dict[RetrievalMode, str] = {
@@ -134,14 +139,15 @@ def build_step_list(
 
 
 def plan_detail(route: RouteDecision, steps: list[PlanStep]) -> str:
-    """Dòng phụ của bước `plan`.
+    """Dòng phụ của bước `plan`: nói cái ĐÁNG kể nhất của kế hoạch vừa dựng.
 
-    Bậc B1 luôn đúng 1 bước (`nodes.MAX_STEPS`), nên cái ĐÁNG kể ở đây là số truy vấn tách
-    ra chạy song song, không phải số bước. Nhánh "N bước phụ thuộc nhau" thuộc về B4 — chưa
-    viết vì hiện không có đường nào chạy tới.
+    Nhiều bước (câu multi-hop) là thông tin đắt hơn hẳn số truy vấn song song, nên nó được ưu
+    tiên nói trước — đó cũng là lúc người dùng cần biết vì sao câu này chờ lâu hơn thường lệ.
     """
     if route != "needs_retrieval":
         return _NON_RETRIEVAL_DETAIL[route]
+    if len(steps) > 1:
+        return f"Phát hiện {len(steps)} ý phụ thuộc nhau · tra {len(steps)} bước"
     query_count = sum(len(s.queries) for s in steps)
     if query_count > 1:
         return f"Tách {query_count} truy vấn · tìm song song"
@@ -158,8 +164,23 @@ def retrieve_detail(mode: RetrievalMode, *, query_count: int, chunk_count: int) 
     return " · ".join(parts)
 
 
-def retrieve_state(chunk_count: int) -> StepState:
-    return "done" if chunk_count > 0 else "partial"
+def retrieve_state(chunk_count: int, *, awaiting_resolve: bool = False) -> StepState:
+    """`awaiting_resolve` = bước này còn phải trích mắt xích -> giữ `running`.
+
+    Tìm được đoạn mới xong nửa việc; `resolve_step` mới là chỗ chốt dòng. Cho `done` ở đây
+    thì trong lúc trích, UI hiện tick xanh cho một việc chưa xong.
+    """
+    if chunk_count == 0:
+        return "partial"
+    return "running" if awaiting_resolve else "done"
+
+
+def resolve_detail(*, label: str, value: str) -> str:
+    return f"{label} → {value}"
+
+
+def resolve_missing_detail(target: str) -> str:
+    return f"Chưa xác định được {target}"
 
 
 def synthesize_detail(*, context_count: int, confidence: AnswerConfidence | None) -> str:
@@ -168,7 +189,7 @@ def synthesize_detail(*, context_count: int, confidence: AnswerConfidence | None
 
 
 def synthesize_state(confidence: AnswerConfidence | None) -> StepState:
-    return "partial" if confidence in _WEAK_CONFIDENCE else "done"
+    return "partial" if confidence in WEAK_CONFIDENCE else "done"
 
 
 def validate_detail(*, valid: int, total: int, will_retry: bool) -> str:
@@ -251,6 +272,32 @@ def retrieve_internals(
         rows.append(_row(f"Truy vấn {i}", f"{text}  →  {q.get('chunks', 0)} đoạn"))
     rows.append(_row("Tổng đã gộp", f"{total_chunks} đoạn"))
     rows.append(_row("Ngữ cảnh graph", f"{graph_context} quan hệ"))
+    return rows
+
+
+def resolve_internals(
+    *,
+    target: str,
+    value: str,
+    confidence: str,
+    sources: list[str],
+    dropped: list[str],
+) -> list[InternalRow]:
+    """Trích trượt là ca admin cần soi nhất: thấy được đã HỎI gì và model trả về gì, thay vì
+    chỉ thấy một dòng "chưa xác định được".
+
+    `dropped` (chunk_id model khai mà không có trong ngữ cảnh) chỉ hiện khi thật sự có — nó
+    là dấu hiệu bịa nguồn, và cũng là lý do một mắt xích nghe rất chắc vẫn bị loại. Giấu nó đi
+    thì ca đó nhìn y hệt ca "không tìm thấy gì".
+    """
+    rows = [
+        _row("Cần trích", target),
+        _row("Trích được", value or "—"),
+        _row("Độ tin cậy", confidence),
+        _row("Nguồn hợp lệ", ", ".join(sources) if sources else "—"),
+    ]
+    if dropped:
+        rows.append(_row("Nguồn bịa (bị loại)", ", ".join(dropped)))
     return rows
 
 

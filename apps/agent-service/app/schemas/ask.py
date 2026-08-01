@@ -91,11 +91,20 @@ class StepQuery(BaseModel):
 
 
 class PlanStep(BaseModel):
-    """Một bước trong todo list. B1 chỉ chạy đúng 1 bước; nhiều bước là bậc B4."""
+    """Một bước trong todo list, chạy theo thứ tự `id`.
+
+    Câu thường = 1 bước không có `resolve` (không tốn LLM call nào giữa vòng). Câu multi-hop
+    = 2 bước, bước đầu có `resolve` để trích mắt xích điền vào placeholder `<id>` của bước sau.
+    """
 
     id: int
-    label: str  # nhãn tiếng Việt ngắn, hiện lên DebugPanel (và panel tiến trình ở B3)
+    label: str  # nhãn tiếng Việt ngắn, hiện lên panel tiến trình cho người dùng đọc
     queries: list[StepQuery]
+    # Mô tả mắt xích cần trích từ chunk của CHÍNH bước này ("tên người kế nhiệm..."). Rỗng =
+    # bước chỉ truy hồi. Bước CUỐI không được có (không ai tiêu thụ) — cưỡng chế ở planning.py.
+    resolve: str = ""
+    # id bước cung cấp mắt xích. Chỉ để kiểm tính hợp lệ + vẽ UI; thứ tự CHẠY là thứ tự `id`.
+    depends_on: int | None = None
 
 
 class PlanOutput(BaseModel):
@@ -111,6 +120,36 @@ class PlanOutput(BaseModel):
     # Mode agent tự chọn cho CẢ câu hỏi. Bị bỏ qua khi request đã override mode cụ thể.
     selected_mode: AutoSelectableMode = "hybrid"
     steps: list[PlanStep] = Field(default_factory=list)
+
+
+class StepResolveOutput(BaseModel):
+    """Output node `resolve_step`: mắt xích trích được từ context của bước vừa chạy.
+
+    Ngắn có chủ đích — chính vì output chỉ là một cái tên nên đưa được TOÀN VĂN chunk vào
+    prompt (khác hẳn `reflect` đã bỏ, vốn chỉ đọc 240 ký tự đầu mỗi chunk rồi phán "đủ chưa").
+
+    `confidence`/`source_chunk_ids` là bắt buộc chứ không trang trí: đáp án trung gian đi vào
+    prompt synthesize như một fact CÓ NGUỒN, và `thấp` thì dừng list thay vì tra tiếp bằng
+    một cái tên đoán mò (§0.2 mục 6 — sai lan truyền).
+    """
+
+    value: str = ""  # "" = không thấy trong context
+    confidence: AnswerConfidence = "thấp"
+    source_chunk_ids: list[str] = Field(default_factory=list)
+
+
+class ResolvedFact(BaseModel):
+    """Mắt xích đã trích ở một bước, mang sang `synthesize` như một fact CÓ NGUỒN.
+
+    Không phải output LLM (đó là `StepResolveOutput`) mà là bản ghi state: thêm `step_id` +
+    `label` để panel tiến trình và prompt gọi tên được bước đã sinh ra nó.
+    """
+
+    step_id: int
+    label: str
+    value: str
+    confidence: AnswerConfidence
+    source_chunk_ids: list[str] = Field(default_factory=list)
 
 
 class SynthesizedAnswer(BaseModel):
