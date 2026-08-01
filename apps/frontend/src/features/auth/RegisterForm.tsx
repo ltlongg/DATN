@@ -79,7 +79,6 @@ export function RegisterForm() {
             if (mismatch) setMismatch(false);
           }}
         />
-        <p className="text-xs text-ink-soft">Tối thiểu 8 ký tự.</p>
       </div>
 
       <div className="space-y-1.5">
