@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
-from app.orchestrator.planning import DEFAULT_STEP_LABEL, normalize_plan
+from app.orchestrator.planning import (
+    DEFAULT_STEP_LABEL,
+    fill_placeholders,
+    normalize_plan,
+)
 from app.schemas.ask import PlanOutput, PlanStep, StepQuery
 
 
@@ -12,7 +16,7 @@ def _out(**kw) -> PlanOutput:
     return PlanOutput(**kw)
 
 
-def _norm(parsed: PlanOutput, question: str, *, max_steps=1, max_queries=4):
+def _norm(parsed: PlanOutput, question: str, *, max_steps=2, max_queries=4):
     return normalize_plan(
         parsed, question, max_steps=max_steps, max_queries_per_step=max_queries
     )
@@ -164,3 +168,149 @@ def test_blank_label_falls_back_to_default() -> None:
     parsed = _out(steps=[PlanStep(id=1, label="   ", queries=[StepQuery(query="q")])])
     _, steps, _ = _norm(parsed, "hỏi")
     assert steps[0].label == DEFAULT_STEP_LABEL
+
+
+# --- multi-step (B4): placeholder + resolve + depends_on ---
+
+
+def _multihop(**overrides) -> PlanOutput:
+    """Todo list multi-hop HỢP LỆ: bước 1 trích mắt xích, bước 2 dùng `<1>`."""
+    steps = [
+        PlanStep(
+            id=1,
+            label="Xác định người lãnh đạo",
+            queries=[StepQuery(query="ai lãnh đạo Bắc Sơn", entities=["Bắc Sơn"])],
+            resolve="tên người lãnh đạo",
+        ),
+        PlanStep(
+            id=2,
+            label="Chức vụ về sau",
+            depends_on=1,
+            queries=[StepQuery(query="<1> giữ chức vụ gì", entities=["<1>"])],
+        ),
+    ]
+    return _out(steps=overrides.pop("steps", steps), **overrides)
+
+
+def test_valid_multihop_plan_is_kept_intact() -> None:
+    _, steps, warnings = _norm(_multihop(), "Ai lãnh đạo Bắc Sơn về sau giữ chức gì?")
+    assert [s.id for s in steps] == [1, 2]
+    assert steps[0].resolve == "tên người lãnh đạo"
+    assert steps[1].depends_on == 1
+    assert steps[1].queries[0].query == "<1> giữ chức vụ gì"
+    assert warnings == []
+
+
+def test_placeholder_in_entities_survives_literal_guard() -> None:
+    """`<1>` KHÔNG có nguyên văn trong câu hỏi nhưng vẫn phải giữ: nó được điền ở
+    execute-time. Guard §2.1 chỉ cấm tên model tự nghĩ ra, không cấm placeholder."""
+    _, steps, warnings = _norm(_multihop(), "Ai lãnh đạo Bắc Sơn về sau giữ chức gì?")
+    assert steps[1].queries[0].entities == ["<1>"]
+    assert warnings == []
+
+
+def test_placeholder_in_first_step_downgrades_to_single_default_step() -> None:
+    """Bước 1 không có gì để điền vào placeholder -> truy vấn rác. Hạ về câu hỏi gốc."""
+    steps = [
+        PlanStep(id=1, label="A", queries=[StepQuery(query="<1> là ai")]),
+        PlanStep(id=2, label="B", queries=[StepQuery(query="q2")]),
+    ]
+    _, out, warnings = _norm(_multihop(steps=steps), "hỏi")
+    assert len(out) == 1
+    assert out[0].label == DEFAULT_STEP_LABEL
+    assert out[0].queries[0].query == "standalone q"
+    assert any("placeholder" in w for w in warnings)
+
+
+def test_placeholder_pointing_to_step_without_resolve_downgrades() -> None:
+    steps = [
+        PlanStep(id=1, label="A", queries=[StepQuery(query="q1")]),  # không có resolve
+        PlanStep(id=2, label="B", queries=[StepQuery(query="<1> làm gì")]),
+    ]
+    _, out, warnings = _norm(_multihop(steps=steps), "hỏi")
+    assert [s.label for s in out] == ["A"]
+    assert any("placeholder" in w for w in warnings)
+
+
+def test_invalid_depends_on_is_cleared_not_downgraded() -> None:
+    """`depends_on` không điều khiển gì lúc chạy (thứ tự là thứ tự `id`, chờ mắt xích là do
+    placeholder) -> trỏ sai thì dọn field, KHÔNG vứt cả todo list chạy được."""
+    steps = [
+        PlanStep(id=1, label="A", depends_on=2, queries=[StepQuery(query="q1")]),
+        PlanStep(id=2, label="B", queries=[StepQuery(query="q2")]),
+    ]
+    _, out, warnings = _norm(_multihop(steps=steps), "hỏi")
+    assert [s.label for s in out] == ["A", "B"]
+    assert out[0].depends_on is None
+    assert any("depends_on" in w for w in warnings)
+
+
+def test_resolve_nobody_consumes_is_stripped() -> None:
+    """Trích xong không ai dùng = tốn đúng một LLM call vứt đi (§4.1 luật 5).
+
+    Ca hay gặp nhất là bước CUỐI (không có bước nào sau để dùng), nhưng luật viết tổng quát
+    theo "có ai tham chiếu `<id>` không" nên bắt luôn ca bước giữa bị bỏ quên.
+    """
+    steps = [
+        PlanStep(id=1, label="A", queries=[StepQuery(query="q1")], resolve="mắt xích"),
+        PlanStep(id=2, label="B", queries=[StepQuery(query="q2 không dùng placeholder")]),
+    ]
+    _, out, warnings = _norm(_multihop(steps=steps), "hỏi")
+    assert [s.resolve for s in out] == ["", ""]
+    assert any("resolve" in w for w in warnings)
+
+
+def test_single_step_with_resolve_is_stripped_not_downgraded() -> None:
+    parsed = _out(
+        steps=[PlanStep(id=1, label="A", queries=[StepQuery(query="q")], resolve="x")]
+    )
+    _, out, _ = _norm(parsed, "hỏi")
+    assert len(out) == 1 and out[0].resolve == ""
+
+
+def test_renumbering_remaps_placeholder_and_depends_on() -> None:
+    """LLM hay trả id lệch (0-based, nhảy số). Đánh số lại mà quên remap là placeholder trỏ
+    vào hư không -> bước sau chạy với `<7>` nguyên văn trong truy vấn."""
+    steps = [
+        PlanStep(id=7, label="A", queries=[StepQuery(query="q1")], resolve="mắt xích"),
+        PlanStep(
+            id=9,
+            label="B",
+            depends_on=7,
+            queries=[StepQuery(query="<7> làm gì", entities=["<7>"])],
+        ),
+    ]
+    _, out, warnings = _norm(_multihop(steps=steps), "hỏi")
+    assert [s.id for s in out] == [1, 2]
+    assert out[1].depends_on == 1
+    assert out[1].queries[0].query == "<1> làm gì"
+    assert out[1].queries[0].entities == ["<1>"]
+    assert warnings == []
+
+
+def test_second_step_cut_by_max_steps_downgrades_orphaned_placeholder() -> None:
+    """Cắt bước 2 vì quá `max_steps` thì `resolve` của bước 1 mất người tiêu thụ -> phải
+    strip, không được để lại một LLM call vô nghĩa."""
+    _, out, warnings = _norm(_multihop(), "hỏi", max_steps=1)
+    assert len(out) == 1
+    assert out[0].resolve == ""
+    assert any("bước" in w for w in warnings)
+
+
+# --- fill_placeholders (execute-time) ---
+
+
+def test_fill_placeholders_replaces_in_query_and_entities() -> None:
+    step = PlanStep(
+        id=2,
+        label="B",
+        queries=[StepQuery(query="<1> giữ chức gì", entities=["<1>", "Bắc Sơn"])],
+    )
+    filled = fill_placeholders(step, {1: "Chu Văn Tấn"})
+    assert filled.queries[0].query == "Chu Văn Tấn giữ chức gì"
+    assert filled.queries[0].entities == ["Chu Văn Tấn", "Bắc Sơn"]
+
+
+def test_fill_placeholders_leaves_step_untouched_when_nothing_to_fill() -> None:
+    step = PlanStep(id=1, label="A", queries=[StepQuery(query="q", entities=["X"])])
+    assert fill_placeholders(step, {}) is step
