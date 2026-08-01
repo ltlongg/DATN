@@ -1,9 +1,8 @@
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { Markdown } from "@/components/Markdown";
 import { CitationList } from "@/features/chat/CitationList";
-import { ClarificationPrompt } from "@/features/chat/ClarificationPrompt";
-import { DebugPanel } from "@/features/chat/DebugPanel";
 import { AssistantAvatar, UserAvatar } from "@/features/chat/MessageAvatar";
+import { ProgressPanel } from "@/features/chat/ProgressPanel";
 import type { ChatItem } from "@/features/chat/chatReducer";
 import { formatTtft } from "@/lib/format";
 import { useAuthStore } from "@/store/authStore";
@@ -15,14 +14,10 @@ function countWords(text: string): number {
 }
 
 /** 1 dòng chat. User: bong bóng phải. Assistant: khối trái + citations/confidence/lỗi. */
-export function MessageBubble({
-  item,
-  onReply,
-}: {
-  item: ChatItem;
-  onReply: (text: string) => void;
-}) {
-  const isAdmin = useAuthStore((s) => s.user?.role === "admin");
+export function MessageBubble({ item }: { item: ChatItem }) {
+  // Không cần biết role ở đây nữa: tầng 2 của panel tiến trình chỉ hiện khi `step.internals`
+  // CÓ MẶT, mà backend đã bóc field đó cho mọi lượt không phải admin-bật-debug. Một nguồn
+  // sự thật, và là nguồn ở phía server.
   const userName = useAuthStore((s) => s.user?.name ?? "");
 
   if (item.role === "user") {
@@ -40,6 +35,13 @@ export function MessageBubble({
     <div className="flex justify-start gap-2">
       <AssistantAvatar />
       <div className="min-w-0 flex-1 rounded-2xl rounded-bl-sm border border-paper-border bg-paper-card px-4 py-3">
+        {/* Trên MỌI nhánh (kể cả lỗi/bị chặn): panel cho thấy hệ thống đã đi tới đâu rồi
+            mới dừng — im lặng ở đúng lúc hỏng là thứ khó chịu nhất. */}
+        <ProgressPanel
+          steps={item.steps}
+          startedAt={item.startedAt}
+          streaming={item.streaming}
+        />
         {item.error ? (
           <p className="text-sm text-rose-700">⚠ {item.error.message}</p>
         ) : item.blocked ? (
@@ -54,13 +56,11 @@ export function MessageBubble({
               Câu hỏi bị chặn bởi bộ lọc an toàn.
             </p>
           )
-        ) : item.clarificationNeeded ? (
-          <ClarificationPrompt
-            question={item.clarificationQuestion ?? item.content}
-            disabled={item.streaming}
-            onReply={onReply}
-          />
         ) : (
+          // Câu hỏi lại (route `ambiguous`) đi CHUNG nhánh này, không có khối vàng riêng:
+          // nó là một câu trả lời như mọi câu khác, chỉ khác ở chỗ kết thúc bằng dấu hỏi.
+          // `content` đã là chính câu hỏi lại (reducer set từ event `clarification`).
+          // ConfidenceBadge/CitationList tự ẩn khi rỗng nên không cần rẽ nhánh.
           <>
             <div className="text-ink">
               {item.content !== "" && <Markdown content={item.content} />}
@@ -97,8 +97,6 @@ export function MessageBubble({
             <CitationList citations={item.citations} />
           </>
         )}
-
-        {isAdmin && <DebugPanel item={item} />}
       </div>
     </div>
   );

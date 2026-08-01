@@ -1,5 +1,3 @@
-import { useState } from "react";
-import type { RetrievalMode } from "@/api/askStream";
 import { Composer } from "@/features/chat/Composer";
 import { MessageList } from "@/features/chat/MessageList";
 import type { ChatItem } from "@/features/chat/chatReducer";
@@ -11,6 +9,15 @@ const SAMPLE_QUESTIONS = [
   "Ý nghĩa lịch sử của Cách mạng Tháng Tám 1945?",
 ];
 
+/**
+ * Lượt cuối là câu hỏi lại của agent -> ô nhập chính đổi lời mời. Chỉ xét item CUỐI: trả lời
+ * xong một clarification rồi thì lời mời phải trở lại bình thường.
+ */
+function isAwaitingClarification(items: ChatItem[]): boolean {
+  const last = items[items.length - 1];
+  return !!last && last.role === "assistant" && last.clarificationNeeded;
+}
+
 /** Khung chat: empty-state gợi ý câu hỏi hoặc danh sách message, + ô nhập. */
 export function ChatPanel({
   items,
@@ -19,12 +26,8 @@ export function ChatPanel({
 }: {
   items: ChatItem[];
   streaming: boolean;
-  onSend: (text: string, mode: RetrievalMode) => void;
+  onSend: (text: string) => void;
 }) {
-  // Mode truy hồi do khung chat giữ để áp dụng cho cả câu hỏi mẫu lẫn reply.
-  const [mode, setMode] = useState<RetrievalMode>("hybrid");
-  const send = (text: string) => onSend(text, mode);
-
   return (
     <div className="flex h-full flex-col">
       {items.length === 0 ? (
@@ -39,7 +42,7 @@ export function ChatPanel({
             {SAMPLE_QUESTIONS.map((q) => (
               <button
                 key={q}
-                onClick={() => send(q)}
+                onClick={() => onSend(q)}
                 className="rounded-lg border border-paper-border bg-paper-card px-4 py-3 text-left text-sm text-ink transition hover:border-brand"
               >
                 {q}
@@ -48,9 +51,15 @@ export function ChatPanel({
           </div>
         </div>
       ) : (
-        <MessageList items={items} onReply={send} />
+        <MessageList items={items} />
       )}
-      <Composer disabled={streaming} mode={mode} onModeChange={setMode} onSend={send} />
+      <Composer
+        disabled={streaming}
+        onSend={onSend}
+        placeholder={
+          isAwaitingClarification(items) ? "Trả lời để làm rõ…" : undefined
+        }
+      />
     </div>
   );
 }
