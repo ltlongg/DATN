@@ -49,7 +49,7 @@ def compute_cost_by_day(rows: list[dict[str, Any]]) -> list[DailyCost]:
 
 
 def compute_cost_by_task(rows: list[dict[str, Any]]) -> list[TaskCost]:
-    """Group theo task ('build_query' | 'synthesize'), sort theo task."""
+    """Group theo task ('plan' | 'synthesize' | ...), sort theo task."""
     calls: dict[str, int] = defaultdict(int)
     tokens: dict[str, int] = defaultdict(int)
     for r in rows:

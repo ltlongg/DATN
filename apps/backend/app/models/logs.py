@@ -16,7 +16,7 @@ from app.core.db import connection
 # Cột thô của message (không tính chất lượng ở SQL — để service thuần xử lý).
 _MSG_COLS = (
     "id, role, content, clarification_needed, citations, visualization, "
-    "retrieval_mode, confidence, warnings, ttft_ms, created_at"
+    "retrieval_mode, confidence, warnings, steps, ttft_ms, created_at"
 )
 
 

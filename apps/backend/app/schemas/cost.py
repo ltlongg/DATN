@@ -1,6 +1,6 @@
 """Schema cho Module 4 — Chi phí (cost dashboard, admin).
 
-Chỉ track token của 2 lệnh gọi LLM online (build_query, synthesize). Ước tính $ là
+Chỉ track token của các lệnh gọi LLM online (plan, synthesize). Ước tính $ là
 CLIENT-SIDE (admin tự nhập giá/1K token trên UI), KHÔNG persist. Xem
 backend-additions-plan.md §4.
 """
@@ -25,7 +25,7 @@ class DailyCost(BaseModel):
 
 
 class TaskCost(BaseModel):
-    task: str  # 'build_query' | 'synthesize'
+    task: str  # 'plan' | 'synthesize' | 'guardrail_input' (+ 'build_query' ở log cũ)
     calls: int
     total_tokens: int
 

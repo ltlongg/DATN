@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ConversationLogItem(BaseModel):
@@ -50,6 +50,10 @@ class MessageLogItem(BaseModel):
     retrieval_mode: str
     confidence: str | None
     warnings: list[Any]
+    # Panel tiến trình đã lưu, KÈM `internals` của từng bước (số liệu thô trước đây nằm ở
+    # DebugPanel realtime rồi bay mất). Đây là chỗ duy nhất admin xem lại được luồng xử lý
+    # của một hội thoại đã đóng.
+    steps: list[dict[str, Any]] = Field(default_factory=list)
     ttft_ms: int | None
     created_at: datetime
     quality: MessageQuality
@@ -110,7 +114,7 @@ class TokenSummary(BaseModel):
 
 class MessageTokenTaskRow(BaseModel):
     """1 dòng phân rã theo task trong 1 message. `model` ở mức task vì mỗi task có thể dùng
-    model khác nhau (build_query/synthesize vs guardrail_input)."""
+    model khác nhau (plan/synthesize vs guardrail_input)."""
 
     task: str
     model: str

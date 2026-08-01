@@ -99,9 +99,17 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
     """,
     # TTFT (mili-giây) của assistant message: đo Ở BACKEND, từ lúc nhận POST /ask tới event
     # `token` ĐẦU TIÊN proxy xuống frontend — gồm cả quota check, load history, guardrails,
-    # build_query, retrieval, không chỉ riêng LLM. NULL = không đo được (stream lỗi/blocked
+    # plan, retrieval, không chỉ riêng LLM. NULL = không đo được (stream lỗi/blocked
     # trước token đầu, hoặc message user).
     "ALTER TABLE messages ADD COLUMN IF NOT EXISTS ttft_ms INTEGER;",
+    # Panel tiến trình (B3): chuỗi bước agent đã chạy + kết quả từng bước, để reload vẫn
+    # thấy lại chuỗi suy luận chứ không chỉ câu trả lời. Backend KHÔNG diễn giải nội dung,
+    # chỉ lưu nguyên mảng gom từ event `steps`/`step` (xem sse_collector).
+    # ⚠️ Dùng ALTER chứ KHÔNG drop+tạo lại như agentic-retrieval-loop-plan.md §7.1 viết:
+    # plan đặt giả thiết "chưa có data thật cần giữ", nay `messages` đã có lịch sử hội thoại
+    # thật. Cột ttft_ms ngay trên cũng thêm bằng đúng cách này — giữ nhất quán, và thêm cột
+    # có DEFAULT thì ALTER không tốn gì so với drop.
+    "ALTER TABLE messages ADD COLUMN IF NOT EXISTS steps JSONB NOT NULL DEFAULT '[]';",
     # documents — danh mục tài liệu nguồn. `source_file` là KHÓA NỐI xuống kho tri thức
     # thật: khớp `rag_chunks.metadata->>'source_file'` (vd 'lichsu.clean.md'). Nhờ nó,
     # chunk_count/event_count được ĐẾM THẬT lúc đọc (xem models/document.py) thay vì lưu
