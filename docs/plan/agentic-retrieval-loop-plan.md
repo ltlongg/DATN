@@ -460,6 +460,23 @@ concat + dedupe `graph_context`). Xem §4.2.
 - Emit event `steps` cho FE (§7.3).
 - Fallback lỗi: mode=`hybrid`, 1 bước từ `standalone_query`, `route="needs_retrieval"`, warning.
 
+> ### ✅ ĐÃ CODE 2026-08-01 — hai luật của §4.1 siết lại khi làm thật
+>
+> 1. **`depends_on` trỏ sai → XOÁ FIELD, không hạ cả list** (khác luật 3 ở trên). Lý do: field
+>    này **không điều khiển gì lúc chạy** — thứ tự thực thi là thứ tự `id`, còn việc chờ mắt
+>    xích là do placeholder quyết. Vứt một todo list chạy được vì một field chỉ dùng để kiểm
+>    tra + vẽ UI là phản ứng thái quá. Vẫn ghi warning để đo được.
+> 2. **Luật 5 viết tổng quát hơn**: xoá `resolve` của **bước không có ai tham chiếu `<id>`**,
+>    thay vì chỉ cấm ở bước cuối. Cùng một lý lẽ ("không ai tiêu thụ ⇒ tốn một LLM call vứt
+>    đi") nhưng bắt thêm ca bước-giữa-bị-bỏ-quên, và ca bước cuối tự rơi vào (không có bước
+>    nào sau nó). Ca hay gặp nhất trong thực tế: bước 2 bị cắt vì `max_steps`, `resolve` của
+>    bước 1 mồ côi theo.
+> 3. Luật 6 (bước 1 không placeholder) **không cần code riêng**: nó là hệ quả của luật 4 —
+>    ở bước 1 tập "bước trước có `resolve`" là rỗng nên mọi placeholder đều mồ côi.
+> 4. **Đánh số lại id phải REMAP placeholder + `depends_on`** (bản trước không nói). LLM hay
+>    trả id lệch; đổi `7,9` thành `1,2` mà quên remap thì `<7>` thành mồ côi và một todo list
+>    hợp lệ bị hạ về 1 bước.
+
 ### 4.2 `retrieve` (fan-out trong 1 bước + RRF cross-query + tích luỹ)
 - `mode = state["selected_mode"]`; `step = state["steps"][state["current_step"]]`;
   **KHÔNG tự tăng `current_step`** — biến đó chỉ `advance_step` ghi (§4.5); `retrieve` chỉ ĐỌC.
@@ -546,6 +563,18 @@ synthesize làm**, KHÔNG lấy toàn văn citation-only chunk làm nội dung t
   Detail = "Dense + BM25 · N đoạn" / "Không tìm thấy đoạn phù hợp". Trả `retrieval`,
   `retrieval_mode=mode`, warnings, debug (per-query counts).
 
+> ### ✅ ĐÃ CODE 2026-08-01 — guard đặt ở `retrieve`, không ở `after_retrieve`
+>
+> Bản dưới cho `after_retrieve` đọc `state["retrieval"].chunks` — tức tập **TÍCH LUỸ**. Đúng ở
+> 2 bước nhưng chỉ vì bước duy nhất được `resolve` là bước 1 (lúc đó tích luỹ ≡ lượt hiện
+> tại); nó là loại đúng-do-may mà §8 đã phải viết hẳn một mục để cảnh báo.
+>
+> Code thật: **node `retrieve` tự set `stop_reason`** dựa trên số chunk của **RIÊNG bước
+> mình** (nó có sẵn con số đó trước khi merge), `after_retrieve` chỉ đọc `stop_reason`. Cùng
+> hành vi ở 2 bước, nhưng guard thành **per-step thật** — đúng đường nâng lên 3 bước mà §8 đã
+> phác. Nói cho chuẩn: điều này KHÔNG tự động mở khoá 3 bước (`Settings` vẫn `le=2`), chỉ là
+> gỡ sẵn một trong hai chỗ chặn.
+
 ### 4.3 `after_retrieve` (conditional edge)
 ```python
 def after_retrieve(state) -> str:
@@ -588,12 +617,38 @@ chắc chắn trả `value=""`, nên bỏ qua nó tiết kiệm **đúng một**
 đây là **chặn bước sau chạy bừa**, không phải khoản tiết kiệm đó.
 
 ### 4.4 `resolve_step` (node mới — thay `reflect`)
-- Prompt (§5): đưa **câu GỐC** + `step.resolve` (mô tả mắt xích cần trích) + **full text**
-  các chunk vừa lấy của bước này → hỏi `StepResolveOutput`. Cho full text được vì output chỉ
-  là một chuỗi ngắn — đây chính là điểm `reflect` làm sai (§0.2).
+- Prompt (§5): đưa **`standalone_query`** + `step.resolve` (mô tả mắt xích cần trích) +
+  **full text** các chunk vừa lấy của bước này → hỏi `StepResolveOutput`. Cho full text được
+  vì output chỉ là một chuỗi ngắn — đây chính là điểm `reflect` làm sai (§0.2).
+
+  > ⚠️ **Sửa 2026-08-01: bản trước ghi "câu GỐC" và code làm đúng theo đó — SAI.** Prompt
+  > `resolve` không có khối lịch sử hội thoại, nên câu nối tiếp ("người kế nhiệm **ông ấy** bị
+  > ai sát hại?") vào đây là đại từ không còn đường nào giải; model đúng luật phải trả rỗng →
+  > `stop_reason="unresolved"` → **mất hop 2 trong một ca lẽ ra chạy được**. Và nó khiến
+  > `resolve_step` thành node online DUY NHẤT suy luận trên bản câu hỏi khác với bản đã dùng
+  > để đi tìm (`retrieve` + `synthesize` đều dùng `standalone_query`).
+  > Ba node còn giữ `state["question"]` là CỐ Ý, không phải bỏ sót: `guard_input` phải soi
+  > đúng chữ người dùng gõ, `direct_response`/`clarify` đang đáp lại chính câu đó.
 - Ghi `record_usage(task="resolve", ...)`.
-- `value` không rỗng & `confidence != "thấp"` → `resolved[step.id] = value`, thêm vào
-  `resolved_facts`, emit `step` (state=`done`, detail = `"{label} → {value}"`).
+- `value` không rỗng & `confidence != "thấp"` **& còn ít nhất một `source_chunk_ids` hợp lệ**
+  → `resolved[step.id] = value`, thêm vào `resolved_facts`, emit `step` (state=`done`,
+  detail = `"{label} → {value}"`).
+
+  > ⚠️ **Vế nguồn thêm 2026-08-01, bản trước THIẾU và đó là lỗ thật.** Bản trước chỉ gác
+  > `value` + `confidence`, còn id bịa thì lọc im lặng ở bước dựng `ResolvedFact` — nên
+  > `value="Chu Văn Tấn", confidence="cao", source_chunk_ids=["id-bịa"]` vẫn **được chấp
+  > nhận**, vẫn lái truy vấn bước 2, và vẫn vào prompt synthesize (lúc đó là một khẳng định
+  > TRẦN, không nguồn — đúng thứ §0.2 mục 6 đặt `source_chunk_ids` ra để chặn). Không kiểm
+  > được `value` bằng nguồn nào thì coi như không tìm thấy.
+  >
+  > **Tập id hợp lệ = chunk đưa vào prompt ∪ chunk nguồn của `graph_context`**, không phải
+  > mỗi `retrieval.chunks`: prompt cho phép trích id ở cả hai chỗ, và `graph_context` có thể
+  > trỏ tới chunk không hydrate được (`fusion._with_provenance` chỉ bù `if cid in pool`). So
+  > hẹp hơn ngữ cảnh thật là loại nhầm id hợp lệ — mà guard này DỪNG cả todo list, nên loại
+  > nhầm là mất luôn một hop.
+  >
+  > Id bịa bị loại hiện ở `internals` dòng "Nguồn bịa (bị loại)", KHÔNG đẩy vào `warnings`
+  > (warnings hiện cho NGƯỜI DÙNG ở `MessageBubble`, đây là chuyện của admin).
 - Ngược lại → `stop_reason="unresolved"`, emit `step` (state=`partial`, detail = "chưa xác
   định được {resolve}").
 - Fallback lỗi: coi như không trích được (`stop_reason="unresolved"`) + warning — **không**
@@ -829,15 +884,18 @@ worst-case đôi chi phí synthesize — chỉ khi 0 citation, hiếm.
 
 > ### ✅ ĐÃ CODE 2026-07-31 — nhưng PHẠM VI CO LẠI so với bản viết dưới
 >
-> B4 đã bỏ (cổng go/no-go trượt 2 lần, xem §9) và B5 chưa làm, nên **những phần của §7.3
-> dưới đây CHƯA có đường nào chạy tới và CỐ Ý không dựng sẵn chỗ trống**:
-> - **state `skipped`** — chỉ xảy ra khi todo list bị dừng sớm giữa chừng (`stop_reason=
->   "unresolved"`, §4.3/§4.5), tức chỉ khi có ≥2 bước. Chưa dựng.
-> - **dòng phụ `resolve`** (`"Người kế nhiệm → <tên>"` + chip nguồn) — thuộc B4.
-> - **dòng `validate:N`** + chữ `"x/N liên kết nguồn hợp lệ"` — thuộc B5. Danh sách hiện là
->   `1 + N + 1` = **3 dòng** cho câu đơn, đúng hàng "Trước B5" của bảng bên dưới.
-> - **nhánh `plan` nhiều bước** (`"Phát hiện 2 ý phụ thuộc nhau"`) — `MAX_STEPS = 1` nên
->   không tới được; dòng phụ hiện đếm **số truy vấn song song** thay vì số bước.
+> ~~B4 đã bỏ (cổng go/no-go trượt 2 lần, xem §9) và B5 chưa làm~~ — **cả hai đã code xong**
+> (B5 ngày 2026-07-31, B4 ngày 2026-08-01), nên 4 gạch đầu dòng dưới đây đều **đã hết hiệu
+> lực**; giữ lại làm bản ghi lịch sử của phạm vi từng bị co lại:
+> - ~~state `skipped`~~ → đã dựng, đi kèm nhãn trợ năng riêng ("đã bỏ qua") và gạch ngang
+>   nhãn bước, để phân biệt được với `pending` ("chưa chạy tới").
+> - ~~dòng phụ `resolve`~~ → `resolve_detail`/`resolve_missing_detail`. **Chip nguồn thì
+>   CHƯA**: `source_chunk_ids` của mắt xích hiện chỉ vào prompt synthesize + `internals`
+>   (tầng 2, admin), không thành chip bấm được ở tầng 1.
+> - ~~dòng `validate:N`~~ → đã có từ B5. Danh sách là `1 + N + 2`.
+> - ~~nhánh `plan` nhiều bước~~ → `plan_detail` nay dẫn bằng số BƯỚC khi >1
+>   ("Phát hiện 2 ý phụ thuộc nhau · tra 2 bước"), chỉ rơi về đếm truy vấn song song khi
+>   đúng 1 bước.
 >
 > **Thêm 2 thứ không có trong bản viết** (phát sinh khi code, đều là để nói thật hơn):
 > - **state thứ tư `pending`** — dòng đã khai báo trong `steps` nhưng chưa chạy tới. Không
@@ -1038,6 +1096,13 @@ assert len(answer_ctx) <= cfg.final_context_k
 Vì sao cần knob này: `multiquery_final_k` cắt theo **BƯỚC**, nên 2 bước là ~16 chunk vào
 synthesize — gấp đôi hiện tại mà không ai chặn (§4.2).
 
+> ### ✅ ĐÃ CODE 2026-08-01 — "từ chối >2" nằm ở `Settings`, không ở validator plan
+>
+> `retrieval_max_steps: int = Field(default=2, ge=1, le=2)`. Đặt ràng buộc ở pydantic nghĩa là
+> cấu hình sai **chết lúc khởi động service**, không phải lúc câu hỏi đầu tiên chạy qua
+> validator — người chỉnh biết ngay mình chỉnh vào chỗ chưa hỗ trợ, và không tốn dòng code
+> nào để nói điều đó. Validator plan vì vậy chỉ còn việc cắt `steps[:max_steps]`.
+
 #### `retrieval_max_steps` — V1 CHỐT CỨNG 2, KHÔNG phải knob nâng được
 
 Bản trước viết *"Nâng lên 3 chỉ khi đo được câu thật cần"*. **Rút lại**: kiến trúc
@@ -1140,21 +1205,47 @@ nếu không làm gì. **Invariant phải được tái áp trong node `retrieve
 - **B4 — Multi-step todo** ⚠️ khó nhất **và có CỔNG GO/NO-GO**: `resolve_step` + placeholder
   (điền execute-time) + `advance_step`/`after_resolve`/`after_advance` + **guard 0-chunk dừng
   list** (§4.3) + tích luỹ chunk + prompt `resolve` + few-shot multi-hop.
+  **✅ XONG 2026-08-01** — cổng đạt ở lần đo 2 (khối ngay dưới). Test: agent 372 · backend 186
+  (+4 fail `test_activity.py` có sẵn, lỗi môi trường) · frontend 90.
 
-  > ### ⛔ CỔNG ĐÃ ĐO — B4 **TRƯỢT**, HOÃN VÔ THỜI HẠN (2026-07-31)
+  > ### ⛔→✅ CỔNG: TRƯỢT 2026-07-31, **ĐẠT 2026-08-01** — B4 **ĐÃ CODE**
   >
-  > Hai điều kiện, cả hai đều là **số đo**, không phải cảm giác:
-  > 1. **Có ≥1 câu multi-hop thoả (a)+(b)** của §2.0 → ✅ **ĐẠT** (câu Yên Thế).
-  > 2. **`hybrid` hiện tại chưa giải được** → ❌ **TRƯỢT**: hybrid MỘT lượt lấy về **2/2 mắt
-  >    xích** (hạng 1 và hạng 6). Xem bảng số liệu §10.
+  > **Lần đo 1 (2026-07-31) — trượt.** Hai điều kiện:
+  > 1. Có ≥1 câu multi-hop thoả (a)+(b) của §2.0 → ✅ ĐẠT (câu Yên Thế).
+  > 2. `hybrid` hiện tại chưa giải được → ❌ TRƯỢT: hybrid MỘT lượt lấy về **2/2 mắt xích**
+  >    (hạng 1 và hạng 6).
   >
-  > ⇒ **KHÔNG code B4.** Khâu mà multi-step định sửa đang không hỏng; code thêm `resolve_step`
-  > + placeholder + vòng lặp chỉ để giải một vấn đề chưa quan sát được là tự bịa tính agentic
-  > — đúng thứ §2.2 và §11.2b cảnh báo. Công dồn sang **B5**.
+  > Kết luận lúc đó — không code B4 — là **đúng với dữ liệu lúc đó**, và việc dừng lại để đo
+  > chính là thứ đã ngăn một tuần code cho vấn đề chưa quan sát được.
   >
-  > **Mở lại B4 khi nào**: tìm được câu mà hybrid một lượt **trượt mắt xích** (đo bằng chính
-  > script §10). Lúc đó điều kiện 2 mới thành đạt. Toàn bộ thiết kế B4 trong plan này GIỮ
-  > NGUYÊN, không xoá — nó đúng, chỉ là chưa cần.
+  > **Lần đo 2 (2026-08-01) — đạt.** Quét toàn corpus tìm ứng viên theo đúng cấu trúc
+  > (cạnh `anchor -> bridge` trong MỘT chunk; anchor và bridge co-occur đúng chunk đó; tồn tại
+  > chunk khác chứa bridge nhưng KHÔNG chứa anchor, ở mục khác) → 42 ứng viên qua lọc. Câu
+  > chốt:
+  >
+  > > **"Người lãnh đạo chi bộ Đảng trong khởi nghĩa Bắc Sơn về sau giữ chức vụ gì, tham gia
+  > > đảng ủy chiến dịch nào?"**
+  >
+  > | Cách chạy | hop1 `lichsu_clean-000103` (Bắc Sơn 1940) | hop2 `lichsu_clean-000245` (Đảng ủy Chiến dịch Trần Hưng Đạo 1950) |
+  > |---|---|---|
+  > | Hybrid MỘT lượt, seed `["khởi nghĩa Bắc Sơn"]` | hạng **1/9** | **không có mặt** |
+  > | Bước 2 sau khi trích được "Chu Văn Tấn" | — | hạng **2/8** |
+  >
+  > **Vì sao ca này trượt còn Yên Thế thì không** (khác biệt là CẤU TRÚC, không phải may rủi):
+  > chunk hop2 nói về Chiến dịch Trần Hưng Đạo, **không chứa chữ "Bắc Sơn" nào** → truy vấn
+  > dựng từ vốn từ câu hỏi không có đường chạm tới. Ở Yên Thế thì chunk hop2 vẫn nhắc "Yên
+  > Thế"/"Đề Thám" nên dense/BM25 vớ được. Kiểm bằng text: 10 chunk chứa "Bắc Sơn", 2 chunk
+  > chứa "Chu Văn Tấn", **giao đúng 1** = chính chunk hop1.
+  >
+  > **Graph cũng không cứu được, và đây là chỗ §0.1 mục 3 chưa nói tới**: `_EXPAND_SEED`
+  > ([graph_store.py:122-133](../../apps/agent-service/app/tools/graph_rag/graph_store.py#L122-L133))
+  > trả `source_chunk_ids` của **seed** và của **các cạnh gắn vào seed**, KHÔNG trả chunk list
+  > của node HÀNG XÓM. Chunk 245 thuộc cạnh *Chu Văn Tấn ↔ Chiến dịch Trần Hưng Đạo* — 2 hop
+  > từ seed "khởi nghĩa Bắc Sơn", ngoài tầm. Đo thật: 12 `graph_context` item, không có 245.
+  > Tức 1-hop expand phủ được câu 1-seed **khi mắt xích 2 nằm trên cạnh của chính seed**, và
+  > đó chính là ranh giới của nó.
+  >
+  > ⇒ Điều kiện 2 ĐẠT → code B4. **Ba điểm khác thiết kế gốc, xem §4.1/§4.3/§8.**
 - **B5 — Validate-citations loop**: §6. Wire lại `synthesize_max_attempts`/`regenerating`
   đang chết; panel có thêm dòng "Đối chiếu trích dẫn với nguồn". Demo: ép LLM bịa id → thấy
   `regenerating` + soạn lại.
