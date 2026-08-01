@@ -156,6 +156,28 @@ def test_running_row_is_closed_out_to_partial_when_persisting() -> None:
     assert saved == {"plan": "done", "todo:1": "done", "synthesize:1": "partial"}
 
 
+def test_skipped_row_survives_persistence_unchanged() -> None:
+    """`skipped` (todo list dừng sớm — B4) KHÔNG bị hạ như `running`: nó đã là trạng thái
+    cuối cùng và mang nghĩa riêng ("hệ thống bỏ bước này"), hạ xuống `partial` là nói dối
+    rằng bước đó có chạy dở."""
+    col = SseCollector()
+    col.feed(
+        "steps",
+        {
+            "steps": [
+                {"id": "todo:1", "label": "Xác định mắt xích", "kind": "retrieve"},
+                {"id": "todo:2", "label": "Tra tiếp", "kind": "retrieve"},
+            ]
+        },
+    )
+    col.feed("step", {"id": "todo:1", "state": "partial", "detail": "Chưa xác định được X"})
+    col.feed("step", {"id": "todo:2", "state": "skipped"})
+    col.feed("token", {"text": "x"})
+    col.feed("done", {"confidence": "vừa", "retrieval_mode": "hybrid", "warnings": []})
+    saved = {r["id"]: r["state"] for r in col.message_fields()["steps"]}
+    assert saved == {"todo:1": "partial", "todo:2": "skipped"}
+
+
 def test_close_out_does_not_mutate_collector_state() -> None:
     col = SseCollector()
     col.feed("steps", {"steps": [{"id": "plan", "label": "L", "kind": "system"}]})
