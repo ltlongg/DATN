@@ -11,7 +11,7 @@ import os
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import field_validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Windows: huggingface_hub mặc định cache model bằng symlink -> WinError 1314 nếu user
@@ -112,14 +112,20 @@ class Settings(BaseSettings):
     synthesize_max_attempts: int = 2
     stream_batch_chars: int = 160
 
-    # --- Multi-query fan-out (agentic retrieval loop, bậc B1). Node `plan` sinh nhiều query
-    # chạy SONG SONG trong một bước; `retrieve` gộp bằng RRF theo RANK rồi cắt.
+    # --- Todo list truy hồi (agentic retrieval loop, bậc B1 + B4). Node `plan` sinh các bước;
+    # mỗi bước chạy nhiều query SONG SONG, `retrieve` gộp bằng RRF theo RANK rồi cắt.
     # KHÔNG đi qua RuntimeConfig/system_config ở V1 — xem
     # docs/plan/agentic-retrieval-loop-plan.md §8 (nhét vào đó kéo theo DDL + API + UI admin).
     # `multiquery_final_k` TRÙNG GIÁ TRỊ `rerank_top_k` chứ không buộc phải bằng: mỗi query
-    # đã tự cắt rerank_top_k, đây là lần cắt SAU khi gộp nhiều query. ---
+    # đã tự cắt rerank_top_k, đây là lần cắt SAU khi gộp nhiều query trong MỘT bước.
+    # `final_context_k` là lần cắt cuối, SAU khi gộp các bước (2 bước × 8 = 16 đoạn vào
+    # synthesize thì gấp đôi hiện tại) — chỉ đếm answer-context, chunk provenance-only không
+    # tính (§8). `retrieval_max_steps` cap CỨNG 2, le=2 để giá trị lớn hơn chết ngay lúc khởi
+    # động chứ không âm thầm bị kẹp: kiến trúc tích luỹ hiện chỉ đúng ở 2 bước. ---
     multiquery_final_k: int = 8
+    final_context_k: int = 10
     max_queries_per_step: int = 4
+    retrieval_max_steps: int = Field(default=2, ge=1, le=2)
 
     # --- Guardrails input layer (v1). 1 lớp kiểm input trước build_query, chỉ LLM structured
     # output (KHÔNG regex/keyword/blocklist). Dùng model riêng nhỏ/rẻ (KHÔNG fallback sang
