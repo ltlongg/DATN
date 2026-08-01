@@ -1,10 +1,15 @@
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { Markdown } from "@/components/Markdown";
+import { ProgressPanel } from "@/features/chat/ProgressPanel";
 import { formatDateTime, formatTtft } from "@/lib/format";
 import type { ConversationLogDetail as Detail } from "@/types/admin";
 
 /** Cột giữa: replay hội thoại inline — bong bóng user (phải) + assistant (trái, render markdown
- * + badge độ tin cậy). Phần chất lượng/token nằm ở panel bên phải, không lẫn vào replay. */
+ * + badge độ tin cậy). Phần chất lượng/token nằm ở panel bên phải, không lẫn vào replay.
+ *
+ * Panel tiến trình gập sẵn ở mỗi câu trả lời: đây là chỗ DUY NHẤT xem lại được luồng xử lý
+ * của một hội thoại đã đóng (DebugPanel cũ realtime, F5 là mất). `internals` chỉ có ở đây vì
+ * router /api/admin/logs gác admin. */
 export function ConversationReplay({ detail }: { detail: Detail }) {
   return (
     <div className="flex h-full flex-col">
@@ -35,6 +40,9 @@ export function ConversationReplay({ detail }: { detail: Detail }) {
                 )}
               </div>
               <div className="inline-block max-w-[92%] rounded-lg border border-paper-border bg-paper-card px-3 py-2 text-sm text-ink">
+                {/* startedAt=null -> panel bỏ phần thời gian (đo client-side, không dựng lại
+                    được sau khi phiên đã đóng); streaming=false -> tự gập ngay. */}
+                <ProgressPanel steps={m.steps ?? []} startedAt={null} streaming={false} />
                 <Markdown content={m.content} />
               </div>
             </div>

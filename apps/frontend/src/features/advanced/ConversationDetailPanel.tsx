@@ -10,7 +10,9 @@ const nf = new Intl.NumberFormat("vi-VN");
 
 // Raw task (lưu nguyên trong DB) -> nhãn tiếng Việt. Task lạ -> hiện raw (an toàn khi thêm task).
 const TASK_LABELS: Record<string, string> = {
-  build_query: "Dựng truy vấn",
+  plan: "Dựng truy vấn",
+  // Task cũ, giữ để log LỊCH SỬ (trước khi node đổi tên) vẫn có nhãn thay vì hiện raw.
+  build_query: "Dựng truy vấn (cũ)",
   synthesize: "Tổng hợp",
   guardrail_input: "Kiểm duyệt",
 };

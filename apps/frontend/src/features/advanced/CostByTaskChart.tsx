@@ -11,11 +11,14 @@ import { EmptyState } from "@/components/EmptyState";
 import type { TaskCost } from "@/types/admin";
 
 const LABELS: Record<string, string> = {
-  build_query: "Phân tích câu hỏi",
+  plan: "Phân tích câu hỏi",
+  // Node `plan` từng tên là `build_query`; log cũ vẫn mang task đó nên phải có nhãn riêng,
+  // nếu gộp một nhãn thì hai giai đoạn trông như một và không ai biết mốc đổi ở đâu.
+  build_query: "Phân tích câu hỏi (cũ)",
   synthesize: "Soạn câu trả lời",
 };
 
-/** So sánh token giữa build_query và synthesize (chỉ total_tokens theo task). */
+/** So sánh token giữa các task LLM online (chỉ total_tokens theo task). */
 export function CostByTaskChart({ data }: { data: TaskCost[] }) {
   const rows = data.map((d) => ({ ...d, label: LABELS[d.task] ?? d.task }));
   return (

@@ -1,23 +1,25 @@
 import { useState, type KeyboardEvent } from "react";
-import type { RetrievalMode } from "@/api/askStream";
 
-const MODE_OPTIONS: { value: RetrievalMode; label: string }[] = [
-  { value: "hybrid", label: "Kết hợp" },
-  { value: "traditional", label: "Vector" },
-  { value: "graph", label: "Đồ thị" },
-];
+/**
+ * Ô nhập câu hỏi. Enter gửi, Shift+Enter xuống dòng. Khoá khi đang stream.
+ *
+ * KHÔNG còn ô chọn cách truy hồi: agent tự chọn traditional/hybrid theo câu hỏi (bậc B2,
+ * `docs/plan/agentic-retrieval-loop-plan.md` §0.1). Bắt giáo viên chọn "Vector" hay "Kết hợp"
+ * là bắt họ biết nội tạng hệ thống. Override vẫn còn ở TẦNG API (`AskRequest.mode`) để so
+ * traditional/graph/hybrid trên cùng một câu lúc đánh giá — chỉ không hiện ra UI.
+ */
+const DEFAULT_PLACEHOLDER = "Hỏi về lịch sử Việt Nam…";
 
-/** Ô nhập câu hỏi. Enter gửi, Shift+Enter xuống dòng. Khoá khi đang stream. */
 export function Composer({
   disabled,
-  mode,
-  onModeChange,
   onSend,
+  placeholder = DEFAULT_PLACEHOLDER,
 }: {
   disabled: boolean;
-  mode: RetrievalMode;
-  onModeChange: (mode: RetrievalMode) => void;
   onSend: (text: string) => void;
+  /** Đổi khi agent đang chờ câu làm rõ — đây là thứ THAY cho ô nhập riêng trong khối
+   *  clarification, nên nó phải dẫn được mắt xuống đây. */
+  placeholder?: string;
 }) {
   const [text, setText] = useState("");
 
@@ -37,30 +39,13 @@ export function Composer({
 
   return (
     <div className="border-t border-paper-border bg-paper-card p-3">
-      <div className="mb-2 flex items-center gap-2">
-        <label htmlFor="retrieval-mode" className="text-xs text-ink-soft">
-          Cách truy hồi
-        </label>
-        <select
-          id="retrieval-mode"
-          value={mode}
-          onChange={(e) => onModeChange(e.target.value as RetrievalMode)}
-          className="rounded-md border border-paper-border bg-white px-2 py-1 text-xs text-ink outline-none focus:border-brand"
-        >
-          {MODE_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
       <div className="flex items-end gap-2">
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={onKeyDown}
           rows={1}
-          placeholder="Hỏi về lịch sử Việt Nam…"
+          placeholder={placeholder}
           className="max-h-40 flex-1 resize-none rounded-lg border border-paper-border bg-white px-3 py-2 outline-none focus:border-brand"
         />
         <button

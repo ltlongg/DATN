@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Columns2, Map as MapIcon, Menu } from "lucide-react";
-import type { RetrievalMode } from "@/api/askStream";
 import { getConversation } from "@/api/chat";
 import { ChatPanel } from "@/features/chat/ChatPanel";
 import { ConversationDrawer } from "@/features/chat/ConversationDrawer";
@@ -116,8 +115,8 @@ export default function AskPage() {
   }, [streaming, queryClient]);
 
   // Bubble user hiện NGAY; createConv chỉ chạy (nền) khi chưa có phiên (câu đầu).
-  function handleSend(text: string, mode: RetrievalMode) {
-    void ask(text, mode, async () => {
+  function handleSend(text: string) {
+    void ask(text, async () => {
       const conv = await createConv.mutateAsync(undefined);
       return conv.id;
     });

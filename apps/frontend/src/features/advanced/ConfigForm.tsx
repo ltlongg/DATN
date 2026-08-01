@@ -37,7 +37,7 @@ const RETRIEVAL_FIELDS: FieldSpec[] = [
 ];
 
 const SYNTHESIZE_FIELDS: FieldSpec[] = [
-  { key: "llm_temperature", label: "Temperature", def: 0.0, integer: false, min: 0, max: 2, step: 0.1, help: "Nhiệt độ LLM khi soạn câu trả lời (0–2). build_query luôn giữ 0." },
+  { key: "llm_temperature", label: "Temperature", def: 0.0, integer: false, min: 0, max: 2, step: 0.1, help: "Nhiệt độ LLM khi soạn câu trả lời (0–2). node plan luôn giữ 0." },
 ];
 
 const ALL_FIELDS = [...RETRIEVAL_FIELDS, ...SYNTHESIZE_FIELDS];
