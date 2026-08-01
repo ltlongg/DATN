@@ -8,7 +8,7 @@ from pydantic import ValidationError
 from app.schemas.ask import (
     AskRequest,
     AskResponse,
-    BuildQueryOutput,
+    PlanOutput,
     ChatMessage,
     SynthesizedAnswer,
 )
@@ -54,8 +54,8 @@ def test_ask_response_defaults() -> None:
     assert resp.warnings == []
 
 
-def test_build_query_output_defaults_entities() -> None:
-    out = BuildQueryOutput(standalone_query="q", route="needs_retrieval")
+def test_plan_output_defaults() -> None:
+    out = PlanOutput(standalone_query="q", route="needs_retrieval")
     assert out.mentioned_entities == []
 
 

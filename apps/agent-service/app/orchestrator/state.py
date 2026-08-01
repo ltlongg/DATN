@@ -11,7 +11,14 @@ from typing import Annotated, Literal
 
 from typing_extensions import TypedDict
 
-from app.schemas.ask import AnswerConfidence, ChatMessage, Citation, RouteDecision
+from app.schemas.ask import (
+    AnswerConfidence,
+    ChatMessage,
+    Citation,
+    PlanStep,
+    RequestedMode,
+    RouteDecision,
+)
 from app.schemas.retrieval import RetrievalMode, RetrievalResult
 from app.schemas.visualization import VisualizationPayload
 
@@ -34,9 +41,14 @@ class AgentState(TypedDict):
     conversation_id: str | None
     message_id: str | None
     standalone_query: str
-    seed_mentions: list[str]
-    # Mode user chọn (traditional/graph/hybrid); node retrieve dispatch theo field này.
-    requested_mode: RetrievalMode
+    # Todo list do `plan` sinh + `planning.normalize_plan` kiểm. B1 luôn đúng 1 bước; seed
+    # (`entities`) nằm TRONG từng query của bước, không còn field seed_mentions phẳng.
+    steps: list[PlanStep]
+    # Mode từ request: "auto" = để `plan` chọn, giá trị cụ thể = user ép (bỏ qua plan).
+    override_mode: RequestedMode
+    # Mode THẬT dùng để truy hồi, `plan` giải xong mới có. Node retrieve dispatch theo field
+    # này (không đọc override_mode nữa).
+    selected_mode: RetrievalMode
     route: RouteDecision | None
     clarification_needed: bool
     clarification_question: str | None
