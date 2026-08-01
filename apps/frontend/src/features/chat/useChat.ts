@@ -3,7 +3,6 @@ import {
   openAskStream,
   type AskHandlers,
   type AskStreamController,
-  type RetrievalMode,
 } from "@/api/askStream";
 import { chatReducer } from "@/features/chat/chatReducer";
 import { useAuthStore } from "@/store/authStore";
@@ -31,7 +30,8 @@ export function useChat() {
 
   const buildHandlers = useCallback(
     (assistantId: string): AskHandlers => ({
-      onStatus: (status) => dispatch({ type: "status", id: assistantId, status }),
+      onSteps: (steps) => dispatch({ type: "steps", id: assistantId, steps }),
+      onStep: (step) => dispatch({ type: "step", id: assistantId, step }),
       onToken: (t) => dispatch({ type: "token", id: assistantId, text: t }),
       onRegenerating: () => dispatch({ type: "regenerating", id: assistantId }),
       onCitations: (citations) => dispatch({ type: "citations", id: assistantId, citations }),
@@ -41,7 +41,6 @@ export function useChat() {
         dispatch({ type: "clarification", id: assistantId, question }),
       onBlocked: () => dispatch({ type: "blocked", id: assistantId }),
       onError: (error) => dispatch({ type: "error", id: assistantId, error }),
-      onDebug: (debug) => dispatch({ type: "debug", id: assistantId, debug }),
       onDone: (done) => dispatch({ type: "done", id: assistantId, done }),
     }),
     [],
@@ -54,7 +53,6 @@ export function useChat() {
   const ask = useCallback(
     async (
       question: string,
-      mode: RetrievalMode,
       createConversation: () => Promise<string>,
     ) => {
       const text = question.trim();
@@ -66,6 +64,7 @@ export function useChat() {
         userId: crypto.randomUUID(),
         userText: text,
         assistantId,
+        at: Date.now(),
       });
       setStreaming(true);
 
@@ -87,7 +86,7 @@ export function useChat() {
 
       const controller = openAskStream(
         cid,
-        { question: text, mode, debug: isAdmin },
+        { question: text, debug: isAdmin },
         buildHandlers(assistantId),
       );
       controllerRef.current = controller;

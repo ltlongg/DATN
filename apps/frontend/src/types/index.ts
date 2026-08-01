@@ -79,7 +79,35 @@ export interface VisualizationPayload {
   unplaced_count: number;
 }
 
-/** = MessageOut (backend). `citations`/`visualization` đã lưu theo message. */
+/**
+ * Một dòng của panel tiến trình (B3). `pending` là state DUY NHẤT agent không phát: nó
+ * nghĩa là "đã khai báo trong danh sách nhưng chưa chạy tới" — và sau khi stream đóng thì
+ * đọc là "bước này không chạy" (vd retrieve lỗi nên không tới lượt soạn bài).
+ */
+export type StepState = "pending" | "running" | "done" | "partial";
+
+/** Một dòng của bảng tầng 2. `value` đã được agent format sẵn thành chuỗi. */
+export interface StepInternalRow {
+  label: string;
+  value: string;
+}
+
+export interface ProgressStep {
+  id: string;
+  label: string;
+  kind: "system" | "retrieve";
+  state: StepState;
+  /** Dòng phụ nói KẾT QUẢ, do agent ghép bằng code (không LLM). */
+  detail?: string | null;
+  /**
+   * Tầng 2 — số liệu thô của ĐÚNG bước này (thay DebugPanel cũ, xoá 2026-08-01). Vắng mặt
+   * với người dùng thường: backend bóc khỏi event `step` khi `debug=False`, nên đây không
+   * phải chỗ gác quyền, chỉ là chỗ hiển thị thứ đã tới nơi.
+   */
+  internals?: StepInternalRow[] | null;
+}
+
+/** = MessageOut (backend). `citations`/`visualization`/`steps` đã lưu theo message. */
 export interface Message {
   id: string;
   role: "user" | "assistant";
@@ -90,6 +118,8 @@ export interface Message {
   retrieval_mode: string;
   confidence: string | null;
   warnings: string[];
+  /** Chuỗi bước đã chạy; rỗng với message user và message lưu trước khi có B3. */
+  steps: ProgressStep[];
   /** TTFT (ms): từ lúc gửi câu hỏi tới token đầu tiên. null với message user. */
   ttft_ms: number | null;
   created_at: string;
@@ -121,17 +151,4 @@ export interface KbSource {
   chunk_count: number;
   event_count: number;
   document_id: string | null;
-}
-
-// --- SSE debug payload (chỉ admin, gom 1 lần trước `done`) ---
-export interface DebugInfo {
-  build_query?: {
-    standalone_query?: string;
-    route?: string;
-    mentioned_entities?: string[];
-  };
-  retrieve?: {
-    chunks?: number;
-    graph_context?: number;
-  };
 }

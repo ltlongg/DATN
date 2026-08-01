@@ -1,5 +1,5 @@
 /** Types Module 4 (admin nâng cao). Mirror apps/backend/app/schemas/{logs,user,cost}.py. */
-import type { Citation, Role, VisualizationPayload } from "@/types";
+import type { Citation, ProgressStep, Role, VisualizationPayload } from "@/types";
 
 // --- Hội thoại & chất lượng ---
 export interface ConversationLogItem {
@@ -37,6 +37,9 @@ export interface MessageLogItem {
   retrieval_mode: string;
   confidence: string | null;
   warnings: string[];
+  /** Panel tiến trình đã lưu, KÈM `internals` từng bước. Rỗng với message user và với
+   *  message lưu trước khi có B3. */
+  steps: ProgressStep[];
   ttft_ms: number | null;
   created_at: string;
   quality: MessageQuality;
