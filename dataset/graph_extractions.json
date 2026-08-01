@@ -189676,5 +189676,420 @@
         "description": "Từ tháng 6 năm 1989, Hải quân Việt Nam bắt đầu đóng giữ bãi đá ngầm Ba Kè."
       }
     ]
+  },
+  "lichsu_clean-001174": {
+    "prompt_version": "graph-extract-v6",
+    "entities": [
+      {
+        "name": "Mỹ",
+        "type": "Tổ chức",
+        "description": "Lực lượng bắt đầu tiến hành Chiến tranh đặc biệt tại Lào từ năm 1964 và nâng lên thành Chiến tranh đặc biệt tăng cường vào năm 1969."
+      },
+      {
+        "name": "Chiến tranh đặc biệt",
+        "type": "Chủ trương",
+        "description": "Hình thức chiến tranh do Mỹ tiến hành tại Lào từ năm 1964."
+      },
+      {
+        "name": "Chiến tranh đặc biệt tăng cường",
+        "type": "Chủ trương",
+        "description": "Mức độ leo thang của Chiến tranh đặc biệt do Mỹ áp dụng tại Lào từ năm 1969."
+      },
+      {
+        "name": "Quân đội Nhân dân Việt Nam",
+        "type": "Tổ chức",
+        "description": "Lực lượng phối hợp với các lực lượng Lào mở nhiều chiến dịch tại Lào giai đoạn 1964-1973 và phản công quân Việt Nam Cộng hòa ở đường 9-Nam Lào năm 1971."
+      },
+      {
+        "name": "Quân Giải phóng Nhân dân Lào",
+        "type": "Tổ chức",
+        "description": "Lực lượng liên quân với Quân đội Nhân dân Việt Nam mở các chiến dịch 128 và 74A trong năm 1964."
+      },
+      {
+        "name": "Chiến dịch 128",
+        "type": "Sự kiện",
+        "description": "Chiến dịch do liên quân Quân đội Nhân dân Việt Nam và Quân Giải phóng Nhân dân Lào mở đầu năm 1964."
+      },
+      {
+        "name": "Chiến dịch 74A",
+        "type": "Sự kiện",
+        "description": "Chiến dịch do liên quân Quân đội Nhân dân Việt Nam và Quân Giải phóng Nhân dân Lào mở vào tháng 4 năm 1964."
+      },
+      {
+        "name": "Vũ Lập",
+        "type": "Nhân vật",
+        "description": "Đại tá chỉ huy sư đoàn 316 Quân đội Nhân dân Việt Nam hỗ trợ lực lượng Pathet Lào tiến công Nambak tháng 1 năm 1968."
+      },
+      {
+        "name": "Pathet Lào",
+        "type": "Tổ chức",
+        "description": "Lực lượng Lào được quân đội Việt Nam hỗ trợ, phối hợp trong nhiều chiến dịch và mở rộng vùng kiểm soát tại Lào."
+      },
+      {
+        "name": "Nambak",
+        "type": "Địa điểm",
+        "description": "Khu vực bị lực lượng do Vũ Lập chỉ huy hỗ trợ Pathet Lào tiến công và nắm giữ tháng 1 năm 1968."
+      },
+      {
+        "name": "Quân khu Tây Bắc",
+        "type": "Tổ chức",
+        "description": "Đơn vị của Việt Nam mở chiến dịch Mường Sủi tháng 6 năm 1969."
+      },
+      {
+        "name": "Chiến dịch Mường Sủi",
+        "type": "Sự kiện",
+        "description": "Chiến dịch do Quân khu Tây Bắc mở tháng 6 năm 1969 nhằm tiến công khu vực Xiêng Khoảng-Mường Sủi, mở rộng vùng kiểm soát cho Pathet Lào."
+      },
+      {
+        "name": "Xiêng Khoảng-Mường Sủi",
+        "type": "Địa điểm",
+        "description": "Khu vực bị tiến công trong chiến dịch Mường Sủi."
+      },
+      {
+        "name": "Sầm Nưa-Xiêng Khoảng",
+        "type": "Địa điểm",
+        "description": "Khu vực được nối liền thông qua kết quả của chiến dịch Mường Sủi."
+      },
+      {
+        "name": "Cánh đồng Chum",
+        "type": "Địa điểm",
+        "description": "Địa bàn được củng cố sau chiến dịch Mường Sủi và là nơi diễn ra chiến dịch 139."
+      },
+      {
+        "name": "Quân đội Vương quốc Lào-Thái Lan",
+        "type": "Tổ chức",
+        "description": "Lực lượng bị thiệt hại trong chiến dịch Mường Sủi tháng 6 năm 1969."
+      },
+      {
+        "name": "Chiến dịch 139",
+        "type": "Sự kiện",
+        "description": "Chiến dịch phản công do quân đội Việt Nam phối hợp với Pathet Lào mở tại cánh đồng Chum tháng 10 năm 1969."
+      },
+      {
+        "name": "Vàng Pao",
+        "type": "Nhân vật",
+        "description": "Thủ lĩnh có lực lượng đặc biệt bị thiệt hại nặng trong chiến dịch 139 và bị tổn thất lớn trong chiến dịch cánh đồng Chum-Mường Sủi mùa khô 1971-1972."
+      },
+      {
+        "name": "Bản Na-Nậm Ngàn",
+        "type": "Địa điểm",
+        "description": "Khu vực được Pathet Lào kiểm soát thêm sau chiến dịch 139."
+      },
+      {
+        "name": "Quân đội Việt Nam Cộng hòa",
+        "type": "Tổ chức",
+        "description": "Lực lượng mở cuộc hành quân Lam Sơn 719 vào đường 9-Nam Lào đầu năm 1971 và bị buộc tháo chạy sau phản công của Quân đội Nhân dân Việt Nam."
+      },
+      {
+        "name": "Hoàng Xuân Lãm",
+        "type": "Nhân vật",
+        "description": "Người chỉ huy quân đội Việt Nam Cộng hòa trong cuộc hành quân Lam Sơn 719."
+      },
+      {
+        "name": "Hoa Kỳ",
+        "type": "Tổ chức",
+        "description": "Lực lượng dùng không quân và lục quân yểm trợ cuộc hành quân Lam Sơn 719 của quân đội Việt Nam Cộng hòa."
+      },
+      {
+        "name": "Lam Sơn 719",
+        "type": "Sự kiện",
+        "description": "Cuộc hành quân do quân đội Việt Nam Cộng hòa mở vào đường 9-Nam Lào nhằm phá vỡ hệ thống hậu cần của Quân đội Nhân dân Việt Nam và cắt đứt đường mòn Hồ Chí Minh tại Sepone."
+      },
+      {
+        "name": "Đường 9-Nam Lào",
+        "type": "Địa điểm",
+        "description": "Khu vực quân đội Việt Nam Cộng hòa mở cuộc hành quân Lam Sơn 719."
+      },
+      {
+        "name": "Đường mòn Hồ Chí Minh",
+        "type": "Địa điểm",
+        "description": "Tuyến hậu cần chiến lược bị quân đội Việt Nam Cộng hòa nhắm tới trong cuộc hành quân Lam Sơn 719."
+      },
+      {
+        "name": "Sepone",
+        "type": "Địa điểm",
+        "description": "Địa điểm trên đường mòn Hồ Chí Minh mà quân đội Việt Nam Cộng hòa nhằm cắt đứt trong cuộc hành quân Lam Sơn 719."
+      },
+      {
+        "name": "Lê Trọng Tấn",
+        "type": "Nhân vật",
+        "description": "Tướng chỉ huy Quân đội Nhân dân Việt Nam mở chiến dịch phản công Mặt trận 702 năm 1971."
+      },
+      {
+        "name": "Mặt trận 702",
+        "type": "Sự kiện",
+        "description": "Chiến dịch phản công do Quân đội Nhân dân Việt Nam mở năm 1971, buộc quân Việt Nam Cộng hòa tháo chạy khỏi đường 9."
+      },
+      {
+        "name": "Đường 9",
+        "type": "Địa điểm",
+        "description": "Khu vực quân đội Việt Nam Cộng hòa phải tháo chạy khỏi sau chiến dịch phản công Mặt trận 702."
+      },
+      {
+        "name": "Chính phủ Việt Nam Dân chủ Cộng hòa",
+        "type": "Tổ chức",
+        "description": "Chính phủ lên tiếng phản đối việc quân đội Mỹ leo thang chiến tranh ngày 10 tháng 2 năm 1971."
+      },
+      {
+        "name": "Chiến dịch cánh đồng Chum-Mường Sủi",
+        "type": "Sự kiện",
+        "description": "Chiến dịch mùa khô 1971-1972 do liên quân Việt-Lào mở, tiêu diệt lớn lực lượng Vàng Pao, Thái Lan và một phần quân đội Hoàng gia Lào."
+      },
+      {
+        "name": "Na Xa",
+        "type": "Địa điểm",
+        "description": "Khu vực bị đánh phá trong chiến dịch cánh đồng Chum-Mường Sủi mùa khô 1971-1972."
+      },
+      {
+        "name": "Sầm Nưa",
+        "type": "Địa điểm",
+        "description": "Địa bàn được nối liên với Xiêng Khoảng sau chiến dịch cánh đồng Chum-Mường Sủi mùa khô 1971-1972."
+      },
+      {
+        "name": "Xiêng Khoảng",
+        "type": "Địa điểm",
+        "description": "Địa bàn được nối liên với Sầm Nưa sau chiến dịch cánh đồng Chum-Mường Sủi mùa khô 1971-1972."
+      },
+      {
+        "name": "Sư đoàn 968",
+        "type": "Tổ chức",
+        "description": "Đơn vị Việt Nam đánh bại cuộc hành quân của lực lượng Lào-Thái-Vàng Pao và chiếm cao nguyên Bolaven tháng 12 năm 1971."
+      },
+      {
+        "name": "Cao nguyên Bolaven",
+        "type": "Địa điểm",
+        "description": "Địa bàn do sư đoàn 968 Việt Nam chiếm giữ tháng 12 năm 1971."
+      }
+    ],
+    "relations": [
+      {
+        "source": "Mỹ",
+        "target": "Chiến tranh đặc biệt",
+        "keyword": "tiến hành",
+        "description": "Từ năm 1964, Mỹ bắt đầu tiến hành Chiến tranh đặc biệt tại Lào."
+      },
+      {
+        "source": "Mỹ",
+        "target": "Chiến tranh đặc biệt tăng cường",
+        "keyword": "nâng lên",
+        "description": "Đến năm 1969, Mỹ nâng Chiến tranh đặc biệt tại Lào lên thành Chiến tranh đặc biệt tăng cường."
+      },
+      {
+        "source": "Quân đội Nhân dân Việt Nam",
+        "target": "Chiến dịch 128",
+        "keyword": "mở",
+        "description": "Trong năm 1964, liên quân có Quân đội Nhân dân Việt Nam mở chiến dịch 128."
+      },
+      {
+        "source": "Quân Giải phóng Nhân dân Lào",
+        "target": "Chiến dịch 128",
+        "keyword": "mở",
+        "description": "Trong năm 1964, Quân Giải phóng Nhân dân Lào phối hợp mở chiến dịch 128."
+      },
+      {
+        "source": "Quân đội Nhân dân Việt Nam",
+        "target": "Chiến dịch 74A",
+        "keyword": "mở",
+        "description": "Trong năm 1964, liên quân có Quân đội Nhân dân Việt Nam mở chiến dịch 74A."
+      },
+      {
+        "source": "Quân Giải phóng Nhân dân Lào",
+        "target": "Chiến dịch 74A",
+        "keyword": "mở",
+        "description": "Trong năm 1964, Quân Giải phóng Nhân dân Lào phối hợp mở chiến dịch 74A."
+      },
+      {
+        "source": "Vũ Lập",
+        "target": "Quân đội Nhân dân Việt Nam",
+        "keyword": "chỉ huy lực lượng của",
+        "description": "Tháng 1 năm 1968, Đại tá Vũ Lập chỉ huy sư đoàn 316 của Quân đội Nhân dân Việt Nam."
+      },
+      {
+        "source": "Quân đội Nhân dân Việt Nam",
+        "target": "Pathet Lào",
+        "keyword": "hỗ trợ",
+        "description": "Tháng 1 năm 1968, sư đoàn 316 Quân đội Nhân dân Việt Nam hỗ trợ một tiểu đoàn Pathet Lào tiến công Nambak."
+      },
+      {
+        "source": "Pathet Lào",
+        "target": "Nambak",
+        "keyword": "nắm giữ",
+        "description": "Tháng 1 năm 1968, lực lượng Pathet Lào được hỗ trợ để tiến công nắm giữ Nambak."
+      },
+      {
+        "source": "Quân khu Tây Bắc",
+        "target": "Chiến dịch Mường Sủi",
+        "keyword": "mở",
+        "description": "Tháng 6 năm 1969, Quân khu Tây Bắc của Việt Nam mở chiến dịch Mường Sủi."
+      },
+      {
+        "source": "Chiến dịch Mường Sủi",
+        "target": "Xiêng Khoảng-Mường Sủi",
+        "keyword": "diễn ra tại",
+        "description": "Chiến dịch Mường Sủi tiến công khu vực Xiêng Khoảng-Mường Sủi."
+      },
+      {
+        "source": "Chiến dịch Mường Sủi",
+        "target": "Pathet Lào",
+        "keyword": "mở rộng vùng kiểm soát cho",
+        "description": "Chiến dịch Mường Sủi nhằm mở rộng vùng kiểm soát cho Pathet Lào."
+      },
+      {
+        "source": "Chiến dịch Mường Sủi",
+        "target": "Sầm Nưa-Xiêng Khoảng",
+        "keyword": "nối liền",
+        "description": "Chiến dịch Mường Sủi nhằm nối liền khu vực Sầm Nưa-Xiêng Khoảng."
+      },
+      {
+        "source": "Chiến dịch Mường Sủi",
+        "target": "Cánh đồng Chum",
+        "keyword": "củng cố",
+        "description": "Chiến dịch Mường Sủi góp phần củng cố cánh đồng Chum."
+      },
+      {
+        "source": "Chiến dịch Mường Sủi",
+        "target": "Quân đội Vương quốc Lào-Thái Lan",
+        "keyword": "gây thiệt hại",
+        "description": "Trong chiến dịch Mường Sủi, Quân đội Vương quốc Lào-Thái Lan bị thiệt hại nặng."
+      },
+      {
+        "source": "Quân đội Nhân dân Việt Nam",
+        "target": "Chiến dịch 139",
+        "keyword": "mở",
+        "description": "Tháng 10 năm 1969, quân đội Việt Nam mở chiến dịch 139 phản công tại cánh đồng Chum."
+      },
+      {
+        "source": "Pathet Lào",
+        "target": "Chiến dịch 139",
+        "keyword": "phối hợp",
+        "description": "Tháng 10 năm 1969, Pathet Lào phối hợp với quân đội Việt Nam mở chiến dịch 139."
+      },
+      {
+        "source": "Chiến dịch 139",
+        "target": "Cánh đồng Chum",
+        "keyword": "diễn ra tại",
+        "description": "Chiến dịch 139 là cuộc phản công tại cánh đồng Chum."
+      },
+      {
+        "source": "Chiến dịch 139",
+        "target": "Vàng Pao",
+        "keyword": "gây thiệt hại",
+        "description": "Trong chiến dịch 139, lực lượng đặc biệt của Vàng Pao bị thiệt hại nặng."
+      },
+      {
+        "source": "Pathet Lào",
+        "target": "Bản Na-Nậm Ngàn",
+        "keyword": "kiểm soát",
+        "description": "Sau chiến dịch 139, Pathet Lào kiểm soát thêm khu vực Bản Na-Nậm Ngàn."
+      },
+      {
+        "source": "Hoàng Xuân Lãm",
+        "target": "Quân đội Việt Nam Cộng hòa",
+        "keyword": "chỉ huy",
+        "description": "Cuối tháng 1 năm 1971, Hoàng Xuân Lãm chỉ huy quân đội Việt Nam Cộng hòa."
+      },
+      {
+        "source": "Quân đội Việt Nam Cộng hòa",
+        "target": "Lam Sơn 719",
+        "keyword": "mở",
+        "description": "Cuối tháng 1 năm 1971, quân đội Việt Nam Cộng hòa mở cuộc hành quân Lam Sơn 719."
+      },
+      {
+        "source": "Hoa Kỳ",
+        "target": "Lam Sơn 719",
+        "keyword": "yểm trợ",
+        "description": "Không quân và lục quân Hoa Kỳ yểm trợ cuộc hành quân Lam Sơn 719."
+      },
+      {
+        "source": "Lam Sơn 719",
+        "target": "Đường 9-Nam Lào",
+        "keyword": "diễn ra tại",
+        "description": "Lam Sơn 719 được mở vào đường 9-Nam Lào."
+      },
+      {
+        "source": "Lam Sơn 719",
+        "target": "Đường mòn Hồ Chí Minh",
+        "keyword": "nhằm cắt đứt",
+        "description": "Lam Sơn 719 nhằm cắt đứt đường mòn Hồ Chí Minh."
+      },
+      {
+        "source": "Lam Sơn 719",
+        "target": "Sepone",
+        "keyword": "nhắm tới",
+        "description": "Lam Sơn 719 nhằm cắt đứt đường mòn Hồ Chí Minh tại Sepone."
+      },
+      {
+        "source": "Lê Trọng Tấn",
+        "target": "Mặt trận 702",
+        "keyword": "chỉ huy",
+        "description": "Tướng Lê Trọng Tấn chỉ huy Quân đội Nhân dân Việt Nam mở chiến dịch phản công Mặt trận 702."
+      },
+      {
+        "source": "Quân đội Nhân dân Việt Nam",
+        "target": "Mặt trận 702",
+        "keyword": "mở",
+        "description": "Quân đội Nhân dân Việt Nam mở chiến dịch phản công Mặt trận 702 năm 1971."
+      },
+      {
+        "source": "Mặt trận 702",
+        "target": "Quân đội Việt Nam Cộng hòa",
+        "keyword": "buộc rút chạy",
+        "description": "Chiến dịch phản công Mặt trận 702 buộc quân đội Việt Nam Cộng hòa phải tháo chạy."
+      },
+      {
+        "source": "Mặt trận 702",
+        "target": "Đường 9",
+        "keyword": "diễn ra tại",
+        "description": "Chiến dịch phản công Mặt trận 702 buộc quân Việt Nam Cộng hòa tháo chạy khỏi đường 9."
+      },
+      {
+        "source": "Chính phủ Việt Nam Dân chủ Cộng hòa",
+        "target": "Hoa Kỳ",
+        "keyword": "phản đối",
+        "description": "Ngày 10 tháng 2 năm 1971, Chính phủ Việt Nam Dân chủ Cộng hòa lên tiếng phản đối việc quân đội Mỹ leo thang chiến tranh."
+      },
+      {
+        "source": "Quân đội Nhân dân Việt Nam",
+        "target": "Chiến dịch cánh đồng Chum-Mường Sủi",
+        "keyword": "mở",
+        "description": "Cuối năm 1971, liên quân Việt-Lào mở chiến dịch cánh đồng Chum-Mường Sủi mùa khô 1971-1972."
+      },
+      {
+        "source": "Pathet Lào",
+        "target": "Chiến dịch cánh đồng Chum-Mường Sủi",
+        "keyword": "mở",
+        "description": "Cuối năm 1971, lực lượng Lào trong liên quân Việt-Lào mở chiến dịch cánh đồng Chum-Mường Sủi mùa khô 1971-1972."
+      },
+      {
+        "source": "Chiến dịch cánh đồng Chum-Mường Sủi",
+        "target": "Vàng Pao",
+        "keyword": "tiêu diệt lực lượng",
+        "description": "Chiến dịch cánh đồng Chum-Mường Sủi mùa khô 1971-1972 tiêu diệt hơn 7.000 quân Vàng Pao."
+      },
+      {
+        "source": "Pathet Lào",
+        "target": "Na Xa",
+        "keyword": "đánh phá",
+        "description": "Trong chiến dịch cánh đồng Chum-Mường Sủi mùa khô 1971-1972, Pathet Lào đánh phá Na Xa."
+      },
+      {
+        "source": "Chiến dịch cánh đồng Chum-Mường Sủi",
+        "target": "Sầm Nưa",
+        "keyword": "nối liên",
+        "description": "Chiến dịch cánh đồng Chum-Mường Sủi góp phần nối liên Sầm Nưa."
+      },
+      {
+        "source": "Chiến dịch cánh đồng Chum-Mường Sủi",
+        "target": "Xiêng Khoảng",
+        "keyword": "nối liên",
+        "description": "Chiến dịch cánh đồng Chum-Mường Sủi góp phần nối liên Xiêng Khoảng."
+      },
+      {
+        "source": "Sư đoàn 968",
+        "target": "Cao nguyên Bolaven",
+        "keyword": "chiếm",
+        "description": "Tháng 12 năm 1971, sư đoàn 968 Việt Nam chiếm cao nguyên Bolaven."
+      }
+    ]
   }
 }
