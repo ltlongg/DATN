@@ -62,6 +62,28 @@ describe("ProgressPanel", () => {
     render(<ProgressPanel steps={running} startedAt={null} streaming />);
     expect(screen.getByLabelText("đang chạy")).toBeInTheDocument();
   });
+
+  it("bước bị bỏ có nhãn riêng, phân biệt được với bước chưa chạy", () => {
+    // Todo list dừng sớm (B4): "hệ thống cân nhắc rồi bỏ" khác hẳn "chưa tới lượt", và
+    // người dùng chỉ đọc được khác biệt đó nếu hai state có nhãn trợ năng khác nhau.
+    const stopped: ProgressStep[] = [
+      { id: "todo:1", label: "Xác định mắt xích", kind: "retrieve", state: "partial" },
+      { id: "todo:2", label: "Tra tiếp", kind: "retrieve", state: "skipped" },
+      { id: "synthesize:1", label: "Soạn câu trả lời", kind: "system", state: "pending" },
+    ];
+    render(<ProgressPanel steps={stopped} startedAt={null} streaming />);
+    expect(screen.getByLabelText("đã bỏ qua")).toBeInTheDocument();
+    expect(screen.getByLabelText("chưa chạy")).toBeInTheDocument();
+  });
+
+  it("bước bị bỏ KHÔNG tính là đã có kết", () => {
+    const stopped: ProgressStep[] = [
+      { id: "todo:1", label: "Xác định mắt xích", kind: "retrieve", state: "partial" },
+      { id: "todo:2", label: "Tra tiếp", kind: "retrieve", state: "skipped" },
+    ];
+    render(<ProgressPanel steps={stopped} startedAt={null} streaming={false} />);
+    expect(screen.getByText("Đã hoàn thành · 1/2 bước")).toBeInTheDocument();
+  });
 });
 
 /**

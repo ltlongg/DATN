@@ -2,17 +2,20 @@ import { useState } from "react";
 import type { ProgressStep, StepState } from "@/types";
 
 /**
- * Bốn trạng thái, KHÔNG phải hai (plan §7.3 mục 1). UI tham chiếu chỉ có chờ/tick-xanh, kể
+ * Năm trạng thái, KHÔNG phải hai (plan §7.3 mục 1). UI tham chiếu chỉ có chờ/tick-xanh, kể
  * cả khi dòng phụ ghi "chỉ xác minh được 1/2" — với domain lịch sử không chấp nhận được:
  * tick xanh là lời cam kết, không phải hiệu ứng.
  *
  * `pending` sau khi stream đóng đọc là "bước này không chạy" (vd retrieve lỗi nên chưa tới
- * lượt soạn bài), nên để mờ và KHÔNG quay spinner.
+ * lượt soạn bài), nên để mờ và KHÔNG quay spinner. `skipped` mạnh hơn một bậc: hệ thống đã
+ * chạy tới đây rồi CHỦ ĐỘNG bỏ (không trích được mắt xích thì tra tiếp cũng bằng thừa) —
+ * gạch ngang để đọc ra ngay là có bước đã bị cắt khỏi kế hoạch ban đầu.
  */
 const MARK: Record<StepState, { icon: string; className: string; srLabel: string }> = {
   running: { icon: "", className: "text-ink-soft", srLabel: "đang chạy" },
   done: { icon: "✓", className: "text-emerald-600", srLabel: "xong" },
   partial: { icon: "!", className: "text-amber-600", srLabel: "chưa trọn vẹn" },
+  skipped: { icon: "–", className: "text-ink-soft/60", srLabel: "đã bỏ qua" },
   pending: { icon: "○", className: "text-ink-soft/40", srLabel: "chưa chạy" },
 };
 
@@ -38,7 +41,12 @@ function InternalsTable({ rows }: { rows: { label: string; value: string }[] }) 
 export function StepRow({ step, index }: { step: ProgressStep; index: number }) {
   const [open, setOpen] = useState(false);
   const mark = MARK[step.state];
-  const dimmed = step.state === "pending";
+  const labelClass =
+    step.state === "skipped"
+      ? "text-ink-soft line-through"
+      : step.state === "pending"
+        ? "text-ink-soft"
+        : "text-ink";
   // Chỉ admin nhận được `internals` (backend bóc khỏi event `step` khi debug=False), nên
   // sự CÓ MẶT của nó là điều kiện đủ — không cần hỏi role lần nữa ở đây.
   const rows = step.internals ?? [];
@@ -67,7 +75,7 @@ export function StepRow({ step, index }: { step: ProgressStep; index: number }) 
           >
             <span className="mt-px text-[10px] text-ink-soft">{open ? "▾" : "▸"}</span>
             <span className="min-w-0">
-              <span className={`block text-xs font-medium ${dimmed ? "text-ink-soft" : "text-ink"}`}>
+              <span className={`block text-xs font-medium ${labelClass}`}>
                 {index}. {step.label}
               </span>
               {step.detail && <span className="block text-xs text-ink-soft">{step.detail}</span>}
@@ -75,7 +83,7 @@ export function StepRow({ step, index }: { step: ProgressStep; index: number }) 
           </button>
         ) : (
           <>
-            <p className={`text-xs font-medium ${dimmed ? "text-ink-soft" : "text-ink"}`}>
+            <p className={`text-xs font-medium ${labelClass}`}>
               {index}. {step.label}
             </p>
             {step.detail && <p className="text-xs text-ink-soft">{step.detail}</p>}

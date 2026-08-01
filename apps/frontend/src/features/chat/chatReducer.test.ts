@@ -125,6 +125,30 @@ describe("chatReducer — panel tiến trình (B3)", () => {
     expect(steps.map((s) => s.state)).toEqual(["done", "partial", "pending"]);
   });
 
+  it("giữ nguyên dòng skipped khi stream đóng — 'bị bỏ' không phải 'chạy dở'", () => {
+    // Todo list dừng sớm (B4): bước sau bị agent đánh dấu `skipped`. Hạ nó xuống `partial`
+    // như dòng `running` là nói dối rằng bước đó có chạy.
+    const id = "a1";
+    let state = startState(id);
+    state = chatReducer(state, { type: "steps", id, steps: DECL });
+    state = chatReducer(state, { type: "step", id, step: { id: "plan", state: "done" } });
+    state = chatReducer(state, { type: "step", id, step: { id: "todo:1", state: "skipped" } });
+    state = chatReducer(state, {
+      type: "done",
+      id,
+      done: {
+        confidence: "vừa",
+        retrieval_mode: "hybrid",
+        warnings: [],
+        conversation_id: "c1",
+        message_id: "m1",
+        ttft_ms: 900,
+      },
+    });
+    const steps = state.find((it) => it.id === id)!.steps;
+    expect(steps.map((s) => s.state)).toEqual(["done", "skipped", "pending"]);
+  });
+
   it("lỗi giữa chừng cũng kết dòng lại và tắt streaming", () => {
     const id = "a1";
     let state = startState(id);

@@ -83,8 +83,12 @@ export interface VisualizationPayload {
  * Một dòng của panel tiến trình (B3). `pending` là state DUY NHẤT agent không phát: nó
  * nghĩa là "đã khai báo trong danh sách nhưng chưa chạy tới" — và sau khi stream đóng thì
  * đọc là "bước này không chạy" (vd retrieve lỗi nên không tới lượt soạn bài).
+ *
+ * `skipped` khác `pending` ở CHỦ THỂ: hệ thống đã quyết định bỏ bước đó (todo list dừng sớm
+ * vì không trích được mắt xích — B4), chứ không phải chưa chạy tới. Gộp hai cái làm một thì
+ * "đã cân nhắc rồi bỏ" và "chưa tới lượt" trông y hệt nhau.
  */
-export type StepState = "pending" | "running" | "done" | "partial";
+export type StepState = "pending" | "running" | "done" | "partial" | "skipped";
 
 /** Một dòng của bảng tầng 2. `value` đã được agent format sẵn thành chuỗi. */
 export interface StepInternalRow {
