@@ -33,7 +33,7 @@ Nếu thư viện hiện có không đủ → ghi rõ lý do trước khi viết
 Repo là **git repository** (branch `main`). Không còn ở scaffold stage:
 
 - **`agent-service`**: đã có pipeline indexing thực (preprocessing → chunking → graph extraction → timeline extraction → geocoding) **và** answer flow online — `api/ask.py` (FastAPI `/ask`) + `orchestrator/` (LangGraph: build_query → retrieve → synthesize → validate → visualization, stream SSE). Đây là nơi tập trung gần như toàn bộ logic LLM/retrieval.
-- **`backend`**: đã build API gateway (auth JWT, conversation/message, `/ask` streaming proxy, admin documents — **hết mock**, danh mục nối kho tri thức thật, xem `### Tài liệu (Module 3)`) — xem layout dưới. Module 4 (admin nâng cao) **3/4 nhóm đã code xong** (Hội thoại & chất lượng, Người dùng & quota, Chi phí) + KB Inspector (Module 5) + debug streaming, **cộng thêm 2 hạng mục mới từ `admin-restructure-plan.md`**: **token theo hội thoại/message** (song song chất lượng, không thay thế) và **quản lý Prompt đầy đủ** (sửa/version/promote, agent đọc production lúc chạy + fallback code) — xem `### Admin nâng cao` dưới. Chỉ còn **Cấu hình hệ thống** (retrieval mode mặc định + tinh chỉnh, `system-config-plan.md`) là CHƯA code. **`frontend`**: đã build thật (Vite+React+TS) phủ cả 2 role — auth/chat streaming SSE/multi-turn sidebar/debug panel admin/map+timeline/quản lý tài liệu/KB Inspector/Module 4 (logs+token+users+cost+prompts). Nav admin là **sidebar dọc theo nhóm** (không còn tab ngang). Chỉ mục Cấu hình hệ thống là stub "Sắp cập nhật". Xem `### Frontend layout` dưới + `docs/plan/frontend-plan.md` + `docs/plan/admin-restructure-plan.md` (nav dọc + token + prompt, đã code xong cả 3 hạng mục).
+- **`backend`**: đã build API gateway (auth JWT, conversation/message, `/ask` streaming proxy, admin documents — **hết mock**, danh mục nối kho tri thức thật, xem `### Tài liệu (Module 3)`) — xem layout dưới. Module 4 (admin nâng cao) **3/4 nhóm đã code xong** (Hội thoại & chất lượng, Người dùng & quota, Chi phí) + KB Inspector (Module 5) + debug streaming, **cộng thêm 2 hạng mục mới từ `admin-restructure-plan.md`**: **token theo hội thoại/message** (song song chất lượng, không thay thế) và **quản lý Prompt đầy đủ** (sửa/version/promote, agent đọc production lúc chạy + fallback code) — xem `### Admin nâng cao` dưới. Chỉ còn **Cấu hình hệ thống** (retrieval mode mặc định + tinh chỉnh, `system-config-plan.md`) là CHƯA code. **`frontend`**: đã build thật (Vite+React+TS) phủ cả 2 role — auth/chat streaming SSE/multi-turn sidebar/panel tiến trình 2 tầng (tầng 2 admin, thay DebugPanel đã xoá — xem `### Panel tiến trình 2 tầng`)/map+timeline/quản lý tài liệu/KB Inspector/Module 4 (logs+token+users+cost+prompts). Nav admin là **sidebar dọc theo nhóm** (không còn tab ngang). Chỉ mục Cấu hình hệ thống là stub "Sắp cập nhật". Xem `### Frontend layout` dưới + `docs/plan/frontend-plan.md` + `docs/plan/admin-restructure-plan.md` (nav dọc + token + prompt, đã code xong cả 3 hạng mục).
 
 `requirements.txt`, `docker-compose.yml` đã cấu hình. Khi commit, dùng tiếng Việt theo phong cách lịch sử commit hiện có.
 
@@ -287,6 +287,41 @@ stream hỏng/blocked trước token đầu → UI hiện "—", và trung bình
   nhóm này**: agent-service đọc `system_config` qua gọi HTTP `GET /internal/config` của
   backend, KHÔNG tự query Postgres trực tiếp như các module khác — xem `### Storage roles`.
 
+### Panel tiến trình 2 tầng — DebugPanel đã XOÁ (2026-08-01)
+Trước đây có **hai khối vẽ cùng một chuỗi bước bằng hai nguồn khác nhau**: panel tiến trình
+(mọi người, đọc `steps`/`step`) và DebugPanel admin (đọc event `status`). Chúng vẽ LỆCH nhau
+— câu xã giao hiện "1/1 bước" ở trên còn "plan + direct_response" ở dưới — và DebugPanel còn
+kẹt "Đang xử lý…" vĩnh viễn ở các mục ứng với node không bao giờ chạy tới, vì event `debug`
+gom một lần sát `done` nên placeholder không bao giờ được thay.
+
+Nay gộp thành **một danh sách bước, hai tầng chi tiết**:
+- **Tầng 1** (mọi người) — như cũ: nhãn bước + dòng phụ + 4 state.
+- **Tầng 2** (admin) — `internals`: mảng `{label, value}` **gắn vào ĐÚNG bước sinh ra nó**,
+  click dòng bước để mở. Dựng ở `orchestrator/progress.py` (thuần, ghép chuỗi bằng CODE,
+  **không LLM**), gửi **ngay trong event `step`** lúc bước chạy — không gom cuối nữa.
+- **Bước `visualization` MỚI**: node `build_visualization` vẫn chạy nhưng trước giờ không
+  emit bước nào. Nay có dòng riêng; viz hỏng → `partial` kèm tên exception (ca `UndefinedTable`
+  nuốt sạch timeline từng xảy ra một lần, xem `### Timeline + Map`). Danh sách câu đơn giờ là
+  **5 dòng**: `plan → todo:N → synthesize:N → validate:N → visualization`, viz LUÔN cuối kể cả
+  khi retry chèn thêm cặp synthesize/validate vào giữa.
+
+**Gác quyền ở SERVER, 2 cửa** — agent luôn gửi `internals` (để bản lưu đủ), backend bóc:
+`api/chat.py::_visible_step` gọi ở CẢ đường stream (`_proxy_stream`) lẫn đường đọc lại
+(`GET /conversations/{id}`). Chặn mỗi lúc chạy rồi mở toang lúc F5 thì coi như không chặn.
+Frontend KHÔNG hỏi role — điều kiện hiện tầng 2 là `internals` **có mặt**, một nguồn sự thật.
+Cờ `debug` (FE gửi `debug: isAdmin`) giờ gác cả event `debug` lẫn `internals`; admin tắt debug
+cũng không có tầng 2.
+
+**Lưu vào `messages.steps`** (JSONB, **không cần DDL** — `internals` là key bên trong phần tử
+mảng JSON, không phải cột). Nhờ vậy admin xem lại hội thoại **của người khác** ở `/admin/logs`
+(`ConversationReplay` render `ProgressPanel` gập sẵn) — thứ DebugPanel cũ không làm được vì
+ephemeral. `_merge_declaration` (backend) + `mergeDeclaration` (FE) phải chép `internals` y
+như `detail`, không thì lượt soạn lại (B5) xoá trắng tầng 2 của mọi bước đã xong.
+
+**Còn lại**: event `status` bên agent GIỮ (hữu ích khi test curl/Swagger) nhưng **frontend hết
+đọc** — `statusTrace`, action `status`/`debug`, `DebugInfo`, `debugOpen`/`toggleDebug` đã xoá.
+State `debug` + `AskResponse.debug` của `/ask` non-stream giữ nguyên.
+
 ### Xem nguồn (Citation Viewer) — xong 2026-07-12
 Khối **Nguồn** dưới câu trả lời trước đây là chữ tĩnh (`lichsu.clean.md:7349-7352`), không
 kiểm chứng được. Giờ 2 tầng, cùng khoá `chunk_id`. Plan: `docs/plan/citation-viewer-plan.md`.
@@ -357,15 +392,22 @@ là **sidebar dọc theo nhóm** (`AppSidebar.tsx`, KHÔNG còn tab ngang).
 - `api/` — `client.ts` (fetch wrapper Bearer + `{code,message}`→ApiError + 401 clear),
   `askStream.ts` (⭐ parser SSE), `auth/chat/documents/kb/logs/users/cost/prompts.ts`.
 - `store/` — `authStore` (persist), `chatUiStore` (`selectedEventId` link map↔timeline,
-  `layoutMode` **persist** (float/split), `convDrawerOpen`, `tourPlaying`, debugOpen).
+  `layoutMode` **persist** (float/split), `convDrawerOpen`, `tourPlaying`).
 - `features/auth` — RequireAuth/RoleGuard/`AuthLayout` (bố cục 2 cột dùng chung 2 trang) +
   LoginForm/`RegisterForm`+`useRegister`/`GoogleButton` (bọc `GoogleOAuthProvider` TẠI CHỖ,
   không bọc toàn app) + `redirectTarget.ts` (đọc `state.from`, chặn URL ngoài).
 - `features/chat` — `chatReducer` (thuần, test) + `useChat` + ChatPanel/MessageList/Bubble/
-  Composer/Clarification/DebugPanel(admin)/VizPanel/`ConversationDrawer` (drawer phiên ở
-  layout float) + **xem nguồn**: `CitationList` (gộp theo mục, chip `[n]` hover ra quote) +
+  Composer/VizPanel/`ConversationDrawer` (drawer phiên ở
+  layout float) + **panel tiến trình 2 tầng**: `ProgressPanel` + `StepRow` (xem
+  `### Panel tiến trình` dưới) + **xem nguồn**: `CitationList` (gộp theo mục, chip `[n]` hover ra quote) +
   `groupCitations.ts` (thuần, test kỹ — luật gộp + tiền tố chung) + `SourceModal` (click →
   toàn văn, fetch lười). `useChat` KHÔNG đụng panel bản đồ — AskPage mở theo dữ liệu.
+  **Câu hỏi lại (route `ambiguous`) KHÔNG có UI riêng** (bỏ `ClarificationPrompt` 2026-08-01):
+  render y như câu trả lời thường qua `content`, trả lời bằng ô nhập chính. Ô nhập riêng cũ
+  trong khối vàng gọi ĐÚNG cùng `onSend` với Composer — hai ô một việc, mà ô chính không khoá
+  nên không gì cho biết chúng tương đương. Còn lại: cờ `clarificationNeeded` chỉ để `ChatPanel`
+  đổi placeholder thành "Trả lời để làm rõ…" khi lượt CUỐI là clarification (`clarificationQuestion`
+  đã bỏ — luôn trùng `content`).
 - `features/map` + `features/timeline` — EventMap (+ `CameraController` nội bộ)/EventMarker/
   MapEmptyState + TimelineBar (prop `variant` docked|overlay) + `useEventTour` (engine trình
   chiếu, có test). Honest fallback: gazetteer hoãn → markers rỗng → map nền vẫn render
