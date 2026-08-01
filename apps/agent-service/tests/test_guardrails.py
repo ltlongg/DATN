@@ -1,5 +1,5 @@
 """Test guardrails input layer: check_input (allow/block/fail-closed/fail-open/disabled),
-node guard_input qua graph (block emit token+blocked, KHÔNG done/error, KHÔNG gọi build_query/
+node guard_input qua graph (block emit token+blocked, KHÔNG done/error, KHÔNG gọi plan/
 retrieve/synthesize), usage log task=guardrail_input, và ràng buộc KHÔNG regex/keyword.
 """
 
@@ -176,7 +176,7 @@ async def test_check_input_records_usage(monkeypatch) -> None:
     assert capture["model"] == "gpt-4o-mini"
 
 
-# --- graph flow: block dừng hẳn, không gọi build_query/retrieve/synthesize ---
+# --- graph flow: block dừng hẳn, không gọi plan/retrieve/synthesize ---
 
 
 async def _collect(request: AskRequest) -> list[tuple[str, dict]]:
@@ -197,7 +197,7 @@ async def test_block_stream_emits_token_then_blocked_no_done(monkeypatch) -> Non
     monkeypatch.setattr(nodes, "check_input", block)
 
     async def boom_bq(**kw):
-        raise AssertionError("build_query KHÔNG được gọi khi input bị chặn")
+        raise AssertionError("plan KHÔNG được gọi khi input bị chặn")
 
     monkeypatch.setattr(
         nodes,
@@ -217,8 +217,9 @@ async def test_block_stream_emits_token_then_blocked_no_done(monkeypatch) -> Non
     types = [t for t, _ in events]
     # Safe message nhả dần nhiều token (giống câu trả lời thường), blocked ở cuối, không done/error.
     assert types[-1] == "blocked"
-    assert set(types[:-1]) == {"token"}
-    assert len(types) - 1 >= 2  # dài -> cắt thành >=2 cụm
+    # Ngoài token chỉ được có 2 event panel tiến trình (B3) — không status/citations/viz.
+    assert set(types[:-1]) == {"token", "steps", "step"}
+    assert types.count("token") >= 2  # dài -> cắt thành >=2 cụm
     assert "done" not in types and "error" not in types
     tokens = [d["text"] for t, d in events if t == "token"]
     assert "".join(tokens) == safe  # ghép lại nguyên vẹn
@@ -226,7 +227,7 @@ async def test_block_stream_emits_token_then_blocked_no_done(monkeypatch) -> Non
     assert blk == {"stage": "input", "categories": ["harmful_instructions"]}
 
 
-async def test_allow_stream_proceeds_to_build_query(monkeypatch) -> None:
+async def test_allow_stream_proceeds_to_plan(monkeypatch) -> None:
     # allow -> build_query được gọi (đánh dấu qua flag).
     called: dict = {}
 
@@ -235,11 +236,11 @@ async def test_allow_stream_proceeds_to_build_query(monkeypatch) -> None:
 
     monkeypatch.setattr(nodes, "check_input", allow)
 
-    from app.schemas.ask import BuildQueryOutput
+    from app.schemas.ask import PlanOutput
 
     async def fake_bq(**kw):
-        called["build_query"] = True
-        out = BuildQueryOutput(standalone_query="q", mentioned_entities=[], route="smalltalk")
+        called["plan"] = True
+        out = PlanOutput(standalone_query="q", mentioned_entities=[], route="smalltalk")
         return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(parsed=out))])
 
     monkeypatch.setattr(
@@ -251,7 +252,7 @@ async def test_allow_stream_proceeds_to_build_query(monkeypatch) -> None:
     )
     events = await _collect(AskRequest(question="Xin chào", stream=True))
     types = [t for t, _ in events]
-    assert called.get("build_query") is True
+    assert called.get("plan") is True
     assert types[-1] == "done"  # smalltalk -> flow bình thường tới done
 
 
@@ -270,3 +271,19 @@ def test_guardrails_module_has_no_regex_or_blocklist() -> None:
     # Không có danh sách keyword/blocklist hardcode để phân loại.
     for banned in ("BLOCKLIST", "KEYWORDS", "BLOCKED_WORDS", "BAD_WORDS"):
         assert banned not in src
+
+
+async def test_blocked_input_explains_itself_on_progress_panel(monkeypatch) -> None:
+    """Chặn ở cửa -> `plan` không chạy. Panel phải nói "bị chặn", không để dòng phân tích
+    câu hỏi treo `partial` trống trơn (nhìn như hệ thống hỏng)."""
+    async def block(question, history, **_kwargs):
+        return GuardrailDecision(
+            action="block", categories=["other"], safe_message="Xin lỗi."
+        )
+
+    monkeypatch.setattr(nodes, "check_input", block)
+    events = await _collect(AskRequest(question="x", stream=True))
+    assert [r["id"] for r in next(d for t, d in events if t == "steps")["steps"]] == ["plan"]
+    step = next(d for t, d in events if t == "step")
+    assert (step["id"], step["state"]) == ("plan", "partial")
+    assert step["detail"] == "Bộ lọc an toàn đã chặn câu hỏi"

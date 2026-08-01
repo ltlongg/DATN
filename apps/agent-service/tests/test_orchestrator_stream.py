@@ -11,7 +11,7 @@ import pytest
 
 from app.orchestrator import nodes
 from app.orchestrator.runner import run_ask_stream
-from app.schemas.ask import AskRequest, BuildQueryOutput, SynthesizedAnswer
+from app.schemas.ask import AskRequest, PlanOutput, SynthesizedAnswer
 from app.schemas.guardrails import GuardrailDecision
 from app.schemas.retrieval import RetrievalBackendError, RetrievalResult, RetrievedChunk
 from app.schemas.visualization import VisualizationPayload
@@ -38,8 +38,8 @@ def _retrieval(chunk_ids) -> RetrievalResult:
     )
 
 
-def _patch_build_query(monkeypatch, *, route="needs_retrieval"):
-    output = BuildQueryOutput(standalone_query="q", mentioned_entities=[], route=route)
+def _patch_plan(monkeypatch, *, route="needs_retrieval"):
+    output = PlanOutput(standalone_query="q", mentioned_entities=[], route=route)
 
     async def fake_parse(**kw):
         return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(parsed=output))])
@@ -88,7 +88,7 @@ async def _collect(request: AskRequest) -> list[tuple[str, dict]]:
 
 
 async def test_happy_path_event_order(monkeypatch) -> None:
-    _patch_build_query(monkeypatch)
+    _patch_plan(monkeypatch)
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     _patch_synthesize(monkeypatch)
     _patch_viz(monkeypatch)
@@ -100,7 +100,7 @@ async def test_happy_path_event_order(monkeypatch) -> None:
 
 
 async def test_token_concatenates_to_answer(monkeypatch) -> None:
-    _patch_build_query(monkeypatch)
+    _patch_plan(monkeypatch)
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     _patch_synthesize(monkeypatch, answer="Câu một. Câu hai.")
     _patch_viz(monkeypatch)
@@ -110,7 +110,7 @@ async def test_token_concatenates_to_answer(monkeypatch) -> None:
 
 
 async def test_done_summary_carries_confidence_and_mode(monkeypatch) -> None:
-    _patch_build_query(monkeypatch)
+    _patch_plan(monkeypatch)
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     _patch_synthesize(monkeypatch, confidence="vừa")
     _patch_viz(monkeypatch)
@@ -121,7 +121,7 @@ async def test_done_summary_carries_confidence_and_mode(monkeypatch) -> None:
 
 
 async def test_clarify_emits_clarification_and_done_no_token(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="ambiguous")
+    _patch_plan(monkeypatch, route="ambiguous")
     events = await _collect(AskRequest(question="Ông ấy là ai?", stream=True))
     types = [t for t, _ in events]
     assert "clarification" in types
@@ -132,7 +132,7 @@ async def test_clarify_emits_clarification_and_done_no_token(monkeypatch) -> Non
 
 
 async def test_error_after_sse_open_goes_through_error_event(monkeypatch) -> None:
-    _patch_build_query(monkeypatch)
+    _patch_plan(monkeypatch)
     _patch_retrieve(monkeypatch, error=RetrievalBackendError("all_backends_failed"))
     events = await _collect(AskRequest(question="hỏi", stream=True))
     types = [t for t, _ in events]
@@ -145,7 +145,7 @@ async def test_error_after_sse_open_goes_through_error_event(monkeypatch) -> Non
 
 
 async def test_debug_event_emitted_before_done_when_requested(monkeypatch) -> None:
-    _patch_build_query(monkeypatch)
+    _patch_plan(monkeypatch)
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     _patch_synthesize(monkeypatch)
     _patch_viz(monkeypatch)
@@ -154,12 +154,12 @@ async def test_debug_event_emitted_before_done_when_requested(monkeypatch) -> No
     assert types[-1] == "done"
     assert types[-2] == "debug"  # debug ngay trước done (gom rồi bắn 1 lần ở cuối)
     dbg = next(d for t, d in events if t == "debug")["debug"]
-    # state["debug"] đã tích lũy build_query + retrieve qua reducer _merge_debug.
-    assert "build_query" in dbg and "retrieve" in dbg
+    # state["debug"] đã tích lũy plan + retrieve qua reducer _merge_debug.
+    assert "plan" in dbg and "retrieve" in dbg
 
 
 async def test_debug_event_absent_when_not_requested(monkeypatch) -> None:
-    _patch_build_query(monkeypatch)
+    _patch_plan(monkeypatch)
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     _patch_synthesize(monkeypatch)
     _patch_viz(monkeypatch)
@@ -168,10 +168,253 @@ async def test_debug_event_absent_when_not_requested(monkeypatch) -> None:
 
 
 async def test_smalltalk_streams_token_and_done(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="smalltalk")
+    _patch_plan(monkeypatch, route="smalltalk")
     events = await _collect(AskRequest(question="Xin chào", stream=True))
     types = [t for t, _ in events]
     assert "token" in types
     assert types[-1] == "done"
     tokens = "".join(d["text"] for t, d in events if t == "token")
     assert "Xin chào" in tokens
+
+
+# --- panel tiến trình (B3, plan §7.3.1) ---
+
+
+def _steps_event(events) -> list[dict]:
+    return next(d for t, d in events if t == "steps")["steps"]
+
+
+def _step_updates(events) -> list[tuple[str, str]]:
+    """(id, state) theo đúng thứ tự phát — thứ tự là một phần của hợp đồng."""
+    return [(d["id"], d["state"]) for t, d in events if t == "step"]
+
+
+async def test_steps_declares_five_rows_for_simple_question(monkeypatch) -> None:
+    _patch_plan(monkeypatch)
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    _patch_synthesize(monkeypatch)
+    _patch_viz(monkeypatch)
+    events = await _collect(AskRequest(question="hỏi", stream=True))
+    assert [r["id"] for r in _steps_event(events)] == [
+        "plan",
+        "todo:1",
+        "synthesize:1",
+        "validate:1",
+        "visualization",
+    ]
+
+
+async def test_step_updates_follow_the_run_order(monkeypatch) -> None:
+    _patch_plan(monkeypatch)
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    _patch_synthesize(monkeypatch)
+    _patch_viz(monkeypatch)
+    events = await _collect(AskRequest(question="hỏi", stream=True))
+    # `_patch_viz` trả payload RỖNG -> 0 sự kiện -> `partial`, không phải `done`.
+    assert _step_updates(events) == [
+        ("plan", "done"),
+        ("todo:1", "running"),
+        ("todo:1", "done"),
+        ("synthesize:1", "running"),
+        ("synthesize:1", "done"),
+        ("validate:1", "done"),
+        ("visualization", "running"),
+        ("visualization", "partial"),
+    ]
+
+
+async def test_internals_ride_along_with_the_step_that_produced_them(monkeypatch) -> None:
+    """Tầng 2 đi NGAY trong event `step`, không gom một lần sát `done` như event `debug` cũ.
+    Chính cách gom muộn đó đẻ ra mấy dòng "Đang xử lý…" kẹt vĩnh viễn ở nhánh không chạy tới.
+    """
+    _patch_plan(monkeypatch)
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    _patch_synthesize(monkeypatch)
+    _patch_viz(monkeypatch)
+    events = await _collect(AskRequest(question="hỏi", stream=True))
+    with_internals = {
+        d["id"] for t, d in events if t == "step" and d.get("internals")
+    }
+    assert with_internals == {"plan", "todo:1", "synthesize:1", "validate:1", "visualization"}
+    # ... và tới TRƯỚC token đầu tiên với những bước chạy trước synthesize.
+    types = [t for t, _ in events]
+    first_internal = next(
+        i for i, (t, d) in enumerate(events) if t == "step" and d.get("internals")
+    )
+    assert first_internal < types.index("token")
+
+
+async def test_running_update_carries_no_internals_yet(monkeypatch) -> None:
+    """Lúc mở bước thì chưa có số liệu nào — gửi mảng rỗng là mời frontend vẽ bảng trống."""
+    _patch_plan(monkeypatch)
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    _patch_synthesize(monkeypatch)
+    _patch_viz(monkeypatch)
+    events = await _collect(AskRequest(question="hỏi", stream=True))
+    running = [d for t, d in events if t == "step" and d["state"] == "running"]
+    assert running and all("internals" not in d for d in running)
+
+
+async def test_smalltalk_has_no_placeholder_steps_left_hanging(monkeypatch) -> None:
+    """Ca trong ảnh bug: DebugPanel cũ hiện "Đang xử lý…" vĩnh viễn cho Truy hồi/Đối chiếu vì
+    những node đó không bao giờ chạy. Panel chỉ khai dòng THẬT SỰ có trong kịch bản."""
+    _patch_plan(monkeypatch, route="smalltalk")
+    events = await _collect(AskRequest(question="chào", stream=True))
+    assert [r["id"] for r in _steps_event(events)] == ["plan"]
+    plan_update = next(d for t, d in events if t == "step" and d["id"] == "plan")
+    assert plan_update["detail"] == "Câu xã giao · không cần tra tài liệu"
+    assert any(r["label"] == "Định tuyến" for r in plan_update["internals"])
+
+
+async def test_visualization_failure_names_the_error_instead_of_going_quiet(
+    monkeypatch,
+) -> None:
+    """Đã cắn một lần: gazetteer chưa có bảng -> UndefinedTable nuốt sạch timeline mà panel
+    không hé nửa lời (xem CLAUDE.md)."""
+    _patch_plan(monkeypatch)
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    _patch_synthesize(monkeypatch)
+
+    def boom(ids):
+        raise RuntimeError("viz down")
+
+    monkeypatch.setattr(nodes, "build_visualization_payload", boom)
+    events = await _collect(AskRequest(question="hỏi", stream=True))
+    viz = [d for t, d in events if t == "step" and d["id"] == "visualization"][-1]
+    assert viz["state"] == "partial"
+    assert viz["detail"] == "Không dựng được"
+    assert viz["internals"] == [{"label": "Lỗi", "value": "RuntimeError"}]
+    # Câu trả lời vẫn về đủ — viz hỏng không được làm fail answer.
+    assert any(t == "done" for t, _ in events)
+
+
+async def test_steps_arrives_before_any_step_update_and_before_first_token(
+    monkeypatch,
+) -> None:
+    """Frontend chỉ nhận `step` cho id đã khai báo -> `steps` phải tới trước, nếu không
+    mọi cập nhật đầu tiên bị bỏ im lặng."""
+    _patch_plan(monkeypatch)
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    _patch_synthesize(monkeypatch)
+    _patch_viz(monkeypatch)
+    types = [t for t, _ in await _collect(AskRequest(question="hỏi", stream=True))]
+    assert types.index("steps") < types.index("step") < types.index("token")
+
+
+async def test_retrieve_detail_reports_chunk_count(monkeypatch) -> None:
+    _patch_plan(monkeypatch)
+    _patch_retrieve(monkeypatch, _retrieval(["c-1", "c-2", "c-3"]))
+    _patch_synthesize(monkeypatch)
+    _patch_viz(monkeypatch)
+    events = await _collect(AskRequest(question="hỏi", stream=True))
+    detail = next(d for t, d in events if t == "step" and d["id"] == "todo:1" and "detail" in d)
+    assert detail["detail"] == "Dense + BM25 + graph · 3 đoạn"
+
+
+async def test_zero_chunks_marks_both_retrieve_and_synthesize_partial(monkeypatch) -> None:
+    """0 chunk -> has_context đưa sang honest_answer: bước tìm `partial`, và bước soạn bài
+    KHÔNG được treo vĩnh viễn ở `pending` mà phải nói rõ vì sao không chạy.
+
+    Dòng `validate:1` thì NGƯỢC LẠI — nó thật sự không chạy, nên phải ở lại `pending`; bịa
+    cho nó một kết quả là nói dối về việc hệ thống đã làm."""
+    _patch_plan(monkeypatch)
+    _patch_retrieve(monkeypatch, _retrieval([]))
+    events = await _collect(AskRequest(question="hỏi", stream=True))
+    updates = _step_updates(events)
+    assert updates == [
+        ("plan", "done"),
+        ("todo:1", "running"),
+        ("todo:1", "partial"),
+        ("synthesize:1", "partial"),
+    ]
+    assert not any(sid.startswith("validate:") for sid, _ in updates)
+
+
+async def test_clarify_declares_only_plan_row(monkeypatch) -> None:
+    _patch_plan(monkeypatch, route="ambiguous")
+    events = await _collect(AskRequest(question="Ông ấy là ai?", stream=True))
+    assert [r["id"] for r in _steps_event(events)] == ["plan"]
+    assert _step_updates(events) == [("plan", "done")]
+
+
+async def test_plan_llm_failure_marks_plan_partial_not_done(monkeypatch) -> None:
+    """Fallback chạy bằng nguyên câu hỏi -> tick xanh ở đây là nói dối về việc vừa làm."""
+
+    async def boom(**kw):
+        raise RuntimeError("llm down")
+
+    monkeypatch.setattr(
+        nodes,
+        "get_async_openai_client",
+        lambda: SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(parse=boom))),
+    )
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    _patch_synthesize(monkeypatch)
+    _patch_viz(monkeypatch)
+    events = await _collect(AskRequest(question="hỏi", stream=True))
+    assert _step_updates(events)[0] == ("plan", "partial")
+    assert [r["id"] for r in _steps_event(events)] == [
+        "plan",
+        "todo:1",
+        "synthesize:1",
+        "validate:1",
+        "visualization",
+    ]
+
+
+async def test_retrieval_backend_error_leaves_row_running_for_frontend_to_close(
+    monkeypatch,
+) -> None:
+    """§7.3.1 mục 5: không có event mới cho ca lỗi — dòng ở lại `running`, frontend hạ
+    xuống `partial` khi stream đóng mà chưa có kết."""
+    _patch_plan(monkeypatch)
+    _patch_retrieve(monkeypatch, error=RetrievalBackendError("all_backends_failed"))
+    events = await _collect(AskRequest(question="hỏi", stream=True))
+    assert _step_updates(events) == [("plan", "done"), ("todo:1", "running")]
+    assert [t for t, _ in events][-1] == "error"
+
+
+async def test_retry_grows_the_panel_with_new_rows(monkeypatch) -> None:
+    """Soạn lại (B5) phải HIỆN RA trên panel: thêm `synthesize:2`/`validate:2`, không ghi đè
+    dòng cũ. `steps` được phát lại với danh sách dài hơn nên bên nhận phải merge theo id."""
+    _patch_plan(monkeypatch)
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    _patch_viz(monkeypatch)
+    calls = {"n": 0}
+
+    async def fake(messages, *, emitter, model, batch_chars, temperature=0.0, **_kw):
+        from app.orchestrator.synthesis import emit_text_as_batches
+
+        calls["n"] += 1
+        used = ["ghost-id"] if calls["n"] == 1 else ["c-1"]
+        await emit_text_as_batches("Đáp án.", emitter, batch_chars)
+        return SynthesizedAnswer(answer="Đáp án.", used_chunk_ids=used, confidence="cao")
+
+    monkeypatch.setattr(nodes, "stream_synthesis", fake)
+    events = await _collect(AskRequest(question="hỏi", stream=True))
+
+    declarations = [d["steps"] for t, d in events if t == "steps"]
+    assert len(declarations) == 2  # lần 2 phát khi vào lượt soạn lại
+    assert [r["id"] for r in declarations[-1]] == [
+        "plan",
+        "todo:1",
+        "synthesize:1",
+        "validate:1",
+        "synthesize:2",
+        "validate:2",
+        "visualization",
+    ]
+    assert _step_updates(events)[-6:] == [
+        ("validate:1", "partial"),
+        ("synthesize:2", "running"),
+        ("synthesize:2", "done"),
+        ("validate:2", "done"),
+        ("visualization", "running"),
+        ("visualization", "partial"),
+    ]
+    # Dòng phụ nói đúng chuyện đã xảy ra, và chỉ ca 0 hợp lệ mới được ghi "soạn lại".
+    v1 = next(d for t, d in events if t == "step" and d["id"] == "validate:1")
+    v2 = next(d for t, d in events if t == "step" and d["id"] == "validate:2")
+    assert v1["detail"] == "0/1 liên kết nguồn hợp lệ · soạn lại"
+    assert v2["detail"] == "1/1 liên kết nguồn hợp lệ"
+    assert "regenerating" in [t for t, _ in events]  # frontend xoá chữ lượt 1

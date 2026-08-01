@@ -29,8 +29,11 @@ def initial_state(request: AskRequest) -> AgentState:
         "conversation_id": request.conversation_id,
         "message_id": request.message_id,
         "standalone_query": "",
-        "seed_mentions": [],
-        "requested_mode": request.mode,
+        "steps": [],
+        "override_mode": request.mode,
+        # Giá trị thật do `plan` giải (auto -> agent chọn; else -> chính override). Đặt
+        # "hybrid" làm chỗ giữ chỗ; không node nào đọc trước khi `plan` chạy xong.
+        "selected_mode": "hybrid",
         "route": None,
         "clarification_needed": False,
         "clarification_question": None,

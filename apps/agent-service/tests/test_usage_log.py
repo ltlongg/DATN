@@ -12,7 +12,7 @@ from app.core import usage_log
 from app.orchestrator import nodes
 from app.orchestrator.emitter import ListEmitter
 from app.orchestrator.synthesis import stream_synthesis
-from app.schemas.ask import BuildQueryOutput, SynthesizedAnswer
+from app.schemas.ask import PlanOutput, SynthesizedAnswer
 
 
 # --- record_usage -----------------------------------------------------------
@@ -58,13 +58,13 @@ def test_record_usage_inserts_correct_columns(monkeypatch) -> None:
 
     monkeypatch.setattr(usage_log, "connection", fake_connection)
     usage_log.record_usage(
-        "build_query", "gpt", 10, 5, 15,
+        "plan", "gpt", 10, 5, 15,
         user_id="u-1", conversation_id="conv-1", message_id="msg-1",
     )
     insert = next(e for e in log if "INSERT INTO llm_usage" in e[0])
     _id, task, model, prompt, completion, total, user_id, conv_id, msg_id = insert[1]
     assert (task, model, prompt, completion, total, user_id, conv_id, msg_id) == (
-        "build_query", "gpt", 10, 5, 15, "u-1", "conv-1", "msg-1",
+        "plan", "gpt", 10, 5, 15, "u-1", "conv-1", "msg-1",
     )
 
 
@@ -79,7 +79,7 @@ def test_record_usage_swallows_errors(monkeypatch) -> None:
     usage_log.record_usage("synthesize", "m", 1, 2, 3)
 
 
-# --- build_query ghi usage --------------------------------------------------
+# --- plan ghi usage --------------------------------------------------
 
 
 def _client_returning(completion):
@@ -92,10 +92,10 @@ def _client_returning(completion):
 
 
 def _parsed():
-    return BuildQueryOutput(standalone_query="q", mentioned_entities=[], route="needs_retrieval")
+    return PlanOutput(standalone_query="q", mentioned_entities=[], route="needs_retrieval")
 
 
-async def test_build_query_records_usage_when_present(monkeypatch) -> None:
+async def test_plan_records_usage_when_present(monkeypatch) -> None:
     usage = SimpleNamespace(prompt_tokens=10, completion_tokens=5, total_tokens=15)
     completion = SimpleNamespace(
         choices=[SimpleNamespace(message=SimpleNamespace(parsed=_parsed()))], usage=usage
@@ -104,17 +104,18 @@ async def test_build_query_records_usage_when_present(monkeypatch) -> None:
     captured: dict = {}
     monkeypatch.setattr(nodes, "record_usage", lambda **kw: captured.update(kw))
 
-    await nodes.build_query(
+    await nodes.plan(
         {
             "question": "q",
             "history": [],
+            "override_mode": "auto",
             "user_id": "u-1",
             "conversation_id": "conv-1",
             "message_id": "msg-1",
         },
         {},
     )
-    assert captured["task"] == "build_query"
+    assert captured["task"] == "plan"
     assert (captured["prompt_tokens"], captured["completion_tokens"], captured["total_tokens"]) == (
         10, 5, 15,
     )
@@ -123,7 +124,7 @@ async def test_build_query_records_usage_when_present(monkeypatch) -> None:
     assert captured["message_id"] == "msg-1"
 
 
-async def test_build_query_skips_usage_when_absent(monkeypatch) -> None:
+async def test_plan_skips_usage_when_absent(monkeypatch) -> None:
     # completion KHÔNG có attribute usage (như mock cũ) -> không gọi record_usage.
     completion = SimpleNamespace(
         choices=[SimpleNamespace(message=SimpleNamespace(parsed=_parsed()))]
@@ -132,7 +133,9 @@ async def test_build_query_skips_usage_when_absent(monkeypatch) -> None:
     called: list = []
     monkeypatch.setattr(nodes, "record_usage", lambda **kw: called.append(kw))
 
-    await nodes.build_query({"question": "q", "history": [], "user_id": "u-1"}, {})
+    await nodes.plan(
+        {"question": "q", "history": [], "override_mode": "auto", "user_id": "u-1"}, {}
+    )
     assert called == []
 
 

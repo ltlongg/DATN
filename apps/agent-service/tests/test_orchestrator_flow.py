@@ -2,7 +2,7 @@
 
 Phủ mọi nhánh: route (needs_retrieval/ambiguous/out_of_scope/smalltalk), has_context
 (empty -> honest), citation build từ used_chunk_ids (TẠM BỎ validate/retry, xem
-nodes.py::build_visualization), seed_mentions handoff, visualization (ok/error), build_query
+nodes.py::build_visualization), seed handoff (luật §2.1), visualization (ok/error), `plan`
 fallback.
 """
 
@@ -15,7 +15,7 @@ import pytest
 from app.orchestrator import nodes
 from app.orchestrator.emitter import ListEmitter
 from app.orchestrator.runner import run_ask
-from app.schemas.ask import AskRequest, BuildQueryOutput, SynthesizedAnswer
+from app.schemas.ask import AskRequest, PlanOutput, PlanStep, StepQuery, SynthesizedAnswer
 from app.schemas.guardrails import GuardrailDecision
 from app.schemas.retrieval import RetrievalBackendError, RetrievalResult, RetrievedChunk
 from app.schemas.visualization import TimelineItem, VisualizationPayload
@@ -58,9 +58,16 @@ def _retrieval(chunk_ids, *, warnings=None, graph_context=None) -> RetrievalResu
     )
 
 
-def _patch_build_query(monkeypatch, *, route="needs_retrieval", entities=None, error=False):
-    output = BuildQueryOutput(
-        standalone_query="standalone q", mentioned_entities=entities or [], route=route
+def _patch_plan(
+    monkeypatch, *, route="needs_retrieval", entities=None, error=False, selected_mode="hybrid"
+):
+    """Mock LLM `plan`. `steps` để rỗng -> normalize_plan dựng 1 bước từ standalone_query,
+    tức đúng hành vi mặc định; test nào cần nhiều query thì mock riêng."""
+    output = PlanOutput(
+        standalone_query="standalone q",
+        mentioned_entities=entities or [],
+        route=route,
+        selected_mode=selected_mode,
     )
 
     async def fake_parse(**kw):
@@ -116,7 +123,7 @@ def _patch_viz(monkeypatch, payload=None, *, error=False):
 
 
 async def test_needs_retrieval_happy_path(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_plan(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval(["c-1", "c-2"]))
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch)
@@ -129,7 +136,7 @@ async def test_needs_retrieval_happy_path(monkeypatch) -> None:
 
 
 async def test_ambiguous_routes_to_clarify_without_retrieve(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="ambiguous")
+    _patch_plan(monkeypatch, route="ambiguous")
 
     async def boom(*a, **k):  # retrieve KHÔNG được gọi
         raise AssertionError("không được retrieve khi ambiguous")
@@ -144,7 +151,7 @@ async def test_ambiguous_routes_to_clarify_without_retrieve(monkeypatch) -> None
 
 
 async def test_out_of_scope_routes_to_honest(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="out_of_scope")
+    _patch_plan(monkeypatch, route="out_of_scope")
     resp = await run_ask(AskRequest(question="2 + 2 bằng mấy?", stream=False))
     assert resp.retrieval_mode == "none"
     assert resp.confidence == "không đủ dữ liệu"
@@ -152,7 +159,7 @@ async def test_out_of_scope_routes_to_honest(monkeypatch) -> None:
 
 
 async def test_smalltalk_routes_to_direct_response(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="smalltalk")
+    _patch_plan(monkeypatch, route="smalltalk")
     resp = await run_ask(AskRequest(question="Xin chào", stream=False))
     assert resp.retrieval_mode == "none"
     assert "Xin chào" in (resp.answer or "")
@@ -163,7 +170,7 @@ async def test_smalltalk_routes_to_direct_response(monkeypatch) -> None:
 
 
 async def test_empty_retrieval_goes_honest(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_plan(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval([]))
 
     async def boom(*a, **k):
@@ -179,7 +186,7 @@ async def test_empty_retrieval_goes_honest(monkeypatch) -> None:
 
 
 async def test_retrieval_all_backends_fail_propagates(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_plan(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, error=RetrievalBackendError("all_backends_failed"))
     with pytest.raises(RetrievalBackendError) as exc:
         await run_ask(AskRequest(question="hỏi", stream=False))
@@ -189,34 +196,109 @@ async def test_retrieval_all_backends_fail_propagates(monkeypatch) -> None:
 # --- citation build (TẠM BỎ validate/retry — filter đơn giản, không rẽ honest) ---
 
 
-async def test_unknown_chunk_id_dropped_no_retry(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+# --- B5: validate_citations + after_validate (4 nhánh) ---
+
+
+def _patch_synthesize_sequence(monkeypatch, rounds, *, capture=None):
+    """Mock synthesize trả kết quả KHÁC NHAU theo từng lượt: [(answer, used, confidence)...].
+    Cần cho B5 vì lượt soạn lại phải khác lượt đầu mới kiểm được là nó đã soạn lại thật."""
+    calls = {"n": 0}
+
+    async def fake(messages, *, emitter, model, batch_chars, temperature=0.0, **_kw):
+        answer, used, confidence = rounds[min(calls["n"], len(rounds) - 1)]
+        calls["n"] += 1
+        if capture is not None:
+            capture.setdefault("prompts", []).append(messages)
+        await emitter.emit("token", {"text": answer})
+        return SynthesizedAnswer(
+            answer=answer, used_chunk_ids=list(used), confidence=confidence
+        )
+
+    monkeypatch.setattr(nodes, "stream_synthesis", fake)
+    return calls
+
+
+async def test_all_citations_invalid_triggers_exactly_one_retry(monkeypatch) -> None:
+    """LLM bịa sạch id -> 0 liên kết hợp lệ -> soạn lại. Trước B5 id bịa bị vứt IM LẶNG và
+    câu trả lời vẫn hiện kèm dấu [1] mà khối Nguồn rỗng."""
+    _patch_plan(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     capture: dict = {}
-    # LLM khai chunk_id không có trong retrieval -> bị lọc khỏi citations, KHÔNG retry,
-    # KHÔNG rẽ honest_answer -> answer gốc vẫn giữ nguyên.
-    _patch_synthesize(monkeypatch, used=("ghost-id",), capture=capture)
+    calls = _patch_synthesize_sequence(
+        monkeypatch,
+        [("Bịa.", ("ghost-id",), "cao"), ("Có nguồn.", ("c-1",), "cao")],
+        capture=capture,
+    )
     _patch_viz(monkeypatch)
     resp = await run_ask(AskRequest(question="hỏi", stream=False))
-    assert len(capture["calls"]) == 1  # đúng 1 lần gọi, không retry
-    assert resp.answer == "Đáp án."
+    assert calls["n"] == 2
+    assert resp.answer == "Có nguồn."
+    assert [c.chunk_id for c in resp.citations] == ["c-1"]
+    # Lượt 2 phải dùng prompt is_retry, không phải lặp y nguyên prompt cũ.
+    assert capture["prompts"][0] != capture["prompts"][1]
+
+
+async def test_retry_exhausted_falls_back_to_honest_answer(monkeypatch) -> None:
+    """Soạn lại vẫn 0 nguồn -> thà nói chưa đủ dữ liệu còn hơn đưa câu trả lời không có gì
+    chống lưng."""
+    _patch_plan(monkeypatch, route="needs_retrieval")
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    calls = _patch_synthesize_sequence(monkeypatch, [("Bịa.", ("ghost-id",), "cao")])
+    _patch_viz(monkeypatch)
+    resp = await run_ask(AskRequest(question="hỏi", stream=False))
+    assert calls["n"] == 2  # dừng đúng ở synthesize_max_attempts, không lặp vô hạn
+    assert resp.confidence == "không đủ dữ liệu"
+    assert resp.answer == nodes.HONEST_MESSAGE
     assert resp.citations == []
 
 
-async def test_confidence_insufficient_no_longer_forces_honest(monkeypatch) -> None:
-    # TẠM BỎ nhánh confidence-thấp -> honest_answer (từng nằm ở after_validate).
-    _patch_build_query(monkeypatch, route="needs_retrieval")
-    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
-    _patch_synthesize(monkeypatch, used=("c-1",), confidence="không đủ dữ liệu")
+async def test_partially_invalid_citations_keep_the_valid_ones_without_retry(
+    monkeypatch,
+) -> None:
+    """Còn ≥1 id hợp lệ thì ĐI TIẾP — `after_validate` chỉ soạn lại ở ca 0 hợp lệ. Đây là lý
+    do dòng phụ trên panel không được viết "soạn lại" cho ca 1/2."""
+    _patch_plan(monkeypatch, route="needs_retrieval")
+    _patch_retrieve(monkeypatch, _retrieval(["c-1", "c-2"]))
+    calls = _patch_synthesize_sequence(
+        monkeypatch, [("Đáp án.", ("ghost-id", "c-2"), "cao")]
+    )
     _patch_viz(monkeypatch)
     resp = await run_ask(AskRequest(question="hỏi", stream=False))
+    assert calls["n"] == 1
+    assert resp.answer == "Đáp án."
+    assert [c.chunk_id for c in resp.citations] == ["c-2"]
+
+
+async def test_confidence_insufficient_goes_honest_without_burning_a_retry(
+    monkeypatch,
+) -> None:
+    """LLM tự khai không trả lời được thì soạn lại cũng vô ích -> đi honest luôn. Nhánh này
+    phải đứng TRƯỚC nhánh đếm citation trong `after_validate`."""
+    _patch_plan(monkeypatch, route="needs_retrieval")
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    calls = _patch_synthesize_sequence(
+        monkeypatch, [("Đáp án.", ("c-1",), "không đủ dữ liệu")]
+    )
+    _patch_viz(monkeypatch)
+    resp = await run_ask(AskRequest(question="hỏi", stream=False))
+    assert calls["n"] == 1  # KHÔNG tốn lượt soạn lại
     assert resp.confidence == "không đủ dữ liệu"
-    assert resp.answer == "Đáp án."  # answer LLM giữ nguyên, không bị thay bằng honest message
-    assert [c.chunk_id for c in resp.citations] == ["c-1"]
+    assert resp.answer == nodes.HONEST_MESSAGE
+    assert resp.citations == []
+
+
+async def test_valid_citations_go_straight_through(monkeypatch) -> None:
+    _patch_plan(monkeypatch, route="needs_retrieval")
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    calls = _patch_synthesize_sequence(monkeypatch, [("Đáp án.", ("c-1", "c-1"), "cao")])
+    _patch_viz(monkeypatch)
+    resp = await run_ask(AskRequest(question="hỏi", stream=False))
+    assert calls["n"] == 1
+    assert [c.chunk_id for c in resp.citations] == ["c-1"]  # dedupe, giữ thứ tự
 
 
 async def test_citation_built_from_chunk_metadata(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_plan(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch)
@@ -264,7 +346,7 @@ def test_make_quote_blank_text_returns_none(text: str) -> None:
 
 
 async def test_citation_carries_quote_from_chunk_text(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_plan(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch)
@@ -272,25 +354,42 @@ async def test_citation_carries_quote_from_chunk_text(monkeypatch) -> None:
     assert resp.citations[0].quote == "text c-1"
 
 
-# --- seed_mentions handoff ---
+# --- seed handoff + luật entity §2.1 ---
 
 
-async def test_seed_mentions_passed_to_retrieve(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="needs_retrieval", entities=["Trương Định"])
+async def test_seed_from_question_passed_to_retrieve(monkeypatch) -> None:
+    _patch_plan(monkeypatch, route="needs_retrieval", entities=["Trương Định"])
     capture: dict = {}
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]), capture=capture)
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch)
-    await run_ask(AskRequest(question="Ông ấy làm gì?", stream=False))
-    assert capture["seed_mentions"] == ["Trương Định"]
+    await run_ask(AskRequest(question="Trương Định làm gì?", stream=False))
+    assert capture["seed_mentions"] == ["Trương Định"]  # có nguyên văn trong câu hỏi -> giữ
     assert capture["question"] == "standalone q"  # dùng standalone_query đã rewrite
+
+
+async def test_seed_not_in_question_is_dropped_and_passed_as_none(monkeypatch) -> None:
+    """Luật §2.1: entity không có NGUYÊN VĂN trong câu hỏi hiện tại thì loại — kể cả khi
+    LLM suy ra đúng từ lịch sử hội thoại.
+
+    Và phải truyền `None` chứ KHÔNG phải `[]`: `match_seed_entities` coi `[]` là "có danh
+    sách seed và nó rỗng" -> tắt graph hẳn, còn `None` mới bật fallback token-match từ query.
+    """
+    _patch_plan(monkeypatch, route="needs_retrieval", entities=["Trương Định"])
+    capture: dict = {}
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]), capture=capture)
+    _patch_synthesize(monkeypatch, used=("c-1",))
+    _patch_viz(monkeypatch)
+    resp = await run_ask(AskRequest(question="Ông ấy làm gì?", stream=False))
+    assert capture["seed_mentions"] is None
+    assert any("entity" in w for w in resp.warnings)  # loại phải có warning, không im lặng
 
 
 # --- visualization ---
 
 
 async def test_visualization_present_on_success(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_plan(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     _patch_synthesize(monkeypatch, used=("c-1",))
     payload = VisualizationPayload(
@@ -308,7 +407,7 @@ async def test_visualization_present_on_success(monkeypatch) -> None:
 
 
 async def test_visualization_error_returns_answer_with_warning(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_plan(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch, error=True)
@@ -319,7 +418,7 @@ async def test_visualization_error_returns_answer_with_warning(monkeypatch) -> N
 
 
 async def test_visualization_empty_still_valid(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_plan(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch, VisualizationPayload())  # gazetteer rỗng -> no marker
@@ -328,27 +427,27 @@ async def test_visualization_empty_still_valid(monkeypatch) -> None:
     assert resp.visualization.markers == []
 
 
-# --- build_query fallback ---
+# --- plan fallback ---
 
 
-async def test_build_query_llm_error_falls_back_to_needs_retrieval(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, error=True)
+async def test_plan_llm_error_falls_back_to_needs_retrieval(monkeypatch) -> None:
+    _patch_plan(monkeypatch, error=True)
     capture: dict = {}
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]), capture=capture)
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch)
     resp = await run_ask(AskRequest(question="Trương Định là ai?", stream=False))
-    # fallback: standalone_query = question raw, seed rỗng, route needs_retrieval
+    # fallback: 1 bước 1 query = câu hỏi raw, không seed, route needs_retrieval
     assert capture["question"] == "Trương Định là ai?"
-    assert capture["seed_mentions"] == []
-    assert any("build_query" in w for w in resp.warnings)
+    assert capture["seed_mentions"] is None
+    assert any("plan" in w for w in resp.warnings)
 
 
 # --- emitter event order (status -> token -> citations -> visualization) ---
 
 
 async def test_event_order_on_happy_path(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_plan(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch)
@@ -381,31 +480,54 @@ def _patch_three_retrievers(monkeypatch, called: dict, *, result=None) -> None:
 
 
 @pytest.mark.parametrize("mode", ["traditional", "graph", "hybrid"])
-async def test_dispatch_mode_calls_correct_retriever(monkeypatch, mode) -> None:
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+async def test_override_mode_wins_over_agent_choice(monkeypatch, mode) -> None:
+    # plan CHỌN hybrid, nhưng user ép mode -> override phải thắng.
+    _patch_plan(monkeypatch, route="needs_retrieval", selected_mode="hybrid")
     called: dict = {}
     _patch_three_retrievers(monkeypatch, called)
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch)
     resp = await run_ask(AskRequest(question="hỏi", mode=mode, stream=False))
     assert called["which"] == mode
-    assert resp.retrieval_mode == mode  # phản ánh mode đã chọn, không hardcode hybrid
+    assert resp.retrieval_mode == mode
 
 
-async def test_default_mode_is_hybrid(monkeypatch) -> None:
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+@pytest.mark.parametrize("chosen", ["traditional", "hybrid"])
+async def test_auto_mode_uses_agent_choice(monkeypatch, chosen) -> None:
+    _patch_plan(monkeypatch, route="needs_retrieval", selected_mode=chosen)
     called: dict = {}
     _patch_three_retrievers(monkeypatch, called)
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch)
-    resp = await run_ask(AskRequest(question="hỏi", stream=False))  # không truyền mode
-    assert called["which"] == "hybrid"
+    resp = await run_ask(AskRequest(question="hỏi", stream=False))  # không truyền mode -> auto
+    assert called["which"] == chosen
+    assert resp.retrieval_mode == chosen
+
+
+async def test_plan_error_falls_back_to_hybrid_in_auto_mode(monkeypatch) -> None:
+    _patch_plan(monkeypatch, error=True)
+    called: dict = {}
+    _patch_three_retrievers(monkeypatch, called)
+    _patch_synthesize(monkeypatch, used=("c-1",))
+    _patch_viz(monkeypatch)
+    resp = await run_ask(AskRequest(question="hỏi", stream=False))
+    assert called["which"] == "hybrid"  # hybrid là siêu tập -> an toàn nhất khi không biết
     assert resp.retrieval_mode == "hybrid"
+
+
+async def test_plan_error_still_respects_override(monkeypatch) -> None:
+    _patch_plan(monkeypatch, error=True)
+    called: dict = {}
+    _patch_three_retrievers(monkeypatch, called)
+    _patch_synthesize(monkeypatch, used=("c-1",))
+    _patch_viz(monkeypatch)
+    await run_ask(AskRequest(question="hỏi", mode="traditional", stream=False))
+    assert called["which"] == "traditional"
 
 
 async def test_graph_empty_suggests_other_mode(monkeypatch) -> None:
     # mode=graph nhưng không ground được seed -> honest gợi ý đổi mode (KHÔNG auto-fallback).
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_plan(monkeypatch, route="needs_retrieval")
     called: dict = {}
     empty = RetrievalResult(mode="graph", query="q", chunks=[])
     _patch_three_retrievers(monkeypatch, called, result=empty)
@@ -417,7 +539,7 @@ async def test_graph_empty_suggests_other_mode(monkeypatch) -> None:
 
 async def test_traditional_empty_uses_generic_honest(monkeypatch) -> None:
     # traditional rỗng -> message honest CHUNG (không gợi ý đổi mode, user chỉ yêu cầu graph).
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_plan(monkeypatch, route="needs_retrieval")
     called: dict = {}
     empty = RetrievalResult(mode="traditional", query="q", chunks=[])
     _patch_three_retrievers(monkeypatch, called, result=empty)
@@ -438,7 +560,7 @@ async def test_llm_temperature_from_runtime_config_reaches_synthesize(monkeypatc
     # Override runtime_config (autouse fixture để mặc định 0.0) -> temperature admin đặt phải
     # đi qua prepare_state -> state["runtime_config"] -> node synthesize -> stream_synthesis.
     monkeypatch.setattr(runner, "get_runtime_config", lambda: RuntimeConfig(llm_temperature=0.7))
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_plan(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     capture: dict = {}
     _patch_synthesize(monkeypatch, used=("c-1",), capture=capture)
@@ -450,7 +572,7 @@ async def test_llm_temperature_from_runtime_config_reaches_synthesize(monkeypatc
 async def test_synthesize_reorders_chunks_in_prompt(monkeypatch) -> None:
     import re
 
-    _patch_build_query(monkeypatch, route="needs_retrieval")
+    _patch_plan(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval(["c0", "c1", "c2", "c3", "c4"]))
     capture: dict = {}
     _patch_synthesize(monkeypatch, used=("c0",), capture=capture)
@@ -459,3 +581,100 @@ async def test_synthesize_reorders_chunks_in_prompt(monkeypatch) -> None:
     prompt = capture["calls"][0][1]["content"]
     order = re.findall(r"chunk_id: (c\d)", prompt)
     assert order == ["c0", "c2", "c4", "c3", "c1"]  # best ở hai đầu, yếu ở giữa
+
+
+# --- B1: fan-out nhiều query trong MỘT bước ---
+
+
+def _patch_plan_with_queries(monkeypatch, queries: list[StepQuery]):
+    output = PlanOutput(
+        standalone_query="standalone q",
+        route="needs_retrieval",
+        steps=[PlanStep(id=1, label="Bước 1", queries=queries)],
+    )
+
+    async def fake_parse(**kw):
+        return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(parsed=output))])
+
+    monkeypatch.setattr(
+        nodes,
+        "get_async_openai_client",
+        lambda: SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(parse=fake_parse))),
+    )
+
+
+async def test_multi_query_step_runs_every_query_and_merges(monkeypatch) -> None:
+    """3 query -> 3 lượt retrieve, kết quả gộp dedupe theo chunk_id."""
+    _patch_plan_with_queries(
+        monkeypatch,
+        [
+            StepQuery(query="nguyên nhân Yên Thế"),
+            StepQuery(query="diễn biến Yên Thế"),
+            StepQuery(query="kết quả Yên Thế"),
+        ],
+    )
+    seen: list[str] = []
+    per_query = {
+        "nguyên nhân Yên Thế": _retrieval(["c-1", "c-2"]),
+        "diễn biến Yên Thế": _retrieval(["c-2", "c-3"]),  # c-2 trùng -> phải dedupe
+        "kết quả Yên Thế": _retrieval(["c-4"]),
+    }
+
+    async def fake(question, *, seed_mentions=None, **kwargs):
+        seen.append(question)
+        return per_query[question]
+
+    monkeypatch.setattr(nodes, "retrieve_hybrid", fake)
+    _patch_synthesize(monkeypatch, used=("c-1",))
+    _patch_viz(monkeypatch)
+    resp = await run_ask(AskRequest(question="Yên Thế: nguyên nhân, diễn biến, kết quả?", stream=False))
+
+    assert sorted(seen) == sorted(per_query)  # chạy đủ 3 query
+    assert resp.answer == "Đáp án."
+    # c-2 đứng đầu: được 2 query trỏ tới nên RRF cross-query cao nhất.
+    assert resp.debug is None  # debug=False mặc định -> không lộ ra response
+
+
+async def test_multi_query_rrf_ranks_chunk_hit_by_two_queries_first(monkeypatch) -> None:
+    _patch_plan_with_queries(
+        monkeypatch, [StepQuery(query="q1"), StepQuery(query="q2")]
+    )
+    per_query = {
+        "q1": _retrieval(["c-a", "c-shared"]),  # c-shared rank 2
+        "q2": _retrieval(["c-b", "c-shared"]),  # c-shared rank 2 lần nữa -> tổng cao nhất
+    }
+
+    async def fake(question, *, seed_mentions=None, **kwargs):
+        return per_query[question]
+
+    monkeypatch.setattr(nodes, "retrieve_hybrid", fake)
+    capture: dict = {}
+    _patch_synthesize(monkeypatch, used=("c-shared",), capture=capture)
+    _patch_viz(monkeypatch)
+    await run_ask(AskRequest(question="hỏi", stream=False))
+
+    import re
+
+    prompt = capture["calls"][0][1]["content"]
+    order = re.findall(r"chunk_id: (c-[a-z]+)", prompt)
+    # reorder_for_context xếp best-first ra hai đầu -> chunk điểm cao nhất luôn ở vị trí 0.
+    assert order[0] == "c-shared"
+
+
+async def test_plan_caps_queries_per_step(monkeypatch) -> None:
+    """LLM trả nhiều query hơn `max_queries_per_step` -> cắt, không chạy hết."""
+    monkeypatch.setattr(nodes.get_settings(), "max_queries_per_step", 2, raising=True)
+    _patch_plan_with_queries(
+        monkeypatch, [StepQuery(query=f"q{i}") for i in range(5)]
+    )
+    calls: list[str] = []
+
+    async def fake(question, *, seed_mentions=None, **kwargs):
+        calls.append(question)
+        return _retrieval(["c-1"])
+
+    monkeypatch.setattr(nodes, "retrieve_hybrid", fake)
+    _patch_synthesize(monkeypatch, used=("c-1",))
+    _patch_viz(monkeypatch)
+    await run_ask(AskRequest(question="hỏi", stream=False))
+    assert calls == ["q0", "q1"]

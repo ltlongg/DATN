@@ -18,7 +18,7 @@ from app.core.config import get_settings
 from app.core.internal_auth import INTERNAL_KEY_HEADER
 from app.main import app
 from app.orchestrator import nodes
-from app.schemas.ask import BuildQueryOutput, SynthesizedAnswer
+from app.schemas.ask import PlanOutput, SynthesizedAnswer
 from app.schemas.guardrails import GuardrailDecision
 from app.schemas.retrieval import RetrievalBackendError, RetrievalResult, RetrievedChunk
 from app.schemas.visualization import VisualizationPayload
@@ -51,7 +51,7 @@ def _retrieval(chunk_ids) -> RetrievalResult:
 
 
 def _patch_graph(monkeypatch, *, route="needs_retrieval", retrieve_error=None):
-    output = BuildQueryOutput(standalone_query="q", mentioned_entities=[], route=route)
+    output = PlanOutput(standalone_query="q", mentioned_entities=[], route=route)
 
     async def fake_parse(**kw):
         return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(parsed=output))])
