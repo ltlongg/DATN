@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from "react";
+import { useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 
 /**
  * Ô nhập câu hỏi. Enter gửi, Shift+Enter xuống dòng. Khoá khi đang stream.
@@ -9,6 +9,7 @@ import { useState, type KeyboardEvent } from "react";
  * traditional/graph/hybrid trên cùng một câu lúc đánh giá — chỉ không hiện ra UI.
  */
 const DEFAULT_PLACEHOLDER = "Hỏi về lịch sử Việt Nam…";
+const MAX_COMPOSER_HEIGHT_PX = 160;
 
 export function Composer({
   disabled,
@@ -22,6 +23,18 @@ export function Composer({
   placeholder?: string;
 }) {
   const [text, setText] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    // Thu nhỏ trước khi đo để ô nhập co lại khi người dùng xoá bớt nội dung.
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, MAX_COMPOSER_HEIGHT_PX)}px`;
+    textarea.style.overflowY =
+      textarea.scrollHeight > MAX_COMPOSER_HEIGHT_PX ? "auto" : "hidden";
+  }, [text]);
 
   function send() {
     const t = text.trim();
@@ -41,6 +54,7 @@ export function Composer({
     <div className="border-t border-paper-border bg-paper-card p-3">
       <div className="flex items-end gap-2">
         <textarea
+          ref={textareaRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={onKeyDown}
