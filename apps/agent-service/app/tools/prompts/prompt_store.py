@@ -132,3 +132,54 @@ def seed_prompt(key: str, grp: str, title: str, description: str, content: str) 
                 (str(uuid.uuid4()), key, content, "seed from code", "system"),
             )
     return True
+
+
+def publish_prompt_version(key: str, content: str, *, note: str) -> int | None:
+    """Đẩy hằng prompt trong CODE lên production: tạo version mới + hạ version cũ xuống archived.
+
+    Vì sao cần: `seed_prompt` idempotent theo KEY nên sau lần seed đầu, mọi thay đổi prompt
+    trong code **không bao giờ tới runtime** — `get_active_prompt` đọc bản production trong DB
+    và bỏ qua hằng code (hằng chỉ còn là fallback khi DB hỏng). Không có hàm này thì sửa
+    prompt xong tưởng đã chạy, thực tế agent vẫn dùng bản cũ — hỏng IM LẶNG.
+
+    Trả `version_no` mới, hoặc None nếu content đã TRÙNG production (không đẻ version rác).
+    Cùng ngữ nghĩa `promote` của backend `models/prompt.py`: một transaction, production cũ
+    -> archived, ghi `promoted_by`/`promoted_at`.
+    """
+    with connection() as conn:
+        ensure_prompt_tables(conn)
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1 FROM managed_prompts WHERE key = %s", (key,))
+            if cur.fetchone() is None:
+                raise ValueError(f"prompt key chưa tồn tại: {key} (chạy seed trước)")
+            cur.execute(
+                "SELECT content FROM prompt_versions "
+                "WHERE prompt_key = %s AND status = 'production' "
+                "ORDER BY version_no DESC LIMIT 1",
+                (key,),
+            )
+            row = cur.fetchone()
+            if row is not None and row["content"] == content:
+                return None
+            cur.execute(
+                "SELECT COALESCE(MAX(version_no), 0) AS n FROM prompt_versions "
+                "WHERE prompt_key = %s",
+                (key,),
+            )
+            max_row = cur.fetchone()
+            # COALESCE + không GROUP BY -> luôn đúng 1 dòng; assert để mypy khỏi đoán None.
+            assert max_row is not None
+            next_no = int(max_row["n"]) + 1
+            cur.execute(
+                "UPDATE prompt_versions SET status = 'archived' "
+                "WHERE prompt_key = %s AND status = 'production'",
+                (key,),
+            )
+            cur.execute(
+                "INSERT INTO prompt_versions (id, prompt_key, version_no, content, note, "
+                "status, created_by, promoted_by, promoted_at) "
+                "VALUES (%s, %s, %s, %s, %s, 'production', 'system', 'system', now())",
+                (str(uuid.uuid4()), key, next_no, content, note),
+            )
+    clear_cache()  # nếu không, agent trong tiến trình này còn đọc bản cũ tới hết TTL
+    return next_no

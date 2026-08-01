@@ -1,8 +1,8 @@
-"""Test render prompt build_query + synthesize: history, graph_context có cấu trúc, retry suffix."""
+"""Test render prompt plan + synthesize: history, graph_context có cấu trúc, retry suffix."""
 
 from __future__ import annotations
 
-from app.prompts import build_query, synthesize
+from app.prompts import plan, synthesize
 from app.prompts.synthesize import RETRY_INSTRUCTION
 from app.schemas.ask import ChatMessage
 from app.schemas.retrieval import GraphContextItem, RetrievedChunk
@@ -14,21 +14,21 @@ def _chunk(chunk_id: str, text: str, heading: list[str]) -> RetrievedChunk:
     )
 
 
-# --- build_query ---
+# --- plan ---
 
 
-def test_build_query_no_history() -> None:
-    prompt = build_query.build_user_prompt("Trương Định là ai?", [])
+def test_plan_prompt_no_history() -> None:
+    prompt = plan.build_user_prompt("Trương Định là ai?", [])
     assert "(không có)" in prompt
     assert "Trương Định là ai?" in prompt
 
 
-def test_build_query_renders_history_roles() -> None:
+def test_plan_prompt_renders_history_roles() -> None:
     history = [
         ChatMessage(role="user", content="Trương Định là ai?"),
         ChatMessage(role="assistant", content="Ông là thủ lĩnh kháng Pháp."),
     ]
-    prompt = build_query.build_user_prompt("Ông ấy làm gì sau đó?", history)
+    prompt = plan.build_user_prompt("Ông ấy làm gì sau đó?", history)
     assert "Người dùng: Trương Định là ai?" in prompt
     assert "Trợ lý: Ông là thủ lĩnh kháng Pháp." in prompt
     assert "Ông ấy làm gì sau đó?" in prompt

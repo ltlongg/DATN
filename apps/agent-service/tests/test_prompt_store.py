@@ -110,13 +110,13 @@ def test_seed_prompt_idempotent_when_exists(monkeypatch) -> None:
     assert not any("INSERT INTO" in e[0] for e in log)
 
 
-# --- wiring: build_query dùng get_active_prompt (key + fallback đúng) --------
+# --- wiring: plan dùng get_active_prompt (key + fallback đúng) --------
 
 
-async def test_build_query_wires_get_active_prompt(monkeypatch) -> None:
+async def test_plan_wires_get_active_prompt(monkeypatch) -> None:
     from app.orchestrator import nodes
-    from app.prompts import build_query as bq_prompt
-    from app.schemas.ask import BuildQueryOutput
+    from app.prompts import plan as plan_prompt
+    from app.schemas.ask import PlanOutput
 
     captured: dict = {}
 
@@ -127,7 +127,7 @@ async def test_build_query_wires_get_active_prompt(monkeypatch) -> None:
 
     monkeypatch.setattr(nodes, "get_active_prompt", fake_get_active_prompt)
 
-    parsed = BuildQueryOutput(standalone_query="q", mentioned_entities=[], route="smalltalk")
+    parsed = PlanOutput(standalone_query="q", mentioned_entities=[], route="smalltalk")
     completion = SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(parsed=parsed))])
 
     async def fake_parse(**kw):
@@ -142,8 +142,8 @@ async def test_build_query_wires_get_active_prompt(monkeypatch) -> None:
         ),
     )
 
-    await nodes.build_query({"question": "q", "history": []}, {})
+    await nodes.plan({"question": "q", "history": [], "override_mode": "auto"}, {})
     assert captured["key"] == "build_query"
-    assert captured["fallback"] == bq_prompt.SYSTEM_PROMPT
+    assert captured["fallback"] == plan_prompt.SYSTEM_PROMPT
     # system message thực sự dùng content trả về từ get_active_prompt
     assert captured["messages"][0]["content"] == "USED PROMPT"
