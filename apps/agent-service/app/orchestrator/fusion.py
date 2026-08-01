@@ -18,9 +18,17 @@ RRF: nó vốn không được chọn vì liên quan, mà vì có fact graph tr�
 
 from __future__ import annotations
 
+from collections.abc import Iterable
+
 from app.schemas.retrieval import GraphContextItem, RetrievalResult, RetrievedChunk
 
-__all__ = ["fuse_query_results", "is_citation_only", "answer_context_chunks"]
+__all__ = [
+    "fuse_query_results",
+    "merge_across_steps",
+    "dedupe_graph_context",
+    "is_citation_only",
+    "answer_context_chunks",
+]
 
 
 def is_citation_only(chunk: RetrievedChunk) -> bool:
@@ -39,12 +47,34 @@ def _as_provenance(chunk: RetrievedChunk) -> RetrievedChunk:
     return chunk.model_copy(update={"debug": {**chunk.debug, "citation_only": True}})
 
 
-def _merge_graph_context(results: list[RetrievalResult]) -> list[GraphContextItem]:
+def dedupe_graph_context(items: Iterable[GraphContextItem]) -> list[GraphContextItem]:
+    """Dedupe theo `dedup_key`, giữ thứ tự gặp đầu tiên. Dùng cho cả gộp trong-bước
+    (nhiều query) lẫn gộp giữa-các-bước — cùng một phép, không nên có hai bản."""
     merged: dict[tuple[str, ...], GraphContextItem] = {}
-    for result in results:
-        for item in result.graph_context:
-            merged.setdefault(item.dedup_key(), item)
+    for item in items:
+        merged.setdefault(item.dedup_key(), item)
     return list(merged.values())
+
+
+def _with_provenance(
+    answer: list[RetrievedChunk],
+    pool: dict[str, RetrievedChunk],
+    graph_context: list[GraphContextItem],
+) -> list[RetrievedChunk]:
+    """Rule B: bù lại chunk nguồn graph đã rớt khỏi `answer`, dưới dạng provenance.
+
+    Gọi SAU lần cắt cuối cùng của mỗi tầng (trong bước: sau `final_k`; giữa các bước: sau
+    `final_context_k`) — bù trước lần cắt là thủng đúng cái bug đã vá ở `retrieve_hybrid`.
+    """
+    kept = {c.chunk_id for c in answer}
+    provenance = [
+        _as_provenance(pool[cid])
+        for cid in dict.fromkeys(
+            cid for item in graph_context for cid in item.source_chunk_ids
+        )
+        if cid not in kept and cid in pool
+    ]
+    return answer + provenance
 
 
 def fuse_query_results(
@@ -58,7 +88,9 @@ def fuse_query_results(
     if not results:
         return [], []
 
-    graph_context = _merge_graph_context(results)
+    graph_context = dedupe_graph_context(
+        item for result in results for item in result.graph_context
+    )
 
     scores: dict[str, float] = {}
     pool: dict[str, RetrievedChunk] = {}
@@ -78,13 +110,40 @@ def fuse_query_results(
 
     ordered = sorted(scores, key=lambda cid: (-scores[cid], cid))[:final_k]
     fused = [pool[cid] for cid in ordered]
+    return _with_provenance(fused, pool, graph_context), graph_context
 
-    kept = set(ordered)
-    provenance = [
-        _as_provenance(pool[cid])
-        for cid in dict.fromkeys(
-            cid for item in graph_context for cid in item.source_chunk_ids
-        )
-        if cid not in kept and cid in pool
-    ]
-    return fused + provenance, graph_context
+
+def merge_across_steps(
+    previous: list[RetrievedChunk],
+    current: list[RetrievedChunk],
+    *,
+    graph_context: list[GraphContextItem],
+    final_k: int,
+) -> list[RetrievedChunk]:
+    """Gộp kết quả bước hiện tại vào kết quả TÍCH LUỸ của các bước trước.
+
+    Hai luật, cả hai đều ngược với trực giác "cứ xếp lại theo điểm":
+
+    1. **KHÔNG cộng điểm giữa các bước.** Điểm RRF của một bước là tổng trên số query CỦA
+       RIÊNG bước đó — bước 3 query có điểm cao hơn bước 1 query chỉ vì đông hơn, không phải
+       vì liên quan hơn. Giữ nguyên thứ tự trong từng bước, nối, dedupe theo `chunk_id`.
+    2. **Bước SAU đứng TRƯỚC.** Với multi-hop, bước đầu chỉ đi tìm mắt xích còn đáp án thật
+       nằm ở bước cuối; `reorder_for_context` nhận list best-first rồi mới xen kẽ về hai đầu
+       prompt, nên vào sai thứ tự là ra sai vị trí.
+
+    `graph_context` là bản ĐÃ gộp của mọi bước (Rule B áp trên toàn bộ, không riêng bước nào).
+    """
+    pool: dict[str, RetrievedChunk] = {}
+    order: list[str] = []
+    for chunk in [*current, *previous]:
+        existing = pool.get(chunk.chunk_id)
+        if existing is None:
+            order.append(chunk.chunk_id)
+            pool[chunk.chunk_id] = chunk
+        elif is_citation_only(existing) and not is_citation_only(chunk):
+            # Bản answer-context thắng bản provenance: bước này chỉ chạm chunk qua graph
+            # không có nghĩa là bỏ toàn văn mà bước trước đã lấy về để đọc.
+            pool[chunk.chunk_id] = chunk
+
+    answer = [pool[cid] for cid in order if not is_citation_only(pool[cid])][:final_k]
+    return _with_provenance(answer, pool, graph_context)
