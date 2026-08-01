@@ -41,6 +41,9 @@ class MessageOut(BaseModel):
     retrieval_mode: str
     confidence: str | None
     warnings: list[Any]
+    # Chuỗi bước panel tiến trình (B3). Rỗng với message user / message lưu trước khi có
+    # tính năng này -> frontend không render panel.
+    steps: list[dict[str, Any]]
     # TTFT (ms): nhận /ask -> token đầu tiên. None với message user / message lưu trước khi
     # có tính năng này.
     ttft_ms: int | None
@@ -52,10 +55,10 @@ class ConversationDetail(ConversationOut):
 
 
 class AskRequest(BaseModel):
-    # Backend luôn streaming. Frontend CHỌN mode truy hồi (traditional/graph/hybrid); mặc
-    # định hybrid. max_length đồng bộ agent-service.
+    # Backend luôn streaming. Mặc định "auto" = agent tự chọn mode; frontend gửi giá trị cụ
+    # thể để ÉP (override). max_length đồng bộ agent-service.
     question: str = Field(min_length=1, max_length=get_settings().ask_max_question_chars)
-    mode: Literal["traditional", "graph", "hybrid"] = "hybrid"
+    mode: Literal["auto", "traditional", "graph", "hybrid"] = "auto"
     debug: bool = False
 
 

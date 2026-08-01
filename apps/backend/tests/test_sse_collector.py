@@ -99,3 +99,146 @@ def test_empty_answer_not_persisted() -> None:
     col = SseCollector()
     col.feed("done", {"confidence": None, "retrieval_mode": "none", "warnings": []})
     assert not col.should_persist()
+
+
+# --- panel tiến trình (B3) ---
+
+
+def _run_steps(col: SseCollector) -> None:
+    col.feed(
+        "steps",
+        {
+            "steps": [
+                {"id": "plan", "label": "Phân tích câu hỏi", "kind": "system"},
+                {"id": "todo:1", "label": "Tìm A", "kind": "retrieve"},
+                {"id": "synthesize:1", "label": "Soạn câu trả lời", "kind": "system"},
+            ]
+        },
+    )
+    col.feed("step", {"id": "plan", "state": "done", "detail": "Câu hỏi đơn · 1 bước"})
+    col.feed("step", {"id": "todo:1", "state": "running"})
+    col.feed("step", {"id": "todo:1", "state": "done", "detail": "Dense + BM25 + graph · 8 đoạn"})
+
+
+def test_steps_declares_rows_as_pending_until_a_step_update_arrives() -> None:
+    col = SseCollector()
+    col.feed("steps", {"steps": [{"id": "plan", "label": "L", "kind": "system"}]})
+    assert col.steps == [{"id": "plan", "label": "L", "kind": "system", "state": "pending"}]
+
+
+def test_step_updates_merge_into_the_declared_row() -> None:
+    col = SseCollector()
+    _run_steps(col)
+    by_id = {r["id"]: r for r in col.steps}
+    assert by_id["plan"]["state"] == "done"
+    assert by_id["plan"]["detail"] == "Câu hỏi đơn · 1 bước"
+    assert by_id["todo:1"]["detail"] == "Dense + BM25 + graph · 8 đoạn"
+    assert by_id["synthesize:1"]["state"] == "pending"  # chưa chạy tới
+
+
+def test_step_for_unknown_id_is_ignored() -> None:
+    """Cùng luật với frontend: không mọc dòng ma từ id không khai báo."""
+    col = SseCollector()
+    col.feed("steps", {"steps": [{"id": "plan", "label": "L", "kind": "system"}]})
+    col.feed("step", {"id": "todo:9", "state": "done"})
+    assert [r["id"] for r in col.steps] == ["plan"]
+
+
+def test_running_row_is_closed_out_to_partial_when_persisting() -> None:
+    """Stream đóng mà dòng còn `running` = không bao giờ có kết -> lưu `partial`, nếu không
+    reload ra spinner quay mãi."""
+    col = SseCollector()
+    _run_steps(col)
+    col.feed("step", {"id": "synthesize:1", "state": "running"})
+    col.feed("token", {"text": "x"})
+    col.feed("done", {"confidence": "cao", "retrieval_mode": "hybrid", "warnings": []})
+    saved = {r["id"]: r["state"] for r in col.message_fields()["steps"]}
+    assert saved == {"plan": "done", "todo:1": "done", "synthesize:1": "partial"}
+
+
+def test_close_out_does_not_mutate_collector_state() -> None:
+    col = SseCollector()
+    col.feed("steps", {"steps": [{"id": "plan", "label": "L", "kind": "system"}]})
+    col.feed("step", {"id": "plan", "state": "running"})
+    col.feed("token", {"text": "x"})
+    col.feed("done", {"confidence": None, "retrieval_mode": "none", "warnings": []})
+    assert col.message_fields()["steps"] == col.message_fields()["steps"]
+    assert col.steps[0]["state"] == "running"  # nguồn gốc giữ nguyên
+
+
+def test_clarification_message_still_persists_its_steps() -> None:
+    col = SseCollector()
+    col.feed("steps", {"steps": [{"id": "plan", "label": "Phân tích câu hỏi", "kind": "system"}]})
+    col.feed("step", {"id": "plan", "state": "done", "detail": "Câu hỏi chưa rõ · cần hỏi lại"})
+    col.feed("clarification", {"question": "Bạn hỏi về ai?"})
+    fields = col.message_fields()
+    assert fields["clarification_needed"] is True
+    assert fields["steps"][0]["detail"] == "Câu hỏi chưa rõ · cần hỏi lại"
+
+
+def test_retry_declaration_keeps_states_of_rows_already_finished() -> None:
+    """Lượt soạn lại (B5) phát lại `steps` với danh sách DÀI HƠN. Thay thế thay vì merge thì
+    `plan`/`todo:1` đang `done` bị đạp về `pending` -> reload mất sạch chuyện đã xảy ra."""
+    def declare(*ids: str) -> dict:
+        return {"steps": [{"id": i, "label": i, "kind": "system"} for i in ids]}
+
+    col = SseCollector()
+    col.feed("steps", declare("plan", "todo:1", "synthesize:1", "validate:1"))
+    col.feed("step", {"id": "plan", "state": "done", "detail": "Câu hỏi đơn · 1 bước"})
+    col.feed("step", {"id": "todo:1", "state": "done", "detail": "8 đoạn"})
+    col.feed("step", {"id": "synthesize:1", "state": "done", "detail": "Soạn từ 8 đoạn"})
+    col.feed(
+        "step",
+        {"id": "validate:1", "state": "partial", "detail": "0/1 liên kết nguồn hợp lệ · soạn lại"},
+    )
+    # Vào lượt soạn lại: agent phát lại danh sách, dài thêm 2 dòng.
+    col.feed(
+        "steps",
+        declare("plan", "todo:1", "synthesize:1", "validate:1", "synthesize:2", "validate:2"),
+    )
+    by_id = {r["id"]: r for r in col.steps}
+    assert by_id["plan"]["state"] == "done"
+    assert by_id["todo:1"]["detail"] == "8 đoạn"
+    assert by_id["validate:1"]["detail"] == "0/1 liên kết nguồn hợp lệ · soạn lại"
+    assert by_id["synthesize:2"]["state"] == "pending"  # dòng mới, chưa chạy
+    assert "detail" not in by_id["synthesize:2"]
+
+
+# --- internals (tầng 2 panel tiến trình) ---
+
+
+def test_step_internals_are_kept_for_persistence() -> None:
+    """Collector nhận internals của MỌI lượt, kể cả người dùng thường: bản lưu phải đủ để
+    admin soi lại hội thoại của người khác. Việc giấu khỏi người đang hỏi là của api/chat.py."""
+    col = SseCollector()
+    col.feed("steps", {"steps": [{"id": "plan", "label": "L", "kind": "system"}]})
+    col.feed(
+        "step",
+        {
+            "id": "plan",
+            "state": "done",
+            "detail": "Câu hỏi đơn · 1 bước",
+            "internals": [{"label": "Định tuyến", "value": "needs_retrieval"}],
+        },
+    )
+    assert col.message_fields()["steps"][0]["internals"] == [
+        {"label": "Định tuyến", "value": "needs_retrieval"}
+    ]
+
+
+def test_retry_declaration_does_not_wipe_internals_of_finished_rows() -> None:
+    """Cùng lý do với `detail`: bản `steps` phát lại chỉ mang id/label/kind, không chép sang
+    là tầng 2 của mọi bước đã chạy xong biến mất khỏi bản lưu."""
+    def declare(*ids: str) -> dict:
+        return {"steps": [{"id": i, "label": i, "kind": "system"} for i in ids]}
+
+    col = SseCollector()
+    col.feed("steps", declare("plan", "synthesize:1"))
+    col.feed(
+        "step",
+        {"id": "plan", "state": "done", "internals": [{"label": "Model", "value": "m"}]},
+    )
+    col.feed("steps", declare("plan", "synthesize:1", "synthesize:2"))
+    by_id = {r["id"]: r for r in col.steps}
+    assert by_id["plan"]["internals"] == [{"label": "Model", "value": "m"}]
+    assert "internals" not in by_id["synthesize:2"]

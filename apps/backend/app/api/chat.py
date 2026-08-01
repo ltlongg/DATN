@@ -6,6 +6,7 @@ import logging
 import uuid
 from collections.abc import AsyncIterator
 from time import perf_counter
+from typing import Any
 
 import anyio
 from fastapi import APIRouter, Depends, Request
@@ -89,15 +90,25 @@ async def delete_conversation(
 @router.get("/conversations/{conversation_id}", response_model=ConversationDetail)
 async def get_conversation(
     conv: Conversation = Depends(get_owned_conversation),
+    user: User = Depends(get_current_user),
 ) -> ConversationDetail:
     messages = await anyio.to_thread.run_sync(conv_repo.list_messages, conv.id)
+    # `steps` lưu KÈM internals (để admin soi lại ở /admin/logs) nên đường đọc lại phải gác
+    # y như đường stream — chặn mỗi lúc chạy rồi mở toang lúc F5 thì coi như không chặn.
+    keep_internals = user.role == "admin"
     return ConversationDetail(
         id=conv.id,
         title=conv.title,
         created_at=conv.created_at,
         updated_at=conv.updated_at,
         messages=[
-            MessageOut(**m.model_dump(exclude={"conversation_id"})) for m in messages
+            MessageOut(
+                **{
+                    **m.model_dump(exclude={"conversation_id"}),
+                    "steps": [_visible_step(s, keep_internals) for s in m.steps],
+                }
+            )
+            for m in messages
         ],
     )
 
@@ -142,6 +153,18 @@ async def _persist_assistant(
     return assistant_id
 
 
+def _visible_step(data: dict[str, Any], debug: bool) -> dict[str, Any]:
+    """Bóc `internals` (tầng 2 của panel tiến trình) khỏi event `step` khi không phải admin.
+
+    Agent LUÔN gửi internals để `collector` lưu được bản đầy đủ vào `messages.steps`; chỗ
+    quyết định ai được XEM là đây. Giấu ở frontend thôi thì không tính — dữ liệu vẫn nằm
+    trong tab Network, tức nới lỏng thế phòng thủ mà `debug` đang giữ (xem `ask()` bên dưới).
+    """
+    if debug or "internals" not in data:
+        return data
+    return {k: v for k, v in data.items() if k != "internals"}
+
+
 async def _proxy_stream(
     stream: AgentStream,
     collector: SseCollector,
@@ -150,10 +173,12 @@ async def _proxy_stream(
     request_id: str | None,
     user_id: str,
     started_at: float,
+    debug: bool,
 ) -> AsyncIterator[str]:
     """Proxy event SSE xuống frontend, gom vào collector, lưu message cuối khi `done`.
 
-    - event != done/blocked: forward nguyên (không sửa nội dung token).
+    - event != done/blocked: forward nguyên (không sửa nội dung token), TRỪ `step` của người
+      dùng thường — xem `_visible_step`.
     - event == token: chốt TTFT ở token ĐẦU TIÊN (mốc `started_at` bấm từ đầu handler ask()),
       tức đúng khoảng người dùng chờ từ lúc hỏi tới lúc thấy chữ đầu tiên.
     - event == done: lưu assistant message rồi forward done đã thêm conversation_id/
@@ -195,6 +220,10 @@ async def _proxy_stream(
                 event.data.get("categories"),
             )
             yield format_sse("blocked", event.data)
+        elif event.event == "step":
+            # collector.feed() ở trên đã nhận bản ĐẦY ĐỦ -> DB có internals; chỉ bản chảy
+            # xuống trình duyệt mới bị bóc.
+            yield format_sse("step", _visible_step(event.data, debug))
         else:
             yield format_sse(event.event, event.data)
             if event.event == "error":
@@ -231,7 +260,8 @@ async def ask(
     started_at = perf_counter()
 
     # Gác server-side: chỉ admin được bật debug. User gửi debug=true bị ép False (phòng thủ
-    # kép với FE) — event `debug` chỉ agent phát khi request.debug=True nên ép ở đây là đủ.
+    # kép với FE). Cờ này giờ gác HAI thứ: event `debug` (agent chỉ phát khi request.debug)
+    # và `internals` trong event `step` (agent luôn gửi, backend bóc — xem `_visible_step`).
     debug = body.debug and user.role == "admin"
 
     # Quota: kiểm NGAY ĐẦU, TRƯỚC add_message câu hiện tại. count_user_messages_today đếm cả
@@ -285,7 +315,7 @@ async def ask(
     request_id = getattr(request.state, "request_id", None)
     return StreamingResponse(
         _proxy_stream(
-            stream, collector, conv.id, assistant_id, request_id, user.id, started_at
+            stream, collector, conv.id, assistant_id, request_id, user.id, started_at, debug
         ),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
