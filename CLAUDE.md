@@ -176,8 +176,8 @@ Neo4j + Qdrant + Redis + Postgres **đã cài và chạy sẵn trên remote dev 
 Lớp dữ liệu mới song song, dựng **offline 1 lần**; lúc trả lời chỉ **lọc & ráp online** (không trích lại). **Source-of-truth của hạng mục này: `docs/plan/timeline-map-plan.md`** — cập nhật file đó khi đổi quyết định.
 
 Pipeline offline 3 bước rời (verify từng bước):
-1. `scripts/run_segmentation.py` — segmenter gom heading thành "unit" (cap 50K ký tự) → `dataset/timeline_units.json`.
-2. `scripts/run_timeline_index.py` — extract LLM mỗi unit → atomic event (cache `dataset/timeline_extractions.json`, resume theo `unit_id`+version) → reconcile (dedup + `event_id` tất định `uuid5`) → load Postgres `timeline_events`.
+1. `scripts/run_segmentation.py` — segmenter gom heading thành "unit" (cap **30K** ký tự, **không overlap**, unit giữ nguyên từng chunk) → `dataset/timeline_units.json`. Chốt chặn: mỗi chunk phải nằm ĐÚNG MỘT unit, vỡ → không ghi artifact, thoát mã 1.
+2. `scripts/run_timeline_index.py` — extract LLM **1 request/unit**, LLM trả `chunk_results` theo marker `ref` → cache `dataset/timeline_extractions.json` **khoá theo `chunk_id`** (resume: unit xong khi MỌI chunk của nó khớp `prompt_version`+`unit_id`) → reconcile (dedup + `event_id` tất định `uuid5`) → load Postgres `timeline_events`. Xem `### Timeline extract theo unit` dưới.
 3. `scripts/build_gazetteer.py` — geocode `timeline_events.locations` (Google trước → LLM fallback) → Postgres `gazetteer`. **⚠️ TẠM HOÃN** (xem dưới).
 
 Online: `app/tools/visualization/builder.py::build_visualization(retrieved_chunk_ids)` → `select_events_by_chunks` (toán tử mảng giao `&&`) → join `gazetteer` lấy lat/lon → trả `VisualizationPayload` (map markers + timeline items, link 2 chiều bằng `event_id`), honest fallback (thiếu nơi → chỉ timeline; thiếu time → chỉ map).
@@ -185,6 +185,34 @@ Online: `app/tools/visualization/builder.py::build_visualization(retrieved_chunk
 > **⚠️ Khâu toạ độ (gazetteer + lat/lon) đang TẠM HOÃN — làm CUỐI** (quyết định user 2026-06-22). Lý do: độ chính xác địa điểm quan trọng + cần review kĩ (điểm yếu: địa danh trùng tên khác tỉnh bị provider chấm "cao" nhưng sai). **Tạm KHÔNG chạy `build_gazetteer.py`** (cả Google lẫn LLM). KHÔNG cần sửa/disable code: pipeline timeline (`run_timeline_index.py`) không phụ thuộc `app/indexing/geocoding/`, vẫn cho time + `locations` (tên). Builder gặp `gazetteer` rỗng → fallback chỉ-timeline, không vỡ. Nếu thấy `gazetteer` rỗng/dở dang: đó là CỐ Ý.
 >
 > **Đã sửa 2026-07-14 (bug thật, phát hiện khi verify UI)**: câu trên chỉ đúng khi bảng RỖNG. Thực tế `build_gazetteer.py` chưa chạy lần nào nên bảng **CHƯA TỒN TẠI** → `lookup_coords` ném `UndefinedTable` → giết CẢ `build_visualization` → mọi câu trả lời báo `Visualization lỗi: UndefinedTable` và timeline KHÔNG BAO GIỜ hiện, dù `timeline_events` có 3.674 dòng thật. Nay `lookup_coords` bắt `UndefinedTable` → trả `{}` (pattern `cost.py`), đúng tinh thần honest fallback: mất toạ độ chứ không mất timeline.
+
+### Timeline extract theo unit — provenance CẤP CHUNK (code xong 2026-08-02, CHƯA chạy LLM)
+Plan: `docs/plan/timeline-extraction-by-unit-plan.md`. Trước đây event kế thừa
+`source_chunk_ids` của **cả unit** (tới 50K ký tự / hàng chục chunk) → UI cite 1 chunk vẫn
+kéo về mọi event của unit. Nay LLM vẫn đọc trọn unit (đủ ngữ cảnh suy năm, giải "sau đó")
+nhưng phải **quy mỗi event về chunk chứa bằng chứng**.
+
+- **Unit giữ nguyên từng chunk** (`Unit.chunks: list[UnitChunk]`, KHÔNG còn `Unit.text` phẳng);
+  prompt render `<chunk ref="N">` và LLM trả `chunk_results` — **đúng một mục cho mỗi ref**.
+  `ref` (1..N) do `extract_unit_events` sinh VÀ ánh xạ ngược, một nguồn sự thật; `chunk_id`
+  thật KHÔNG lộ vào prompt.
+- **KHÔNG nhận kết quả một phần**: thiếu/trùng/lạ `ref`, LLM refusal, hoặc không parse được
+  → `TimelineExtractionError` cho CẢ unit, không ghi cache, resume trích lại. Cache "mọi chunk
+  rỗng" khi refusal = mất event VĨNH VIỄN (resume tưởng đã xong) — cố ý fail-loud.
+- **Cap 50K → 30K, BỎ overlap, BỎ completeness pass lượt-2.** Overlap phá provenance (1 chunk ở
+  2 unit → 2 lần gọi LLM ghi đè nhau trong cache khoá theo chunk). Cap 30K (~8K token) giữ unit
+  trong vùng recall tốt nên không cần pass 2 nữa. Đo thật: **366 unit, median 5.952 ký tự,
+  max 29.969, overlap 0, phủ đủ 1683/1683 chunk**.
+- **Rule nhãn nhất quán (prompt §attribution)**: cùng một event kể ở nhiều `chunk_ref` phải
+  dùng NGUYÊN VĂN cùng `label` + `time_start` + `locations[0]`, vì `reconcile` gộp bằng khoá
+  `uuid5(parent|time|loc0|label)` — lệch chữ = hai event trùng thay vì một.
+- **Cache `timeline_extractions.json` đổi khoá: `unit_id` → `chunk_id`**. `run_timeline_index.py`
+  **từ chối chạy** trên cache format cũ (entry có `source_chunk_ids`) và bắt đổi tên file —
+  đọc lẫn thì reconcile gán `source_chunk_ids = [unit_id]`, provenance rác vào DB.
+- ⏳ **Còn nợ**: chưa chạy LLM lần nào với v4. `dataset/timeline_units.json` vẫn là bản cap 50K
+  cũ và `timeline_extractions.json` vẫn là cache v2 unit-keyed → phải chạy lại BƯỚC 1 rồi đổi
+  tên cache cũ trước khi trích. Bảng `timeline_events` hiện tại (3.674 dòng) vẫn là dữ liệu
+  provenance-cấp-unit; chỉ replace sau khi review kết quả v4 (plan §11).
 
 ### Agent-service internal layout (`apps/agent-service/app/`)
 - `indexing/preprocessing/` — chuẩn hóa text (cleaner.py). Idempotent + non-destructive.
@@ -539,7 +567,8 @@ console, không cần deploy. `<APIProvider>` BẮT BUỘC `language="vi"` + `re
 
 Giá trị **thực tế** trong code (đừng tin mù `.env.example`, có chỗ còn placeholder cũ):
 - **Embedding + tokenizer**: model tiếng Việt `AITeamVN/Vietnamese_Embedding` (KHÔNG phải OpenAI `text-embedding-3-small` như `.env.example` để). Field: `embedding_model`, `embedding_tokenizer`.
-- **LLM default**: `llm_model = "gpt-5.4-nano"` (qua gateway OpenAI-compatible, set `OPENAI_BASE_URL`). Knob riêng: `graph_llm_model`, `timeline_llm_model` (None = fallback `llm_model`; đặt model hỗ trợ Structured Outputs strict).
+- **LLM default**: `llm_model = "gpt-5.4-nano"` (qua gateway OpenAI-compatible, set `OPENAI_BASE_URL`). Knob riêng offline: `graph_llm_model`, `timeline_llm_model` (None = fallback `llm_model`; đặt model hỗ trợ Structured Outputs strict).
+- **LLM 4 bước ONLINE — mỗi bước một model riêng, BẮT BUỘC set**: `guardrails_llm_model`, `plan_llm_model`, `resolve_llm_model`, `synthesize_llm_model` — **không field nào fallback qua field khác hay về `llm_model`** (quyết định user: chuỗi fallback cũ che mất việc đổi model trong `.env` có thật sự ăn hay không). Thiếu biến nào trong `.env` → `Settings()` vỡ ngay lúc khởi động agent-service (pydantic required field), không âm thầm chạy model không định trước. Cả 4 đều đi qua Structured Outputs strict nên model đặt vào BẮT BUỘC hỗ trợ, không degrade êm; plan/resolve còn truyền `temperature=0.0`. **Model KHÔNG quản qua `system_config`/UI admin** (quyết định cũ, giữ nguyên) — chỉ `.env` + restart agent-service. `_record_usage_from_completion` NHẬN model qua tham số chứ không tự suy lại: mỗi bước một model thì suy lại ở đó sẽ ghi nhầm model bước khác vào `llm_usage`, mà panel Token admin hiện model theo từng dòng task.
 - **Geocoding**: `google_maps_api_key` (rỗng → bỏ qua Google, chỉ LLM fallback). ⚠️ ToS Google: cache lat/lon ≤ 30 ngày — xem `docs/reference/google-maps-api.md`.
 - **Chunking**: `chunk_size=700`, `min_characters_per_chunk=80`.
 - **Storage**: `neo4j_uri/user/password`, `qdrant_host/port/api_key`, `qdrant_collection=history_vn_chunks`, `redis_url`, `database_url`.

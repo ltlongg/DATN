@@ -1,5 +1,19 @@
 # Plan: Lớp dữ liệu Timeline + Map cho câu trả lời
 
+> **⚠️ CẬP NHẬT 2026-08-02 — tầng EXTRACT đã bị thay, đọc kèm
+> [timeline-extraction-by-unit-plan.md](timeline-extraction-by-unit-plan.md).** File này vẫn là
+> source-of-truth cho schema DB, geocoding và builder online, nhưng những điểm sau **ĐÃ LỖI
+> THỜI** ở mọi mục bên dưới (giữ nguyên làm bản ghi lịch sử, đừng code theo):
+> - **Cap 50K → 30K**; **overlap ở `_chunk_split` → BỎ** (mỗi chunk nằm đúng 1 unit);
+>   **completeness pass lượt-2 → BỎ** (§5, §6 Phase 2/4, §7 mục 2-3).
+> - **Unit không còn trường `text` phẳng** — giữ nguyên từng chunk (`Unit.chunks`).
+> - **Event KHÔNG còn kế thừa `source_chunk_ids` của cả unit** (§6 Phase 5 mô tả cũ): LLM trả
+>   `chunk_results` theo marker `ref`, cache khoá theo `chunk_id`, reconcile lấy source từ
+>   chính khoá đó → provenance CẤP CHUNK.
+> - Cache `timeline_extractions.json` đổi khoá `unit_id` → `chunk_id` (§6 "File cache").
+>
+> Schema `timeline_events`, `gazetteer`, `build_visualization()` và toàn bộ §3/§9 **KHÔNG đổi**.
+>
 > Trạng thái: **Phase 1 → 7 đã build & verify**. Toàn pipeline offline + builder online
 > xong: text → units → atomic events (`timeline_events`, 34) → geocode (`gazetteer`, 31,
 > Google+LLM) → `build_visualization()` ra payload map+timeline link bằng event_id.
