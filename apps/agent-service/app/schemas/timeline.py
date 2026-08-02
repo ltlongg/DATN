@@ -9,6 +9,10 @@ không cho `None`); khi ghi DB sẽ convert "" -> NULL.
 mốc đó**. Diễn biến là bắt buộc; thời gian/địa điểm ưu tiên đủ nhưng chấp nhận thiếu
 một vế (thiếu thời gian -> chỉ map; thiếu địa điểm -> chỉ timeline). Một sự kiện lớn
 nhiều mốc rời -> nhiều AtomicEvent cùng `parent_event` (gom ở reconcile).
+
+Kết quả trả về theo TỪNG CHUNK (`chunk_results`), không phải một danh sách phẳng cho
+cả unit: LLM đọc trọn unit để có ngữ cảnh nhưng phải quy mỗi event về đúng chunk chứa
+bằng chứng -> provenance ở cấp chunk, UI chỉ hiện timeline của chunk thực sự được dùng.
 """
 
 from __future__ import annotations
@@ -82,8 +86,28 @@ class AtomicEvent(BaseModel):
     )
 
 
-class TimelineExtraction(BaseModel):
-    """Kết quả trích cho một unit (đoạn gom theo heading). Rỗng nếu đoạn không có
-    sự kiện có diễn biến cụ thể."""
+class ChunkEvents(BaseModel):
+    """Sự kiện trích được TỪ MỘT chunk trong unit (khớp marker `ref` của prompt)."""
 
-    events: list[AtomicEvent]
+    chunk_ref: str = Field(
+        description=(
+            "Đúng giá trị `ref` của thẻ <chunk> chứa bằng chứng cho các event bên "
+            "dưới (vd '1', '2'). KHÔNG tự đặt ref mới."
+        )
+    )
+    events: list[AtomicEvent] = Field(
+        description=(
+            "Các event mà chunk này làm bằng chứng. `[]` nếu chunk không có diễn "
+            "biến nào đáng lên timeline (hợp lệ, không phải lỗi)."
+        )
+    )
+
+
+class TimelineExtraction(BaseModel):
+    """Kết quả trích cho một unit: mỗi chunk đầu vào ĐÚNG MỘT phần tử `chunk_results`.
+
+    Thiếu/trùng/lạ `chunk_ref` -> extractor loại cả unit và trích lại (không nhận
+    kết quả một phần, vì cache ghi theo chunk nên phần thiếu sẽ âm thầm mất event).
+    """
+
+    chunk_results: list[ChunkEvents]
