@@ -8,6 +8,10 @@ tốn token LLM. Luồng offline 3 bước rời, chạy & verify độc lập:
 
 THUẦN, không LLM, tất định: cùng chunks + cùng cap -> cùng units (idempotent).
 
+INVARIANT (chốt chặn): mỗi chunk hợp lệ phải nằm trong ĐÚNG MỘT unit. Vỡ invariant ->
+KHÔNG ghi artifact, thoát mã 1: bước 2 cache theo chunk_id nên một chunk ở 2 unit sẽ bị
+hai lần gọi LLM ghi đè lẫn nhau (mất event im lặng).
+
 Ví dụ:
     python scripts/run_segmentation.py                       # sinh units + report tổng quan
     python scripts/run_segmentation.py --cap 40000 --list -1 # cap khác, liệt kê hết unit
@@ -47,10 +51,6 @@ from app.indexing.timeline.segmenter import (  # noqa: E402
 _DEFAULT_CHUNKS = _REPO_ROOT / "dataset" / "chunks_llm.json"
 _DEFAULT_UNITS = _REPO_ROOT / "dataset" / "timeline_units.json"
 
-# Khớp COMPLETENESS_CHAR_THRESHOLD trong atomic_event_extractor: unit lớn hơn ngưỡng này
-# sẽ được completeness pass ở bước trích -> ở đây cờ ⚠ để soi kỹ ranh giới những unit đó.
-LARGE_UNIT_CHARS = 40_000
-
 
 def _valid_input_ids(chunks: list[dict]) -> list[str]:
     """ID các chunk segmenter THỰC SỰ xét (có id + text không rỗng) — khớp _prepare()."""
@@ -77,76 +77,86 @@ def _write_units(path: Path, cap: int, source: str, units: list[Unit]) -> None:
     os.replace(tmp, path)
 
 
-def _report(units: list[Unit], input_ids: list[str] | None) -> None:
-    """Report kiểm tra phân đoạn: phủ chunk, overlap, phân bố độ dài, unit lớn cần soi."""
+def _check_invariant(units: list[Unit], input_ids: list[str] | None) -> list[str]:
+    """Kiểm tra "mỗi chunk đúng một unit". Trả danh sách vi phạm (rỗng = đạt)."""
+    usage = Counter(cid for u in units for cid in u.chunk_ids)
+    problems = [f"chunk {cid} nằm ở {k} unit (phải = 1)" for cid, k in sorted(usage.items()) if k > 1]
+    if input_ids is not None:
+        missing = sorted(set(input_ids) - set(usage))
+        extra = sorted(set(usage) - set(input_ids))
+        problems += [f"chunk {cid} KHÔNG vào unit nào" for cid in missing]
+        problems += [f"chunk {cid} LẠ (không có trong nguồn)" for cid in extra]
+    return problems
+
+
+def _report(units: list[Unit], cap: int, input_ids: list[str] | None) -> None:
+    """Report kiểm tra phân đoạn: phủ chunk, overlap, phân bố độ dài, unit vượt cap."""
     n = len(units)
     if n == 0:
         print("(0 unit)", flush=True)
         return
-    lens = sorted(len(u.text) for u in units)
-    covered = Counter(cid for u in units for cid in u.source_chunk_ids)
-    large = [u for u in units if len(u.text) > LARGE_UNIT_CHARS]
-    overlap_ids = sorted(cid for cid, k in covered.items() if k > 1)
+    lens = sorted(u.char_len for u in units)
+    usage = Counter(cid for u in units for cid in u.chunk_ids)
+    oversize = [u for u in units if u.char_len > cap]
 
-    print(f"\n=== REPORT phân đoạn: {n} unit ===", flush=True)
+    print(f"\n=== REPORT phân đoạn: {n} unit (cap={cap:,}) ===", flush=True)
     print(
         f"  độ dài (ký tự): min {lens[0]:,} | median {int(statistics.median(lens)):,}"
         f" | max {lens[-1]:,}",
         flush=True,
     )
+    print(f"  chunk/unit: min {min(len(u.chunks) for u in units)} | max {max(len(u.chunks) for u in units)}", flush=True)
     print(
-        f"  unit lớn (> {LARGE_UNIT_CHARS:,} chữ, sẽ chạy completeness pass): {len(large)}",
+        f"  unit VƯỢT cap (chunk đơn lẻ quá dài, giữ nguyên vẹn): {len(oversize)}",
         flush=True,
     )
     print(
-        f"  chunk dùng lại ở >1 unit (overlap do cắt thô — lý tưởng = 0): {len(overlap_ids)}",
+        f"  chunk dùng lại ở >1 unit (overlap — BẮT BUỘC = 0): "
+        f"{sum(1 for k in usage.values() if k > 1)}",
         flush=True,
     )
 
     if input_ids is not None:
         input_set = set(input_ids)
-        covered_set = set(covered)
-        missing = input_set - covered_set
-        extra = covered_set - input_set
-        status = "ĐỦ" if not missing else f"THIẾU {len(missing)}"
+        status = "ĐỦ" if input_set <= set(usage) else f"THIẾU {len(input_set - set(usage))}"
         print(
             f"  phủ chunk: {len(input_set)} chunk nguồn -> phủ "
-            f"{len(covered_set & input_set)} ({status})",
+            f"{len(set(usage) & input_set)} ({status})",
             flush=True,
         )
-        if missing:
-            print(f"    ! THIẾU (không vào unit nào): {sorted(missing)[:10]}", flush=True)
-        if extra:
-            print(f"    ! LẠ (id không có trong nguồn): {sorted(extra)[:10]}", flush=True)
 
-    if large:
-        print("\n  -- unit lớn cần soi kỹ --", flush=True)
-        for u in large:
+    if oversize:
+        print("\n  -- unit vượt cap cần soi kỹ --", flush=True)
+        for u in oversize:
             path = " > ".join(u.heading_path) or "(không heading)"
-            print(f"    {len(u.text):>7,} chữ | {u.unit_id} | {path}", flush=True)
+            print(f"    {u.char_len:>7,} chữ | {u.unit_id} | {path}", flush=True)
 
 
-def _list_units(units: list[Unit], limit: int) -> None:
+def _list_units(units: list[Unit], cap: int, limit: int) -> None:
     """Liệt kê unit theo THỨ TỰ VĂN BẢN (dòng tóm tắt) để soi ranh giới tuần tự."""
     shown = units if limit < 0 else units[:limit]
     print(f"\n--- liệt kê {len(shown)}/{len(units)} unit (thứ tự văn bản) ---", flush=True)
     for i, u in enumerate(shown):
         path = " > ".join(u.heading_path) or "(không heading)"
-        flag = " ⚠lớn" if len(u.text) > LARGE_UNIT_CHARS else ""
+        flag = " ⚠vượt-cap" if u.char_len > cap else ""
         print(
-            f"  [{i:3d}] {len(u.text):>7,}c {len(u.source_chunk_ids):>3} chunk | "
+            f"  [{i:3d}] {u.char_len:>7,}c {len(u.chunks):>3} chunk | "
             f"{u.unit_id}{flag}\n        {path}",
             flush=True,
         )
 
 
 def _show_full(units: list[Unit], n: int) -> None:
-    """In FULL text n unit đầu để đọc kỹ nội dung + ranh giới."""
+    """In FULL text n unit đầu, TÁCH THEO CHUNK — đúng dạng LLM sẽ nhận ở bước 2."""
     for u in units[:n]:
         path = " > ".join(u.heading_path) or "(không heading)"
         bar = "=" * 70
-        print(f"\n{bar}\nUNIT {u.unit_id} | {path} | {len(u.text):,} chữ", flush=True)
-        print(f"chunks: {u.source_chunk_ids}\n{'-' * 70}\n{u.text}", flush=True)
+        print(
+            f"\n{bar}\nUNIT {u.unit_id} | {path} | {u.char_len:,} chữ | {len(u.chunks)} chunk",
+            flush=True,
+        )
+        for i, c in enumerate(u.chunks, start=1):
+            print(f"{'-' * 70}\n[ref={i}] {c.chunk_id} ({len(c.text):,} chữ)\n{c.text}", flush=True)
 
 
 def main() -> int:
@@ -157,7 +167,7 @@ def main() -> int:
     parser.add_argument("--out", default=str(_DEFAULT_UNITS), help="Artifact units để ghi (bước 2 đọc lại).")
     parser.add_argument("--cap", type=int, default=CAP_CHARS, help=f"Cap ký tự mỗi unit (mặc định {CAP_CHARS}).")
     parser.add_argument("--list", type=int, default=0, help="Liệt kê unit (dòng tóm tắt): 0 = không, N = N đầu, -1 = tất cả.")
-    parser.add_argument("--show", type=int, default=0, help="In FULL text N unit đầu để đọc kỹ.")
+    parser.add_argument("--show", type=int, default=0, help="In FULL text N unit đầu (tách theo chunk) để đọc kỹ.")
     parser.add_argument("--report-only", action="store_true", help="Chỉ đọc --out in lại report, KHÔNG build.")
     args = parser.parse_args()
 
@@ -168,10 +178,11 @@ def main() -> int:
             parser.error(f"Không có {out_path} để --report-only. Bỏ cờ này để build trước.")
         data = json.loads(out_path.read_text(encoding="utf-8"))
         units = [unit_from_dict(u) for u in (data.get("units") or [])]
-        print(f"Đọc {out_path.name}: {len(units)} unit (cap={data.get('cap')}).", flush=True)
-        _report(units, None)
+        cap = int(data.get("cap") or args.cap)
+        print(f"Đọc {out_path.name}: {len(units)} unit (cap={cap}).", flush=True)
+        _report(units, cap, None)
         if args.list:
-            _list_units(units, args.list)
+            _list_units(units, cap, args.list)
         if args.show:
             _show_full(units, args.show)
         return 0
@@ -189,11 +200,22 @@ def main() -> int:
         f"-> {len(units)} unit (cap={args.cap})",
         flush=True,
     )
-    _report(units, input_ids)
+    _report(units, args.cap, input_ids)
     if args.list:
-        _list_units(units, args.list)
+        _list_units(units, args.cap, args.list)
     if args.show:
         _show_full(units, args.show)
+
+    problems = _check_invariant(units, input_ids)
+    if problems:
+        print(
+            f"\n[INVARIANT VỠ] {len(problems)} vi phạm 'mỗi chunk đúng một unit' "
+            f"-> KHÔNG ghi {out_path.name} (bước 2 sẽ hỏng im lặng):",
+            flush=True,
+        )
+        for p in problems[:20]:
+            print(f"  ! {p}", flush=True)
+        return 1
 
     _write_units(out_path, args.cap, file_path.name, units)
     print(f"\nĐã ghi {len(units)} unit -> {out_path}", flush=True)
