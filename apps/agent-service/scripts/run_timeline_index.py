@@ -7,8 +7,9 @@ Tách khỏi bước 1 (phân đoạn) để chỉ trích trên units ĐÃ verif
 
 Pipeline bước này (giống run_graph_extraction.py, "vừa làm vừa check"):
   1. đọc units từ dataset/timeline_units.json (KHÔNG tự build — chạy run_segmentation.py trước)
-  2. trích bằng LLM (OpenAI Structured Outputs) -> cache `dataset/timeline_extractions.json`
-  3. reconcile: gán event_id tất định + dedup xuyên unit + parent_event_norm (THUẦN, không LLM)
+  2. trích bằng LLM: 1 unit = 1 request, kết quả tách sẵn theo từng chunk trong unit
+     -> cache `dataset/timeline_extractions.json` KHOÁ THEO chunk_id
+  3. reconcile: gán event_id tất định + dedup xuyên chunk + parent_event_norm (THUẦN, không LLM)
   4. load: TRUNCATE + insert trọn bộ vào Postgres `timeline_events`
 
 `--limit` chỉ giới hạn bước TRÍCH lần này; reconcile + load luôn chạy trên TOÀN cache
@@ -26,7 +27,10 @@ Ví dụ:
     # Chỉ reconcile cache sẵn có rồi nạp DB (không gọi LLM, không cần units):
     python scripts/run_timeline_index.py --limit -1
 
-Resume: mỗi unit trích xong lưu kèm `prompt_version`; lần sau bỏ qua unit có version khớp.
+Resume: cache khoá theo chunk_id, mỗi entry ghi kèm `prompt_version` + `unit_id`. Một unit
+coi là XONG khi MỌI chunk của nó đã có entry khớp cả hai; thiếu một chunk -> trích lại TOÀN
+unit và ghi đè. Sửa text mà giữ nguyên chunk_id -> phải bump `prompt_version` hoặc `--overwrite`
+(cache không lưu hash nội dung).
 """
 
 from __future__ import annotations
@@ -58,7 +62,7 @@ from app.core.config import get_settings  # noqa: E402
 from app.core.llm import get_openai_client  # noqa: E402
 from app.indexing.timeline.atomic_event_extractor import (  # noqa: E402
     TIMELINE_PROMPT_VERSION,
-    extract_timeline_events,
+    extract_unit_events,
 )
 from app.indexing.timeline.reconcile import reconcile_events  # noqa: E402
 from app.indexing.timeline.segmenter import Unit, unit_from_dict  # noqa: E402
@@ -77,6 +81,12 @@ def _load_units(path: Path) -> tuple[int, list[Unit]]:
 
 
 def _load_artifact(path: Path) -> dict[str, Any]:
+    """Đọc cache trích. Cache format CŨ (khoá theo unit_id) -> ném lỗi, KHÔNG trộn.
+
+    Cache cũ có `source_chunk_ids` trong entry và khoá ngoài cùng là `unit_id`; đọc lẫn
+    vào luồng mới thì reconcile sẽ gán `source_chunk_ids = [unit_id]` -> provenance rác
+    trong DB. Thà dừng và bắt đổi tên file còn hơn hỏng im lặng.
+    """
     if not path.exists():
         return {}
     text = path.read_text(encoding="utf-8").strip()
@@ -86,7 +96,18 @@ def _load_artifact(path: Path) -> dict[str, Any]:
         data = json.loads(text)
     except json.JSONDecodeError:
         return {}
-    return data if isinstance(data, dict) else {}
+    if not isinstance(data, dict):
+        return {}
+
+    legacy = [k for k, v in data.items() if isinstance(v, dict) and "source_chunk_ids" in v]
+    if legacy:
+        raise SystemExit(
+            f"[cache] {path} là CACHE ĐỊNH DẠNG CŨ (khoá theo unit_id, có "
+            f"'source_chunk_ids'; {len(legacy)} entry). Luồng mới khoá theo chunk_id.\n"
+            f"  -> Đổi tên file cũ để giữ rollback rồi chạy lại, ví dụ:\n"
+            f'     Rename-Item "{path}" "{path.stem}.unit-keyed.json"'
+        )
+    return data
 
 
 def _write_artifact(path: Path, cache: dict[str, Any]) -> None:
@@ -97,42 +118,59 @@ def _write_artifact(path: Path, cache: dict[str, Any]) -> None:
     os.replace(tmp, path)
 
 
+def _unit_done(cache: dict[str, Any], unit: Unit) -> bool:
+    """Unit XONG khi MỌI chunk của nó có entry khớp cả `prompt_version` lẫn `unit_id`."""
+    for chunk_id in unit.chunk_ids:
+        entry = cache.get(chunk_id)
+        if not isinstance(entry, dict):
+            return False
+        if entry.get("prompt_version") != TIMELINE_PROMPT_VERSION:
+            return False
+        if entry.get("unit_id") != unit.unit_id:
+            return False
+    return True
+
+
 def _summary(cache: dict[str, Any]) -> dict[str, int]:
     """Thống kê chất lượng tầng cache (trước dedup): phân loại event theo time/location."""
     events = [e for v in cache.values() for e in v.get("events", [])]
-    has_t = sum(1 for e in events if e.get("time_start"))
-    has_l = sum(1 for e in events if e.get("locations"))
-    both = sum(1 for e in events if e.get("time_start") and e.get("locations"))
-    neither = sum(1 for e in events if not e.get("time_start") and not e.get("locations"))
     return {
-        "units": len(cache),
+        "chunks": len(cache),
+        "units": len({v.get("unit_id") for v in cache.values()}),
+        "chunks_co_event": sum(1 for v in cache.values() if v.get("events")),
         "events": len(events),
-        "co_time": has_t,
-        "co_location": has_l,
-        "ca_hai": both,
-        "khong_ca_hai": neither,
+        "co_time": sum(1 for e in events if e.get("time_start")),
+        "co_location": sum(1 for e in events if e.get("locations")),
+        "ca_hai": sum(1 for e in events if e.get("time_start") and e.get("locations")),
+        "khong_ca_hai": sum(
+            1 for e in events if not e.get("time_start") and not e.get("locations")
+        ),
     }
 
 
-def _show_units(cache: dict[str, Any], unit_ids: list[str]) -> None:
-    """In chi tiết event của vài unit để soi chất lượng bằng mắt."""
-    for uid in unit_ids:
-        entry = cache.get(uid)
-        if not entry:
-            continue
-        path = " > ".join(entry.get("heading_path") or []) or "(không heading)"
-        evs = entry.get("events", [])
-        print(f"\n=== UNIT {uid} | {path} | {len(evs)} sự kiện ===", flush=True)
-        for e in evs:
-            t = e.get("time_start") or "—"
-            if e.get("time_end"):
-                t += f"..{e['time_end']}"
-            loc = ", ".join(e.get("locations") or []) or "—"
-            print(
-                f"  [{t}] ({e.get('confidence')}) {e.get('label')}\n"
-                f"      nơi: {loc} | parent: {e.get('parent_event') or '—'}",
-                flush=True,
-            )
+def _show_units(cache: dict[str, Any], units: list[Unit], n: int) -> None:
+    """In event của N unit đầu, TÁCH THEO CHUNK — soi việc quy event về đúng chunk."""
+    for u in units[:n]:
+        path = " > ".join(u.heading_path) or "(không heading)"
+        total = sum(len(cache.get(cid, {}).get("events", [])) for cid in u.chunk_ids)
+        print(f"\n=== UNIT {u.unit_id} | {path} | {total} sự kiện ===", flush=True)
+        for i, chunk_id in enumerate(u.chunk_ids, start=1):
+            entry = cache.get(chunk_id)
+            if entry is None:
+                print(f"  [ref={i}] {chunk_id}: (chưa trích)", flush=True)
+                continue
+            evs = entry.get("events", [])
+            print(f"  [ref={i}] {chunk_id}: {len(evs)} sự kiện", flush=True)
+            for e in evs:
+                t = e.get("time_start") or "—"
+                if e.get("time_end"):
+                    t += f"..{e['time_end']}"
+                loc = ", ".join(e.get("locations") or []) or "—"
+                print(
+                    f"      [{t}] ({e.get('confidence')}) {e.get('label')}\n"
+                    f"          nơi: {loc} | parent: {e.get('parent_event') or '—'}",
+                    flush=True,
+                )
 
 
 def _batches(items: list[Unit], size: int) -> list[list[Unit]]:
@@ -208,6 +246,7 @@ def main() -> int:
     cache = _load_artifact(artifact_path)
 
     # --limit < 0: chỉ reconcile + nạp DB từ cache sẵn có -> KHÔNG cần units artifact.
+    units: list[Unit]
     if args.limit < 0:
         cap, units = 0, []
     else:
@@ -221,25 +260,16 @@ def main() -> int:
         if not units:
             parser.error(f"{units_path} rỗng (0 unit). Chạy lại run_segmentation.py.")
 
-    # Resume qua cache: unit có prompt_version khớp coi như xong (trừ --overwrite).
-    if args.overwrite:
-        done: set[str] = set()
-    else:
-        done = {
-            uid for uid, v in cache.items()
-            if v.get("prompt_version") == TIMELINE_PROMPT_VERSION
-        }
-
-    todo = [u for u in units if u.unit_id not in done]
-    if args.limit > 0:
-        todo = todo[: args.limit]
+    # Resume: unit xong khi MỌI chunk của nó đã có entry khớp version + unit_id.
+    pending = units if args.overwrite else [u for u in units if not _unit_done(cache, u)]
+    todo = pending[: args.limit] if args.limit > 0 else pending
 
     settings = get_settings()
     model = settings.timeline_llm_model or settings.llm_model
     src = "(cache, --limit<0)" if args.limit < 0 else f"{Path(args.units).name} (cap={cap})"
     print(
         f"Units: {src} | {len(units)} unit "
-        f"({len(done)} đã trích, {len(todo)} sẽ xử lý) | "
+        f"({len(units) - len(pending)} đã trích, {len(todo)} sẽ xử lý lần này) | "
         f"model={model} | prompt={TIMELINE_PROMPT_VERSION} | {args.workers} luồng",
         flush=True,
     )
@@ -250,21 +280,21 @@ def main() -> int:
     if todo:
         client = get_openai_client()
 
-        def _process(unit: Unit) -> str:
-            result = extract_timeline_events(
-                unit.text,
+        def _process(unit: Unit) -> None:
+            per_chunk = extract_unit_events(
+                [(c.chunk_id, c.text) for c in unit.chunks],
                 unit.heading_path,
                 client=client,
                 model=model,
-                unit_id=unit.unit_id,
             )
-            cache[unit.unit_id] = {
-                "prompt_version": TIMELINE_PROMPT_VERSION,
-                "heading_path": unit.heading_path,
-                "source_chunk_ids": unit.source_chunk_ids,
-                "events": [e.model_dump() for e in result.events],
-            }
-            return unit.unit_id
+            # extract_unit_events bảo đảm phủ ĐỦ chunk của unit -> ghi trọn bộ, không
+            # để sót entry cũ của unit nào khác (mỗi chunk chỉ thuộc đúng 1 unit).
+            for chunk_id, events in per_chunk.items():
+                cache[chunk_id] = {
+                    "prompt_version": TIMELINE_PROMPT_VERSION,
+                    "unit_id": unit.unit_id,
+                    "events": [e.model_dump() for e in events],
+                }
 
         total = len(todo)
         completed = 0
@@ -318,7 +348,7 @@ def main() -> int:
     _finalize(cache, args)
 
     if args.show > 0:
-        _show_units(cache, [u.unit_id for u in units[: args.show]])
+        _show_units(cache, units, args.show)
     print(f"\nCache -> {artifact_path}")
     return 1 if errors else 0
 

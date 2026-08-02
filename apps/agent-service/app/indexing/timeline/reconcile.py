@@ -1,13 +1,13 @@
-"""Reconcile atomic event: gán `event_id` tất định + dedup xuyên unit + `parent_event_norm`.
+"""Reconcile atomic event: gán `event_id` tất định + dedup xuyên chunk + `parent_event_norm`.
 
-Đọc cache `timeline_extractions.json` ({unit_id: {source_chunk_ids, events:[...]}}),
+Đọc cache `timeline_extractions.json` ({chunk_id: {prompt_version, unit_id, events:[...]}}),
 sinh danh sách record sẵn sàng nạp vào bảng `timeline_events`. THUẦN TẤT ĐỊNH (uuid5),
 KHÔNG gọi LLM — chạy lại cùng cache ra cùng kết quả.
 
 - `event_id = uuid5(NS, norm_parent | norm_time | norm_location0 | norm_label)`. Có
   `norm_parent` trong khoá để hai sự kiện KHÁC chiến dịch mà trùng time+nơi+label không
   bị gộp nhầm (xem plan §3).
-- Dedup: event cùng `event_id` (từ nhiều unit, vd một mốc được nhắc lại ở section kề)
+- Dedup: event cùng `event_id` (từ nhiều chunk, vd một diễn biến được kể tiếp ở chunk kề)
   gộp làm MỘT: hợp nhất `source_chunk_ids` + `locations`, giữ `confidence` cao nhất và
   label/summary của bản chắc hơn.
 - `parent_event_norm = resolve(parent_event)` (canonical_norm) -> gom nhóm + link sang
@@ -18,8 +18,10 @@ LƯU Ý tất định: vì `parent_norm` vào khoá `event_id` qua `resolve()` (
 -> event_id của các sự kiện CÓ parent có thể đổi. Không sao với thiết kế hiện tại (bảng
 nạp lại trọn bộ TRUNCATE+insert), nhưng đừng dựa vào event_id cũ sau khi rebuild alias.
 
-Mỗi event kế thừa `source_chunk_ids` của UNIT chứa nó (extraction theo unit) — đây là
-khoá join online về chunk đã retrieve.
+PROVENANCE CẤP CHUNK: `source_chunk_ids` của mỗi event lấy từ chính KHOÁ NGOÀI CÙNG của
+cache (một chunk_id), KHÔNG phải cả unit. Nhờ vậy UI join `source_chunk_ids && retrieved`
+chỉ kéo về event mà chunk được cite thực sự làm bằng chứng, thay vì mọi event cùng unit.
+Event trải nhiều chunk gom lại đúng bấy nhiêu chunk qua bước dedup ở trên.
 """
 
 from __future__ import annotations
@@ -57,12 +59,11 @@ def _compute_event_id(
 
 
 def reconcile_events(cache: dict[str, Any]) -> list[dict[str, Any]]:
-    """Cache trích -> list record cho `timeline_events` (đã dedup, có event_id)."""
+    """Cache trích (khoá theo chunk_id) -> record cho `timeline_events` (dedup + event_id)."""
     merged: dict[str, dict[str, Any]] = {}
 
-    for unit in cache.values():
-        unit_chunks = [c for c in (unit.get("source_chunk_ids") or []) if c]
-        for ev in unit.get("events", []):
+    for chunk_id, entry in cache.items():
+        for ev in entry.get("events", []):
             label = (ev.get("label") or "").strip()
             if not label:
                 continue  # không có nhãn -> không định danh được, bỏ
@@ -89,14 +90,14 @@ def reconcile_events(cache: dict[str, Any]) -> list[dict[str, Any]]:
                     "locations": list(locations),
                     "confidence": conf,
                     "parent_event_norm": parent_norm,  # '' -> event_store ghi NULL
-                    "source_chunk_ids": list(unit_chunks),
+                    "source_chunk_ids": [chunk_id],
                 }
                 continue
 
-            # Gộp trùng (cùng event_id từ unit khác).
+            # Gộp trùng (cùng event_id từ chunk khác) -> union chunk nguồn.
             existing["locations"] = _dedup_keep_order(existing["locations"] + locations)
             existing["source_chunk_ids"] = _dedup_keep_order(
-                existing["source_chunk_ids"] + unit_chunks
+                existing["source_chunk_ids"] + [chunk_id]
             )
             if CONFIDENCE_RANK.get(conf, 0) > CONFIDENCE_RANK.get(existing["confidence"], 0):
                 existing["confidence"] = conf
