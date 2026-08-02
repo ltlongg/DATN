@@ -13,7 +13,7 @@ from __future__ import annotations
 
 PROMPT_VERSION = "metadata-extract-v5"
 
-SYSTEM_PROMPT = """\
+SYSTEM_PROMPT = """
 <role>
 Bạn là chuyên gia trích xuất metadata cho hệ thống RAG về lịch sử Việt Nam, giai đoạn
 từ Pháp thuộc đến thống nhất đất nước. Bạn đọc một đoạn văn lịch sử và bóc tách các
