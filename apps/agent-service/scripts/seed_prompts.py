@@ -5,7 +5,7 @@ trùng. Sau seed, admin sửa/version/promote qua UI; agent đọc version produ
 (get_active_prompt) và luôn fallback về hằng code nếu DB thiếu.
 
 Nhóm:
-  - ONLINE    : build_query, synthesize (orchestrator dùng mỗi câu trả lời — ĐÃ wiring runtime)
+  - ONLINE    : plan, resolve, synthesize (orchestrator dùng mỗi câu trả lời — ĐÃ wiring runtime)
   - GUARDRAIL : guardrails_input (ĐÃ wiring runtime)
   - INDEXING  : graph/metadata/timeline/geocode/alias (đăng ký + version được, nhưng CHƯA nối
                 runtime vào script indexing — chỉ hiệu lực khi re-index, wiring HOÃN)
@@ -20,7 +20,7 @@ Ví dụ (PowerShell):
     $env:PYTHONIOENCODING="utf-8"
     cd apps/agent-service
     .\venv\Scripts\python.exe scripts/seed_prompts.py                        # seed key mới
-    .\venv\Scripts\python.exe scripts/seed_prompts.py --publish --key build_query
+    .\venv\Scripts\python.exe scripts/seed_prompts.py --publish --key plan
 """
 
 from __future__ import annotations
@@ -42,9 +42,7 @@ from app.tools.prompts.prompt_store import publish_prompt_version, seed_prompt  
 
 # (key, grp, title, description, content). key = định danh runtime (khớp get_active_prompt).
 _REGISTRY: list[tuple[str, str, str, str, str]] = [
-    # Key GIỮ "build_query" dù node/file prompt đã đổi tên sang `plan` — đổi key là reseed DB
-    # + mất lịch sử version đang có. Xem app/prompts/plan.py.
-    ("build_query", "ONLINE", "Dựng truy vấn",
+    ("plan", "ONLINE", "Phân tích câu hỏi",
      "Rewrite câu hỏi + phân tuyến + phân rã truy vấn tìm kiếm (mỗi câu trả lời).",
      plan.SYSTEM_PROMPT),
     ("resolve", "ONLINE", "Trích mắt xích",

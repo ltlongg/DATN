@@ -163,7 +163,7 @@ async def run_ask_stream(request: AskRequest) -> AsyncIterator[str]:
                 yield _sse("error", {"code": error_code(exc), "message": error_message(exc)})
             return
         if request.debug:
-            # Gom debug (build_query + retrieve) rồi bắn 1 lần, NGAY TRƯỚC done. Xem
+            # Gom debug (plan + retrieve) rồi bắn 1 lần, NGAY TRƯỚC done. Xem
             # backend-additions-plan.md §1.1: dữ liệu có sớm nhưng gửi muộn (đọc từ
             # final_state sau khi graph xong) — hành vi cố ý, FE hiện placeholder tới lúc này.
             yield _sse("debug", {"debug": final_state.get("debug", {})})

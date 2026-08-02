@@ -1,10 +1,10 @@
-"""Ghi token usage của các lệnh gọi LLM ONLINE (build_query, synthesize) vào Postgres.
+"""Ghi token usage của các lệnh gọi LLM ONLINE (plan, resolve, synthesize) vào Postgres.
 
 Mirror pattern chunk_store.py (`_database_url()` strip +psycopg, CREATE TABLE IF NOT
 EXISTS lazy). Bảng `llm_usage` do agent-service sở hữu; backend đọc thẳng (cùng Postgres).
 
 TRIẾT LÝ: ghi usage KHÔNG được làm fail câu trả lời thật (cùng tinh thần build_visualization
-— viz lỗi không fail answer). Vì vậy `record_usage` NUỐT mọi exception. Chỉ track 2 lệnh gọi
+— viz lỗi không fail answer). Vì vậy `record_usage` NUỐT mọi exception. Chỉ track lệnh gọi
 OpenAI online; KHÔNG track embedding (self-hosted, không tính phí token) hay indexing offline.
 Xem backend-additions-plan.md §4.1.
 """

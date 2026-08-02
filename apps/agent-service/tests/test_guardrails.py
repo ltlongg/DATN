@@ -228,7 +228,7 @@ async def test_block_stream_emits_token_then_blocked_no_done(monkeypatch) -> Non
 
 
 async def test_allow_stream_proceeds_to_plan(monkeypatch) -> None:
-    # allow -> build_query được gọi (đánh dấu qua flag).
+    # allow -> `plan` được gọi (đánh dấu qua flag).
     called: dict = {}
 
     async def allow(question, history, **_kwargs):

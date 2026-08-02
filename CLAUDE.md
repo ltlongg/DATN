@@ -32,7 +32,7 @@ Nếu thư viện hiện có không đủ → ghi rõ lý do trước khi viết
 
 Repo là **git repository** (branch `main`). Không còn ở scaffold stage:
 
-- **`agent-service`**: đã có pipeline indexing thực (preprocessing → chunking → graph extraction → timeline extraction → geocoding) **và** answer flow online — `api/ask.py` (FastAPI `/ask`) + `orchestrator/` (LangGraph: build_query → retrieve → synthesize → validate → visualization, stream SSE). Đây là nơi tập trung gần như toàn bộ logic LLM/retrieval.
+- **`agent-service`**: đã có pipeline indexing thực (preprocessing → chunking → graph extraction → timeline extraction → geocoding) **và** answer flow online — `api/ask.py` (FastAPI `/ask`) + `orchestrator/` (LangGraph: plan → retrieve → synthesize → validate → visualization, stream SSE). Đây là nơi tập trung gần như toàn bộ logic LLM/retrieval.
 - **`backend`**: đã build API gateway (auth JWT, conversation/message, `/ask` streaming proxy, admin documents — **hết mock**, danh mục nối kho tri thức thật, xem `### Tài liệu (Module 3)`) — xem layout dưới. Module 4 (admin nâng cao) **3/4 nhóm đã code xong** (Hội thoại & chất lượng, Người dùng & quota, Chi phí) + KB Inspector (Module 5) + debug streaming, **cộng thêm 2 hạng mục mới từ `admin-restructure-plan.md`**: **token theo hội thoại/message** (song song chất lượng, không thay thế) và **quản lý Prompt đầy đủ** (sửa/version/promote, agent đọc production lúc chạy + fallback code) — xem `### Admin nâng cao` dưới. Chỉ còn **Cấu hình hệ thống** (retrieval mode mặc định + tinh chỉnh, `system-config-plan.md`) là CHƯA code. **`frontend`**: đã build thật (Vite+React+TS) phủ cả 2 role — auth/chat streaming SSE/multi-turn sidebar/panel tiến trình 2 tầng (tầng 2 admin, thay DebugPanel đã xoá — xem `### Panel tiến trình 2 tầng`)/map+timeline/quản lý tài liệu/KB Inspector/Module 4 (logs+token+users+cost+prompts). Nav admin là **sidebar dọc theo nhóm** (không còn tab ngang). Chỉ mục Cấu hình hệ thống là stub "Sắp cập nhật". Xem `### Frontend layout` dưới + `docs/plan/frontend-plan.md` + `docs/plan/admin-restructure-plan.md` (nav dọc + token + prompt, đã code xong cả 3 hạng mục).
 
 `requirements.txt`, `docker-compose.yml` đã cấu hình. Khi commit, dùng tiếng Việt theo phong cách lịch sử commit hiện có.
@@ -224,12 +224,12 @@ nhưng phải **quy mỗi event về chunk chứa bằng chứng**.
 - `tools/graph_rag/` — `chunk_store.py` (Postgres), `vector_store.py` (Qdrant), `graph_store.py` (Neo4j, + `list_entities`/`get_entity` cho KB Inspector).
 - `tools/visualization/` — `event_store.py` (`timeline_events`), `gazetteer_store.py` (`gazetteer`), `builder.py` (online).
 - `tools/prompts/` — `prompt_store.py`: bảng `managed_prompts`/`prompt_versions` (lazy tạo, mirror chunk_store), `get_active_prompt(key, fallback)` đọc version `production` (cache TTL 60s, **luôn fallback về hằng code** nếu DB thiếu/lỗi, nuốt mọi exception — dùng cho 3 prompt ONLINE/GUARDRAIL). Seed từ `scripts/seed_prompts.py`.
-- `prompts/` — hằng `SYSTEM_PROMPT` trong code (nguồn seed + fallback runtime), có versioning theo comment (graph_extract, metadata_extract, timeline_extract, geocode, alias_judge, build_query, synthesize, guardrails_input).
+- `prompts/` — hằng `SYSTEM_PROMPT` trong code (nguồn seed + fallback runtime), có versioning theo comment (graph_extract, metadata_extract, timeline_extract, geocode, alias_judge, plan, resolve, synthesize, guardrails_input).
 - `schemas/` — Pydantic models (chunk, graph, metadata, timeline, gazetteer, visualization, alias, `ask.py` request/response — có `conversation_id`/`message_id` để quy `llm_usage`, `kb.py` cho KB Inspector).
 - `core/` — config, llm, embedding, clients (qdrant, neo4j), `usage_log.py` (`record_usage` → bảng `llm_usage` gồm `conversation_id`/`message_id`, tạo lazy + `ALTER ... IF NOT EXISTS` idempotent, nuốt mọi exception).
 - `scripts/` — CLI utilities (xem Commands) + `seed_prompts.py` (seed 8 managed prompt từ hằng code, idempotent).
 - `api/` — `ask.py` (`POST /ask`, streaming SSE), `kb.py` (`GET /kb/entities`, `/kb/entities/{norm_name}` — read-only, phục vụ backend proxy Module 5).
-- `orchestrator/` — LangGraph: `nodes.py` (build_query → retrieve → synthesize → validate → visualization, ghi `llm_usage` kèm conversation_id/message_id, dùng `get_active_prompt` cho build_query/synthesize), `guardrails.py` (`check_input` dùng `get_active_prompt("guardrails_input", ...)`), `runner.py` (`run_ask_stream`, emit event `debug` trước `done`), `state.py`, `synthesis.py`.
+- `orchestrator/` — LangGraph: `nodes.py` (plan → retrieve → synthesize → validate → visualization, ghi `llm_usage` kèm conversation_id/message_id, dùng `get_active_prompt` cho plan/synthesize), `guardrails.py` (`check_input` dùng `get_active_prompt("guardrails_input", ...)`), `runner.py` (`run_ask_stream`, emit event `debug` trước `done`), `state.py`, `synthesis.py`.
 - `tools/traditional_rag/`, `tools/hybrid/` — `retriever.py` mỗi thư mục; node `retrieve()` gọi thẳng `tools/hybrid/retriever.py::retrieve_hybrid`, set `retrieval_mode="hybrid"`.
 
 ### Backend internal layout (`apps/backend/app/`)
@@ -276,7 +276,7 @@ created_at` dùng `clock_timestamp()` (không `now()`) để thứ tự message 
 
 **TTFT** (`messages.ttft_ms`): đo Ở BACKEND, KHÔNG phải agent — bấm giờ đầu handler `ask()`,
 chốt ở event `token` ĐẦU TIÊN proxy xuống FE (`api/chat.py::_proxy_stream` → `SseCollector.
-mark_first_token`). Vậy con số gồm cả quota check + history + guardrails + build_query +
+mark_first_token`). Vậy con số gồm cả quota check + history + guardrails + plan +
 retrieval + LLM = đúng khoảng người dùng chờ tới chữ đầu tiên, KHÔNG phải TTFT riêng của LLM
 (OpenAI không trả metric này; muốn tách riêng phần LLM thì phải đo thêm trong `synthesis.py`).
 Đi kèm event `done` (FE hiện ngay) + lưu DB (thấy lại sau reload). NULL = message user, hoặc
@@ -297,9 +297,9 @@ stream hỏng/blocked trước token đầu → UI hiện "—", và trung bình
   - **Item 3 — Token theo hội thoại**: `llm_usage` thêm cột `conversation_id`/`message_id`
     (ALTER idempotent, giữ data cũ). **Bổ sung SONG SONG chất lượng, KHÔNG thay thế** — cả 2
     luôn hiển thị cạnh nhau. KHÔNG quy ra tiền $. Model hiển thị **ở từng dòng task** (không
-    phải 1 model chung/message) vì build_query/synthesize và guardrail_input có thể khác model.
-  - **Item 2 — Quản lý Prompt**: chỉ 3 prompt **ONLINE/GUARDRAIL** (build_query, synthesize,
-    guardrails_input) wiring runtime thật; 5 prompt **INDEXING** (offline) chỉ đăng ký +
+    phải 1 model chung/message) vì plan/synthesize và guardrail_input có thể khác model.
+  - **Item 2 — Quản lý Prompt**: chỉ 3 prompt **ONLINE/GUARDRAIL** (plan — key cũ `build_query`,
+    synthesize, guardrails_input) wiring runtime thật; 5 prompt **INDEXING** (offline) chỉ đăng ký +
     version được, **CHƯA nối vào script indexing** (ghi rõ "chưa nối" ở UI). An toàn: agent
     LUÔN fallback về hằng code nếu DB thiếu/lỗi.
   - Trang Hội thoại (`/admin/logs`) redesign sang **bố cục 3 cột inline** (mượn từ Socratic,

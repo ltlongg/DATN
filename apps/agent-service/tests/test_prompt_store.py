@@ -67,7 +67,7 @@ def _clear_cache():
 
 def test_get_active_prompt_returns_production_content(monkeypatch) -> None:
     _patch_conn(monkeypatch, {"content": "PROD PROMPT"})
-    assert prompt_store.get_active_prompt("build_query", fallback="CODE") == "PROD PROMPT"
+    assert prompt_store.get_active_prompt("plan", fallback="CODE") == "PROD PROMPT"
 
 
 def test_get_active_prompt_fallback_when_no_production(monkeypatch) -> None:
@@ -88,8 +88,8 @@ def test_get_active_prompt_fallback_on_db_error(monkeypatch) -> None:
 
 def test_get_active_prompt_caches_within_ttl(monkeypatch) -> None:
     log = _patch_conn(monkeypatch, {"content": "PROD"})
-    prompt_store.get_active_prompt("build_query", fallback="CODE")
-    prompt_store.get_active_prompt("build_query", fallback="CODE")
+    prompt_store.get_active_prompt("plan", fallback="CODE")
+    prompt_store.get_active_prompt("plan", fallback="CODE")
     # Chỉ 1 lần chạm DB (SELECT) dù gọi 2 lần -> cache hoạt động.
     selects = [e for e in log if "SELECT content" in e[0]]
     assert len(selects) == 1
@@ -97,7 +97,7 @@ def test_get_active_prompt_caches_within_ttl(monkeypatch) -> None:
 
 def test_seed_prompt_creates_when_absent(monkeypatch) -> None:
     log = _patch_conn(monkeypatch, None)  # SELECT 1 -> None (chưa có key)
-    created = prompt_store.seed_prompt("build_query", "ONLINE", "T", "d", "CONTENT")
+    created = prompt_store.seed_prompt("plan", "ONLINE", "T", "d", "CONTENT")
     assert created is True
     assert any("INSERT INTO managed_prompts" in e[0] for e in log)
     assert any("INSERT INTO prompt_versions" in e[0] for e in log)
@@ -105,7 +105,7 @@ def test_seed_prompt_creates_when_absent(monkeypatch) -> None:
 
 def test_seed_prompt_idempotent_when_exists(monkeypatch) -> None:
     log = _patch_conn(monkeypatch, {"?column?": 1})  # SELECT 1 -> có row -> đã tồn tại
-    created = prompt_store.seed_prompt("build_query", "ONLINE", "T", "d", "CONTENT")
+    created = prompt_store.seed_prompt("plan", "ONLINE", "T", "d", "CONTENT")
     assert created is False
     assert not any("INSERT INTO" in e[0] for e in log)
 
@@ -143,7 +143,7 @@ async def test_plan_wires_get_active_prompt(monkeypatch) -> None:
     )
 
     await nodes.plan({"question": "q", "history": [], "override_mode": "auto"}, {})
-    assert captured["key"] == "build_query"
+    assert captured["key"] == "plan"
     assert captured["fallback"] == plan_prompt.SYSTEM_PROMPT
     # system message thực sự dùng content trả về từ get_active_prompt
     assert captured["messages"][0]["content"] == "USED PROMPT"

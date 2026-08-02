@@ -112,6 +112,11 @@ class PlanOutput(BaseModel):
 
     `steps` rỗng là hợp lệ -> `planning.normalize_plan` dựng 1 bước mặc định từ
     `standalone_query`, tức hành vi y hệt trước khi có multi-query.
+
+    THỨ TỰ FIELD CÓ Ý NGHĨA: Structured Outputs sinh JSON theo thứ tự property của schema, mà
+    prompt v6 bắt chọn `selected_mode` theo `mentioned_entities` — entity phải được viết ra
+    TRƯỚC thì model mới "thấy" nó lúc chọn mode. Đảo hai field là prompt nói dối model mà
+    không có gì báo lỗi; `test_mentioned_entities_generated_before_selected_mode` khoá lại.
     """
 
     standalone_query: str

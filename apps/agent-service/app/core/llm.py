@@ -34,7 +34,7 @@ def get_openai_client() -> OpenAI:
 
 
 def get_async_openai_client() -> AsyncOpenAI:
-    """Async client cho orchestrator (build_query + synthesize streaming).
+    """Async client cho orchestrator (plan/resolve + synthesize streaming).
 
     Tách khỏi client sync để FastAPI/LangGraph chạy trong event loop không bị block.
     Cache theo (api_key, base_url) như client sync.

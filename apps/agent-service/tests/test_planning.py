@@ -22,6 +22,21 @@ def _norm(parsed: PlanOutput, question: str, *, max_steps=2, max_queries=4):
     )
 
 
+# --- thứ tự field PlanOutput: prompt `plan` dựa vào nó ---
+
+
+def test_mentioned_entities_generated_before_selected_mode() -> None:
+    """`mentioned_entities` PHẢI đứng trước `selected_mode` trong schema.
+
+    Prompt v6 bắt chọn mode theo `mentioned_entities` ("ở trên"). Structured Outputs sinh
+    JSON theo đúng thứ tự property của schema, mà thứ tự đó = thứ tự khai báo field ở đây —
+    nên model chỉ "thấy" được entity nếu nó đã viết ra trước. Đảo hai field này là prompt nói
+    dối model mà KHÔNG có gì khác báo lỗi: output vẫn hợp lệ, mode chỉ âm thầm kém đi.
+    """
+    order = list(PlanOutput.model_fields)
+    assert order.index("mentioned_entities") < order.index("selected_mode")
+
+
 # --- fallback: steps rỗng -> 1 bước từ standalone_query ---
 
 

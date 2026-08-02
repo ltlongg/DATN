@@ -135,7 +135,7 @@ class Settings(BaseSettings):
     max_queries_per_step: int = 4
     retrieval_max_steps: int = Field(default=2, ge=1, le=2)
 
-    # --- Guardrails input layer (v1). 1 lớp kiểm input trước build_query, chỉ LLM structured
+    # --- Guardrails input layer (v1). 1 lớp kiểm input trước `plan`, chỉ LLM structured
     # output (KHÔNG regex/keyword/blocklist). Dùng model riêng nhỏ/rẻ (KHÔNG fallback sang
     # plan/resolve/synthesize/llm_model). fail_closed=True: model lỗi/timeout -> vẫn chặn +
     # trả safe message mặc định. Xem docs/plan/guardrails-input-plan.md. ---

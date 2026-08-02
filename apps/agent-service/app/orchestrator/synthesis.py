@@ -70,7 +70,7 @@ async def stream_synthesis(
     trước, `used_chunk_ids`/`confidence` về ở cuối.
 
     `temperature` do admin chỉnh qua Cấu hình hệ thống (RuntimeConfig.llm_temperature); mặc
-    định 0.0. build_query GIỮ 0.0 cứng (cần deterministic), chỉ synthesize dùng field này.
+    định 0.0. `plan`/`resolve` GIỮ 0.0 cứng (cần deterministic), chỉ synthesize dùng field này.
 
     `on_usage(prompt, completion, total)` (nếu truyền) được await đúng 1 lần sau khi có
     usage. Mặc định None = giữ nguyên hành vi cũ (không đọc usage). `stream_options=

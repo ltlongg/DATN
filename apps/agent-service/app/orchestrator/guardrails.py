@@ -1,4 +1,4 @@
-"""Guardrails input layer (v1) — 1 lớp kiểm câu hỏi TRƯỚC khi vào build_query.
+"""Guardrails input layer (v1) — 1 lớp kiểm câu hỏi TRƯỚC khi vào `plan`.
 
 `check_input` gọi LLM guardrails (model riêng `guardrails_llm_model`, KHÔNG fallback sang
 orchestrator/llm_model) với Structured Output `GuardrailDecision`. Quyết định allow/block

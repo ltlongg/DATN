@@ -1,4 +1,4 @@
-"""Test instrument token usage online: record_usage (fake connect), build_query gọi
+"""Test instrument token usage online: record_usage (fake connect), `plan` gọi
 record_usage đúng khi completion có usage / bỏ qua khi không có, stream_synthesis gọi
 on_usage.
 """

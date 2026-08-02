@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     Lỗi warm-up không chặn startup — model sẽ lazy-load lại ở request đầu như hành vi cũ.
 
     Đo thực tế (RTX 4060, 2026-07-14): warm-up này kéo node `retrieve` của request ĐẦU về
-    ~0.9s (ngang request sau). Cold còn lại của request đầu (~5s) nằm ở `build_query` — là
+    ~0.9s (ngang request sau). Cold còn lại của request đầu (~5s) nằm ở `plan` — là
     handshake HTTP/TLS lần đầu tới gateway LLM, KHÔNG phải model, warm ở đây không chữa
     được."""
     try:

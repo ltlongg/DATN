@@ -139,13 +139,13 @@ async def _record_usage_from_completion(
     )
 
 
-# --- 0. guard_input (guardrails input layer — chạy TRƯỚC build_query) ---
+# --- 0. guard_input (guardrails input layer — chạy TRƯỚC `plan`) ---
 
 
 async def guard_input(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
-    """Kiểm câu hỏi qua guardrails. allow -> đi tiếp build_query (ghi debug). block -> emit
+    """Kiểm câu hỏi qua guardrails. allow -> đi tiếp `plan` (ghi debug). block -> emit
     `token(safe_message)` + `blocked` rồi raise GuardrailsBlocked để DỪNG hẳn flow (không
-    build_query/retrieve/synthesize, không emit done). check_input không bao giờ raise nên
+    plan/retrieve/synthesize, không emit done). check_input không bao giờ raise nên
     lỗi/timeout đã quy về allow/block theo fail_closed."""
     emitter = _emitter(config)
     decision = await check_input(
@@ -207,10 +207,8 @@ async def plan(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
             messages=[
                 {
                     "role": "system",
-                    # Key managed prompt GIỮ "build_query" dù node/file đã đổi tên sang `plan`
-                    # — đổi key là phải reseed DB + mất lịch sử version. Xem prompts/plan.py.
                     "content": get_active_prompt(
-                        "build_query", fallback=plan_prompt.SYSTEM_PROMPT
+                        "plan", fallback=plan_prompt.SYSTEM_PROMPT
                     ),
                 },
                 {"role": "user", "content": plan_prompt.build_user_prompt(question, history)},
