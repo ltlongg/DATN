@@ -101,24 +101,35 @@ async def _emit_step(
     await emitter.emit("step", data)
 
 
-def _orchestrator_model() -> str:
-    settings = get_settings()
-    return settings.orchestrator_llm_model or settings.llm_model
+def _plan_model() -> str:
+    return get_settings().plan_llm_model
+
+
+def _resolve_model() -> str:
+    return get_settings().resolve_llm_model
+
+
+def _synthesize_model() -> str:
+    return get_settings().synthesize_llm_model
 
 
 async def _record_usage_from_completion(
-    completion: Any, task: str, state: AgentState
+    completion: Any, task: str, state: AgentState, *, model: str
 ) -> None:
     """Ghi usage của 1 lệnh gọi LLM online (fire-and-forget). Completion không có `.usage`
     (vd mock cũ) -> bỏ qua êm. record_usage tự nuốt lỗi nên không làm fail flow. Gắn
-    user_id/conversation_id/message_id từ state để quy usage về đúng user + hội thoại + message."""
+    user_id/conversation_id/message_id từ state để quy usage về đúng user + hội thoại + message.
+
+    `model` là THAM SỐ chứ không tự suy lại: từ khi mỗi bước có knob model riêng, suy lại ở đây
+    sẽ ghi nhầm model của bước khác vào `llm_usage` — mà panel Token của admin hiện model theo
+    TỪNG dòng task, nên ghi nhầm là nói dối chứ không phải sai số nhỏ."""
     usage = getattr(completion, "usage", None)
     if usage is None:
         return
     await asyncio.to_thread(
         record_usage,
         task=task,
-        model=_orchestrator_model(),
+        model=model,
         prompt_tokens=getattr(usage, "prompt_tokens", 0) or 0,
         completion_tokens=getattr(usage, "completion_tokens", 0) or 0,
         total_tokens=getattr(usage, "total_tokens", 0) or 0,
@@ -188,10 +199,11 @@ async def plan(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     history = state["history"]
     override = state["override_mode"]
     settings = get_settings()
+    model = _plan_model()
     try:
         client = get_async_openai_client()
         completion = await client.chat.completions.parse(
-            model=_orchestrator_model(),
+            model=model,
             messages=[
                 {
                     "role": "system",
@@ -209,7 +221,7 @@ async def plan(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
         parsed = completion.choices[0].message.parsed
         if parsed is None:
             raise ValueError("plan trả parsed None")
-        await _record_usage_from_completion(completion, "plan", state)
+        await _record_usage_from_completion(completion, "plan", state, model=model)
         standalone, steps, warnings = normalize_plan(
             parsed,
             question,
@@ -454,10 +466,11 @@ async def resolve_step(state: AgentState, config: RunnableConfig) -> dict[str, A
     await emitter.emit(
         "status", {"node": "resolve_step", "msg": f"đang xác định {step.resolve}"}
     )
+    model = _resolve_model()
     try:
         client = get_async_openai_client()
         completion = await client.chat.completions.parse(
-            model=_orchestrator_model(),
+            model=model,
             messages=[
                 {
                     "role": "system",
@@ -485,7 +498,7 @@ async def resolve_step(state: AgentState, config: RunnableConfig) -> dict[str, A
         parsed = completion.choices[0].message.parsed
         if parsed is None:
             raise ValueError("resolve trả parsed None")
-        await _record_usage_from_completion(completion, "resolve", state)
+        await _record_usage_from_completion(completion, "resolve", state, model=model)
     except Exception as exc:  # noqa: BLE001 — LLM chết không được làm sập cả câu trả lời
         await _emit_step(
             emitter,
@@ -680,12 +693,13 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
     user_id = state.get("user_id")
     conversation_id = state.get("conversation_id")
     message_id = state.get("message_id")
+    model = _synthesize_model()
 
     async def _on_usage(prompt: int, completion: int, total: int) -> None:
         await asyncio.to_thread(
             record_usage,
             task="synthesize",
-            model=_orchestrator_model(),
+            model=model,
             prompt_tokens=prompt,
             completion_tokens=completion,
             total_tokens=total,
@@ -697,7 +711,7 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
     result = await stream_synthesis(
         messages,
         emitter=emitter,
-        model=_orchestrator_model(),
+        model=model,
         batch_chars=settings.stream_batch_chars,
         temperature=cfg.llm_temperature,
         on_usage=_on_usage,
@@ -712,7 +726,7 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
         progress.synthesize_internals(
             prompt_chunks=len(chunks_for_prompt),
             citation_only_chunks=len(retrieval.chunks) - len(chunks_for_prompt),
-            model=_orchestrator_model(),
+            model=model,
             attempt=attempt + 1,
         ),
     )
