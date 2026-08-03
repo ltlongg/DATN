@@ -39,7 +39,7 @@ def _ctx():
 
 async def test_retrieve_graph_hydrates_and_attaches_graph_context(monkeypatch) -> None:
     monkeypatch.setattr(
-        GR, "search_graph", lambda q, **kw: ([_cand("c-1", 1, 3.0)], _ctx())
+        GR, "search_graph", lambda seeds, **kw: ([_cand("c-1", 1, 3.0)], _ctx())
     )
     monkeypatch.setattr(GR, "get_rag_chunks_by_ids", lambda ids: [_row("c-1")])
     result = await GR.retrieve_graph("Phan Bội Châu và Cường Để", seed_mentions=["Phan Bội Châu"])
@@ -52,7 +52,7 @@ async def test_retrieve_graph_hydrates_and_attaches_graph_context(monkeypatch) -
 
 
 async def test_retrieve_graph_empty_when_no_seed(monkeypatch) -> None:
-    monkeypatch.setattr(GR, "search_graph", lambda q, **kw: ([], []))
+    monkeypatch.setattr(GR, "search_graph", lambda seeds, **kw: ([], []))
     monkeypatch.setattr(GR, "get_rag_chunks_by_ids", lambda ids: [])
     result = await GR.retrieve_graph("không có thực thể", seed_mentions=["Lạ"])
     assert result.chunks == [] and result.graph_context == []
@@ -61,7 +61,7 @@ async def test_retrieve_graph_empty_when_no_seed(monkeypatch) -> None:
 async def test_retrieve_graph_passes_injected_seed_mentions(monkeypatch) -> None:
     seen = {}
 
-    def fake_search(q, *, seed_mentions=None, **kw):
+    def fake_search(seed_mentions, **kw):
         seen["seed_mentions"] = seed_mentions
         return [], []
 
@@ -71,26 +71,30 @@ async def test_retrieve_graph_passes_injected_seed_mentions(monkeypatch) -> None
     assert seen["seed_mentions"] == ["Trương Định"]
 
 
-async def test_retrieve_graph_falls_back_to_token_match_when_none(monkeypatch) -> None:
+async def test_retrieve_graph_without_seed_searches_nothing(monkeypatch) -> None:
+    """Không truyền seed -> xuống `search_graph` là danh sách RỖNG, không phải câu hỏi.
+
+    Graph không còn tự dò tên từ chuỗi query (token-match đã bỏ), nên "không có seed" nghĩa
+    là không có gì để tra chứ không phải "để graph tự lo".
+    """
     seen = {}
 
-    def fake_search(q, *, seed_mentions=None, **kw):
+    def fake_search(seed_mentions, **kw):
         seen["seed_mentions"] = seed_mentions
         return [], []
 
     monkeypatch.setattr(GR, "search_graph", fake_search)
     monkeypatch.setattr(GR, "get_rag_chunks_by_ids", lambda ids: [])
-    await GR.retrieve_graph("Trương Định là ai")  # không truyền seed_mentions
-    assert seen["seed_mentions"] is None  # search_graph tự token-match
+    await GR.retrieve_graph("Trương Định là ai")
+    assert list(seen["seed_mentions"]) == []
 
 
 async def test_retrieve_graph_forwards_tuning_to_search_graph(monkeypatch) -> None:
     seen: dict = {}
 
     def fake_search(
-        q,
+        seed_mentions,
         *,
-        seed_mentions=None,
         top_k=None,
         max_seed_entities=None,
         max_chunks_per_seed=None,
@@ -135,7 +139,7 @@ async def test_retrieve_graph_forwards_tuning_to_search_graph(monkeypatch) -> No
 
 
 async def test_retrieve_graph_raises_neo4j_unavailable_on_backend_error(monkeypatch) -> None:
-    def boom(q, **kw):
+    def boom(seeds, **kw):
         raise ConnectionError("neo4j down")
 
     monkeypatch.setattr(GR, "search_graph", boom)

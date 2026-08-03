@@ -18,6 +18,7 @@ nên relation lỡ thiếu node thì bị bỏ qua thay vì tạo node rỗng.
 from __future__ import annotations
 
 import itertools
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -170,17 +171,18 @@ class GraphSeed:
 
 
 def match_seed_entities(
-    query: str,
+    seed_mentions: Sequence[str],
     *,
-    seed_mentions: list[str] | None = None,
     limit: int,
     hub_source_count_threshold: int | None = None,
     index: EntityIndex | None = None,
 ) -> list[GraphSeed]:
-    """Sinh + ground seed (bước A) rồi sort/hub-guard/cap (bước B đối xứng indexing).
+    """Ground từng mention -> node KG, rồi sort/hub-guard/cap (đối xứng bước indexing).
 
-    `seed_mentions != None` -> ground trực tiếp từng mention (chiến lược 1, từ LLM).
-    `seed_mentions is None`  -> token-match từ query (chiến lược 2, fallback deterministic).
+    `seed_mentions` là NGUỒN SEED DUY NHẤT: mention do node `plan` trích và đã qua guard ở
+    `orchestrator/planning.py`. Rỗng -> không seed -> graph tắt cho query đó; KHÔNG còn
+    fallback dò tên từ chuỗi câu hỏi (xem `entity_index`).
+
     `hub_source_count_threshold` None -> fallback settings (Cấu hình hệ thống truyền vào).
     """
     index = index or get_entity_index()
@@ -191,21 +193,11 @@ def match_seed_entities(
     )
 
     raw: list[GraphSeed] = []
-    if seed_mentions is not None:
-        for mention in seed_mentions:
-            info = index.ground(mention)
-            if info is not None:
-                raw.append(
-                    GraphSeed(mention=mention, info=info, token_count=len(mention.split()))
-                )
-    else:
-        for info in index.token_match(query, limit=limit * 3):
+    for mention in seed_mentions:
+        info = index.ground(mention)
+        if info is not None:
             raw.append(
-                GraphSeed(
-                    mention=info.name,
-                    info=info,
-                    token_count=len(info.norm_name.split()),
-                )
+                GraphSeed(mention=mention, info=info, token_count=len(mention.split()))
             )
 
     # Hub guard: bỏ seed 1-từ generic có source_count quá lớn (vd "Pháp"). Seed nhiều từ
@@ -240,9 +232,8 @@ def _join_descriptions(descriptions: Any) -> str:
 
 
 def search_graph(
-    query: str,
+    seed_mentions: Sequence[str],
     *,
-    seed_mentions: list[str] | None = None,
     top_k: int | None = None,
     max_seed_entities: int | None = None,
     max_chunks_per_seed: int | None = None,
@@ -255,7 +246,9 @@ def search_graph(
 ) -> tuple[list[RetrievalCandidate], list[GraphContextItem]]:
     """Trả CẢ candidate (provenance, để RRF gộp) LẪN graph_context (content cho LLM).
 
-    Không match seed -> trả ([], []) (KHÔNG raise; orchestrator/honest answer xử lý).
+    Nhận thẳng danh sách mention chứ KHÔNG nhận câu hỏi: từ khi bỏ token-match, graph không
+    còn đọc chuỗi query dưới bất kỳ hình thức nào — nó chỉ đi từ seed. Seed rỗng hoặc không
+    ground được -> trả ([], []) (KHÔNG raise; orchestrator/honest answer xử lý).
 
     Các kwarg tinh chỉnh None -> fallback settings (Cấu hình hệ thống truyền giá trị admin).
     """
@@ -267,8 +260,7 @@ def search_graph(
         else settings.graph_hub_source_count_threshold
     )
     seeds = match_seed_entities(
-        query,
-        seed_mentions=seed_mentions,
+        seed_mentions,
         limit=max_seed_entities if max_seed_entities is not None else settings.graph_max_seed_entities,
         hub_source_count_threshold=hub_threshold,
         index=index,

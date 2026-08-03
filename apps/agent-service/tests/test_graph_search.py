@@ -61,27 +61,25 @@ class _Driver:
 
 def test_match_seed_entities_grounds_injected_mentions() -> None:
     idx = _index([{"name": "Trương Định", "norm_name": "trương định", "source_count": 3}])
-    seeds = G.match_seed_entities("", seed_mentions=["Trương Định"], limit=5, index=idx)
+    seeds = G.match_seed_entities(["Trương Định"], limit=5, index=idx)
     assert [s.info.norm_name for s in seeds] == ["trương định"]
 
 
-def test_match_seed_entities_token_match_when_mentions_none() -> None:
+def test_match_seed_entities_empty_when_no_mention() -> None:
+    """Không còn dò tên từ chuỗi câu hỏi: rỗng vào -> rỗng ra, graph tắt cho query đó."""
     idx = _index([{"name": "Trương Định", "norm_name": "trương định", "source_count": 3}])
-    seeds = G.match_seed_entities(
-        "vai trò của Trương Định là gì", seed_mentions=None, limit=5, index=idx
-    )
-    assert [s.info.norm_name for s in seeds] == ["trương định"]
+    assert G.match_seed_entities([], limit=5, index=idx) == []
 
 
 def test_match_seed_entities_drops_single_token_hub_seed() -> None:
     idx = _index([{"name": "Pháp", "norm_name": "pháp", "source_count": 500}])
-    seeds = G.match_seed_entities("", seed_mentions=["Pháp"], limit=5, index=idx)
+    seeds = G.match_seed_entities(["Pháp"], limit=5, index=idx)
     assert seeds == []  # 1 từ + source_count cao -> hub, bỏ
 
 
 def test_match_seed_entities_keeps_multiword_even_if_high_count() -> None:
     idx = _index([{"name": "Quân Pháp", "norm_name": "quân pháp", "source_count": 500}])
-    seeds = G.match_seed_entities("", seed_mentions=["Quân Pháp"], limit=5, index=idx)
+    seeds = G.match_seed_entities(["Quân Pháp"], limit=5, index=idx)
     assert [s.info.norm_name for s in seeds] == ["quân pháp"]
 
 
@@ -112,10 +110,7 @@ def _pbc_records():
 def test_search_graph_returns_candidates_and_graph_context() -> None:
     idx = _index([{"name": "Phan Bội Châu", "norm_name": "phan bội châu", "source_count": 10}])
     cands, ctx = G.search_graph(
-        "Phan Bội Châu liên quan gì đến Cường Để?",
-        seed_mentions=["Phan Bội Châu"],
-        driver=_Driver(_pbc_records()),
-        index=idx,
+        ["Phan Bội Châu"], driver=_Driver(_pbc_records()), index=idx
     )
     assert {c.chunk_id for c in cands} == {"c-1", "c-2", "c-3"}
     # c-2 vừa là seed chunk vừa là edge chunk -> điểm cao nhất.
@@ -151,12 +146,7 @@ def _hue_records():
 def test_search_graph_relation_direction_follows_true_edge_not_seed() -> None:
     # Seed là TARGET của cạnh -> KHÔNG được render ngược thành source.
     idx = _index([{"name": "Trương Định", "norm_name": "trương định", "source_count": 5}])
-    _, ctx = G.search_graph(
-        "ai phong chức cho Trương Định",
-        seed_mentions=["Trương Định"],
-        driver=_Driver(_hue_records()),
-        index=idx,
-    )
+    _, ctx = G.search_graph(["Trương Định"], driver=_Driver(_hue_records()), index=idx)
     rel = next(i for i in ctx if i.kind == "relation")
     assert rel.source_norm == "triều đình huế"  # hướng thật, không phải seed
     assert rel.source_name == "Triều đình Huế"
@@ -167,7 +157,7 @@ def test_search_graph_relation_direction_follows_true_edge_not_seed() -> None:
 def test_search_graph_relation_keeps_structured_source_keyword_target() -> None:
     idx = _index([{"name": "Phan Bội Châu", "norm_name": "phan bội châu", "source_count": 10}])
     _, ctx = G.search_graph(
-        "x", seed_mentions=["Phan Bội Châu"], driver=_Driver(_pbc_records()), index=idx
+        ["Phan Bội Châu"], driver=_Driver(_pbc_records()), index=idx
     )
     rel = next(i for i in ctx if i.kind == "relation")
     assert rel.source_norm == "phan bội châu"
@@ -181,7 +171,7 @@ def test_search_graph_relation_keeps_structured_source_keyword_target() -> None:
 def test_search_graph_collects_descriptions_into_context() -> None:
     idx = _index([{"name": "Phan Bội Châu", "norm_name": "phan bội châu", "source_count": 10}])
     _, ctx = G.search_graph(
-        "x", seed_mentions=["Phan Bội Châu"], driver=_Driver(_pbc_records()), index=idx
+        ["Phan Bội Châu"], driver=_Driver(_pbc_records()), index=idx
     )
     entity = next(i for i in ctx if i.kind == "entity")
     assert "nhà cách mạng" in entity.description
@@ -191,12 +181,7 @@ def test_search_graph_collects_descriptions_into_context() -> None:
 
 def test_search_graph_empty_when_no_seed() -> None:
     idx = _index([])
-    cands, ctx = G.search_graph(
-        "câu hỏi không có thực thể nào trong KG",
-        seed_mentions=["Thực Thể Lạ"],
-        driver=_Driver({}),
-        index=idx,
-    )
+    cands, ctx = G.search_graph(["Thực Thể Lạ"], driver=_Driver({}), index=idx)
     assert cands == [] and ctx == []
 
 
@@ -214,7 +199,7 @@ def test_search_graph_caps_chunks_per_seed(monkeypatch) -> None:
     )
     idx = _index([{"name": "Phan Bội Châu", "norm_name": "phan bội châu", "source_count": 10}])
     cands, _ = G.search_graph(
-        "x", seed_mentions=["Phan Bội Châu"], driver=_Driver(_pbc_records()), index=idx
+        ["Phan Bội Châu"], driver=_Driver(_pbc_records()), index=idx
     )
     assert len(cands) == 1  # cap chặn bùng nổ chunk per seed
 
@@ -270,8 +255,7 @@ def _path_between_two():
 def test_search_graph_pathfinding_two_seeds_links_entities() -> None:
     idx = _two_seed_index()
     cands, ctx = G.search_graph(
-        "Quan hệ giữa Phan Bội Châu và Phan Châu Trinh?",
-        seed_mentions=["Phan Bội Châu", "Phan Châu Trinh"],
+        ["Phan Bội Châu", "Phan Châu Trinh"],
         driver=_Driver(_expand_two_seeds(), _path_between_two()),
         index=idx,
     )
@@ -289,8 +273,7 @@ def test_search_graph_pathfinding_two_seeds_links_entities() -> None:
 def test_search_graph_no_path_skips_pair() -> None:
     idx = _two_seed_index()
     cands, ctx = G.search_graph(
-        "x",
-        seed_mentions=["Phan Bội Châu", "Phan Châu Trinh"],
+        ["Phan Bội Châu", "Phan Châu Trinh"],
         driver=_Driver(_expand_two_seeds(), {}),  # không có đường nối
         index=idx,
     )
@@ -301,7 +284,7 @@ def test_search_graph_no_path_skips_pair() -> None:
 def test_search_graph_single_seed_skips_pathfinding() -> None:
     idx = _index([{"name": "Phan Bội Châu", "norm_name": "phan bội châu", "source_count": 10}])
     drv = _Driver(_pbc_records())
-    G.search_graph("x", seed_mentions=["Phan Bội Châu"], driver=drv, index=idx)
+    G.search_graph(["Phan Bội Châu"], driver=drv, index=idx)
     assert drv.session_obj.path_calls == 0  # 1 seed -> KHÔNG gọi path cypher
 
 

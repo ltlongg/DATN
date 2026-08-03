@@ -2,13 +2,15 @@
 
 `search_graph` (sync, Neo4j) chạy trong `to_thread` để không chẹn event loop. Trả CẢ
 `chunks` (provenance) LẪN `graph_context` (content đã chưng cất từ KG, đưa thẳng cho LLM).
-`seed_mentions` injectable: caller (orchestrator) truyền mention từ LLM; None -> search_graph
-tự token-match. Không match seed -> empty result (KHÔNG raise).
+`seed_mentions` do caller (orchestrator) truyền vào từ node `plan` — rỗng thì graph không có
+gì để bắt đầu nên trả empty result (KHÔNG raise). `query` chỉ còn dùng để gắn vào
+`RetrievalResult`; phần graph không đọc nó nữa.
 """
 
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Sequence
 
 from app.schemas.retrieval import RetrievalBackendError, RetrievalResult, RetrievedChunk
 from app.tools.graph_rag.chunk_store import get_rag_chunks_by_ids
@@ -20,7 +22,7 @@ __all__ = ["retrieve_graph"]
 async def retrieve_graph(
     query: str,
     *,
-    seed_mentions: list[str] | None = None,
+    seed_mentions: Sequence[str] = (),
     graph_top_k: int | None = None,
     graph_max_seed_entities: int | None = None,
     graph_max_chunks_per_seed: int | None = None,
@@ -33,8 +35,7 @@ async def retrieve_graph(
     try:
         candidates, graph_context = await asyncio.to_thread(
             search_graph,
-            query,
-            seed_mentions=seed_mentions,
+            seed_mentions,
             top_k=graph_top_k,
             max_seed_entities=graph_max_seed_entities,
             max_chunks_per_seed=graph_max_chunks_per_seed,

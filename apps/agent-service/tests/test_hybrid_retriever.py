@@ -55,7 +55,7 @@ def _patch(
             raise bm25_err
         return bm25 or []
 
-    def fake_graph(query, *, seed_mentions=None, **kw):
+    def fake_graph(seed_mentions, **kw):
         if graph_err:
             raise graph_err
         return graph if graph is not None else ([], [])
@@ -255,9 +255,8 @@ async def test_hybrid_forwards_tuning_to_candidate_sources(monkeypatch) -> None:
         return []
 
     def fake_graph(
-        query,
+        seed_mentions,
         *,
-        seed_mentions=None,
         top_k=None,
         max_seed_entities=None,
         max_chunks_per_seed=None,

@@ -1,13 +1,13 @@
 """Grounding query-side: map mention/cụm trong câu hỏi -> node `:Entity` thật trong KG.
 
-Hai việc:
-- **Bước B — grounding (LUÔN dùng)**: `ground(mention)` đi qua `resolve()` (normalize giữ
-  dấu + tra alias_map) rồi tra inverted-index `by_norm` -> đối xứng tuyệt đối với lúc
-  index (`graph_store.merge_graph` cũng resolve trước khi tạo khóa). KHÔNG bắn Cypher
-  exact-match từng cụm.
-- **Bước A chiến lược 2 — token-match fallback**: `token_match(query)` tách câu hỏi thành
-  token, sinh các cụm liên tiếp (dài trước), ground từng cụm; cụm dài nuốt cụm ngắn lồng
-  trong nó. Dùng khi caller không truyền `seed_mentions` (LLM ở chiến lược 1).
+Đúng một việc: `ground(mention)` đi qua `resolve()` (normalize giữ dấu + tra alias_map) rồi
+tra inverted-index `by_norm` -> đối xứng tuyệt đối với lúc index (`graph_store.merge_graph`
+cũng resolve trước khi tạo khóa). KHÔNG bắn Cypher exact-match từng cụm.
+
+Mention để ground đến từ ĐÚNG một nguồn: `entities` do node `plan` trích (đã qua guard ở
+`orchestrator/planning.py`). Bản trước còn `token_match(query)` dò tên bằng cách tách chuỗi
+query thành cụm rồi ground thử — đã XOÁ: nó chạy chính khi guard vừa loại sạch entity, tức
+âm thầm gỡ lại đúng thứ guard vừa chặn, theo một luật không ai kiểm soát được.
 
 Index nạp toàn bộ `norm_name`/`name`/`source_count` của `:Entity` từ Neo4j (KG nhỏ).
 Cache ra `dataset/entity_index.json` kèm version stamp; rebuild khi `alias_map.json` hoặc
@@ -19,7 +19,6 @@ from __future__ import annotations
 import json
 import logging
 import os
-import re
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -43,9 +42,6 @@ log = logging.getLogger(__name__)
 
 _REPO_ROOT = Path(__file__).resolve().parents[5]
 _DEFAULT_CACHE = _REPO_ROOT / "dataset" / "entity_index.json"
-
-# Token = chuỗi chữ/số (\w khớp cả chữ tiếng Việt có dấu); bỏ dấu câu (?,.…).
-_TOKEN_RE = re.compile(r"\w+", re.UNICODE)
 
 # Cypher nạp toàn bộ entity (KG vài nghìn node). source_count = độ "hub" để guard.
 _LOAD_ENTITIES = """
@@ -107,27 +103,6 @@ class EntityIndex:
         """Map một mention -> EntityInfo qua resolve() (giữ dấu). None nếu không có node."""
         _, norm = resolve(mention)
         return self.by_norm.get(norm)
-
-    def token_match(self, query: str, *, limit: int) -> list[EntityInfo]:
-        """Tách query -> cụm liên tiếp, ground; cụm dài hơn nuốt cụm ngắn lồng bên trong."""
-        tokens = _TOKEN_RE.findall(query)
-        n = len(tokens)
-        if n == 0:
-            return []
-        covered = [False] * n
-        hits: list[tuple[int, EntityInfo]] = []
-        for span_len in range(n, 0, -1):  # cụm dài trước
-            for start in range(0, n - span_len + 1):
-                if any(covered[start : start + span_len]):
-                    continue
-                phrase = " ".join(tokens[start : start + span_len])
-                info = self.ground(phrase)
-                if info is not None:
-                    hits.append((start, info))
-                    for i in range(start, start + span_len):
-                        covered[i] = True
-        hits.sort(key=lambda h: h[0])  # theo thứ tự xuất hiện trong câu
-        return [info for _, info in hits][:limit]
 
     def to_cache_dict(self) -> dict[str, Any]:
         return {

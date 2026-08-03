@@ -1,5 +1,5 @@
-"""Test entity_index: grounding qua resolve() (giữ dấu), token-match fallback ưu tiên
-cụm dài, và cache version (rebuild khi alias_map/KG đổi).
+"""Test entity_index: grounding qua resolve() (giữ dấu) và cache version (rebuild khi
+alias_map/KG đổi).
 
 Tất cả in-memory / fake driver — không chạm Neo4j thật (chính là điều grounding phải
 đạt: tra inverted-index, KHÔNG bắn Cypher exact-match từng cụm).
@@ -58,33 +58,6 @@ def test_grounding_uses_inverted_index_not_per_phrase_cypher() -> None:
     # -> chứng tỏ không bắn Cypher exact-match cho từng cụm.
     idx = _index([{"name": "Đà Nẵng", "norm_name": "đà nẵng", "source_count": 3}])
     assert idx.ground("đà nẵng").norm_name == "đà nẵng"
-
-
-# --- Token-match fallback (bước A chiến lược 2) ---------------------------
-
-
-def test_token_match_prefers_longer_contiguous_span() -> None:
-    idx = _index(
-        [
-            {"name": "Điện Biên Phủ", "norm_name": "điện biên phủ", "source_count": 4},
-            {"name": "Điện Biên", "norm_name": "điện biên", "source_count": 2},
-        ]
-    )
-    got = idx.token_match("Chiến dịch Điện Biên Phủ năm 1954", limit=5)
-    norms = [e.norm_name for e in got]
-    assert "điện biên phủ" in norms
-    assert "điện biên" not in norms  # cụm ngắn bị cụm dài hơn nuốt
-
-
-def test_token_match_strips_punctuation_and_matches() -> None:
-    idx = _index([{"name": "Cường Để", "norm_name": "cường để", "source_count": 2}])
-    got = idx.token_match("Phan Bội Châu liên quan gì đến Cường Để?", limit=5)
-    assert [e.norm_name for e in got] == ["cường để"]
-
-
-def test_token_match_empty_when_no_entity_in_query() -> None:
-    idx = _index([{"name": "Trương Định", "norm_name": "trương định", "source_count": 5}])
-    assert idx.token_match("hôm nay trời rất đẹp", limit=5) == []
 
 
 # --- Build từ Neo4j (fake driver) ----------------------------------------

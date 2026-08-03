@@ -18,6 +18,7 @@ PROVENANCE, gọi được ở citation nhưng người gọi nên loại khỏi
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Sequence
 
 from app.core.config import get_settings
 from app.core.reranker import rerank
@@ -57,8 +58,7 @@ async def _bm25_candidates(
 
 
 async def _graph_candidates(
-    question: str,
-    seed_mentions: list[str] | None,
+    seed_mentions: Sequence[str],
     *,
     top_k: int | None,
     max_seed_entities: int | None,
@@ -71,8 +71,7 @@ async def _graph_candidates(
     try:
         candidates, context = await asyncio.to_thread(
             search_graph,
-            question,
-            seed_mentions=seed_mentions,
+            seed_mentions,
             top_k=top_k,
             max_seed_entities=max_seed_entities,
             max_chunks_per_seed=max_chunks_per_seed,
@@ -91,7 +90,7 @@ async def _graph_candidates(
 async def retrieve_hybrid(
     question: str,
     *,
-    seed_mentions: list[str] | None = None,
+    seed_mentions: Sequence[str] = (),
     rag_top_k: int | None = None,
     graph_top_k: int | None = None,
     hybrid_candidate_k: int | None = None,
@@ -122,7 +121,6 @@ async def retrieve_hybrid(
         _vector_candidates(question, top_k=rag_top_k),
         _bm25_candidates(question, top_k=bm25_top_k),
         _graph_candidates(
-            question,
             seed_mentions,
             top_k=graph_top_k,
             max_seed_entities=graph_max_seed_entities,
