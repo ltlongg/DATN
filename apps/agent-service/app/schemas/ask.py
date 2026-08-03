@@ -84,9 +84,10 @@ class StepQuery(BaseModel):
     """Một truy vấn chạy độc lập. Nhiều StepQuery trong cùng bước -> chạy SONG SONG."""
 
     query: str
-    # Seed cho mode hybrid. LUẬT: chỉ tên riêng xuất hiện NGUYÊN VĂN trong câu hỏi hiện tại
-    # (không lấy từ history, không lấy từ kiến thức nội tại của model). Cưỡng chế bằng code ở
-    # `orchestrator/planning.py`, không chỉ bằng prompt.
+    # Seed cho mode hybrid/graph, và là nguồn seed DUY NHẤT (không còn fallback token-match).
+    # LUẬT: chỉ tên riêng xuất hiện NGUYÊN VĂN trong `standalone_query` — câu ĐÃ VIẾT LẠI, nên
+    # tên model điền vào lúc thay đại từ là hợp lệ, còn tên nó tự nhớ ra thì không. Cưỡng chế
+    # bằng code ở `orchestrator/planning.py`, không chỉ bằng prompt.
     entities: list[str] = Field(default_factory=list)
 
 
@@ -114,9 +115,10 @@ class PlanOutput(BaseModel):
     `standalone_query`, tức hành vi y hệt trước khi có multi-query.
 
     THỨ TỰ FIELD CÓ Ý NGHĨA: Structured Outputs sinh JSON theo thứ tự property của schema, mà
-    prompt v6 bắt chọn `selected_mode` theo `mentioned_entities` — entity phải được viết ra
-    TRƯỚC thì model mới "thấy" nó lúc chọn mode. Đảo hai field là prompt nói dối model mà
-    không có gì báo lỗi; `test_mentioned_entities_generated_before_selected_mode` khoá lại.
+    prompt v6 bắt trích `mentioned_entities` và chọn `selected_mode` bằng cách ĐỌC LẠI
+    `standalone_query` — câu viết lại phải ra TRƯỚC thì model mới "thấy" nó ở hai bước sau.
+    Đảo thứ tự là prompt nói dối model mà không có gì báo lỗi;
+    `test_standalone_query_generated_before_entities_and_mode` khoá lại.
     """
 
     standalone_query: str

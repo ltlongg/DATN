@@ -4,12 +4,20 @@ Tách khỏi `nodes.py` để test được không cần mock gì. Nguyên tắc
 output LLM** — sai luật thì hạ về phương án đơn giản hơn (bỏ bước phụ thuộc, hoặc 1 bước 1
 query từ `standalone_query`) kèm warning, thà chạy đơn giản còn hơn chạy sai.
 
-Luật `entities` (docs/plan/agentic-retrieval-loop-plan.md §2.1) cưỡng chế TẠI ĐÂY chứ không
-chỉ bằng prompt: chỉ giữ tên riêng xuất hiện NGUYÊN VĂN trong câu hỏi hiện tại. Không lấy từ
-lịch sử hội thoại, không lấy từ kiến thức nội tại của model — model nhớ sai tên thì seed sai
-đi thẳng vào graph mà không ai biết. Ngoại lệ DUY NHẤT là placeholder `<N>`: nó chưa có giá
-trị lúc plan chạy, và giá trị điền vào sau này đến từ chunk đã truy hồi chứ không từ trí nhớ
-model.
+Luật `entities` cưỡng chế TẠI ĐÂY chứ không chỉ bằng prompt: chỉ giữ tên riêng xuất hiện
+NGUYÊN VĂN trong `standalone_query` — CÂU ĐÃ VIẾT LẠI, không phải câu người dùng vừa gõ.
+Mốc là câu viết lại vì nó mới là câu cả lượt tin dùng: nó là `[CÂU HỎI]` của prompt
+synthesize, là câu hỏi của `resolve`, và là gốc của mọi truy vấn đem đi tìm. Bắt seed graph
+phải khớp câu hỏi gốc trong khi ba đường kia đã đi theo câu viết lại chỉ khoá được một cửa
+trong bốn, mà cái giá là câu nối tiếp ("ông ấy hy sinh năm nào?") mất sạch seed đúng lúc đã
+biết chắc "ông ấy" là ai. Guard vẫn còn nguyên tác dụng: tên model tự nhớ ra mà không viết
+vào `standalone_query` thì vẫn bị loại. Ngoại lệ DUY NHẤT là placeholder `<N>`: nó chưa có
+giá trị lúc plan chạy, và giá trị điền vào sau này đến từ chunk đã truy hồi chứ không từ trí
+nhớ model.
+
+Từ khi bỏ fallback token-match (`entity_index.token_match`), danh sách này là NGUỒN SEED DUY
+NHẤT của graph: rỗng nghĩa là graph tắt cho query đó, chứ không còn ai dò tên từ chuỗi query
+nữa.
 
 Module này cũng là nơi ĐỊNH NGHĨA cú pháp placeholder (`<N>`) — cả bên kiểm (plan-time) lẫn
 bên điền (`fill_placeholders`, execute-time trong node `retrieve`) đều đọc từ đây, để không
@@ -48,8 +56,8 @@ def _placeholder_ids(step: PlanStep) -> set[int]:
     return found
 
 
-def _keep_grounded_entities(entities: list[str], *, folded_question: str) -> list[str]:
-    """Giữ entity xuất hiện nguyên văn trong câu hỏi (hoặc placeholder); bỏ phần còn lại."""
+def _keep_grounded_entities(entities: list[str], *, folded_standalone: str) -> list[str]:
+    """Giữ entity có nguyên văn trong câu ĐÃ VIẾT LẠI (hoặc placeholder); bỏ phần còn lại."""
     kept: list[str] = []
     seen: set[str] = set()
     for raw in entities:
@@ -57,7 +65,7 @@ def _keep_grounded_entities(entities: list[str], *, folded_question: str) -> lis
         folded = _fold(name)
         if not folded or folded in seen:
             continue
-        if not _PLACEHOLDER_RE.fullmatch(name) and folded not in folded_question:
+        if not _PLACEHOLDER_RE.fullmatch(name) and folded not in folded_standalone:
             continue
         seen.add(folded)
         kept.append(name)
@@ -67,7 +75,7 @@ def _keep_grounded_entities(entities: list[str], *, folded_question: str) -> lis
 def _clean_queries(
     queries: list[StepQuery],
     *,
-    folded_question: str,
+    folded_standalone: str,
     global_entities: list[str],
     max_queries: int,
 ) -> tuple[list[StepQuery], int]:
@@ -81,7 +89,7 @@ def _clean_queries(
         text = item.query.strip()
         if not text:
             continue
-        grounded = _keep_grounded_entities(item.entities, folded_question=folded_question)
+        grounded = _keep_grounded_entities(item.entities, folded_standalone=folded_standalone)
         dropped += len(item.entities) - len(grounded)
         # Seed toàn cục (`mentioned_entities`) union vào MỌI query — chúng đã qua cùng guard.
         merged = list(dict.fromkeys([*grounded, *global_entities]))
@@ -183,10 +191,10 @@ def normalize_plan(
     """
     warnings: list[str] = []
     standalone = parsed.standalone_query.strip() or question
-    folded_question = _fold(question)
+    folded_standalone = _fold(standalone)
 
     global_entities = _keep_grounded_entities(
-        parsed.mentioned_entities, folded_question=folded_question
+        parsed.mentioned_entities, folded_standalone=folded_standalone
     )
     dropped = len(parsed.mentioned_entities) - len(global_entities)
 
@@ -194,7 +202,7 @@ def normalize_plan(
     for step in parsed.steps[:max_steps]:
         queries, step_dropped = _clean_queries(
             step.queries,
-            folded_question=folded_question,
+            folded_standalone=folded_standalone,
             global_entities=global_entities,
             max_queries=max_queries_per_step,
         )
@@ -236,7 +244,7 @@ def normalize_plan(
         ]
     if dropped:
         warnings.append(
-            f"loại {dropped} entity không có nguyên văn trong câu hỏi (luật seed §2.1)."
+            f"loại {dropped} entity không có nguyên văn trong câu hỏi đã viết lại."
         )
     return standalone, steps, warnings
 

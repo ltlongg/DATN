@@ -2,7 +2,7 @@
 
 Phủ mọi nhánh: route (needs_retrieval/ambiguous/out_of_scope/smalltalk), has_context
 (empty -> honest), citation build từ used_chunk_ids (TẠM BỎ validate/retry, xem
-nodes.py::build_visualization), seed handoff (luật §2.1), visualization (ok/error), `plan`
+nodes.py::build_visualization), seed handoff (guard entity), visualization (ok/error), `plan`
 fallback.
 """
 
@@ -399,34 +399,44 @@ async def test_citation_carries_quote_from_chunk_text(monkeypatch) -> None:
     assert resp.citations[0].quote == "text c-1"
 
 
-# --- seed handoff + luật entity §2.1 ---
+# --- seed handoff + guard entity (mốc = câu đã viết lại) ---
 
 
-async def test_seed_from_question_passed_to_retrieve(monkeypatch) -> None:
-    _patch_plan(monkeypatch, route="needs_retrieval", entities=["Trương Định"])
+async def test_seed_from_standalone_passed_to_retrieve(monkeypatch) -> None:
+    """Câu người dùng gõ chỉ có đại từ; tên nằm ở câu viết lại -> seed vẫn xuống retrieve."""
+    _patch_plan(
+        monkeypatch,
+        route="needs_retrieval",
+        entities=["Trương Định"],
+        standalone="Trương Định làm gì?",
+    )
     capture: dict = {}
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]), capture=capture)
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch)
-    await run_ask(AskRequest(question="Trương Định làm gì?", stream=False))
-    assert capture["seed_mentions"] == ["Trương Định"]  # có nguyên văn trong câu hỏi -> giữ
-    assert capture["question"] == "standalone q"  # dùng standalone_query đã rewrite
+    await run_ask(AskRequest(question="Ông ấy làm gì?", stream=False))
+    assert capture["seed_mentions"] == ["Trương Định"]
+    assert capture["question"] == "Trương Định làm gì?"  # dùng standalone_query đã rewrite
 
 
-async def test_seed_not_in_question_is_dropped_and_passed_as_none(monkeypatch) -> None:
-    """Luật §2.1: entity không có NGUYÊN VĂN trong câu hỏi hiện tại thì loại — kể cả khi
-    LLM suy ra đúng từ lịch sử hội thoại.
+async def test_seed_not_in_standalone_is_dropped_and_graph_disabled(monkeypatch) -> None:
+    """Guard vẫn loại tên model tự nhớ ra: nó không có mặt trong câu viết lại.
 
-    Và phải truyền `None` chứ KHÔNG phải `[]`: `match_seed_entities` coi `[]` là "có danh
-    sách seed và nó rỗng" -> tắt graph hẳn, còn `None` mới bật fallback token-match từ query.
+    Xuống retrieve là `[]` chứ không phải `None`: từ khi bỏ token-match, không còn nghĩa
+    "để graph tự dò tên từ chuỗi query" nào để phân biệt hai giá trị đó.
     """
-    _patch_plan(monkeypatch, route="needs_retrieval", entities=["Trương Định"])
+    _patch_plan(
+        monkeypatch,
+        route="needs_retrieval",
+        entities=["Trương Định"],
+        standalone="Ông ấy làm gì?",
+    )
     capture: dict = {}
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]), capture=capture)
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch)
     resp = await run_ask(AskRequest(question="Ông ấy làm gì?", stream=False))
-    assert capture["seed_mentions"] is None
+    assert capture["seed_mentions"] == []
     assert any("entity" in w for w in resp.warnings)  # loại phải có warning, không im lặng
 
 
@@ -484,7 +494,7 @@ async def test_plan_llm_error_falls_back_to_needs_retrieval(monkeypatch) -> None
     resp = await run_ask(AskRequest(question="Trương Định là ai?", stream=False))
     # fallback: 1 bước 1 query = câu hỏi raw, không seed, route needs_retrieval
     assert capture["question"] == "Trương Định là ai?"
-    assert capture["seed_mentions"] is None
+    assert capture["seed_mentions"] == []
     assert any("plan" in w for w in resp.warnings)
 
 
@@ -761,6 +771,7 @@ async def test_multihop_fills_placeholder_from_resolved_link(monkeypatch) -> Non
         steps=_multihop_steps(),
         resolve=[_resolved()],
         entities=["Bắc Sơn"],
+        standalone=MULTIHOP_QUESTION,
     )
     capture: dict = {}
     _patch_retrieve(

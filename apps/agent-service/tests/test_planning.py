@@ -1,4 +1,4 @@
-"""Test `orchestrator/planning.py` — chuẩn hoá todo list + guard entity (§2.1). Thuần, không mock."""
+"""Test `orchestrator/planning.py` — chuẩn hoá todo list + guard entity. Thuần, không mock."""
 
 from __future__ import annotations
 
@@ -25,16 +25,18 @@ def _norm(parsed: PlanOutput, question: str, *, max_steps=2, max_queries=4):
 # --- thứ tự field PlanOutput: prompt `plan` dựa vào nó ---
 
 
-def test_mentioned_entities_generated_before_selected_mode() -> None:
-    """`mentioned_entities` PHẢI đứng trước `selected_mode` trong schema.
+def test_standalone_query_generated_before_entities_and_mode() -> None:
+    """`standalone_query` PHẢI đứng trước `mentioned_entities` VÀ `selected_mode`.
 
-    Prompt v6 bắt chọn mode theo `mentioned_entities` ("ở trên"). Structured Outputs sinh
-    JSON theo đúng thứ tự property của schema, mà thứ tự đó = thứ tự khai báo field ở đây —
-    nên model chỉ "thấy" được entity nếu nó đã viết ra trước. Đảo hai field này là prompt nói
-    dối model mà KHÔNG có gì khác báo lỗi: output vẫn hợp lệ, mode chỉ âm thầm kém đi.
+    Prompt bắt model đọc chính câu nó vừa viết lại để trích entity và chọn mode. Structured
+    Outputs sinh JSON theo đúng thứ tự property của schema, mà thứ tự đó = thứ tự khai báo
+    field ở đây — nên hai trường sau chỉ "thấy" được câu viết lại nếu nó đã ra trước. Đảo thứ
+    tự là prompt nói dối model mà KHÔNG có gì khác báo lỗi: output vẫn hợp lệ, seed và mode
+    chỉ âm thầm kém đi.
     """
     order = list(PlanOutput.model_fields)
-    assert order.index("mentioned_entities") < order.index("selected_mode")
+    assert order.index("standalone_query") < order.index("mentioned_entities")
+    assert order.index("standalone_query") < order.index("selected_mode")
 
 
 # --- fallback: steps rỗng -> 1 bước từ standalone_query ---
@@ -61,33 +63,58 @@ def test_step_with_only_blank_queries_falls_back() -> None:
     assert [q.query for q in steps[0].queries] == ["standalone q"]
 
 
-# --- guard entity: chỉ giữ tên có NGUYÊN VĂN trong câu hỏi hiện tại ---
+# --- guard entity: chỉ giữ tên có NGUYÊN VĂN trong câu ĐÃ VIẾT LẠI ---
 
 
-def test_entity_present_in_question_is_kept() -> None:
-    parsed = _out(mentioned_entities=["Trương Định"])
+def test_entity_present_in_standalone_is_kept() -> None:
+    parsed = _out(
+        standalone_query="Trương Định hy sinh năm nào?",
+        mentioned_entities=["Trương Định"],
+    )
     _, steps, warnings = _norm(parsed, "Trương Định hy sinh năm nào?")
     assert steps[0].queries[0].entities == ["Trương Định"]
     assert warnings == []
 
 
-def test_entity_absent_from_question_is_dropped_with_warning() -> None:
-    # Ca kinh điển: LLM suy đúng từ history, nhưng luật §2.1 vẫn cấm.
-    parsed = _out(mentioned_entities=["Trương Định"])
+def test_entity_resolved_from_history_is_kept_when_written_into_standalone() -> None:
+    """Ca ĐẢO CHIỀU so với luật cũ, và là lý do đổi mốc.
+
+    "Ông ấy hy sinh năm nào?" được viết lại thành "Trương Định hy sinh năm nào?" -> tên đó là
+    seed HỢP LỆ dù câu người dùng gõ không hề có. Luật cũ (mốc = câu gốc) loại nó, và từ khi
+    bỏ fallback token-match thì loại ở đây là mất seed hẳn chứ không còn ai gỡ lại.
+    """
+    parsed = _out(
+        standalone_query="Trương Định hy sinh năm nào?",
+        mentioned_entities=["Trương Định"],
+    )
+    _, steps, warnings = _norm(parsed, "Ông ấy hy sinh năm nào?")
+    assert steps[0].queries[0].entities == ["Trương Định"]
+    assert warnings == []
+
+
+def test_entity_absent_from_standalone_is_dropped_with_warning() -> None:
+    """Guard KHÔNG bị gỡ, chỉ đổi mốc: tên không có trong câu viết lại vẫn bị loại."""
+    parsed = _out(standalone_query="Ông ấy làm gì?", mentioned_entities=["Trương Định"])
     _, steps, warnings = _norm(parsed, "Ông ấy làm gì?")
     assert steps[0].queries[0].entities == []
     assert any("entity" in w for w in warnings)
 
 
 def test_entity_matching_ignores_case_and_extra_space() -> None:
-    parsed = _out(mentioned_entities=["  trương   định  "])
+    parsed = _out(
+        standalone_query="Trương Định hy sinh năm nào?",
+        mentioned_entities=["  trương   định  "],
+    )
     _, steps, _ = _norm(parsed, "Trương Định hy sinh năm nào?")
     assert steps[0].queries[0].entities == ["trương   định"]
 
 
 def test_entity_matching_keeps_vietnamese_diacritics_strict() -> None:
     """CỐ Ý không bỏ dấu: "Truong Dinh" KHÔNG được coi là khớp "Trương Định"."""
-    parsed = _out(mentioned_entities=["Truong Dinh"])
+    parsed = _out(
+        standalone_query="Trương Định hy sinh năm nào?",
+        mentioned_entities=["Truong Dinh"],
+    )
     _, steps, _ = _norm(parsed, "Trương Định hy sinh năm nào?")
     assert steps[0].queries[0].entities == []
 
@@ -95,6 +122,7 @@ def test_entity_matching_keeps_vietnamese_diacritics_strict() -> None:
 def test_model_invented_entity_is_dropped() -> None:
     """Câu hỏi nhắc "Yên Thế" nhưng không nhắc "Đề Thám" -> tên model tự thêm bị loại."""
     parsed = _out(
+        standalone_query="Nghĩa quân Yên Thế đình chiến mấy lần?",
         steps=[
             PlanStep(
                 id=1,
@@ -110,6 +138,7 @@ def test_model_invented_entity_is_dropped() -> None:
 
 def test_global_entities_union_into_every_query() -> None:
     parsed = _out(
+        standalone_query="Đề Nắm và Yên Thế?",
         mentioned_entities=["Yên Thế"],
         steps=[
             PlanStep(
@@ -129,6 +158,7 @@ def test_global_entities_union_into_every_query() -> None:
 
 def test_duplicate_entities_deduped_keeping_order() -> None:
     parsed = _out(
+        standalone_query="Yên Thế ra sao?",
         mentioned_entities=["Yên Thế"],
         steps=[
             PlanStep(
@@ -204,6 +234,7 @@ def _multihop(**overrides) -> PlanOutput:
             queries=[StepQuery(query="<1> giữ chức vụ gì", entities=["<1>"])],
         ),
     ]
+    overrides.setdefault("standalone_query", "Ai lãnh đạo Bắc Sơn về sau giữ chức gì?")
     return _out(steps=overrides.pop("steps", steps), **overrides)
 
 
@@ -218,7 +249,7 @@ def test_valid_multihop_plan_is_kept_intact() -> None:
 
 def test_placeholder_in_entities_survives_literal_guard() -> None:
     """`<1>` KHÔNG có nguyên văn trong câu hỏi nhưng vẫn phải giữ: nó được điền ở
-    execute-time. Guard §2.1 chỉ cấm tên model tự nghĩ ra, không cấm placeholder."""
+    execute-time. Guard chỉ cấm tên model tự nghĩ ra, không cấm placeholder."""
     _, steps, warnings = _norm(_multihop(), "Ai lãnh đạo Bắc Sơn về sau giữ chức gì?")
     assert steps[1].queries[0].entities == ["<1>"]
     assert warnings == []
@@ -230,7 +261,7 @@ def test_placeholder_in_first_step_downgrades_to_single_default_step() -> None:
         PlanStep(id=1, label="A", queries=[StepQuery(query="<1> là ai")]),
         PlanStep(id=2, label="B", queries=[StepQuery(query="q2")]),
     ]
-    _, out, warnings = _norm(_multihop(steps=steps), "hỏi")
+    _, out, warnings = _norm(_multihop(steps=steps, standalone_query="standalone q"), "hỏi")
     assert len(out) == 1
     assert out[0].label == DEFAULT_STEP_LABEL
     assert out[0].queries[0].query == "standalone q"

@@ -314,12 +314,11 @@ async def _retrieve_one(
 ) -> RetrievalResult:
     """Một lượt truy hồi cho MỘT query. Mỗi mode chỉ nhận subset knob của nó.
 
-    `seed_mentions` truyền None khi rỗng chứ KHÔNG truyền []: `match_seed_entities` phân biệt
-    hai thứ đó — None thì token-match từ chuỗi query (fallback tất định), còn [] là "có danh
-    sách seed và nó rỗng" nên graph tắt hẳn. Guard §2.1 lọc sạch entity là chuyện thường gặp,
-    không được biến nó thành tắt graph.
+    `item.entities` đi thẳng xuống làm `seed_mentions`, kể cả khi rỗng: rỗng nghĩa là câu hỏi
+    không có tên riêng nào ground được, và lúc đó graph không có gì để bắt đầu. Bản trước đổi
+    rỗng thành None để `match_seed_entities` dò tên từ chuỗi query — fallback đó đã bỏ.
     """
-    seeds = item.entities or None
+    seeds = item.entities
     if mode == "traditional":
         # traditional CỐ Ý không dùng seed_mentions (thiết kế: dense + BM25 thuần).
         return await retrieve_traditional(
