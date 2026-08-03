@@ -232,6 +232,37 @@ nhưng phải **quy mỗi event về chunk chứa bằng chứng**.
 - `orchestrator/` — LangGraph: `nodes.py` (plan → retrieve → synthesize → validate → visualization, ghi `llm_usage` kèm conversation_id/message_id, dùng `get_active_prompt` cho plan/synthesize), `guardrails.py` (`check_input` dùng `get_active_prompt("guardrails_input", ...)`), `runner.py` (`run_ask_stream`, emit event `debug` trước `done`), `state.py`, `synthesis.py`.
 - `tools/traditional_rag/`, `tools/hybrid/` — `retriever.py` mỗi thư mục; node `retrieve()` gọi thẳng `tools/hybrid/retriever.py::retrieve_hybrid`, set `retrieval_mode="hybrid"`.
 
+### Seed graph + chọn mode: mọi thứ quy về `standalone_query` (xong 2026-08-03, prompt `plan-v6`)
+Trước đây ba chỗ cùng trả lời "câu này nói về thực thể nào" nhưng nhìn ba văn bản khác nhau:
+mode chọn theo cảm nhận "câu có hỏi quan hệ không", `mentioned_entities` bị siết theo **câu
+người dùng gõ**, còn seed graph khi rỗng thì rơi sang token-match dò tên trong chuỗi `query`.
+Nay cả ba quy về **`standalone_query`** — câu chính model vừa viết lại.
+
+- **Guard entity đổi mốc, KHÔNG bị gỡ** (`orchestrator/planning.py::_keep_grounded_entities`):
+  giữ tên có nguyên văn trong `standalone_query`. Tên model điền vào lúc thay đại từ → hợp lệ
+  (trước bị loại); tên nó tự nhớ ra mà không viết vào câu đó → vẫn loại. Lý do đổi: ba đường
+  downstream (synthesize, resolve, mọi truy vấn tìm kiếm) vốn đã tin `standalone_query`, bắt
+  riêng đường seed khớp câu gốc chỉ khoá 1 cửa trong 4 mà giá là câu nối tiếp mất sạch seed.
+- **`selected_mode` chọn bằng cách ĐỌC LẠI `standalone_query`**: có tên riêng → `hybrid`, kể
+  cả câu rất đơn giản; không có tên riêng nào → `traditional`. Căn cứ duy nhất là có tên riêng
+  hay không, KHÔNG phải câu khó/dễ — vì `traditional` cố ý bỏ `seed_mentions`, chọn nó cho câu
+  có tên riêng là tự cắt nhánh graph.
+- **Fallback token-match đã XOÁ** (`EntityIndex.token_match` + `_TOKEN_RE`): nó chạy đúng lúc
+  guard vừa loại sạch tên, tức âm thầm gỡ lại thứ guard vừa chặn theo luật không ai kiểm soát.
+  Kéo theo `match_seed_entities`/`search_graph` **không còn nhận `query`** (graph không đọc
+  chuỗi câu hỏi dưới bất kỳ hình thức nào nữa, chỉ đi từ seed), và `retrieve` truyền thẳng
+  `[]` chứ không đổi thành `None`. `entities` rỗng = graph tắt cho query đó, một nghĩa duy nhất.
+- **Thứ tự field `PlanOutput` LÀ MỘT PHẦN CỦA PROMPT**: Structured Outputs sinh JSON theo thứ
+  tự khai báo, nên `standalone_query` phải đứng trước `mentioned_entities` + `selected_mode`
+  thì model mới "thấy" nó. Khoá bằng `test_standalone_query_generated_before_entities_and_mode`.
+- **Hệ quả chấp nhận**: với `auto`, `traditional` chỉ còn chạy cho câu không có tên riêng nào;
+  mode `graph` ép thủ công sẽ trả rỗng hợp lệ cho những câu đó; và `standalone_query` thành
+  điểm tin cậy DUY NHẤT của cả lượt — muốn nâng chất lượng thì sửa luật rewrite / few-shot /
+  ngưỡng `ambiguous`, đừng dựng thêm guard ở hạ nguồn.
+- Quyết định cũ ở `docs/plan/agentic-retrieval-loop-plan.md` §2.1 đã bị thay (có khối cảnh báo
+  ngay đầu mục đó); `retrieval-layer-plan.md` "Chiến lược 2" + `retrieval-modes-plan.md` C1 đã
+  ghi chú token-match không còn.
+
 ### Backend internal layout (`apps/backend/app/`)
 Cấu trúc theo lớp (KHÔNG dùng `modules/` như scaffold cũ; KHÔNG ORM/Alembic — psycopg
 tay + `CREATE TABLE IF NOT EXISTS`). Plan: `docs/plan/backend-plan.md`.

@@ -154,7 +154,8 @@ payload Qdrant (`actors`/`locations`). Soft, không hard-AND: `should` OR-gate h
 
 ### C1. Giữ nguyên (đang tốt)
 - Ground seed (`match_seed_entities`): LLM `seed_mentions` → fallback `token_match`; hub
-  guard; cap `graph_max_seed_entities`.
+  guard; cap `graph_max_seed_entities`. *(fallback `token_match` đã XOÁ 2026-08-03 — chỉ còn
+  seed từ LLM; xem `agentic-retrieval-loop-plan.md` §2.1.)*
 - Mỗi seed expand **1-hop** (`_EXPAND_SEED`) → entity + relation 1-hop làm `graph_context`,
   score chunk (`_SEED_HIT=2.0`, `_EDGE_HIT=1.0`, hub weight `0.25`, cap mỗi seed).
 

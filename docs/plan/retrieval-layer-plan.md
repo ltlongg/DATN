@@ -354,6 +354,13 @@ nếu `None` → tự fallback chiến lược deterministic.
   kháng chiến Nam Kỳ 1860?" không tên → để dense/vector lo, đừng ép LLM đoán → tránh bịa).
   Lý do né LLM trong plan gốc (sợ +1 call) **không còn**, vì gộp được vào call sẵn có.
 
+- 🔴 **Chiến lược 2 đã XOÁ khỏi code (2026-08-03)** — `EntityIndex.token_match` không còn, và
+  `match_seed_entities`/`search_graph` không còn nhận `query`. Lý do: nó chạy đúng lúc guard
+  entity vừa loại sạch tên, tức âm thầm gỡ lại thứ guard vừa chặn theo một luật không kiểm
+  soát được. Từ nay `entities` do node `plan` trích là nguồn seed duy nhất; rỗng = graph tắt
+  cho query đó. Đoạn mô tả dưới giữ làm bản ghi lịch sử. Xem `agentic-retrieval-loop-plan.md`
+  §2.1 (khối cảnh báo đầu mục).
+
 - **Chiến lược 2 — Token-match deterministic (FALLBACK + BASELINE eval).** Khi `seed_mentions`
   là `None` (retrieval chạy standalone, debug, hoặc LLM lỗi): tokenize question → tra
   inverted-index trực tiếp, ưu tiên cụm khớp **nhiều token liên tiếp** (vd "điện biên phủ").

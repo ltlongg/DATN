@@ -275,6 +275,18 @@ có nguồn, **nhưng vẫn giữ nguyên** luật cũ "kiến thức model tự
 đây và trong prompt §5. Tức: bảo model sinh ra, rồi viết code loại đi. **Vừa tốn token vừa
 đẻ warning vô nghĩa.** Chốt lại đúng MỘT luật cho cả hai chỗ.
 
+> 🔴 **§2.1 ĐÃ BỊ THAY (2026-08-03) — đọc phần dưới như bản ghi lịch sử, không phải luật đang
+> chạy.** Luật hiện hành: mốc đối chiếu `entities` là **`standalone_query`** (câu model vừa
+> viết lại) chứ không phải câu người dùng gõ, nên tên giải ra từ lịch sử hội thoại là **HỢP
+> LỆ** nếu đã viết vào câu đó. Kèm theo: **fallback token-match đã XOÁ** (`entity_index.
+> token_match` + tham số `query` của `match_seed_entities`/`search_graph` không còn), nên
+> `retrieve` truyền thẳng `[]` chứ không đổi thành `None` nữa, và `selected_mode` chọn theo
+> "trong `standalone_query` có tên riêng hay không". Lý do: ba đường downstream (synthesize,
+> resolve, mọi truy vấn tìm kiếm) vốn đã tin `standalone_query` — bắt riêng đường seed graph
+> khớp câu gốc chỉ khoá một cửa trong bốn, mà cái giá là câu nối tiếp mất sạch seed đúng lúc
+> đã biết chắc "ông ấy" là ai. Chi tiết: `app/orchestrator/planning.py` (docstring đầu module)
+> + `app/prompts/plan.py` (`plan-v6`).
+
 #### Luật (chốt 2026-07-31 lần 2)
 
 | Vế | Nguồn hợp lệ | Cưỡng chế |
