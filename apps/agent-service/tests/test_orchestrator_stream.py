@@ -140,6 +140,29 @@ async def test_done_summary_carries_confidence_and_mode(monkeypatch) -> None:
     assert done["retrieval_mode"] == "hybrid"
 
 
+async def test_insufficient_confidence_with_valid_citation_keeps_streamed_answer(
+    monkeypatch,
+) -> None:
+    """Self-reported confidence không được xoá answer đã có nguồn hợp lệ."""
+    _patch_plan(monkeypatch)
+    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
+    _patch_synthesize(
+        monkeypatch,
+        answer="Phần có căn cứ. Một lời lưu ý tự nhiên về phần còn thiếu.",
+        confidence="không đủ dữ liệu",
+    )
+    _patch_viz(monkeypatch)
+
+    events = await _collect(AskRequest(question="hỏi", stream=True))
+
+    assert "regenerating" not in [t for t, _ in events]
+    assert "".join(d["text"] for t, d in events if t == "token") == (
+        "Phần có căn cứ. Một lời lưu ý tự nhiên về phần còn thiếu."
+    )
+    done = next(d for t, d in events if t == "done")
+    assert done["confidence"] == "không đủ dữ liệu"
+
+
 async def test_clarify_emits_clarification_and_done_no_token(monkeypatch) -> None:
     _patch_plan(monkeypatch, route="ambiguous")
     events = await _collect(AskRequest(question="Ông ấy là ai?", stream=True))

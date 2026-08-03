@@ -789,11 +789,11 @@ async def validate_citations(state: AgentState, config: RunnableConfig) -> dict[
 def after_validate(state: AgentState) -> str:
     """Conditional edge — CHỈ ĐỌC state (không emit, không ghi).
 
-    Thứ tự nhánh có ý nghĩa: `confidence="không đủ dữ liệu"` là LLM tự khai không trả lời
-    được, soạn lại cũng vô ích nên đi honest luôn, không tốn lượt.
+    `confidence` là mức tự đánh giá của LLM, không phải kết quả kiểm chứng độc lập. Vì vậy
+    không dùng riêng giá trị `"không đủ dữ liệu"` để thu hồi một answer đã có nguồn hợp lệ;
+    prompt synthesize chịu trách nhiệm nói rõ phần thông tin còn thiếu ngay trong answer.
+    Citation vẫn là chốt an toàn: không còn id hợp lệ thì soạn lại, hết lượt mới đi honest.
     """
-    if state.get("confidence") == "không đủ dữ liệu":
-        return "honest_answer"
     if state.get("used_chunk_ids"):
         return "build_visualization"
     # 0 liên kết hợp lệ: còn lượt thì soạn lại, hết lượt thì thà nói chưa đủ dữ liệu còn hơn

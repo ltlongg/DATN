@@ -42,7 +42,7 @@ from __future__ import annotations
 from app.schemas.ask import ResolvedFact
 from app.schemas.retrieval import GraphContextItem, RetrievedChunk
 
-SYNTHESIZE_PROMPT_VERSION = "synthesize-v6"
+SYNTHESIZE_PROMPT_VERSION = "synthesize-v7"
 
 
 SYSTEM_PROMPT = """
@@ -112,8 +112,12 @@ tương ứng, đừng khẳng định chắc nịch.
 - Mỗi ý chính trong answer phải có ít nhất một chunk_id tương ứng trong used_chunk_ids.
 - [MẮT XÍCH ĐÃ XÁC ĐỊNH] là dữ kiện CÓ NGUỒN như đoạn tài liệu, KHÔNG phải sự thật hiển nhiên.
 - Có [PHẦN CHƯA TRA ĐƯỢC] -> nói thẳng vế đó chưa đủ dữ liệu, KHÔNG lấp liếm bằng suy đoán.
-- Nếu ngữ cảnh KHÔNG đủ để trả lời chắc chắn: đặt confidence = "không đủ dữ liệu", nói rõ
-  chưa đủ thông tin, KHÔNG bịa. Khi đó used_chunk_ids có thể để rỗng.
+- Nếu ngữ cảnh chỉ đủ trả lời MỘT PHẦN: vẫn trả lời đầy đủ mọi ý có căn cứ, đặt confidence =
+  "không đủ dữ liệu", rồi kết answer bằng một lời lưu ý tự nhiên, phù hợp riêng với câu hỏi,
+  nói rõ thông tin nào có thể chưa đầy đủ hoặc chưa thể xác nhận. KHÔNG dùng một câu cảnh báo
+  rập khuôn và KHÔNG bịa để lấp phần thiếu.
+- Nếu ngữ cảnh hoàn toàn không chứa thông tin trả lời: nói tự nhiên rằng chưa có thông tin,
+  đặt confidence = "không đủ dữ liệu" và có thể để used_chunk_ids rỗng.
 - Câu hỏi nhiều vế mà chỉ MỘT SỐ vế có căn cứ: trả lời các vế có căn cứ và nói rõ vế nào chưa
   đủ dữ liệu. KHÔNG im lặng bỏ qua vế thiếu, cũng không hạ confidence của cả câu vì một vế.
 - Không tự bịa trích dẫn nguyên văn (quote); để hệ thống tự lấy quote từ chunk nếu cần.

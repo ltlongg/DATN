@@ -314,11 +314,10 @@ async def test_partially_invalid_citations_keep_the_valid_ones_without_retry(
     assert [c.chunk_id for c in resp.citations] == ["c-2"]
 
 
-async def test_confidence_insufficient_goes_honest_without_burning_a_retry(
+async def test_confidence_insufficient_with_valid_citation_keeps_answer(
     monkeypatch,
 ) -> None:
-    """LLM tự khai không trả lời được thì soạn lại cũng vô ích -> đi honest luôn. Nhánh này
-    phải đứng TRƯỚC nhánh đếm citation trong `after_validate`."""
+    """Confidence là tự đánh giá của LLM: answer có nguồn hợp lệ vẫn được giữ nguyên."""
     _patch_plan(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     calls = _patch_synthesize_sequence(
@@ -326,10 +325,10 @@ async def test_confidence_insufficient_goes_honest_without_burning_a_retry(
     )
     _patch_viz(monkeypatch)
     resp = await run_ask(AskRequest(question="hỏi", stream=False))
-    assert calls["n"] == 1  # KHÔNG tốn lượt soạn lại
+    assert calls["n"] == 1
     assert resp.confidence == "không đủ dữ liệu"
-    assert resp.answer == nodes.HONEST_MESSAGE
-    assert resp.citations == []
+    assert resp.answer == "Đáp án."
+    assert [c.chunk_id for c in resp.citations] == ["c-1"]
 
 
 async def test_valid_citations_go_straight_through(monkeypatch) -> None:
