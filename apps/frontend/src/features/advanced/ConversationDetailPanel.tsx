@@ -29,15 +29,32 @@ function QualityFlags({ m }: { m: MessageLogItem }) {
     { label: "có cảnh báo", on: m.quality.has_warning, cls: "bg-yellow-100 text-yellow-800" },
   ];
   const active = flags.filter((f) => f.on);
-  if (active.length === 0)
+  if (active.length === 0 && m.warnings.length === 0)
     return <span className="text-[11px] text-green-700">không có cảnh báo</span>;
   return (
-    <div className="flex flex-wrap gap-1">
-      {active.map((f) => (
-        <span key={f.label} className={`rounded-full px-2 py-0.5 text-[11px] ${f.cls}`}>
-          {f.label}
-        </span>
-      ))}
+    <div className="space-y-1">
+      {active.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {active.map((f) => (
+            <span key={f.label} className={`rounded-full px-2 py-0.5 text-[11px] ${f.cls}`}>
+              {f.label}
+            </span>
+          ))}
+        </div>
+      )}
+      {/* Nội dung warning chỉ hiện Ở ĐÂY, không hiện ở bong bóng chat (xem MessageBubble):
+          đây là chẩn đoán nội bộ của orchestrator, admin mới có ngữ cảnh đọc. Badge "có
+          cảnh báo" ở trên là cờ tổng hợp từ backend, giữ nguyên — danh sách dưới là chi
+          tiết của chính cờ đó. */}
+      {m.warnings.length > 0 && (
+        <ul className="space-y-0.5 rounded-md border border-yellow-200 bg-yellow-50/60 p-2">
+          {m.warnings.map((w, i) => (
+            <li key={i} className="text-[11px] text-amber-800">
+              • {String(w)}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

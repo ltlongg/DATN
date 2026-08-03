@@ -1,4 +1,3 @@
-import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { Markdown } from "@/components/Markdown";
 import { CitationList } from "@/features/chat/CitationList";
 import { AssistantAvatar, UserAvatar } from "@/features/chat/MessageAvatar";
@@ -13,7 +12,7 @@ function countWords(text: string): number {
   return t === "" ? 0 : t.split(/\s+/).length;
 }
 
-/** 1 dòng chat. User: bong bóng phải. Assistant: khối trái + citations/confidence/lỗi. */
+/** 1 dòng chat. User: bong bóng phải. Assistant: khối trái + citations/lỗi. */
 export function MessageBubble({ item }: { item: ChatItem }) {
   // Không cần biết role ở đây nữa: tầng 2 của panel tiến trình chỉ hiện khi `step.internals`
   // CÓ MẶT, mà backend đã bóc field đó cho mọi lượt không phải admin-bật-debug. Một nguồn
@@ -60,7 +59,7 @@ export function MessageBubble({ item }: { item: ChatItem }) {
           // Câu hỏi lại (route `ambiguous`) đi CHUNG nhánh này, không có khối vàng riêng:
           // nó là một câu trả lời như mọi câu khác, chỉ khác ở chỗ kết thúc bằng dấu hỏi.
           // `content` đã là chính câu hỏi lại (reducer set từ event `clarification`).
-          // ConfidenceBadge/CitationList tự ẩn khi rỗng nên không cần rẽ nhánh.
+          // CitationList tự ẩn khi rỗng nên không cần rẽ nhánh.
           <>
             <div className="text-ink">
               {item.content !== "" && <Markdown content={item.content} />}
@@ -72,9 +71,13 @@ export function MessageBubble({ item }: { item: ChatItem }) {
               )}
             </div>
 
+            {/* `confidence` và `warnings` VẪN về đủ trong item (và vẫn lưu DB), chỉ không
+                render ở đây: cả hai là ngôn ngữ nội bộ của orchestrator ("bỏ resolve của
+                bước không có bước sau dùng tới") — người dùng đọc không hiểu, mà đọc rồi
+                lại tưởng câu trả lời có vấn đề. Chỗ xem chúng là trang quản trị
+                (`features/advanced`), nơi có ngữ cảnh để hiểu. */}
             {!item.streaming && (
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <ConfidenceBadge confidence={item.confidence} />
                 {item.ttftMs !== null && (
                   <span
                     className="text-xs text-ink-soft"
@@ -86,11 +89,6 @@ export function MessageBubble({ item }: { item: ChatItem }) {
                 <span className="text-xs text-ink-soft">
                   {countWords(item.content)} từ
                 </span>
-                {item.warnings.map((w, i) => (
-                  <span key={i} className="text-xs text-amber-700">
-                    {w}
-                  </span>
-                ))}
               </div>
             )}
 
