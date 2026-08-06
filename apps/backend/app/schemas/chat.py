@@ -58,7 +58,7 @@ class AskRequest(BaseModel):
     # Backend luôn streaming. Mặc định "auto" = agent tự chọn mode; frontend gửi giá trị cụ
     # thể để ÉP (override). max_length đồng bộ agent-service.
     question: str = Field(min_length=1, max_length=get_settings().ask_max_question_chars)
-    mode: Literal["auto", "traditional", "graph", "hybrid"] = "auto"
+    mode: Literal["auto", "traditional", "hybrid"] = "auto"
     debug: bool = False
 
 

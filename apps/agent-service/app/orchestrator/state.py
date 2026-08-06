@@ -67,7 +67,7 @@ class AgentState(TypedDict):
     clarification_question: str | None
     retrieval: RetrievalResult | None
     # "none" mặc định; node retrieve set = requested_mode (clarify/smalltalk/out_of_scope giữ none).
-    retrieval_mode: Literal["traditional", "graph", "hybrid", "none"]
+    retrieval_mode: Literal["traditional", "hybrid", "none"]
     answer: str | None
     confidence: AnswerConfidence | None
     # tăng sau MỖI synthesize; retry nếu < synthesize_max_attempts (guard chống loop).

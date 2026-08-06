@@ -1,9 +1,9 @@
-"""Contract tầng retrieval query-side (traditional / graph / hybrid).
+"""Contract tầng retrieval query-side (traditional / hybrid).
 
 Hai trục dữ liệu TÁCH BIỆT, đừng trộn:
 - `chunks` (RetrievedChunk) — đường provenance: text chunk đã hydrate từ Postgres.
 - `graph_context` (GraphContextItem) — NỘI DUNG đã chưng cất từ KG (description của
-  entity/relation), đưa THẲNG cho LLM, KHÔNG qua RRF. Chỉ graph + hybrid điền.
+  entity/relation), đưa THẲNG cho LLM, KHÔNG qua RRF. Chỉ hybrid điền.
 
 Không dùng một field `score` chung: cosine (vector), rank-based (graph), RRF, reranker
 là bốn thang đo khác bản chất nên mỗi cái một field riêng để debug/ablation.
@@ -15,8 +15,9 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-RetrievalMode = Literal["traditional", "graph", "hybrid"]
+RetrievalMode = Literal["traditional", "hybrid"]
 # "vector" = dense; "sparse" = BM25 keyword; "graph" = GraphRAG. Hybrid fuse cả ba qua RRF.
+# "graph" ở đây là NGUỒN candidate bên trong hybrid, KHÔNG phải một `RetrievalMode`.
 CandidateSource = Literal["vector", "graph", "sparse"]
 
 

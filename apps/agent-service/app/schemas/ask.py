@@ -22,11 +22,13 @@ AnswerConfidence = Literal["cao", "vừa", "thấp", "không đủ dữ liệu"]
 
 # Mode ở TẦNG REQUEST: thêm "auto" so với `RetrievalMode` nội bộ. CỐ Ý không nhét "auto" vào
 # `RetrievalMode` — "auto" là ý định của người gọi, không phải một cách truy hồi; nó luôn được
-# giải thành 1 trong 3 giá trị thật TRƯỚC khi tới node retrieve.
-RequestedMode = Literal["auto", "traditional", "graph", "hybrid"]
+# giải thành 1 trong 2 giá trị thật TRƯỚC khi tới node retrieve.
+RequestedMode = Literal["auto", "traditional", "hybrid"]
 
-# Mode node `plan` được phép tự chọn. KHÔNG có "graph": mode graph đứng riêng đã bỏ khỏi
-# lựa chọn mặc định (graph vẫn sống bên trong hybrid), chỉ còn là override thủ công.
+# Mode node `plan` được phép tự chọn — trùng khít phần không-"auto" của `RequestedMode`, tức
+# agent chọn được đúng những gì người gọi ép được. Mode graph đứng riêng đã BỎ HẲN: graph
+# sống bên trong hybrid (`retrieve_hybrid` gọi thẳng `search_graph`), không còn là một cách
+# truy hồi tách biệt ở bất kỳ tầng nào.
 AutoSelectableMode = Literal["traditional", "hybrid"]
 
 
@@ -39,7 +41,7 @@ class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=4000)
     history: list[ChatMessage] = Field(default_factory=list, max_length=12)
     # "auto" = node `plan` tự chọn mode (mặc định). Giá trị cụ thể = user OVERRIDE, bỏ qua
-    # lựa chọn của plan. `graph` chỉ còn dùng cho demo/đánh giá, không hiện ở UI mặc định.
+    # lựa chọn của plan — chỉ dùng để so traditional vs hybrid lúc đánh giá, không hiện ở UI.
     mode: RequestedMode = "auto"
     stream: bool = True  # True -> SSE; False -> gom event trả 1 AskResponse JSON
     debug: bool = False
@@ -70,7 +72,7 @@ class AskResponse(BaseModel):
     answer: str | None = None
     citations: list[Citation] = Field(default_factory=list)
     # "none" khi không retrieve (clarify/smalltalk/out_of_scope); else = mode đã chọn.
-    retrieval_mode: Literal["traditional", "graph", "hybrid", "none"] = "none"
+    retrieval_mode: Literal["traditional", "hybrid", "none"] = "none"
     confidence: AnswerConfidence | None = None
     visualization: VisualizationPayload | None = None
     warnings: list[str] = Field(default_factory=list)
