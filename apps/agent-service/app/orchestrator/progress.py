@@ -68,7 +68,6 @@ WEAK_CONFIDENCE: frozenset[str] = frozenset({"thấp", "không đủ dữ liệu
 _MODE_SOURCES: dict[RetrievalMode, str] = {
     "hybrid": "Dense + BM25 + graph",
     "traditional": "Dense + BM25",
-    "graph": "Knowledge graph",
 }
 
 # Route không cần truy hồi -> danh sách chỉ có đúng dòng `plan`, và dòng đó tự giải thích

@@ -6,7 +6,7 @@ import { useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
  * KHÔNG còn ô chọn cách truy hồi: agent tự chọn traditional/hybrid theo câu hỏi (bậc B2,
  * `docs/plan/agentic-retrieval-loop-plan.md` §0.1). Bắt giáo viên chọn "Vector" hay "Kết hợp"
  * là bắt họ biết nội tạng hệ thống. Override vẫn còn ở TẦNG API (`AskRequest.mode`) để so
- * traditional/graph/hybrid trên cùng một câu lúc đánh giá — chỉ không hiện ra UI.
+ * traditional/hybrid trên cùng một câu lúc đánh giá — chỉ không hiện ra UI.
  */
 const DEFAULT_PLACEHOLDER = "Hỏi về lịch sử Việt Nam…";
 const MAX_COMPOSER_HEIGHT_PX = 160;

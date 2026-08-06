@@ -62,7 +62,7 @@ export interface AskStreamController {
 
 /**
  * Body gửi lên `/ask`. KHÔNG có `mode`: agent tự chọn cách truy hồi (bậc B2). Backend mặc
- * định "auto" khi thiếu field. Override traditional/graph/hybrid vẫn gọi được ở tầng API
+ * định "auto" khi thiếu field. Override traditional/hybrid vẫn gọi được ở tầng API
  * (curl/Swagger) để so sánh lúc đánh giá — chỉ frontend không gửi.
  * Xem docs/plan/agentic-retrieval-loop-plan.md §0.1.
  */
