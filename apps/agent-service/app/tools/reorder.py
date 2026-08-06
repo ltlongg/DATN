@@ -3,7 +3,7 @@
 LLM chú ý kém ở GIỮA context dài; chunk quan trọng nên nằm ở ĐẦU và CUỐI. Nhận list đã
 sắp best-first (rerank / graph score / RRF đã làm) -> xen kẽ chunk điểm cao về hai đầu,
 chunk yếu dồn vào giữa. THUẦN sắp xếp: không gọi LLM, không bỏ/đổi chunk (giữ nguyên số
-lượng + provenance). Áp ở bước synthesize, chung cho cả 3 mode.
+lượng + provenance). Áp ở bước synthesize, chung cho cả 2 mode.
 """
 
 from __future__ import annotations

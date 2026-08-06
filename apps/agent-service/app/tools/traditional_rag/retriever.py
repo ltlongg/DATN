@@ -1,6 +1,6 @@
 """Traditional RAG facade: dense+sparse fuse (Qdrant RRF) -> hydrate Postgres -> rerank.
 
-Đây là một trong ba mode (traditional/graph/hybrid). Dùng standalone cho debug/eval/
+Đây là một trong hai mode (traditional/hybrid). Dùng standalone cho debug/eval/
 ablation. `graph_context` luôn rỗng ở mode này (đó là phần của GraphRAG). Sau cải tiến:
 dense (semantic) + BM25 (keyword) fuse RRF SERVER-SIDE trong Qdrant rồi rerank cross-encoder
 (no-op nếu `RERANKER_MODEL` rỗng). Backend lỗi -> RetrievalBackendError propagate.

@@ -48,7 +48,6 @@ from app.schemas.ask import (
     StepResolveOutput,
 )
 from app.schemas.retrieval import RetrievalMode, RetrievalResult, RetrievedChunk
-from app.tools.graph_rag.retriever import retrieve_graph
 from app.tools.hybrid.retriever import retrieve_hybrid
 from app.tools.prompts.prompt_store import get_active_prompt
 from app.tools.reorder import reorder_for_context
@@ -58,14 +57,6 @@ from app.tools.visualization.builder import build_visualization as build_visuali
 HONEST_MESSAGE = (
     "Mình chưa tìm thấy đủ thông tin trong corpus hiện có để trả lời chắc chắn câu này. "
     "Bạn có thể hỏi cụ thể hơn về nhân vật, mốc thời gian hoặc sự kiện không?"
-)
-
-# Riêng mode=graph không ground được seed: gợi ý đổi mode (KHÔNG auto-fallback — quyết
-# định user 2026-07-01). Các trường hợp honest khác giữ HONEST_MESSAGE.
-GRAPH_EMPTY_MESSAGE = (
-    "Mình chưa tìm thấy thực thể hoặc quan hệ phù hợp trong knowledge graph cho câu hỏi này "
-    "ở chế độ Graph. Bạn thử lại bằng chế độ Traditional hoặc Hybrid để tìm theo nội dung "
-    "tài liệu nhé."
 )
 
 # Độ dài trích đoạn kèm mỗi citation (hover ở frontend). Đủ dài để nhận ra đoạn nói gì,
@@ -326,18 +317,6 @@ async def _retrieve_one(
             top_k=cfg.rag_top_k,
             bm25_top_k=cfg.bm25_top_k,
             rerank_top_k=cfg.rerank_top_k,
-        )
-    if mode == "graph":
-        return await retrieve_graph(
-            item.query,
-            seed_mentions=seeds,
-            graph_top_k=cfg.graph_top_k,
-            graph_max_seed_entities=cfg.graph_max_seed_entities,
-            graph_max_chunks_per_seed=cfg.graph_max_chunks_per_seed,
-            graph_hub_source_count_threshold=cfg.graph_hub_source_count_threshold,
-            graph_max_context_items=cfg.graph_max_context_items,
-            graph_max_path_hops=cfg.graph_max_path_hops,
-            graph_path_hit_weight=cfg.graph_path_hit_weight,
         )
     return await retrieve_hybrid(
         item.query,
@@ -846,18 +825,6 @@ def _build_citation(chunk: RetrievedChunk) -> Citation:
 # --- 7. honest_answer ---
 
 
-def _honest_message(state: AgentState) -> str:
-    """Graph mode ground rỗng -> gợi ý đổi mode; còn lại -> message honest chung.
-
-    Phân biệt chính xác: retrieval None = route bypass (out_of_scope); retrieval rỗng +
-    mode graph = không ground được seed; retrieval có chunk nhưng citation fail = giữ chung.
-    """
-    retrieval = state.get("retrieval")
-    if state.get("selected_mode") == "graph" and retrieval is not None and not retrieval.chunks:
-        return GRAPH_EMPTY_MESSAGE
-    return HONEST_MESSAGE
-
-
 async def honest_answer(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     emitter = _emitter(config)
     if state.get("synthesize_attempt_count", 0) > 0:
@@ -876,7 +843,7 @@ async def honest_answer(state: AgentState, config: RunnableConfig) -> dict[str, 
             "Chưa đủ dữ liệu · trả lời trung thực",
         )
     settings = get_settings()
-    message = _honest_message(state)
+    message = HONEST_MESSAGE
     await emit_text_as_batches(message, emitter, settings.stream_batch_chars)
     return {
         "answer": message,
