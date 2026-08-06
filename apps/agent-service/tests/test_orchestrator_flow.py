@@ -11,6 +11,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 import pytest
+from pydantic import ValidationError
 
 from app.orchestrator import nodes
 from app.orchestrator.emitter import ListEmitter
@@ -512,16 +513,12 @@ async def test_event_order_on_happy_path(monkeypatch) -> None:
     assert types[0] == "status"
 
 
-# --- dispatch theo mode (user chọn tay 1 trong 3) ---
+# --- dispatch theo mode (user chọn tay 1 trong 2) ---
 
 
-def _patch_three_retrievers(monkeypatch, called: dict, *, result=None) -> None:
+def _patch_both_retrievers(monkeypatch, called: dict, *, result=None) -> None:
     async def fake_trad(question, **kw):
         called["which"] = "traditional"
-        return result if result is not None else _retrieval(["c-1"])
-
-    async def fake_graph(query, **kw):
-        called["which"] = "graph"
         return result if result is not None else _retrieval(["c-1"])
 
     async def fake_hybrid(question, **kw):
@@ -529,16 +526,15 @@ def _patch_three_retrievers(monkeypatch, called: dict, *, result=None) -> None:
         return result if result is not None else _retrieval(["c-1"])
 
     monkeypatch.setattr(nodes, "retrieve_traditional", fake_trad)
-    monkeypatch.setattr(nodes, "retrieve_graph", fake_graph)
     monkeypatch.setattr(nodes, "retrieve_hybrid", fake_hybrid)
 
 
-@pytest.mark.parametrize("mode", ["traditional", "graph", "hybrid"])
+@pytest.mark.parametrize("mode", ["traditional", "hybrid"])
 async def test_override_mode_wins_over_agent_choice(monkeypatch, mode) -> None:
     # plan CHỌN hybrid, nhưng user ép mode -> override phải thắng.
     _patch_plan(monkeypatch, route="needs_retrieval", selected_mode="hybrid")
     called: dict = {}
-    _patch_three_retrievers(monkeypatch, called)
+    _patch_both_retrievers(monkeypatch, called)
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch)
     resp = await run_ask(AskRequest(question="hỏi", mode=mode, stream=False))
@@ -546,11 +542,23 @@ async def test_override_mode_wins_over_agent_choice(monkeypatch, mode) -> None:
     assert resp.retrieval_mode == mode
 
 
+def test_graph_is_not_a_selectable_mode() -> None:
+    """Mode graph đứng riêng đã bỏ: cả request lẫn plan đều không nhận "graph" nữa.
+
+    Khoá ở tầng schema chứ không chỉ ở dispatch — nếu ai đó thêm lại literal, test này đổ
+    trước khi nhánh retrieve kịp phân xử.
+    """
+    with pytest.raises(ValidationError):
+        AskRequest(question="hỏi", mode="graph")
+    with pytest.raises(ValidationError):
+        PlanOutput(standalone_query="q", route="needs_retrieval", selected_mode="graph")
+
+
 @pytest.mark.parametrize("chosen", ["traditional", "hybrid"])
 async def test_auto_mode_uses_agent_choice(monkeypatch, chosen) -> None:
     _patch_plan(monkeypatch, route="needs_retrieval", selected_mode=chosen)
     called: dict = {}
-    _patch_three_retrievers(monkeypatch, called)
+    _patch_both_retrievers(monkeypatch, called)
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch)
     resp = await run_ask(AskRequest(question="hỏi", stream=False))  # không truyền mode -> auto
@@ -561,7 +569,7 @@ async def test_auto_mode_uses_agent_choice(monkeypatch, chosen) -> None:
 async def test_plan_error_falls_back_to_hybrid_in_auto_mode(monkeypatch) -> None:
     _patch_plan(monkeypatch, error=True)
     called: dict = {}
-    _patch_three_retrievers(monkeypatch, called)
+    _patch_both_retrievers(monkeypatch, called)
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch)
     resp = await run_ask(AskRequest(question="hỏi", stream=False))
@@ -572,33 +580,26 @@ async def test_plan_error_falls_back_to_hybrid_in_auto_mode(monkeypatch) -> None
 async def test_plan_error_still_respects_override(monkeypatch) -> None:
     _patch_plan(monkeypatch, error=True)
     called: dict = {}
-    _patch_three_retrievers(monkeypatch, called)
+    _patch_both_retrievers(monkeypatch, called)
     _patch_synthesize(monkeypatch, used=("c-1",))
     _patch_viz(monkeypatch)
     await run_ask(AskRequest(question="hỏi", mode="traditional", stream=False))
     assert called["which"] == "traditional"
 
 
-async def test_graph_empty_suggests_other_mode(monkeypatch) -> None:
-    # mode=graph nhưng không ground được seed -> honest gợi ý đổi mode (KHÔNG auto-fallback).
+@pytest.mark.parametrize("mode", ["traditional", "hybrid"])
+async def test_empty_retrieval_uses_generic_honest(monkeypatch, mode) -> None:
+    """Mọi mode retrieve ra rỗng đều dùng MỘT message honest chung.
+
+    Trước đây mode graph có message riêng gợi ý đổi sang Traditional/Hybrid; bỏ graph rồi
+    thì không còn mode nào để gợi ý, nên nhánh đó đi luôn.
+    """
     _patch_plan(monkeypatch, route="needs_retrieval")
     called: dict = {}
-    empty = RetrievalResult(mode="graph", query="q", chunks=[])
-    _patch_three_retrievers(monkeypatch, called, result=empty)
-    resp = await run_ask(AskRequest(question="hỏi", mode="graph", stream=False))
-    assert called["which"] == "graph"
-    assert resp.retrieval_mode == "graph"
-    assert "Traditional" in (resp.answer or "") and "Hybrid" in (resp.answer or "")
-
-
-async def test_traditional_empty_uses_generic_honest(monkeypatch) -> None:
-    # traditional rỗng -> message honest CHUNG (không gợi ý đổi mode, user chỉ yêu cầu graph).
-    _patch_plan(monkeypatch, route="needs_retrieval")
-    called: dict = {}
-    empty = RetrievalResult(mode="traditional", query="q", chunks=[])
-    _patch_three_retrievers(monkeypatch, called, result=empty)
-    resp = await run_ask(AskRequest(question="hỏi", mode="traditional", stream=False))
-    assert "chưa tìm thấy đủ thông tin" in (resp.answer or "")
+    empty = RetrievalResult(mode=mode, query="q", chunks=[])
+    _patch_both_retrievers(monkeypatch, called, result=empty)
+    resp = await run_ask(AskRequest(question="hỏi", mode=mode, stream=False))
+    assert resp.answer == nodes.HONEST_MESSAGE
 
 
 # --- Phần F: document reordering áp ở synthesize (chống lost-in-the-middle) ---

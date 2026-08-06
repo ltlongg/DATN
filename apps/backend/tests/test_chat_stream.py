@@ -160,14 +160,27 @@ def test_ask_forwards_selected_mode(client, auth, mock_agent) -> None:  # type: 
     cid = _new_conversation(client, user)
     mock_agent.configure(
         events=format_sse("token", {"text": "x"})
-        + format_sse("done", {"confidence": "cao", "retrieval_mode": "graph", "warnings": []})
+        + format_sse("done", {"confidence": "cao", "retrieval_mode": "hybrid", "warnings": []})
     )
     client.post(
+        f"/api/chat/conversations/{cid}/ask",
+        json={"question": "Q", "mode": "hybrid"},
+        headers=user,
+    )
+    assert mock_agent.captured["payload"]["mode"] == "hybrid"
+
+
+def test_ask_rejects_removed_graph_mode(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
+    """Mode graph đứng riêng đã bỏ -> 422 ngay ở validate, không đẩy xuống agent."""
+    user = auth("user")
+    cid = _new_conversation(client, user)
+    resp = client.post(
         f"/api/chat/conversations/{cid}/ask",
         json={"question": "Q", "mode": "graph"},
         headers=user,
     )
-    assert mock_agent.captured["payload"]["mode"] == "graph"
+    assert resp.status_code == 422
+    assert mock_agent.captured == {}
 
 
 def test_ask_default_mode_is_auto(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]

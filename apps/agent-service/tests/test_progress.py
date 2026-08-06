@@ -120,10 +120,6 @@ def test_retrieve_detail_names_the_backends_that_actually_ran() -> None:
         progress.retrieve_detail("traditional", query_count=1, chunk_count=5)
         == "Dense + BM25 · 5 đoạn"
     )
-    assert (
-        progress.retrieve_detail("graph", query_count=1, chunk_count=3)
-        == "Knowledge graph · 3 đoạn"
-    )
 
 
 def test_retrieve_detail_mentions_parallel_queries_only_when_more_than_one() -> None:
@@ -326,10 +322,10 @@ def test_plan_internals_spells_out_who_picked_the_mode() -> None:
     )
     assert _value(agent, "Cách truy hồi") == "hybrid (agent chọn)"
     forced = progress.plan_internals(
-        standalone_query="q", route="needs_retrieval", selected_mode="graph",
+        standalone_query="q", route="needs_retrieval", selected_mode="traditional",
         mode_source="override",
     )
-    assert _value(forced, "Cách truy hồi") == "graph (người dùng ép)"
+    assert _value(forced, "Cách truy hồi") == "traditional (người dùng ép)"
 
 
 def test_retrieve_internals_pairs_each_query_with_its_own_chunk_count() -> None:
