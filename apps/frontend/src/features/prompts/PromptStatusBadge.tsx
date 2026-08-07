@@ -1,11 +1,9 @@
 const STYLES: Record<string, string> = {
   production: "bg-green-100 text-green-800",
-  staging: "bg-amber-100 text-amber-800",
   archived: "bg-gray-200 text-gray-600",
 };
 const LABELS: Record<string, string> = {
   production: "PRODUCTION",
-  staging: "STAGING",
   archived: "ARCHIVED",
 };
 

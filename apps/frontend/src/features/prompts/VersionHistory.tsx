@@ -12,18 +12,18 @@ function AuditLine({ v }: { v: PromptVersionMeta }) {
   return <p className="mt-0.5 text-[11px] text-ink-soft">{parts.join(" · ")}</p>;
 }
 
-/** Cột phải: lịch sử version + đẩy production + so sánh với bản production hiện hành. */
+/** Cột phải: lịch sử version + khôi phục bản cũ + so sánh với bản production hiện hành. */
 export function VersionHistory({
   versions,
   activeVersionNo,
   pending,
-  onPromote,
+  onRollback,
   onCompare,
 }: {
   versions: PromptVersionMeta[];
   activeVersionNo: number | null;
   pending: boolean;
-  onPromote: (versionNo: number) => void;
+  onRollback: (versionNo: number) => void;
   onCompare: (versionNo: number) => void;
 }) {
   return (
@@ -43,11 +43,11 @@ export function VersionHistory({
           <div className="mt-1.5 flex gap-3 text-xs">
             {v.status !== "production" && (
               <button
-                onClick={() => onPromote(v.version_no)}
+                onClick={() => onRollback(v.version_no)}
                 disabled={pending}
                 className="text-brand hover:underline disabled:opacity-50"
               >
-                Đẩy lên production
+                Khôi phục bản này
               </button>
             )}
             <button onClick={() => onCompare(v.version_no)} className="text-ink-soft hover:text-ink">

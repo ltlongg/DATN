@@ -57,29 +57,33 @@ export default function AdminPromptsPage() {
     qc.invalidateQueries({ queryKey: ["adm-prompts"] });
     qc.invalidateQueries({ queryKey: ["adm-prompt", selectedKey] });
   };
-  const createMut = useMutation({ mutationFn: () => createPromptVersion(selectedKey as string, { content, note: note || null }) });
+  const createMut = useMutation({
+    mutationFn: () => createPromptVersion(selectedKey as string, { content, note: note || null }),
+    onSuccess: invalidate,
+  });
   const promoteMut = useMutation({
     mutationFn: (versionNo: number) => promotePromptVersion(selectedKey as string, versionNo),
     onSuccess: invalidate,
   });
 
-  async function handleSaveStaging() {
+  async function handleSave() {
     setError(null);
     try {
       await createMut.mutateAsync();
-      invalidate();
+      setNote("");
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Không lưu được bản staging.");
+      setError(e instanceof ApiError ? e.message : "Không lưu được phiên bản mới.");
     }
   }
 
-  async function handleSavePromote() {
+  async function handleRollback(versionNo: number) {
     setError(null);
     try {
-      const created = await createMut.mutateAsync();
-      await promoteMut.mutateAsync(created.version_no);
+      const updated = await promoteMut.mutateAsync(versionNo);
+      setContent(updated.production_content ?? "");
+      setNote("");
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Không đẩy được lên production.");
+      setError(e instanceof ApiError ? e.message : "Không khôi phục được phiên bản này.");
     }
   }
 
@@ -104,7 +108,7 @@ export default function AdminPromptsPage() {
     <div className="space-y-4">
       <PageHeader
         title="Quản lý Prompt"
-        desc="Sửa, tạo bản, đẩy production cho system prompt. Agent luôn fallback về hằng code nếu DB thiếu."
+        desc="Sửa system prompt và áp dụng ngay; mỗi lần lưu tạo một phiên bản mới trong lịch sử. Agent luôn fallback về hằng code nếu DB thiếu."
       />
 
       {list.isLoading ? (
@@ -134,8 +138,7 @@ export default function AdminPromptsPage() {
                 error={error}
                 onContentChange={setContent}
                 onNoteChange={setNote}
-                onSaveStaging={handleSaveStaging}
-                onSavePromote={handleSavePromote}
+                onSave={handleSave}
               />
             )}
           </div>
@@ -148,7 +151,7 @@ export default function AdminPromptsPage() {
                   detail.data.versions.find((v) => v.status === "production")?.version_no ?? null
                 }
                 pending={pending}
-                onPromote={(no) => promoteMut.mutate(no)}
+                onRollback={handleRollback}
                 onCompare={handleCompare}
               />
             )}

@@ -1,7 +1,7 @@
 import { PromptStatusBadge } from "@/features/prompts/PromptStatusBadge";
 import type { PromptDetail } from "@/types/prompt";
 
-/** Cột giữa: sửa content + note, tạo bản staging (hoặc lưu & đẩy production luôn). */
+/** Cột giữa: sửa content + note, lưu là tạo version mới và đẩy production ngay. */
 export function PromptEditor({
   detail,
   content,
@@ -11,8 +11,7 @@ export function PromptEditor({
   error,
   onContentChange,
   onNoteChange,
-  onSaveStaging,
-  onSavePromote,
+  onSave,
 }: {
   detail: PromptDetail;
   content: string;
@@ -22,8 +21,7 @@ export function PromptEditor({
   error: string | null;
   onContentChange: (v: string) => void;
   onNoteChange: (v: string) => void;
-  onSaveStaging: () => void;
-  onSavePromote: () => void;
+  onSave: () => void;
 }) {
   const hasProduction = detail.production_content !== null;
   return (
@@ -65,18 +63,11 @@ export function PromptEditor({
 
       <div className="mt-3 flex flex-wrap justify-end gap-2">
         <button
-          onClick={onSaveStaging}
-          disabled={!dirty || pending}
-          className="rounded-md border border-paper-border px-4 py-2 text-sm text-ink hover:bg-paper disabled:opacity-50"
-        >
-          Lưu bản staging
-        </button>
-        <button
-          onClick={onSavePromote}
+          onClick={onSave}
           disabled={!dirty || pending}
           className="rounded-md bg-brand px-4 py-2 text-sm text-brand-fg hover:bg-brand-dark disabled:opacity-50"
         >
-          Lưu & đẩy lên production
+          Lưu & áp dụng
         </button>
       </div>
     </div>
