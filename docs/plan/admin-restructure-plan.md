@@ -219,7 +219,7 @@ prompt_versions(
   version_no   INTEGER NOT NULL,     -- tăng dần theo prompt_key
   content      TEXT NOT NULL,        -- system prompt text
   note         TEXT,
-  status       TEXT NOT NULL,        -- 'production' | 'staging' | 'archived'
+  status       TEXT NOT NULL,        -- 'production' | 'archived'
   created_by   TEXT,                 -- email admin tạo version
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
   promoted_by  TEXT,                 -- email admin đẩy lên production (NULL nếu chưa từng)
@@ -248,17 +248,19 @@ content = hằng trong code hiện tại, note='seed from code'). Chạy lại k
 
 ### Backend API (admin CRUD) — `apps/backend/app/`
 - `models/prompt.py` (psycopg trực tiếp, đọc/ghi cùng bảng — pattern `cost.py`):
-  `list_prompts()`, `get_prompt(key)` + versions, `create_staging_version(key, content, note, by)`,
-  `promote(key, version_no, by)` (transaction: demote production→archived, set no→production
-  **+ set `promoted_by=by`, `promoted_at=now()` trên version được đẩy**),
+  `list_prompts()`, `get_prompt(key)` + versions, `create_version(key, content, note, by)`
+  (transaction: demote production→archived, insert version mới thẳng thành production **+ set
+  `created_by`/`promoted_by=by`, `promoted_at=now()`** — KHÔNG có bản nháp staging),
+  `promote(key, version_no, by)` (chỉ dùng rollback: đưa 1 version cũ trở lại production),
   `get_version(key, version_no)`.
 - `schemas/prompt.py`: Pydantic list/detail/version/compare.
 - `api/prompts.py` (router `/api/admin/prompts`, `require_admin`):
   - `GET /` → list nhóm (key, grp, title, active version_no, số version).
   - `GET /{key}` → meta + versions[] (kèm `promoted_by`/`promoted_at`) + content production
     hiện hành.
-  - `POST /{key}/versions` `{content, note}` → tạo staging (`created_by` = admin hiện tại).
-  - `POST /{key}/versions/{no}/promote` → đẩy production (`promoted_by` = admin hiện tại).
+  - `POST /{key}/versions` `{content, note}` → tạo version mới và áp dụng production ngay
+    (`created_by` = `promoted_by` = admin hiện tại).
+  - `POST /{key}/versions/{no}/promote` → rollback về version cũ (`promoted_by` = admin hiện tại).
   - `GET /{key}/versions/{no}` → content 1 version (phục vụ So sánh).
 - Đăng ký router trong `app/main.py`.
 
@@ -267,19 +269,20 @@ content = hằng trong code hiện tại, note='seed from code'). Chạy lại k
 - `features/prompts/` (3 cột như ảnh Socratic prompts-detail):
   - **Trái** `PromptTree`: list theo nhóm (ONLINE / GUARDRAIL / INDEXING) + chọn.
   - **Giữa** `PromptEditor`: header (key · nhóm · badge PRODUCTION · cập nhật bởi) + textarea
-    `content` + ô `note` ("why this change?") + nút **Lưu bản staging** + **Đẩy lên production**.
-  - **Phải** `VersionHistory`: mỗi version có badge `PRODUCTION`/`STAGING`/`ARCHIVED` +
+    `content` + ô `note` ("why this change?") + nút **Lưu & áp dụng** (1 nút duy nhất).
+  - **Phải** `VersionHistory`: mỗi version có badge `PRODUCTION`/`ARCHIVED` +
     "Hiện hành" + dòng audit nhỏ ("tạo bởi {created_by} · đẩy bởi {promoted_by} lúc
-    {promoted_at}", ẩn khi NULL) + nút **Đẩy lên production** + **So sánh** (mở Modal diff 2
+    {promoted_at}", ẩn khi NULL) + nút **Khôi phục bản này** + **So sánh** (mở Modal diff 2
     cột, dùng lib diff nhẹ hoặc so sánh dòng tự viết).
 - `pages/AdminPromptsPage.tsx` (lazy) lắp 3 cột.
 - Prompt OFFLINE hiện badge "chưa nối runtime" để trung thực (chỉ có hiệu lực khi re-index).
 
 ### Kiểm thử
 - Agent: `get_active_prompt` trả production / fallback khi thiếu / nuốt lỗi DB. Seed idempotent.
-- Backend: promote đổi đúng status (transaction), create_staging tăng version_no, list nhóm.
-- FE: render tree/editor/history; mutation tạo staging + promote invalidate query.
-- E2E thủ công: sửa `synthesize` → đẩy production → hỏi câu mới → answer dùng prompt mới
+- Backend: create_version tăng version_no + lên production ngay (production cũ → archived),
+  promote rollback đúng status, list nhóm.
+- FE: render tree/editor/history; mutation lưu + rollback invalidate query.
+- E2E thủ công: sửa `synthesize` → lưu & áp dụng → hỏi câu mới → answer dùng prompt mới
   (kiểm bằng debug panel / thay đổi rõ). Xoá version production → answer fallback về code.
 
 ---
