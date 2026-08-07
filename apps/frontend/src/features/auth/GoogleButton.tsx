@@ -38,8 +38,8 @@ export function GoogleButton() {
   }
 
   return (
-    <div className="mt-6">
-      <div className="mb-4 flex items-center gap-3 text-xs font-semibold uppercase tracking-wide text-ink">
+    <div className="mt-5">
+      <div className="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-wide text-ink">
         <span className="h-px flex-1 bg-ink/25" />
         hoặc
         <span className="h-px flex-1 bg-ink/25" />
@@ -58,6 +58,7 @@ export function GoogleButton() {
                 : setError("Không đăng nhập được bằng Google.")
             }
             onError={() => setError("Không đăng nhập được bằng Google.")}
+            shape="pill"
             // width theo hợp đồng GIS là CHUỖI số pixel (tối đa "400") — không phải số,
             // không phải "100%". Muốn co giãn thì canh bằng div bọc ngoài.
             width="320"

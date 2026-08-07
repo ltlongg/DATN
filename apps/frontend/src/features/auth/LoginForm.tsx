@@ -14,7 +14,7 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-5">
       <div className="space-y-1.5">
         <label htmlFor="email" className="block text-sm font-semibold text-ink">
           Email
@@ -56,7 +56,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-md bg-brand py-2 font-medium text-brand-fg transition hover:bg-brand-dark disabled:opacity-60"
+        className="w-full rounded-full bg-brand py-2.5 font-medium text-brand-fg transition hover:bg-brand-dark disabled:opacity-60"
       >
         {pending ? "Đang đăng nhập…" : "Đăng nhập"}
       </button>

@@ -12,9 +12,9 @@ export default function RegisterPage() {
     <AuthLayout title="Đăng ký">
       <RegisterForm />
       <GoogleButton />
-      <p className="mt-4 text-center text-sm text-ink">
+      <p className="mt-5 text-center text-sm text-ink">
         Đã có tài khoản?{" "}
-        <Link to="/login" className="font-semibold text-brand hover:underline">
+        <Link to="/login" className="font-bold text-ink transition hover:underline">
           Đăng nhập
         </Link>
       </p>

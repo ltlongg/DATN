@@ -12,9 +12,9 @@ export default function LoginPage() {
     <AuthLayout title="Đăng nhập">
       <LoginForm />
       <GoogleButton />
-      <p className="mt-4 text-center text-sm text-ink">
+      <p className="mt-5 text-center text-sm text-ink">
         Chưa có tài khoản?{" "}
-        <Link to="/register" className="font-semibold text-brand hover:underline">
+        <Link to="/register" className="font-bold text-ink transition hover:underline">
           Đăng ký
         </Link>
       </p>

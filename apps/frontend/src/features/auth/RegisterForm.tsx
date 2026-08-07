@@ -26,7 +26,7 @@ export function RegisterForm() {
   const shownError = mismatch ? "Mật khẩu xác nhận không khớp." : error;
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="space-y-5">
       <div className="space-y-1.5">
         <label htmlFor="reg-name" className={LABEL_CLASS}>
           Họ tên
@@ -110,7 +110,7 @@ export function RegisterForm() {
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-md bg-brand py-2 font-medium text-brand-fg transition hover:bg-brand-dark disabled:opacity-60"
+        className="w-full rounded-full bg-brand py-2.5 font-medium text-brand-fg transition hover:bg-brand-dark disabled:opacity-60"
       >
         {pending ? "Đang tạo tài khoản…" : "Đăng ký"}
       </button>
