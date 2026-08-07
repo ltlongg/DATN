@@ -20,7 +20,7 @@ class PromptListItem(BaseModel):
 class PromptVersionMeta(BaseModel):
     version_no: int
     note: str | None
-    status: str  # 'production' | 'staging' | 'archived'
+    status: str  # 'production' | 'archived'
     created_by: str | None
     created_at: datetime
     promoted_by: str | None

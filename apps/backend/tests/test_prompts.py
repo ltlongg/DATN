@@ -1,6 +1,6 @@
-"""Item 2 — quản lý Prompt: model (create_staging tăng version, promote đổi status trong
-transaction) + endpoints (list/detail/version/promote + require_admin). Dùng key test riêng,
-cô lập bằng txn rollback (conftest)."""
+"""Item 2 — quản lý Prompt: model (create_version tăng version_no + lên production ngay,
+promote rollback về bản cũ, cả hai trong transaction) + endpoints (list/detail/version/promote
++ require_admin). Dùng key test riêng, cô lập bằng txn rollback (conftest)."""
 
 from __future__ import annotations
 
@@ -47,30 +47,38 @@ def _seed_prompt(conn: psycopg.Connection, key: str) -> None:  # type: ignore[ty
 # --- model ------------------------------------------------------------------
 
 
-def test_create_staging_increments_version_no(db_conn) -> None:  # type: ignore[no-untyped-def]
+def test_create_version_goes_straight_to_production(db_conn) -> None:  # type: ignore[no-untyped-def]
     key = f"test-{uuid.uuid4().hex[:8]}"
     _seed_prompt(db_conn, key)
-    v = repo.create_staging_version(key, "V2 CONTENT", "why", "admin@example.com")
+    v = repo.create_version(key, "V2 CONTENT", "why", "admin@example.com")
     assert v is not None
     assert v["version_no"] == 2
-    assert v["status"] == "staging"
+    assert v["status"] == "production"
     assert v["created_by"] == "admin@example.com"
+    assert v["promoted_by"] == "admin@example.com"
+    assert v["promoted_at"] is not None
+
+    detail = repo.get_prompt(key)
+    assert detail is not None
+    by_no = {row["version_no"]: row for row in detail["versions"]}
+    assert by_no[1]["status"] == "archived"  # production cũ bị demote trong cùng transaction
+    assert detail["production_content"] == "V2 CONTENT"
 
 
-def test_promote_switches_production_in_transaction(db_conn) -> None:  # type: ignore[no-untyped-def]
+def test_promote_rolls_back_to_older_version(db_conn) -> None:  # type: ignore[no-untyped-def]
     key = f"test-{uuid.uuid4().hex[:8]}"
     _seed_prompt(db_conn, key)
-    repo.create_staging_version(key, "V2", "note", "admin@example.com")  # version 2 = staging
+    repo.create_version(key, "V2", "note", "admin@example.com")  # version 2 = production
 
-    assert repo.promote(key, 2, "admin@example.com") is True
+    assert repo.promote(key, 1, "admin@example.com") is True
     detail = repo.get_prompt(key)
     assert detail is not None
     by_no = {v["version_no"]: v for v in detail["versions"]}
-    assert by_no[2]["status"] == "production"
-    assert by_no[2]["promoted_by"] == "admin@example.com"
-    assert by_no[2]["promoted_at"] is not None
-    assert by_no[1]["status"] == "archived"  # production cũ bị demote
-    assert detail["production_content"] == "V2"  # content production đổi
+    assert by_no[1]["status"] == "production"
+    assert by_no[1]["promoted_by"] == "admin@example.com"
+    assert by_no[1]["promoted_at"] is not None
+    assert by_no[2]["status"] == "archived"
+    assert detail["production_content"] == "V1 CONTENT"
 
 
 def test_promote_unknown_version_returns_false(db_conn) -> None:  # type: ignore[no-untyped-def]
@@ -107,7 +115,7 @@ def test_list_and_detail_endpoints(client, auth, db_conn) -> None:  # type: igno
     assert len(body["versions"]) == 1
 
 
-def test_create_then_promote_endpoint_flow(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
+def test_create_version_endpoint_applies_immediately(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     key = f"test-{uuid.uuid4().hex[:8]}"
     _seed_prompt(db_conn, key)
     admin = auth("admin")
@@ -119,10 +127,14 @@ def test_create_then_promote_endpoint_flow(client, auth, db_conn) -> None:  # ty
     )
     assert created.status_code == 200
     assert created.json()["version_no"] == 2
+    assert created.json()["status"] == "production"
 
-    promoted = client.post(f"/api/admin/prompts/{key}/versions/2/promote", headers=admin)
-    assert promoted.status_code == 200
-    assert promoted.json()["production_content"] == "V2 CONTENT"
+    detail = client.get(f"/api/admin/prompts/{key}", headers=admin)
+    assert detail.json()["production_content"] == "V2 CONTENT"
+
+    rolled_back = client.post(f"/api/admin/prompts/{key}/versions/1/promote", headers=admin)
+    assert rolled_back.status_code == 200
+    assert rolled_back.json()["production_content"] == "V1 CONTENT"
 
 
 def test_prompts_require_admin(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]

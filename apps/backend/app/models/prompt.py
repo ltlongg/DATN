@@ -3,8 +3,9 @@ prompt_versions mà agent-service sở hữu DDL (bootstrap bằng scripts/seed_
 
 Reads bắt `UndefinedTable` -> rỗng (giống models/cost.py): mở UI Prompt trước khi seed không
 500. Writes chỉ chạy trên key ĐÃ seed (FK) nên giả định bảng tồn tại. Mọi hàm SYNC; API gọi
-qua anyio.to_thread. `promote` chạy trong 1 connection() -> 1 transaction (commit khi thoát
-sạch)."""
+qua anyio.to_thread. Không có tầng staging: `create_version` tạo bản mới VÀ đẩy production
+ngay; `promote` chỉ còn phục vụ rollback về một bản archived cũ. Cả hai chạy trong 1
+connection() -> 1 transaction (commit khi thoát sạch)."""
 
 from __future__ import annotations
 
@@ -90,11 +91,9 @@ def get_version(key: str, version_no: int) -> dict[str, Any] | None:
         return None
 
 
-def create_staging_version(
-    key: str, content: str, note: str | None, by: str
-) -> dict[str, Any] | None:
-    """Tạo version 'staging' mới (version_no = max+1). None nếu key không tồn tại. Trả meta
-    version vừa tạo."""
+def create_version(key: str, content: str, note: str | None, by: str) -> dict[str, Any] | None:
+    """Tạo version mới (version_no = max+1) và đẩy thẳng lên production trong cùng transaction:
+    production cũ -> archived. None nếu key không tồn tại. Trả meta version vừa tạo."""
     with connection() as conn, conn.cursor() as cur:
         cur.execute("SELECT 1 FROM managed_prompts WHERE key = %s", (key,))
         if cur.fetchone() is None:
@@ -106,11 +105,17 @@ def create_staging_version(
         )
         next_no = int(cur.fetchone()["next"])
         cur.execute(
+            "UPDATE prompt_versions SET status = 'archived' "
+            "WHERE prompt_key = %s AND status = 'production'",
+            (key,),
+        )
+        cur.execute(
             f"INSERT INTO prompt_versions "
-            f"(id, prompt_key, version_no, content, note, status, created_by) "
-            f"VALUES (%s, %s, %s, %s, %s, 'staging', %s) "
+            f"(id, prompt_key, version_no, content, note, status, created_by, "
+            f"promoted_by, promoted_at) "
+            f"VALUES (%s, %s, %s, %s, %s, 'production', %s, %s, now()) "
             f"RETURNING {_VERSION_META_COLS}",
-            (str(uuid.uuid4()), key, next_no, content, note, by),
+            (str(uuid.uuid4()), key, next_no, content, note, by, by),
         )
         created = cur.fetchone()
         cur.execute("UPDATE managed_prompts SET updated_at = now() WHERE key = %s", (key,))
@@ -118,8 +123,9 @@ def create_staging_version(
 
 
 def promote(key: str, version_no: int, by: str) -> bool:
-    """Đẩy 1 version lên production (transaction 1 connection): production hiện tại ->
-    archived; version đích -> production + ghi promoted_by/at. False nếu version không tồn tại."""
+    """Rollback: đưa 1 version cũ trở lại production (transaction 1 connection): production
+    hiện tại -> archived; version đích -> production + ghi promoted_by/at. False nếu version
+    không tồn tại."""
     with connection() as conn, conn.cursor() as cur:
         cur.execute(
             "SELECT 1 FROM prompt_versions WHERE prompt_key = %s AND version_no = %s",

@@ -1,8 +1,9 @@
 """Quản lý Prompt router (admin) — prefix /api/admin/prompts. Item 2.
 
-Sửa/version/promote **system prompt tĩnh** đã seed từ code sang Postgres. Agent đọc version
-production lúc chạy (get_active_prompt) + luôn fallback về hằng code. created_by/promoted_by
-lấy từ email admin đang đăng nhập (audit).
+Sửa/version **system prompt tĩnh** đã seed từ code sang Postgres. Lưu là đẩy production ngay
+(không có bản nháp staging); `promote` chỉ dùng để rollback về version cũ trong lịch sử. Agent
+đọc version production lúc chạy (get_active_prompt) + luôn fallback về hằng code.
+created_by/promoted_by lấy từ email admin đang đăng nhập (audit).
 """
 
 from __future__ import annotations
@@ -51,9 +52,10 @@ async def get_version(key: str, version_no: int) -> PromptVersionContent:
 async def create_version(
     key: str, body: CreateVersionInput, user: User = Depends(require_admin)
 ) -> PromptVersionMeta:
-    """Tạo bản staging mới (chưa production). created_by = email admin."""
+    """Tạo version mới VÀ đẩy production ngay (production cũ -> archived).
+    created_by = promoted_by = email admin."""
     row = await anyio.to_thread.run_sync(
-        repo.create_staging_version, key, body.content, body.note, user.email
+        repo.create_version, key, body.content, body.note, user.email
     )
     if row is None:
         raise AppError(404, "not_found", "Không tìm thấy prompt để tạo phiên bản.")
@@ -64,8 +66,8 @@ async def create_version(
 async def promote_version(
     key: str, version_no: int, user: User = Depends(require_admin)
 ) -> PromptDetail:
-    """Đẩy 1 version lên production (demote production cũ -> archived). promoted_by = email admin.
-    Trả detail mới để FE cập nhật."""
+    """Rollback: đưa 1 version cũ trở lại production (production hiện tại -> archived).
+    promoted_by = email admin. Trả detail mới để FE cập nhật."""
     ok = await anyio.to_thread.run_sync(repo.promote, key, version_no, user.email)
     if not ok:
         raise AppError(404, "not_found", "Không tìm thấy phiên bản để đẩy lên production.")
