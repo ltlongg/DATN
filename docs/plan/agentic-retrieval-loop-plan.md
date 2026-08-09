@@ -165,8 +165,8 @@ START
   → validate_citations                     (B5 — reinstate, xem §6)
   → (after_validate)
         ├─ có citation hợp lệ → build_visualization
-        ├─ confidence="không đủ dữ liệu" → honest_answer
-        └─ 0 citation & còn attempt → synthesize (retry, emit `regenerating`)
+        ├─ 0 citation & còn attempt → synthesize (retry, emit `regenerating`)
+        └─ 0 citation & hết attempt → honest_answer
   → build_visualization → END
 ```
 
@@ -797,10 +797,10 @@ liệu** thay vì thông điệp chung (đúng tinh thần honest domain lịch 
 
 > ### ✅ ĐÃ CODE 2026-07-31 — đúng thiết kế dưới, thêm 3 điểm chốt lúc làm
 >
-> 1. **Thứ tự nhánh trong `after_validate` KHÔNG được đảo**: `confidence="không đủ dữ liệu"`
->    phải xét TRƯỚC khi đếm citation. LLM tự khai không trả lời được thì soạn lại cũng vô
->    ích — đặt sau thì một câu "không đủ dữ liệu" **có** citation hợp lệ sẽ đi thẳng sang
->    `build_visualization`, tức bỏ qua nhánh honest.
+> 1. **Cập nhật 2026-08-03**: `confidence="không đủ dữ liệu"` là tự đánh giá của LLM,
+>    không còn tự động đưa answer có citation hợp lệ sang `honest_answer`. Prompt phải trả
+>    lời mọi phần có căn cứ và tự kết bằng lời lưu ý phù hợp với phần còn thiếu. Citation
+>    vẫn là chốt an toàn quyết định giữ, retry hay fallback.
 > 2. **`honest_answer` chỉ chốt dòng `synthesize:1` khi `synthesize_attempt_count == 0`.**
 >    Đến từ `after_validate` hết lượt thì các dòng soạn/đối chiếu đã có trạng thái thật rồi;
 >    đạp lại là xoá mất chuyện đã xảy ra.
@@ -833,7 +833,6 @@ cổng go/no-go (§9).
   judge — ghi rõ hạn chế: chỉ kiểm hình thức "id có thuộc tập retrieve", không kiểm ngữ nghĩa
   grounding).
 - **`after_validate`** conditional:
-  - `confidence == "không đủ dữ liệu"` → `honest_answer`.
   - có ≥1 citation hợp lệ → `build_visualization`.
   - 0 citation hợp lệ & `synthesize_attempt_count < synthesize_max_attempts` → `synthesize`
     (retry; `synthesize` đã emit `regenerating` khi `attempt>0`).
