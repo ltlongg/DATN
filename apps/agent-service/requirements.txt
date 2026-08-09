@@ -75,6 +75,13 @@ psycopg-pool>=3,<4
 # --- Logging ---
 structlog
 
+# --- Đánh giá RAG (offline, chỉ dùng cho scripts/run_ragas_eval.py) ---
+# GHIM CHÍNH XÁC, không dùng dải: số liệu đánh giá trong báo cáo phải tái lập được, mà
+# ragas đổi API giữa các minor (0.1 -> 0.2 đổi toàn bộ schema; 0.4 deprecate wrapper LLM).
+# Đổi version thì phải chạy lại toàn bộ và ghi lại version mới vào báo cáo.
+ragas==0.4.3
+datasets
+
 # --- Testing ---
 pytest
 pytest-asyncio
