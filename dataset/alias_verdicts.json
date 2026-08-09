@@ -10978,5 +10978,23 @@
     "canonical": "Đại đội 1 tiểu đoàn 514",
     "confidence": "cao",
     "reason": "Khác số hiệu tiểu đoàn (261 và 514), mô tả nguồn gốc hình thành cũng khác nên là hai đơn vị riêng."
+  },
+  "alias-judge-v1|sepone||sêpôn": {
+    "same": true,
+    "canonical": "Sêpôn",
+    "confidence": "cao",
+    "reason": "Cùng địa danh Sêpôn (Sepone) ở Nam Lào trên tuyến đường mòn Hồ Chí Minh; hai tên chỉ khác cách phiên âm."
+  },
+  "alias-judge-v1|sepone||sê pôn": {
+    "same": true,
+    "canonical": "Sê Pôn",
+    "confidence": "cao",
+    "reason": "Cùng địa danh Sê Pôn (Sepone) trên tuyến đường mòn Hồ Chí Minh, là mục tiêu hậu cần và điểm then chốt của Lam Sơn 719."
+  },
+  "alias-judge-v1|cao nguyên bolaven||cao nguyên bôlôven": {
+    "same": true,
+    "canonical": "Cao nguyên Bôlôven",
+    "confidence": "cao",
+    "reason": "Cùng chỉ Cao nguyên Bolaven/Bôlôven ở Hạ Lào; khác nhau chỉ ở cách phiên âm, còn mô tả đề cập các thời điểm kiểm soát khác nhau."
   }
 }
