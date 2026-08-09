@@ -5,9 +5,15 @@
         "dataset/chunks_llm.json": true,
         "dataset/graph_extractions.json": true,
         "dataset.clean.md": true,
-        "dataset/alias_seed.json": false,
+        "dataset/alias_seed.json": true,
         "dataset/alias_verdicts.json": true,
         "dataset/alias_review.md": true,
-        "dataset/alias_map.json": true
+        "dataset/alias_map.json": true,
+        "Tập 1.md": true,
+        "Tập 2.md": true,
+        "tap1.clean.md": true,
+        "tap2.clean.md": true,
+        "phi-su-kien.md": true,
+        "phi-su-kien.clean.md": true,
     }
 }
