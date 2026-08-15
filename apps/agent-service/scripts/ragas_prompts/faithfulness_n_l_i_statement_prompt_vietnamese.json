@@ -1,0 +1,59 @@
+{
+  "ragas_version": "0.4.3",
+  "language": "vietnamese",
+  "instruction": "Nhiệm vụ của bạn là đánh giá mức độ trung thực của một loạt mệnh đề dựa trên ngữ cảnh được cho. Với mỗi mệnh đề, trả verdict là 1 nếu mệnh đề có thể suy ra TRỰC TIẾP từ ngữ cảnh, hoặc 0 nếu mệnh đề không thể suy ra trực tiếp từ ngữ cảnh.",
+  "examples": [
+    {
+      "input": {
+        "context": "John là sinh viên Đại học XYZ. Anh đang theo học ngành Khoa học Máy tính. Học kỳ này anh đăng ký nhiều môn, gồm Cấu trúc dữ liệu, Giải thuật và Quản trị cơ sở dữ liệu. John là một sinh viên chăm chỉ, dành rất nhiều thời gian học và làm bài tập. Anh thường ở lại thư viện đến muộn để làm đồ án.",
+        "statements": [
+          "John học ngành Sinh học.",
+          "John đang học một môn về Trí tuệ nhân tạo.",
+          "John là một sinh viên tận tuỵ.",
+          "John có một công việc bán thời gian."
+        ]
+      },
+      "output": {
+        "statements": [
+          {
+            "statement": "John học ngành Sinh học.",
+            "reason": "Ngành học của John được nêu rõ là Khoa học Máy tính. Không có thông tin nào cho thấy anh học ngành Sinh học.",
+            "verdict": 0
+          },
+          {
+            "statement": "John đang học một môn về Trí tuệ nhân tạo.",
+            "reason": "Ngữ cảnh có liệt kê các môn John đang đăng ký, và Trí tuệ nhân tạo không nằm trong đó. Vì vậy không suy ra được rằng John đang học môn về Trí tuệ nhân tạo.",
+            "verdict": 0
+          },
+          {
+            "statement": "John là một sinh viên tận tuỵ.",
+            "reason": "Ngữ cảnh nói rằng anh dành rất nhiều thời gian học và làm bài tập. Ngoài ra ngữ cảnh còn nói anh thường ở lại thư viện đến muộn để làm đồ án, điều đó hàm ý sự tận tuỵ.",
+            "verdict": 1
+          },
+          {
+            "statement": "John có một công việc bán thời gian.",
+            "reason": "Ngữ cảnh không cho thông tin nào về việc John có công việc bán thời gian.",
+            "verdict": 0
+          }
+        ]
+      }
+    },
+    {
+      "input": {
+        "context": "Quang hợp là quá trình được thực vật, tảo và một số vi khuẩn sử dụng để chuyển năng lượng ánh sáng thành năng lượng hoá học.",
+        "statements": [
+          "Albert Einstein là một thiên tài."
+        ]
+      },
+      "output": {
+        "statements": [
+          {
+            "statement": "Albert Einstein là một thiên tài.",
+            "reason": "Ngữ cảnh và mệnh đề không liên quan gì đến nhau.",
+            "verdict": 0
+          }
+        ]
+      }
+    }
+  ]
+}

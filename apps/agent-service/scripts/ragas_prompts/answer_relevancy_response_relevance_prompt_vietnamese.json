@@ -1,0 +1,25 @@
+{
+  "ragas_version": "0.4.3",
+  "language": "vietnamese",
+  "instruction": "Hãy sinh một câu hỏi ứng với câu trả lời được cho, và xác định câu trả lời có né tránh hay không. Trả noncommittal là 1 nếu câu trả lời né tránh và 0 nếu câu trả lời dứt khoát. Câu trả lời né tránh là câu lảng tránh, mơ hồ hoặc nước đôi. Ví dụ, \"tôi không biết\" hoặc \"tôi không chắc\" là những câu trả lời né tránh.",
+  "examples": [
+    {
+      "input": {
+        "response": "Albert Einstein sinh ra ở Đức."
+      },
+      "output": {
+        "question": "Albert Einstein sinh ra ở đâu?",
+        "noncommittal": 0
+      }
+    },
+    {
+      "input": {
+        "response": "Tôi không biết tính năng đột phá của chiếc điện thoại thông minh được phát minh năm 2023 là gì, vì tôi không nắm được thông tin sau năm 2022."
+      },
+      "output": {
+        "question": "Tính năng đột phá của chiếc điện thoại thông minh được phát minh năm 2023 là gì?",
+        "noncommittal": 1
+      }
+    }
+  ]
+}

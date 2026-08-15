@@ -1,0 +1,962 @@
+[
+  {
+    "score": 12,
+    "bridge": "Nguyễn Đình Chiểu",
+    "anchor": "Cuộc nổi dậy Trương Định",
+    "anchor_relation": "tham gia",
+    "target": "Phong trào tị địa",
+    "target_relation": "tham gia",
+    "hop1_chunk_id": "phi-su-kien_clean-000017",
+    "hop2_chunk_id": "phi-su-kien_clean-000020",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương I. VIỆT NAM TRƯỚC NGUY CƠ THỰC DÂN PHÁP XÂM LƯỢC. CUỘC KHÁNG CHIẾN BẮT ĐẦU",
+      "III. THỰC DÂN PHÁP PHÁT ĐỘNG CHIẾN TRANH XÂM LƯỢC VIỆT NAM",
+      "1. Từ Đà Nẵng đến Gia Định"
+    ],
+    "hop2_heading": [
+      "Chương I. VIỆT NAM TRƯỚC NGUY CƠ THỰC DÂN PHÁP XÂM LƯỢC. CUỘC KHÁNG CHIẾN BẮT ĐẦU",
+      "III. THỰC DÂN PHÁP PHÁT ĐỘNG CHIẾN TRANH XÂM LƯỢC VIỆT NAM",
+      "2. Từ Hoà ước năm 1862 đến việc thực dân Pháp đánh chiếm ba tỉnh miền Tây Nam Kì"
+    ],
+    "hop1_quote": "Cuộc nổi dậy của Trương Định là phong trào lớn nhất lúc đó. Trương Định đã chiến đấu rất sớm trên mặt trận Gia Định. Ngay sau khi Pháp chiếm thành Gia Định (17 - 2 - 1859), ông đã đưa đội nghĩa quân c",
+    "hop2_quote": "Hoà ước kí kết xong, thực dân Pháp vội cho các thuyền máy hối hả truyền tin đó đi các nơi, nhất là ở các nơi đang bị nghĩa quân uy hiếp nghiêm trọng, tưởng rằng nghĩa quân các nơi sẽ ngoạn ngoãn thi h"
+  },
+  {
+    "score": 12,
+    "bridge": "Nguyễn Đình Chiểu",
+    "anchor": "Phong trào tị địa",
+    "anchor_relation": "tham gia",
+    "target": "Cuộc nổi dậy Trương Định",
+    "target_relation": "tham gia",
+    "hop1_chunk_id": "phi-su-kien_clean-000020",
+    "hop2_chunk_id": "phi-su-kien_clean-000017",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương I. VIỆT NAM TRƯỚC NGUY CƠ THỰC DÂN PHÁP XÂM LƯỢC. CUỘC KHÁNG CHIẾN BẮT ĐẦU",
+      "III. THỰC DÂN PHÁP PHÁT ĐỘNG CHIẾN TRANH XÂM LƯỢC VIỆT NAM",
+      "2. Từ Hoà ước năm 1862 đến việc thực dân Pháp đánh chiếm ba tỉnh miền Tây Nam Kì"
+    ],
+    "hop2_heading": [
+      "Chương I. VIỆT NAM TRƯỚC NGUY CƠ THỰC DÂN PHÁP XÂM LƯỢC. CUỘC KHÁNG CHIẾN BẮT ĐẦU",
+      "III. THỰC DÂN PHÁP PHÁT ĐỘNG CHIẾN TRANH XÂM LƯỢC VIỆT NAM",
+      "1. Từ Đà Nẵng đến Gia Định"
+    ],
+    "hop1_quote": "Hoà ước kí kết xong, thực dân Pháp vội cho các thuyền máy hối hả truyền tin đó đi các nơi, nhất là ở các nơi đang bị nghĩa quân uy hiếp nghiêm trọng, tưởng rằng nghĩa quân các nơi sẽ ngoạn ngoãn thi h",
+    "hop2_quote": "Cuộc nổi dậy của Trương Định là phong trào lớn nhất lúc đó. Trương Định đã chiến đấu rất sớm trên mặt trận Gia Định. Ngay sau khi Pháp chiếm thành Gia Định (17 - 2 - 1859), ông đã đưa đội nghĩa quân c"
+  },
+  {
+    "score": 12,
+    "bridge": "Kỳ Đồng",
+    "anchor": "Đề Thám",
+    "anchor_relation": "hỗ trợ",
+    "target": "Mạc Đĩnh Phúc",
+    "target_relation": "liên hệ với",
+    "hop1_chunk_id": "lichsu_clean-000032",
+    "hop2_chunk_id": "phi-su-kien_clean-000035",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "6. Khởi nghĩa Yên Thế",
+      "Diễn biến",
+      "Giai đoạn 2 (1893 - 1897)"
+    ],
+    "hop2_heading": [
+      "Chương III. PHONG TRÀO ĐẤU TRANH CỦA NHÂN DÂN VIỆT NAM CHỐNG CHIẾN TRANH BÌNH ĐỊNH CỦA THỰC DÂN PHÁP",
+      "III. PHONG TRÀO ĐẤU TRANH TỰ VỆ CỦA NÔNG DÂN YÊN THẾ VÀ ĐỒNG BÀO MIỀN NÚI",
+      "3. Phong trào yêu nước mang màu sắc tôn giáo"
+    ],
+    "hop1_quote": " với Pháp, lần thứ nhất vào tháng 10 - 1894, lần thứ hai vào tháng 12-1897. Sau khi Đề Nắm hi sinh, Đề Thám đảm nhận vai trò lãnh đạo phong trào Yên Thế. Ông đã khôi phục những toán quân còn sót lại ở Yên Thế và các vùng xung quanh, rồi tiếp tục hoạt động. So với giai đoạn trước, số lượng nghĩa quân",
+    "hop2_quote": "hững tên tay sai của Pháp.  Ở ngoài Bắc, vào những năm cuối thế kỉ XIX có phong trào của Kỳ Đồng và Mạc Đĩnh Phúc.  Kỳ Đồng quê ở Thái Bình, tên thật là Nguyễn Văn Cẩm, được gọi là Kỳ Đồng (đứa bé kì dị) vì thuở bé ông học rất thông minh (như thần đồng). Năm 1888, ông phất cờ khởi nghĩa định chiếm t"
+  },
+  {
+    "score": 12,
+    "bridge": "Kỳ Đồng",
+    "anchor": "Đề Thám",
+    "anchor_relation": "hỗ trợ",
+    "target": "Phong trào Kỳ Đồng và Mạc Đĩnh Phúc",
+    "target_relation": "tham gia",
+    "hop1_chunk_id": "lichsu_clean-000032",
+    "hop2_chunk_id": "phi-su-kien_clean-000035",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "6. Khởi nghĩa Yên Thế",
+      "Diễn biến",
+      "Giai đoạn 2 (1893 - 1897)"
+    ],
+    "hop2_heading": [
+      "Chương III. PHONG TRÀO ĐẤU TRANH CỦA NHÂN DÂN VIỆT NAM CHỐNG CHIẾN TRANH BÌNH ĐỊNH CỦA THỰC DÂN PHÁP",
+      "III. PHONG TRÀO ĐẤU TRANH TỰ VỆ CỦA NÔNG DÂN YÊN THẾ VÀ ĐỒNG BÀO MIỀN NÚI",
+      "3. Phong trào yêu nước mang màu sắc tôn giáo"
+    ],
+    "hop1_quote": " với Pháp, lần thứ nhất vào tháng 10 - 1894, lần thứ hai vào tháng 12-1897. Sau khi Đề Nắm hi sinh, Đề Thám đảm nhận vai trò lãnh đạo phong trào Yên Thế. Ông đã khôi phục những toán quân còn sót lại ở Yên Thế và các vùng xung quanh, rồi tiếp tục hoạt động. So với giai đoạn trước, số lượng nghĩa quân",
+    "hop2_quote": "Từ trước tới nay, khi nghiên cứu lịch sử cận đại Việt Nam, người ta thường chú trọng nhiều tới các phong trào do các sĩ phu lãnh đạo, mà ít chú ý tới những phong trào yêu nước mang màu sắc tôn giáo. T"
+  },
+  {
+    "score": 12,
+    "bridge": "Kỳ Đồng",
+    "anchor": "Đề Thám",
+    "anchor_relation": "hỗ trợ",
+    "target": "Thành Nam Định",
+    "target_relation": "định chiếm",
+    "hop1_chunk_id": "lichsu_clean-000032",
+    "hop2_chunk_id": "phi-su-kien_clean-000035",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "6. Khởi nghĩa Yên Thế",
+      "Diễn biến",
+      "Giai đoạn 2 (1893 - 1897)"
+    ],
+    "hop2_heading": [
+      "Chương III. PHONG TRÀO ĐẤU TRANH CỦA NHÂN DÂN VIỆT NAM CHỐNG CHIẾN TRANH BÌNH ĐỊNH CỦA THỰC DÂN PHÁP",
+      "III. PHONG TRÀO ĐẤU TRANH TỰ VỆ CỦA NÔNG DÂN YÊN THẾ VÀ ĐỒNG BÀO MIỀN NÚI",
+      "3. Phong trào yêu nước mang màu sắc tôn giáo"
+    ],
+    "hop1_quote": " với Pháp, lần thứ nhất vào tháng 10 - 1894, lần thứ hai vào tháng 12-1897. Sau khi Đề Nắm hi sinh, Đề Thám đảm nhận vai trò lãnh đạo phong trào Yên Thế. Ông đã khôi phục những toán quân còn sót lại ở Yên Thế và các vùng xung quanh, rồi tiếp tục hoạt động. So với giai đoạn trước, số lượng nghĩa quân",
+    "hop2_quote": " dị) vì thuở bé ông học rất thông minh (như thần đồng). Năm 1888, ông phất cờ khởi nghĩa định chiếm thành Nam Định. Việc không thành. ông bị bắt, rồi bị đày sang châu Phi. Để mua chuộc ông, bọn thực dân đã cho ông sang Pháp học, sau đưa về nước làm công chức cho chính quyền thuộc địa.  Năm 1896, Kỳ "
+  },
+  {
+    "score": 12,
+    "bridge": "Kỳ Đồng",
+    "anchor": "Mạc Đĩnh Phúc",
+    "anchor_relation": "liên hệ với",
+    "target": "Đề Thám",
+    "target_relation": "hỗ trợ",
+    "hop1_chunk_id": "phi-su-kien_clean-000035",
+    "hop2_chunk_id": "lichsu_clean-000032",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương III. PHONG TRÀO ĐẤU TRANH CỦA NHÂN DÂN VIỆT NAM CHỐNG CHIẾN TRANH BÌNH ĐỊNH CỦA THỰC DÂN PHÁP",
+      "III. PHONG TRÀO ĐẤU TRANH TỰ VỆ CỦA NÔNG DÂN YÊN THẾ VÀ ĐỒNG BÀO MIỀN NÚI",
+      "3. Phong trào yêu nước mang màu sắc tôn giáo"
+    ],
+    "hop2_heading": [
+      "6. Khởi nghĩa Yên Thế",
+      "Diễn biến",
+      "Giai đoạn 2 (1893 - 1897)"
+    ],
+    "hop1_quote": "hững tên tay sai của Pháp.  Ở ngoài Bắc, vào những năm cuối thế kỉ XIX có phong trào của Kỳ Đồng và Mạc Đĩnh Phúc.  Kỳ Đồng quê ở Thái Bình, tên thật là Nguyễn Văn Cẩm, được gọi là Kỳ Đồng (đứa bé kì dị) vì thuở bé ông học rất thông minh (như thần đồng). Năm 1888, ông phất cờ khởi nghĩa định chiếm t",
+    "hop2_quote": " với Pháp, lần thứ nhất vào tháng 10 - 1894, lần thứ hai vào tháng 12-1897. Sau khi Đề Nắm hi sinh, Đề Thám đảm nhận vai trò lãnh đạo phong trào Yên Thế. Ông đã khôi phục những toán quân còn sót lại ở Yên Thế và các vùng xung quanh, rồi tiếp tục hoạt động. So với giai đoạn trước, số lượng nghĩa quân"
+  },
+  {
+    "score": 12,
+    "bridge": "Trần Cao Vân",
+    "anchor": "Võ Trứ",
+    "anchor_relation": "phối hợp với",
+    "target": "Cuộc vận động khởi nghĩa năm 1916",
+    "target_relation": "lãnh đạo",
+    "hop1_chunk_id": "phi-su-kien_clean-000036",
+    "hop2_chunk_id": "phi-su-kien_clean-000140",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương III. PHONG TRÀO ĐẤU TRANH CỦA NHÂN DÂN VIỆT NAM CHỐNG CHIẾN TRANH BÌNH ĐỊNH CỦA THỰC DÂN PHÁP",
+      "III. PHONG TRÀO ĐẤU TRANH TỰ VỆ CỦA NÔNG DÂN YÊN THẾ VÀ ĐỒNG BÀO MIỀN NÚI",
+      "3. Phong trào yêu nước mang màu sắc tôn giáo"
+    ],
+    "hop2_heading": [
+      "Chương VI. VIỆT NAM TRONG CHIẾN TRANH THẾ GIỚI THỨ NHẤT (1914 - 1918)",
+      "V. PHONG TRÀO ĐẤU TRANH YÊU NƯỚC CÁCH MẠNG",
+      "4. Cuộc vận động khởi nghĩa của Thái Phiên và Trần Cao Vân (1916)"
+    ],
+    "hop1_quote": "h, cuộc khởi nghĩa đã nhanh chóng bị đàn áp.  Thời gian này trong miền Trung có cuộc khởi nghĩa của Võ Trứ, Trần Cao Vân ở Phú Yên (1898).  Thực dân Pháp thường gọi những người tham gia cuộc khởi nghĩa này là \"Giặc Rựa\", \"Giặc Thầy chùa\" (vì phong trào có đông đảo nhà sư tham gia và vũ khí phần lớn ",
+    "hop2_quote": "Sau gần một năm tham chiến, quân Pháp bị nhiều tổn thất về người và của. Chính quyền Đông Dương tăng cường bắt lính thuộc địa để bù đắp vào sự thiếu hụt quân số. Đợt bắt lính thứ hai ở Đông Dương thực"
+  },
+  {
+    "score": 12,
+    "bridge": "Trần Cao Vân",
+    "anchor": "Cuộc vận động khởi nghĩa năm 1916",
+    "anchor_relation": "lãnh đạo",
+    "target": "Võ Trứ",
+    "target_relation": "phối hợp với",
+    "hop1_chunk_id": "phi-su-kien_clean-000140",
+    "hop2_chunk_id": "phi-su-kien_clean-000036",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương VI. VIỆT NAM TRONG CHIẾN TRANH THẾ GIỚI THỨ NHẤT (1914 - 1918)",
+      "V. PHONG TRÀO ĐẤU TRANH YÊU NƯỚC CÁCH MẠNG",
+      "4. Cuộc vận động khởi nghĩa của Thái Phiên và Trần Cao Vân (1916)"
+    ],
+    "hop2_heading": [
+      "Chương III. PHONG TRÀO ĐẤU TRANH CỦA NHÂN DÂN VIỆT NAM CHỐNG CHIẾN TRANH BÌNH ĐỊNH CỦA THỰC DÂN PHÁP",
+      "III. PHONG TRÀO ĐẤU TRANH TỰ VỆ CỦA NÔNG DÂN YÊN THẾ VÀ ĐỒNG BÀO MIỀN NÚI",
+      "3. Phong trào yêu nước mang màu sắc tôn giáo"
+    ],
+    "hop1_quote": "Sau gần một năm tham chiến, quân Pháp bị nhiều tổn thất về người và của. Chính quyền Đông Dương tăng cường bắt lính thuộc địa để bù đắp vào sự thiếu hụt quân số. Đợt bắt lính thứ hai ở Đông Dương thực",
+    "hop2_quote": "h, cuộc khởi nghĩa đã nhanh chóng bị đàn áp.  Thời gian này trong miền Trung có cuộc khởi nghĩa của Võ Trứ, Trần Cao Vân ở Phú Yên (1898).  Thực dân Pháp thường gọi những người tham gia cuộc khởi nghĩa này là \"Giặc Rựa\", \"Giặc Thầy chùa\" (vì phong trào có đông đảo nhà sư tham gia và vũ khí phần lớn "
+  },
+  {
+    "score": 12,
+    "bridge": "Trần Cao Vân",
+    "anchor": "Cuộc vận động khởi nghĩa năm 1916",
+    "anchor_relation": "lãnh đạo",
+    "target": "Chùa Chánh Danh",
+    "target_relation": "lấy làm căn cứ",
+    "hop1_chunk_id": "phi-su-kien_clean-000140",
+    "hop2_chunk_id": "phi-su-kien_clean-000036",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương VI. VIỆT NAM TRONG CHIẾN TRANH THẾ GIỚI THỨ NHẤT (1914 - 1918)",
+      "V. PHONG TRÀO ĐẤU TRANH YÊU NƯỚC CÁCH MẠNG",
+      "4. Cuộc vận động khởi nghĩa của Thái Phiên và Trần Cao Vân (1916)"
+    ],
+    "hop2_heading": [
+      "Chương III. PHONG TRÀO ĐẤU TRANH CỦA NHÂN DÂN VIỆT NAM CHỐNG CHIẾN TRANH BÌNH ĐỊNH CỦA THỰC DÂN PHÁP",
+      "III. PHONG TRÀO ĐẤU TRANH TỰ VỆ CỦA NÔNG DÂN YÊN THẾ VÀ ĐỒNG BÀO MIỀN NÚI",
+      "3. Phong trào yêu nước mang màu sắc tôn giáo"
+    ],
+    "hop1_quote": "Sau gần một năm tham chiến, quân Pháp bị nhiều tổn thất về người và của. Chính quyền Đông Dương tăng cường bắt lính thuộc địa để bù đắp vào sự thiếu hụt quân số. Đợt bắt lính thứ hai ở Đông Dương thực",
+    "hop2_quote": " phong trào Cần vương thất bại, ông vẫn bí mật tiếp tục hoạt động. Ông gặp Võ Trứ và hai ông đã lấy chùa Chánh Danh làm căn cứ, từ đây mở rộng hoạt động ra khắp hai tỉnh Phú Yên và Bình Định. Hầu hết các chùa ở hai tỉnh này đều là cơ sở của Võ Trứ và Trần Cao Vân.  Sau một thời gian tuyên truyền vận"
+  },
+  {
+    "score": 12,
+    "bridge": "Trần Cao Vân",
+    "anchor": "Cuộc vận động khởi nghĩa năm 1916",
+    "anchor_relation": "lãnh đạo",
+    "target": "Khởi nghĩa Võ Trứ - Trần Cao Vân",
+    "target_relation": "chỉ huy",
+    "hop1_chunk_id": "phi-su-kien_clean-000140",
+    "hop2_chunk_id": "phi-su-kien_clean-000036",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương VI. VIỆT NAM TRONG CHIẾN TRANH THẾ GIỚI THỨ NHẤT (1914 - 1918)",
+      "V. PHONG TRÀO ĐẤU TRANH YÊU NƯỚC CÁCH MẠNG",
+      "4. Cuộc vận động khởi nghĩa của Thái Phiên và Trần Cao Vân (1916)"
+    ],
+    "hop2_heading": [
+      "Chương III. PHONG TRÀO ĐẤU TRANH CỦA NHÂN DÂN VIỆT NAM CHỐNG CHIẾN TRANH BÌNH ĐỊNH CỦA THỰC DÂN PHÁP",
+      "III. PHONG TRÀO ĐẤU TRANH TỰ VỆ CỦA NÔNG DÂN YÊN THẾ VÀ ĐỒNG BÀO MIỀN NÚI",
+      "3. Phong trào yêu nước mang màu sắc tôn giáo"
+    ],
+    "hop1_quote": "Sau gần một năm tham chiến, quân Pháp bị nhiều tổn thất về người và của. Chính quyền Đông Dương tăng cường bắt lính thuộc địa để bù đắp vào sự thiếu hụt quân số. Đợt bắt lính thứ hai ở Đông Dương thực",
+    "hop2_quote": "Cuộc khởi nghĩa thất bại sau ba năm hoạt động (1895 - 1897). Mạc Đĩnh Phúc bị bắt, bị xử tử. Còn Kỳ Đồng bị thực dân Pháp đày ra đảo Haiti.  Ngoài Bắc còn có phong trào Vương Quốc Chính.  Vương Quốc C"
+  },
+  {
+    "score": 12,
+    "bridge": "Lê Hoan",
+    "anchor": "Thượng du Bắc Kỳ",
+    "anchor_relation": "được điều đến",
+    "target": "Quân đội thân binh",
+    "target_relation": "đặt dưới quyền",
+    "hop1_chunk_id": "lichsu_clean-000075",
+    "hop2_chunk_id": "phi-su-kien_clean-000046",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "7. Phong trào Cần vương",
+      "Khởi nghĩa Thanh Sơn",
+      "Diễn biến"
+    ],
+    "hop2_heading": [
+      "Chương IV. NHỮNG BIẾN ĐỔI CỦA XÃ HỘI VIỆT NAM ĐẦU THẾ KỈ XX",
+      "I. CUỘC KHAI THÁC THUỘC ĐỊA LẦN THỨ NHẤT CỦA TƯ BẢN PHÁP (1897 - 1914)",
+      "2. Bộ máy quân sự, cảnh sát, toà án và nhà tù"
+    ],
+    "hop1_quote": " bị dập tắt, cho nên quân Pháp đã có thể tập trung lực lượng mở những cuộc càn quét quy mô lên vùng thượng du Bắc Kỳ. Bên cạnh giải pháp quân sự (chủ yếu đàn áp và bắt bớ); các quan chức Pháp còn dùng thủ đoạn chính trị, tức là dùng tiền của và quan tước để mua chuộc các thủ lĩnh và các nghĩa quân, ",
+    "hop2_quote": "i Việt cho toàn xứ, gọi là lực lượng dân vệ (garde civile). Ngoài ra, ở cả ba xứ, chúng còn tổ chức quân đội thân binh, dưới quyền của bọn việt gian phản động như Nguyễn Thân, Lê Hoan, Hoàng Cao Khải, Trần Bá Lộc, có nhiệm vụ thường trực đàn áp các cuộc nổi dậy của nhân dân.  Về số lượng, tính đến n"
+  },
+  {
+    "score": 12,
+    "bridge": "Lê Hoan",
+    "anchor": "Quân đội thân binh",
+    "anchor_relation": "đặt dưới quyền",
+    "target": "Thượng du Bắc Kỳ",
+    "target_relation": "được điều đến",
+    "hop1_chunk_id": "phi-su-kien_clean-000046",
+    "hop2_chunk_id": "lichsu_clean-000075",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương IV. NHỮNG BIẾN ĐỔI CỦA XÃ HỘI VIỆT NAM ĐẦU THẾ KỈ XX",
+      "I. CUỘC KHAI THÁC THUỘC ĐỊA LẦN THỨ NHẤT CỦA TƯ BẢN PHÁP (1897 - 1914)",
+      "2. Bộ máy quân sự, cảnh sát, toà án và nhà tù"
+    ],
+    "hop2_heading": [
+      "7. Phong trào Cần vương",
+      "Khởi nghĩa Thanh Sơn",
+      "Diễn biến"
+    ],
+    "hop1_quote": "i Việt cho toàn xứ, gọi là lực lượng dân vệ (garde civile). Ngoài ra, ở cả ba xứ, chúng còn tổ chức quân đội thân binh, dưới quyền của bọn việt gian phản động như Nguyễn Thân, Lê Hoan, Hoàng Cao Khải, Trần Bá Lộc, có nhiệm vụ thường trực đàn áp các cuộc nổi dậy của nhân dân.  Về số lượng, tính đến n",
+    "hop2_quote": " bị dập tắt, cho nên quân Pháp đã có thể tập trung lực lượng mở những cuộc càn quét quy mô lên vùng thượng du Bắc Kỳ. Bên cạnh giải pháp quân sự (chủ yếu đàn áp và bắt bớ); các quan chức Pháp còn dùng thủ đoạn chính trị, tức là dùng tiền của và quan tước để mua chuộc các thủ lĩnh và các nghĩa quân, "
+  },
+  {
+    "score": 12,
+    "bridge": "Lê Hoan",
+    "anchor": "Quân đội thân binh",
+    "anchor_relation": "đặt dưới quyền",
+    "target": "Tuần phủ Hưng Hóa",
+    "target_relation": "giữ chức",
+    "hop1_chunk_id": "phi-su-kien_clean-000046",
+    "hop2_chunk_id": "lichsu_clean-000075",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương IV. NHỮNG BIẾN ĐỔI CỦA XÃ HỘI VIỆT NAM ĐẦU THẾ KỈ XX",
+      "I. CUỘC KHAI THÁC THUỘC ĐỊA LẦN THỨ NHẤT CỦA TƯ BẢN PHÁP (1897 - 1914)",
+      "2. Bộ máy quân sự, cảnh sát, toà án và nhà tù"
+    ],
+    "hop2_heading": [
+      "7. Phong trào Cần vương",
+      "Khởi nghĩa Thanh Sơn",
+      "Diễn biến"
+    ],
+    "hop1_quote": "i Việt cho toàn xứ, gọi là lực lượng dân vệ (garde civile). Ngoài ra, ở cả ba xứ, chúng còn tổ chức quân đội thân binh, dưới quyền của bọn việt gian phản động như Nguyễn Thân, Lê Hoan, Hoàng Cao Khải, Trần Bá Lộc, có nhiệm vụ thường trực đàn áp các cuộc nổi dậy của nhân dân.  Về số lượng, tính đến n",
+    "hop2_quote": "ến đây các viên quan giàu kinh nghiệm, như đại tá Pennequin (chỉ huy khu quân sự Tây Bắc), Lê Hoan (tuần phủ Hưng Hóa)... nên các lực lượng kháng chiến ở vùng thượng du Bắc Kỳ, trong đó có quân của Đốc Ngữ, đã gặp khó khăn về nhiều mặt. Sau khi Đốc Ngữ hy sinh, khoảng ba tháng sau, Lãnh Khuê (một th"
+  },
+  {
+    "score": 12,
+    "bridge": "Lý Hồng Chương",
+    "anchor": "Nhà Thanh",
+    "anchor_relation": "trình phê chuẩn",
+    "target": "Điều ước Mã Quan",
+    "target_relation": "ký kết",
+    "hop1_chunk_id": "lichsu_clean-000014",
+    "hop2_chunk_id": "phi-su-kien_clean-000074",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "5. Chiến tranh Pháp - Thanh (trên lãnh thổ Việt Nam)",
+      "Chiến tranh",
+      null
+    ],
+    "hop2_heading": [
+      "Chương V. PHONG TRÀO YÊU NƯỚC CÁCH MẠNG VIỆT NAM ĐẦU THẾ KỈ XX",
+      "I. ẢNH HƯỞNG CỦA TÌNH HÌNH THẾ GIỚI VÀ CÁC TRÀO LƯU TƯ TƯỞNG TƯ SẢN ĐẾN VIỆT NAM",
+      "1. Tình hình Trung Quốc ảnh hưởng sâu sắc đến Việt Nam"
+    ],
+    "hop1_quote": "khắc nghiệt đó nên đàm phán đổ vỡ. Ông Phạm Thận Duật được cử sang Thiên Tân cầu cứu với triều đình nhà Thanh. Tổng đốc Lưỡng Quảng là Trương Thụ Thanh làm mật sớ về tâu với vua nhà Thanh, đại lược nói: \"nước Nam và nước Tàu tiếp giáp với nhau mà thế lực nước Nam thật là suy hèn, không có thể tự chủ",
+    "hop2_quote": "ông kiên quyết chống Nhật, chỉ trông mong vào các cường quốc. Ngày 17-4-1895, Lý Hồng Chương kí kết Điều ước Mã Quan ở Nhật Bản gồm các khoản chính: - 1 Thừa nhận quyền tự chủ của Triều Tiên. - 2 Cắt nhường cho Nhật bán đảo Liêu Đông, Đài Loan, Bành Hồ. - 3 Bồi thường chiến phí 2 van lạng bac. - 4 M"
+  },
+  {
+    "score": 12,
+    "bridge": "Lý Hồng Chương",
+    "anchor": "Điều ước Mã Quan",
+    "anchor_relation": "ký kết",
+    "target": "Nhà Thanh",
+    "target_relation": "trình phê chuẩn",
+    "hop1_chunk_id": "phi-su-kien_clean-000074",
+    "hop2_chunk_id": "lichsu_clean-000014",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương V. PHONG TRÀO YÊU NƯỚC CÁCH MẠNG VIỆT NAM ĐẦU THẾ KỈ XX",
+      "I. ẢNH HƯỞNG CỦA TÌNH HÌNH THẾ GIỚI VÀ CÁC TRÀO LƯU TƯ TƯỞNG TƯ SẢN ĐẾN VIỆT NAM",
+      "1. Tình hình Trung Quốc ảnh hưởng sâu sắc đến Việt Nam"
+    ],
+    "hop2_heading": [
+      "5. Chiến tranh Pháp - Thanh (trên lãnh thổ Việt Nam)",
+      "Chiến tranh",
+      null
+    ],
+    "hop1_quote": "ông kiên quyết chống Nhật, chỉ trông mong vào các cường quốc. Ngày 17-4-1895, Lý Hồng Chương kí kết Điều ước Mã Quan ở Nhật Bản gồm các khoản chính: - 1 Thừa nhận quyền tự chủ của Triều Tiên. - 2 Cắt nhường cho Nhật bán đảo Liêu Đông, Đài Loan, Bành Hồ. - 3 Bồi thường chiến phí 2 van lạng bac. - 4 M",
+    "hop2_quote": "khắc nghiệt đó nên đàm phán đổ vỡ. Ông Phạm Thận Duật được cử sang Thiên Tân cầu cứu với triều đình nhà Thanh. Tổng đốc Lưỡng Quảng là Trương Thụ Thanh làm mật sớ về tâu với vua nhà Thanh, đại lược nói: \"nước Nam và nước Tàu tiếp giáp với nhau mà thế lực nước Nam thật là suy hèn, không có thể tự chủ"
+  },
+  {
+    "score": 12,
+    "bridge": "Lý Hồng Chương",
+    "anchor": "Điều ước Mã Quan",
+    "anchor_relation": "ký kết",
+    "target": "Bourée",
+    "target_relation": "thương lượng với",
+    "hop1_chunk_id": "phi-su-kien_clean-000074",
+    "hop2_chunk_id": "lichsu_clean-000014",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương V. PHONG TRÀO YÊU NƯỚC CÁCH MẠNG VIỆT NAM ĐẦU THẾ KỈ XX",
+      "I. ẢNH HƯỞNG CỦA TÌNH HÌNH THẾ GIỚI VÀ CÁC TRÀO LƯU TƯ TƯỞNG TƯ SẢN ĐẾN VIỆT NAM",
+      "1. Tình hình Trung Quốc ảnh hưởng sâu sắc đến Việt Nam"
+    ],
+    "hop2_heading": [
+      "5. Chiến tranh Pháp - Thanh (trên lãnh thổ Việt Nam)",
+      "Chiến tranh",
+      null
+    ],
+    "hop1_quote": "ông kiên quyết chống Nhật, chỉ trông mong vào các cường quốc. Ngày 17-4-1895, Lý Hồng Chương kí kết Điều ước Mã Quan ở Nhật Bản gồm các khoản chính: - 1 Thừa nhận quyền tự chủ của Triều Tiên. - 2 Cắt nhường cho Nhật bán đảo Liêu Đông, Đài Loan, Bành Hồ. - 3 Bồi thường chiến phí 2 van lạng bac. - 4 M",
+    "hop2_quote": "ía bắc sông Hồng\", nên quân Thanh nhân cơ hội này tiến vào Bắc Việt. Tháng 11 năm 1882, Đại sứ Pháp Bourée tại Trung Hoa tiến hành một cuộc gặp mặt với Phó vương Trực Lệ (Zhili-tức vùng Bắc Kinh) Lý Hồng Chương, trong đó hai bên tính đến khả năng nhượng vùng Lào Cai cho nhà Thanh để lập một cửa khẩu"
+  },
+  {
+    "score": 12,
+    "bridge": "Đỗ Chân Thiết",
+    "anchor": "Đồng Lợi Tế",
+    "anchor_relation": "mở",
+    "target": "Vân Nam",
+    "target_relation": "gây dựng cơ sở tại",
+    "hop1_chunk_id": "phi-su-kien_clean-000113",
+    "hop2_chunk_id": "phi-su-kien_clean-000137",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương V. PHONG TRÀO YÊU NƯỚC CÁCH MẠNG VIỆT NAM ĐẦU THẾ KỈ XX",
+      "IV. ĐÔNG KINH NGHĨA THỤC",
+      null
+    ],
+    "hop2_heading": [
+      "Chương VI. VIỆT NAM TRONG CHIẾN TRANH THẾ GIỚI THỨ NHẤT (1914 - 1918)",
+      "V. PHONG TRÀO ĐẤU TRANH YÊU NƯỚC CÁCH MẠNG",
+      "1. Những hoạt động của Việt Nam Quang phục hội"
+    ],
+    "hop1_quote": "à Nội bán, nhưng chưa quen nên phải bỏ vì thua lỗ; sau đó ông hùn vốn với các đồng chí mở hiệu buôn Đồng Lợi Tế ở phố Mã Mây, chuyên buôn bán hàng nội hoá; rồi lại mở thêm hiệu Tuy Phương ở gần ga Hàng Cỏ chuyên bán thuốc Bắc.  Hoàng Tăng Bí và Nguyễn Quyền mở công ti Đông Thành Xương ở phố Hàng Gai",
+    "hop2_quote": "c nhiều cuộc bạo động.  Trước hết là kế hoạch đánh chiếm Hà Nội của cơ sở Việt Nam Quang phục hội ở Vân Nam (Trung Quốc). Một hội viên tên là Đỗ Chân Thiết đã về gây dựng cơ sở ở Vân Nam. Ông vận động được một số Việt kiều và nhân viên của công ti xe lửa Vân Nam thành lập chi bộ Quang phục hội.  Kế "
+  },
+  {
+    "score": 12,
+    "bridge": "Đỗ Chân Thiết",
+    "anchor": "Đồng Lợi Tế",
+    "anchor_relation": "mở",
+    "target": "Hà Khẩu",
+    "target_relation": "bị xử tử tại",
+    "hop1_chunk_id": "phi-su-kien_clean-000113",
+    "hop2_chunk_id": "phi-su-kien_clean-000137",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương V. PHONG TRÀO YÊU NƯỚC CÁCH MẠNG VIỆT NAM ĐẦU THẾ KỈ XX",
+      "IV. ĐÔNG KINH NGHĨA THỤC",
+      null
+    ],
+    "hop2_heading": [
+      "Chương VI. VIỆT NAM TRONG CHIẾN TRANH THẾ GIỚI THỨ NHẤT (1914 - 1918)",
+      "V. PHONG TRÀO ĐẤU TRANH YÊU NƯỚC CÁCH MẠNG",
+      "1. Những hoạt động của Việt Nam Quang phục hội"
+    ],
+    "hop1_quote": "à Nội bán, nhưng chưa quen nên phải bỏ vì thua lỗ; sau đó ông hùn vốn với các đồng chí mở hiệu buôn Đồng Lợi Tế ở phố Mã Mây, chuyên buôn bán hàng nội hoá; rồi lại mở thêm hiệu Tuy Phương ở gần ga Hàng Cỏ chuyên bán thuốc Bắc.  Hoàng Tăng Bí và Nguyễn Quyền mở công ti Đông Thành Xương ở phố Hàng Gai",
+    "hop2_quote": "4, thực dân Pháp tập trung lực lượng vây ráp. Đỗ Chân Thiết cùng 58 đồng chí bị bắt và bị xử tử tại Hà Khẩu.  Sau thất bại của chi bộ Quang phục hội Vân Nam, các cơ sở Quang phục hội rải rác ở các tỉnh Hà Đông, Sơn Tây, Hoà Bình, Vĩnh Yên, Phú Thọ, Bắc Ninh,... vẫn chờ thời cơ đẩy mạnh hoạt động.  C"
+  },
+  {
+    "score": 12,
+    "bridge": "Đỗ Chân Thiết",
+    "anchor": "Vân Nam",
+    "anchor_relation": "gây dựng cơ sở tại",
+    "target": "Đồng Lợi Tế",
+    "target_relation": "mở",
+    "hop1_chunk_id": "phi-su-kien_clean-000137",
+    "hop2_chunk_id": "phi-su-kien_clean-000113",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương VI. VIỆT NAM TRONG CHIẾN TRANH THẾ GIỚI THỨ NHẤT (1914 - 1918)",
+      "V. PHONG TRÀO ĐẤU TRANH YÊU NƯỚC CÁCH MẠNG",
+      "1. Những hoạt động của Việt Nam Quang phục hội"
+    ],
+    "hop2_heading": [
+      "Chương V. PHONG TRÀO YÊU NƯỚC CÁCH MẠNG VIỆT NAM ĐẦU THẾ KỈ XX",
+      "IV. ĐÔNG KINH NGHĨA THỤC",
+      null
+    ],
+    "hop1_quote": "c nhiều cuộc bạo động.  Trước hết là kế hoạch đánh chiếm Hà Nội của cơ sở Việt Nam Quang phục hội ở Vân Nam (Trung Quốc). Một hội viên tên là Đỗ Chân Thiết đã về gây dựng cơ sở ở Vân Nam. Ông vận động được một số Việt kiều và nhân viên của công ti xe lửa Vân Nam thành lập chi bộ Quang phục hội.  Kế ",
+    "hop2_quote": "à Nội bán, nhưng chưa quen nên phải bỏ vì thua lỗ; sau đó ông hùn vốn với các đồng chí mở hiệu buôn Đồng Lợi Tế ở phố Mã Mây, chuyên buôn bán hàng nội hoá; rồi lại mở thêm hiệu Tuy Phương ở gần ga Hàng Cỏ chuyên bán thuốc Bắc.  Hoàng Tăng Bí và Nguyễn Quyền mở công ti Đông Thành Xương ở phố Hàng Gai"
+  },
+  {
+    "score": 12,
+    "bridge": "Đỗ Chân Thiết",
+    "anchor": "Vân Nam",
+    "anchor_relation": "gây dựng cơ sở tại",
+    "target": "Tuy Phương",
+    "target_relation": "mở",
+    "hop1_chunk_id": "phi-su-kien_clean-000137",
+    "hop2_chunk_id": "phi-su-kien_clean-000113",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương VI. VIỆT NAM TRONG CHIẾN TRANH THẾ GIỚI THỨ NHẤT (1914 - 1918)",
+      "V. PHONG TRÀO ĐẤU TRANH YÊU NƯỚC CÁCH MẠNG",
+      "1. Những hoạt động của Việt Nam Quang phục hội"
+    ],
+    "hop2_heading": [
+      "Chương V. PHONG TRÀO YÊU NƯỚC CÁCH MẠNG VIỆT NAM ĐẦU THẾ KỈ XX",
+      "IV. ĐÔNG KINH NGHĨA THỤC",
+      null
+    ],
+    "hop1_quote": "c nhiều cuộc bạo động.  Trước hết là kế hoạch đánh chiếm Hà Nội của cơ sở Việt Nam Quang phục hội ở Vân Nam (Trung Quốc). Một hội viên tên là Đỗ Chân Thiết đã về gây dựng cơ sở ở Vân Nam. Ông vận động được một số Việt kiều và nhân viên của công ti xe lửa Vân Nam thành lập chi bộ Quang phục hội.  Kế ",
+    "hop2_quote": " đồng chí mở hiệu buôn Đồng Lợi Tế ở phố Mã Mây, chuyên buôn bán hàng nội hoá; rồi lại mở thêm hiệu Tuy Phương ở gần ga Hàng Cỏ chuyên bán thuốc Bắc.  Hoàng Tăng Bí và Nguyễn Quyền mở công ti Đông Thành Xương ở phố Hàng Gai vừa buôn bán hàng tạp hoá, vừa làm công nghệ như dệt xuyến hoa đại đoá, ướp "
+  },
+  {
+    "score": 12,
+    "bridge": "Hoàng Trọng Mậu",
+    "anchor": "Trận Tà Lùng",
+    "anchor_relation": "chỉ đạo",
+    "target": "Kế hoạch đánh Móng Cái, Lạng Sơn, Hà Khẩu",
+    "target_relation": "chỉ huy",
+    "hop1_chunk_id": "lichsu_clean-000089",
+    "hop2_chunk_id": "phi-su-kien_clean-000138",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "10. Trận Tà Lùng (1915)",
+      null,
+      null
+    ],
+    "hop2_heading": [
+      "Chương VI. VIỆT NAM TRONG CHIẾN TRANH THẾ GIỚI THỨ NHẤT (1914 - 1918)",
+      "V. PHONG TRÀO ĐẤU TRANH YÊU NƯỚC CÁCH MẠNG",
+      "2. Kế hoạch đánh Móng Cái, Lạng Sơn, Hà Khẩu (1915)"
+    ],
+    "hop1_quote": "Trận Tà Lùng là cuộc công kích đồn Tà Lùng, tỉnh Cao Bằng do Việt Nam Quang phục Hội dưới sự chỉ đạo của Hoàng Trọng Mậu, Nguyễn Hải Thần & Phan Bội Châu với hoàng thân Kỳ Ngoại hầu Cường Để làm hội c",
+    "hop2_quote": "Đầu năm 1915, một số người lãnh đạo Quang phục hội ở nước ngoài chủ trương vượt biên giới đánh Móng Cái, Lạng Sơn và Hà Khẩu. Kế hoạch được vạch ra là: Nguyễn Mạnh Hiếu chỉ huy đội thứ nhất tiến qua Đ"
+  },
+  {
+    "score": 12,
+    "bridge": "Hoàng Trọng Mậu",
+    "anchor": "Trận Tà Lùng",
+    "anchor_relation": "chỉ đạo",
+    "target": "Hà Khẩu",
+    "target_relation": "đánh về",
+    "hop1_chunk_id": "lichsu_clean-000089",
+    "hop2_chunk_id": "phi-su-kien_clean-000138",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "10. Trận Tà Lùng (1915)",
+      null,
+      null
+    ],
+    "hop2_heading": [
+      "Chương VI. VIỆT NAM TRONG CHIẾN TRANH THẾ GIỚI THỨ NHẤT (1914 - 1918)",
+      "V. PHONG TRÀO ĐẤU TRANH YÊU NƯỚC CÁCH MẠNG",
+      "2. Kế hoạch đánh Móng Cái, Lạng Sơn, Hà Khẩu (1915)"
+    ],
+    "hop1_quote": "Trận Tà Lùng là cuộc công kích đồn Tà Lùng, tỉnh Cao Bằng do Việt Nam Quang phục Hội dưới sự chỉ đạo của Hoàng Trọng Mậu, Nguyễn Hải Thần & Phan Bội Châu với hoàng thân Kỳ Ngoại hầu Cường Để làm hội c",
+    "hop2_quote": " số người lãnh đạo Quang phục hội ở nước ngoài chủ trương vượt biên giới đánh Móng Cái, Lạng Sơn và Hà Khẩu. Kế hoạch được vạch ra là: Nguyễn Mạnh Hiếu chỉ huy đội thứ nhất tiến qua Đồng Dương đánh về Móng Cái; Nguyễn Thượng Hiền chỉ huy đội thứ hai tiến qua Long Châu đánh úp Lạng Sơn; Hoàng Trọng M"
+  },
+  {
+    "score": 12,
+    "bridge": "Hoàng Trọng Mậu",
+    "anchor": "Trận Tà Lùng",
+    "anchor_relation": "chỉ đạo",
+    "target": "Chính quyền Trung Hoa",
+    "target_relation": "bắt và giao",
+    "hop1_chunk_id": "lichsu_clean-000089",
+    "hop2_chunk_id": "phi-su-kien_clean-000138",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "10. Trận Tà Lùng (1915)",
+      null,
+      null
+    ],
+    "hop2_heading": [
+      "Chương VI. VIỆT NAM TRONG CHIẾN TRANH THẾ GIỚI THỨ NHẤT (1914 - 1918)",
+      "V. PHONG TRÀO ĐẤU TRANH YÊU NƯỚC CÁCH MẠNG",
+      "2. Kế hoạch đánh Móng Cái, Lạng Sơn, Hà Khẩu (1915)"
+    ],
+    "hop1_quote": "Trận Tà Lùng là cuộc công kích đồn Tà Lùng, tỉnh Cao Bằng do Việt Nam Quang phục Hội dưới sự chỉ đạo của Hoàng Trọng Mậu, Nguyễn Hải Thần & Phan Bội Châu với hoàng thân Kỳ Ngoại hầu Cường Để làm hội c",
+    "hop2_quote": "Lạng Sơn được thực hiện một phần, nhưng cũng không gây được thiệt hại đáng kể cho địch.  Sau vụ này chính quyền Trung Hoa, Anh và Xiêm câu kết với thực dân Pháp đã bắt và giao cho chúng nhiều chiến sĩ cách mạng Việt Nam, trong số đó có Hoàng Trọng Mậu, Lê Dương, Giáo Trung, Bùi Đông Khê, Vũ Sĩ Lập,."
+  },
+  {
+    "score": 12,
+    "bridge": "Hoàng Trọng Mậu",
+    "anchor": "Trận Tà Lùng",
+    "anchor_relation": "chỉ đạo",
+    "target": "Chính quyền Anh",
+    "target_relation": "bắt và giao",
+    "hop1_chunk_id": "lichsu_clean-000089",
+    "hop2_chunk_id": "phi-su-kien_clean-000138",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "10. Trận Tà Lùng (1915)",
+      null,
+      null
+    ],
+    "hop2_heading": [
+      "Chương VI. VIỆT NAM TRONG CHIẾN TRANH THẾ GIỚI THỨ NHẤT (1914 - 1918)",
+      "V. PHONG TRÀO ĐẤU TRANH YÊU NƯỚC CÁCH MẠNG",
+      "2. Kế hoạch đánh Móng Cái, Lạng Sơn, Hà Khẩu (1915)"
+    ],
+    "hop1_quote": "Trận Tà Lùng là cuộc công kích đồn Tà Lùng, tỉnh Cao Bằng do Việt Nam Quang phục Hội dưới sự chỉ đạo của Hoàng Trọng Mậu, Nguyễn Hải Thần & Phan Bội Châu với hoàng thân Kỳ Ngoại hầu Cường Để làm hội c",
+    "hop2_quote": "Đầu năm 1915, một số người lãnh đạo Quang phục hội ở nước ngoài chủ trương vượt biên giới đánh Móng Cái, Lạng Sơn và Hà Khẩu. Kế hoạch được vạch ra là: Nguyễn Mạnh Hiếu chỉ huy đội thứ nhất tiến qua Đ"
+  },
+  {
+    "score": 12,
+    "bridge": "Hoàng Trọng Mậu",
+    "anchor": "Trận Tà Lùng",
+    "anchor_relation": "chỉ đạo",
+    "target": "Chính quyền Xiêm",
+    "target_relation": "bắt và giao",
+    "hop1_chunk_id": "lichsu_clean-000089",
+    "hop2_chunk_id": "phi-su-kien_clean-000138",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "10. Trận Tà Lùng (1915)",
+      null,
+      null
+    ],
+    "hop2_heading": [
+      "Chương VI. VIỆT NAM TRONG CHIẾN TRANH THẾ GIỚI THỨ NHẤT (1914 - 1918)",
+      "V. PHONG TRÀO ĐẤU TRANH YÊU NƯỚC CÁCH MẠNG",
+      "2. Kế hoạch đánh Móng Cái, Lạng Sơn, Hà Khẩu (1915)"
+    ],
+    "hop1_quote": "Trận Tà Lùng là cuộc công kích đồn Tà Lùng, tỉnh Cao Bằng do Việt Nam Quang phục Hội dưới sự chỉ đạo của Hoàng Trọng Mậu, Nguyễn Hải Thần & Phan Bội Châu với hoàng thân Kỳ Ngoại hầu Cường Để làm hội c",
+    "hop2_quote": "Đầu năm 1915, một số người lãnh đạo Quang phục hội ở nước ngoài chủ trương vượt biên giới đánh Móng Cái, Lạng Sơn và Hà Khẩu. Kế hoạch được vạch ra là: Nguyễn Mạnh Hiếu chỉ huy đội thứ nhất tiến qua Đ"
+  },
+  {
+    "score": 12,
+    "bridge": "Hoàng Trọng Mậu",
+    "anchor": "Kế hoạch đánh Móng Cái, Lạng Sơn, Hà Khẩu",
+    "anchor_relation": "chỉ huy",
+    "target": "Trận Tà Lùng",
+    "target_relation": "chỉ đạo",
+    "hop1_chunk_id": "phi-su-kien_clean-000138",
+    "hop2_chunk_id": "lichsu_clean-000089",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương VI. VIỆT NAM TRONG CHIẾN TRANH THẾ GIỚI THỨ NHẤT (1914 - 1918)",
+      "V. PHONG TRÀO ĐẤU TRANH YÊU NƯỚC CÁCH MẠNG",
+      "2. Kế hoạch đánh Móng Cái, Lạng Sơn, Hà Khẩu (1915)"
+    ],
+    "hop2_heading": [
+      "10. Trận Tà Lùng (1915)",
+      null,
+      null
+    ],
+    "hop1_quote": "Đầu năm 1915, một số người lãnh đạo Quang phục hội ở nước ngoài chủ trương vượt biên giới đánh Móng Cái, Lạng Sơn và Hà Khẩu. Kế hoạch được vạch ra là: Nguyễn Mạnh Hiếu chỉ huy đội thứ nhất tiến qua Đ",
+    "hop2_quote": "Trận Tà Lùng là cuộc công kích đồn Tà Lùng, tỉnh Cao Bằng do Việt Nam Quang phục Hội dưới sự chỉ đạo của Hoàng Trọng Mậu, Nguyễn Hải Thần & Phan Bội Châu với hoàng thân Kỳ Ngoại hầu Cường Để làm hội c"
+  },
+  {
+    "score": 12,
+    "bridge": "Đào Duy Anh",
+    "anchor": "Quan hải tùng thư",
+    "anchor_relation": "gắn với",
+    "target": "Tân Việt Cách mạng Đảng",
+    "target_relation": "lãnh đạo",
+    "hop1_chunk_id": "phi-su-kien_clean-000206",
+    "hop2_chunk_id": "phi-su-kien_clean-000218",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương VIII. BƯỚC PHÁT TRIỂN MỚI CỦA PHONG TRÀO DÂN TỘC Ở VIỆT NAM SAU CHIẾN TRANH",
+      "V. CAO TRÀO YÊU NƯỚC VÀ ĐÒI TỰ DO DÂN CHỦ Ở TRONG NƯỚC",
+      "4. Phong trào văn hoá tiến bộ"
+    ],
+    "hop2_heading": [
+      "Chương IX. PHONG TRÀO DÂN TỘC Ở VIỆT NAM TỪ NĂM 1925 ĐẾN NĂM 1930",
+      "I. SỰ XUẤT HIỆN VÀ HOẠT ĐỘNG CỦA BA TỔ CHỨC CÁCH MẠNG",
+      "2. Tân Việt Cách mạng đảng"
+    ],
+    "hop1_quote": "o có tư tưởng yêu nước. Tiêu biểu như *Nam đồng thư xã* của Phạm Tuấn Tài, Phạm Tuấn Lâm ở Hà Nội, *Quan hải tùng thư* ở Huế của Đào Duy Anh, *Cường học thư xã* của Trần Huy Liệu ở Sài Gòn.",
+    "hop2_quote": "Về tư tưởng chính trị, Tân Việt Cách mạng đảng xác định: \"Liên hợp cả các đồng chí trong ngoài, trong thì dẫn đạo công nông binh, quần chúng, ngoài thì liên lạc với các dân tộc bị áp bức để đánh đổ đế quốc chủ nghĩa đặng ki"
+  },
+  {
+    "score": 12,
+    "bridge": "Đào Duy Anh",
+    "anchor": "Tân Việt Cách mạng Đảng",
+    "anchor_relation": "lãnh đạo",
+    "target": "Quan hải tùng thư",
+    "target_relation": "gắn với",
+    "hop1_chunk_id": "phi-su-kien_clean-000218",
+    "hop2_chunk_id": "phi-su-kien_clean-000206",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương IX. PHONG TRÀO DÂN TỘC Ở VIỆT NAM TỪ NĂM 1925 ĐẾN NĂM 1930",
+      "I. SỰ XUẤT HIỆN VÀ HOẠT ĐỘNG CỦA BA TỔ CHỨC CÁCH MẠNG",
+      "2. Tân Việt Cách mạng đảng"
+    ],
+    "hop2_heading": [
+      "Chương VIII. BƯỚC PHÁT TRIỂN MỚI CỦA PHONG TRÀO DÂN TỘC Ở VIỆT NAM SAU CHIẾN TRANH",
+      "V. CAO TRÀO YÊU NƯỚC VÀ ĐÒI TỰ DO DÂN CHỦ Ở TRONG NƯỚC",
+      "4. Phong trào văn hoá tiến bộ"
+    ],
+    "hop1_quote": "Về tư tưởng chính trị, Tân Việt Cách mạng đảng xác định: \"Liên hợp cả các đồng chí trong ngoài, trong thì dẫn đạo công nông binh, quần chúng, ngoài thì liên lạc với các dân tộc bị áp bức để đánh đổ đế quốc chủ nghĩa đặng ki",
+    "hop2_quote": "o có tư tưởng yêu nước. Tiêu biểu như *Nam đồng thư xã* của Phạm Tuấn Tài, Phạm Tuấn Lâm ở Hà Nội, *Quan hải tùng thư* ở Huế của Đào Duy Anh, *Cường học thư xã* của Trần Huy Liệu ở Sài Gòn."
+  },
+  {
+    "score": 12,
+    "bridge": "Nguyễn Văn Tố",
+    "anchor": "Nguyễn Đổng Lâm",
+    "anchor_relation": "ra lệnh thả",
+    "target": "Ban thường trực",
+    "target_relation": "làm Trưởng ban",
+    "hop1_chunk_id": "lichsu_clean-000163",
+    "hop2_chunk_id": "phi-su-kien_clean-000287",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "2. Xung đột đảng phái tại Việt Nam (1945-1949)",
+      "Việt Nam Quốc dân Đảng",
+      null
+    ],
+    "hop2_heading": [
+      "Chương I. XÂY DỰNG VÀ BẢO VỆ CHẾ ĐỘ DÂN CHỦ CỘNG HOÀ (1945 - 1946)",
+      "II- MỞ RỘNG KHỐI ĐẠI ĐOÀN KẾT DÂN TỘC, XÂY DỰNG NỀN DÂN CHỦ CỘNG HOÀ",
+      "2. Xây dựng hệ thống chính quyền nhân dân và pháp luật"
+    ],
+    "hop1_quote": "t trong vụ án phố Ôn Như Hầu, bị buộc tội bắt cóc, tống tiền và bị tống giam ngay lập tức. Đại biểu Nguyễn Đổng Lâm bị công an Hải Dương bắt và bị kiến nghị gửi đến trại biệt giam trong 2 năm với lý do \"chính quyền địa phương sẽ gặp nhiều khó khăn nếu ông Lâm còn tự do ngoài vòng pháp luật\". Trường ",
+    "hop2_quote": "chiến uỷ viên hội do Võ Nguyên Giáp làm Chủ tịch, Vũ Hồng Khanh làm Phó Chủ tịch.  Quốc hội đã bầu *Ban thường trực* gồm 15 uỷ viên chính thức và 3 uỷ viên dự khuyết, Trưởng ban là Nguyễn Văn Tố, Phó ban là Phạm Văn Đồng và Cung Đình Quỳ (Việt Quốc).  Quốc hội cũng đã thông qua bản Tuyên ngôn, trịnh"
+  },
+  {
+    "score": 12,
+    "bridge": "Nguyễn Văn Tố",
+    "anchor": "Ban thường trực",
+    "anchor_relation": "làm Trưởng ban",
+    "target": "Nguyễn Đổng Lâm",
+    "target_relation": "ra lệnh thả",
+    "hop1_chunk_id": "phi-su-kien_clean-000287",
+    "hop2_chunk_id": "lichsu_clean-000163",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương I. XÂY DỰNG VÀ BẢO VỆ CHẾ ĐỘ DÂN CHỦ CỘNG HOÀ (1945 - 1946)",
+      "II- MỞ RỘNG KHỐI ĐẠI ĐOÀN KẾT DÂN TỘC, XÂY DỰNG NỀN DÂN CHỦ CỘNG HOÀ",
+      "2. Xây dựng hệ thống chính quyền nhân dân và pháp luật"
+    ],
+    "hop2_heading": [
+      "2. Xung đột đảng phái tại Việt Nam (1945-1949)",
+      "Việt Nam Quốc dân Đảng",
+      null
+    ],
+    "hop1_quote": "chiến uỷ viên hội do Võ Nguyên Giáp làm Chủ tịch, Vũ Hồng Khanh làm Phó Chủ tịch.  Quốc hội đã bầu *Ban thường trực* gồm 15 uỷ viên chính thức và 3 uỷ viên dự khuyết, Trưởng ban là Nguyễn Văn Tố, Phó ban là Phạm Văn Đồng và Cung Đình Quỳ (Việt Quốc).  Quốc hội cũng đã thông qua bản Tuyên ngôn, trịnh",
+    "hop2_quote": "t trong vụ án phố Ôn Như Hầu, bị buộc tội bắt cóc, tống tiền và bị tống giam ngay lập tức. Đại biểu Nguyễn Đổng Lâm bị công an Hải Dương bắt và bị kiến nghị gửi đến trại biệt giam trong 2 năm với lý do \"chính quyền địa phương sẽ gặp nhiều khó khăn nếu ông Lâm còn tự do ngoài vòng pháp luật\". Trường "
+  },
+  {
+    "score": 12,
+    "bridge": "Hoàng Minh Giám",
+    "anchor": "Emile Bollaert",
+    "anchor_relation": "chuyển thông điệp",
+    "target": "Chính phủ Trung ương",
+    "target_relation": "mời tham gia",
+    "hop1_chunk_id": "lichsu_clean-000211",
+    "hop2_chunk_id": "phi-su-kien_clean-000308",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "3. Chiến tranh Đông Dương",
+      "Giai đoạn 1946-1949",
+      "Các nỗ lực ngoại giao"
+    ],
+    "hop2_heading": [
+      "Chương II. SỰ BÙNG NỔ VÀ TIẾN TRIỂN CỦA CUỘC KHÁNG CHIẾN TRONG TOÀN QUỐC (1946 - 1950)",
+      "II- XÂY DỰNG NỀN DÂN CHỦ CỘNG HOÀ",
+      "1. Chính trị"
+    ],
+    "hop1_quote": "ng đem lại kết quả gì, người Pháp muốn có phản ứng quân sự mạnh trước khi tính đến chuyện đàm phán. Emile Bollaert, Cao ủy Pháp mới được bổ nhiệm từ tháng 3 năm 1947, được tướng Leclerc khuyên \"đàm phán bằng mọi giá\". Những người thân cận ông như Pierre Messmer và Paul Mus cũng thiên về chiều hướng ",
+    "hop2_quote": "Năm 1947, chính phủ Trung ương được cải tổ để mời thêm một số trí thức, nhân sĩ tham gia nhằm thực hiện tính liên hiệp quốc dân rộng rãi hơn. Phan Anh được mời giữ chức Bộ trưởng Bộ Kinh tế, Hoàng Minh Giám giữ"
+  },
+  {
+    "score": 12,
+    "bridge": "Hoàng Minh Giám",
+    "anchor": "Chính phủ Trung ương",
+    "anchor_relation": "mời tham gia",
+    "target": "Emile Bollaert",
+    "target_relation": "chuyển thông điệp",
+    "hop1_chunk_id": "phi-su-kien_clean-000308",
+    "hop2_chunk_id": "lichsu_clean-000211",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương II. SỰ BÙNG NỔ VÀ TIẾN TRIỂN CỦA CUỘC KHÁNG CHIẾN TRONG TOÀN QUỐC (1946 - 1950)",
+      "II- XÂY DỰNG NỀN DÂN CHỦ CỘNG HOÀ",
+      "1. Chính trị"
+    ],
+    "hop2_heading": [
+      "3. Chiến tranh Đông Dương",
+      "Giai đoạn 1946-1949",
+      "Các nỗ lực ngoại giao"
+    ],
+    "hop1_quote": "Năm 1947, chính phủ Trung ương được cải tổ để mời thêm một số trí thức, nhân sĩ tham gia nhằm thực hiện tính liên hiệp quốc dân rộng rãi hơn. Phan Anh được mời giữ chức Bộ trưởng Bộ Kinh tế, Hoàng Minh Giám giữ",
+    "hop2_quote": "ng đem lại kết quả gì, người Pháp muốn có phản ứng quân sự mạnh trước khi tính đến chuyện đàm phán. Emile Bollaert, Cao ủy Pháp mới được bổ nhiệm từ tháng 3 năm 1947, được tướng Leclerc khuyên \"đàm phán bằng mọi giá\". Những người thân cận ông như Pierre Messmer và Paul Mus cũng thiên về chiều hướng "
+  },
+  {
+    "score": 12,
+    "bridge": "Tạ Quang Bửu",
+    "anchor": "Hiệp định Genève về Đông Dương",
+    "anchor_relation": "ký kết",
+    "target": "Chính phủ Trung ương",
+    "target_relation": "mời tham gia",
+    "hop1_chunk_id": "lichsu_clean-000504",
+    "hop2_chunk_id": "phi-su-kien_clean-000308",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "3. Chiến tranh Đông Dương",
+      "Sự tham gia của các nước ở chiến tranh Đông Dương",
+      "Hiệp định Genève"
+    ],
+    "hop2_heading": [
+      "Chương II. SỰ BÙNG NỔ VÀ TIẾN TRIỂN CỦA CUỘC KHÁNG CHIẾN TRONG TOÀN QUỐC (1946 - 1950)",
+      "II- XÂY DỰNG NỀN DÂN CHỦ CỘNG HOÀ",
+      "1. Chính trị"
+    ],
+    "hop1_quote": "Ngày 20 tháng 7 năm 1954, Hiệp định Genève về Đông Dương bắt đầu được ký kết với nhiều văn kiện, chủ yếu là: Ba hiệp định đình chỉ chiến sự tại Việt Nam, Lào và Campuchia Bản tuyên bố cuối cùng của hội nghị (không có chữ ký nh",
+    "hop2_quote": "Năm 1947, chính phủ Trung ương được cải tổ để mời thêm một số trí thức, nhân sĩ tham gia nhằm thực hiện tính liên hiệp quốc dân rộng rãi hơn. Phan Anh được mời giữ chức Bộ trưởng Bộ Kinh tế, Hoàng Minh Giám giữ"
+  },
+  {
+    "score": 12,
+    "bridge": "Tạ Quang Bửu",
+    "anchor": "Hiệp định Genève về Đông Dương",
+    "anchor_relation": "ký kết",
+    "target": "Bộ trưởng Bộ Quốc phòng",
+    "target_relation": "giữ chức",
+    "hop1_chunk_id": "lichsu_clean-000504",
+    "hop2_chunk_id": "phi-su-kien_clean-000308",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "3. Chiến tranh Đông Dương",
+      "Sự tham gia của các nước ở chiến tranh Đông Dương",
+      "Hiệp định Genève"
+    ],
+    "hop2_heading": [
+      "Chương II. SỰ BÙNG NỔ VÀ TIẾN TRIỂN CỦA CUỘC KHÁNG CHIẾN TRONG TOÀN QUỐC (1946 - 1950)",
+      "II- XÂY DỰNG NỀN DÂN CHỦ CỘNG HOÀ",
+      "1. Chính trị"
+    ],
+    "hop1_quote": "Ngày 20 tháng 7 năm 1954, Hiệp định Genève về Đông Dương bắt đầu được ký kết với nhiều văn kiện, chủ yếu là: Ba hiệp định đình chỉ chiến sự tại Việt Nam, Lào và Campuchia Bản tuyên bố cuối cùng của hội nghị (không có chữ ký nh",
+    "hop2_quote": " chức Bộ trưởng Bộ Kinh tế, Hoàng Minh Giám giữ chức Bộ trưởng Bộ Ngoại giao, Tạ Quang Bửu giữ chức Bộ trưởng Bộ Quốc phòng, Đặng Văn Hướng giữ chức Bộ trưởng không Bộ. Sau khi Bộ trưởng Huỳnh Thúc Kháng qua đời, tháng 11-1947, Hồ Chí Minh mời Phan Kế Toại giữ chức quyền Bộ trưởng Bộ Nội vụ.  Chính "
+  },
+  {
+    "score": 12,
+    "bridge": "Tạ Quang Bửu",
+    "anchor": "Chính phủ Trung ương",
+    "anchor_relation": "mời tham gia",
+    "target": "Hiệp định Genève về Đông Dương",
+    "target_relation": "ký kết",
+    "hop1_chunk_id": "phi-su-kien_clean-000308",
+    "hop2_chunk_id": "lichsu_clean-000504",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương II. SỰ BÙNG NỔ VÀ TIẾN TRIỂN CỦA CUỘC KHÁNG CHIẾN TRONG TOÀN QUỐC (1946 - 1950)",
+      "II- XÂY DỰNG NỀN DÂN CHỦ CỘNG HOÀ",
+      "1. Chính trị"
+    ],
+    "hop2_heading": [
+      "3. Chiến tranh Đông Dương",
+      "Sự tham gia của các nước ở chiến tranh Đông Dương",
+      "Hiệp định Genève"
+    ],
+    "hop1_quote": "Năm 1947, chính phủ Trung ương được cải tổ để mời thêm một số trí thức, nhân sĩ tham gia nhằm thực hiện tính liên hiệp quốc dân rộng rãi hơn. Phan Anh được mời giữ chức Bộ trưởng Bộ Kinh tế, Hoàng Minh Giám giữ",
+    "hop2_quote": "Ngày 20 tháng 7 năm 1954, Hiệp định Genève về Đông Dương bắt đầu được ký kết với nhiều văn kiện, chủ yếu là: Ba hiệp định đình chỉ chiến sự tại Việt Nam, Lào và Campuchia Bản tuyên bố cuối cùng của hội nghị (không có chữ ký nh"
+  },
+  {
+    "score": 12,
+    "bridge": "Trần Quốc Hoàn",
+    "anchor": "Mặt trận Hà Nội",
+    "anchor_relation": "phái đến",
+    "target": "Bộ Công an",
+    "target_relation": "lãnh đạo",
+    "hop1_chunk_id": "lichsu_clean-000192",
+    "hop2_chunk_id": "phi-su-kien_clean-000332",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "3. Chiến tranh Đông Dương",
+      "Giai đoạn 1946-1949",
+      "Trận Hà Nội 1946"
+    ],
+    "hop2_heading": [
+      "Chương III. CUỘC KHÁNG CHIẾN PHÁT TRIỂN MẠNH MẼ VÀ KẾT THÚC THẮNG LỢI (1951 - 1954)",
+      "II- SỰ LỚN MẠNH CỦA NỀN DÂN CHỦ CỘNG HOÀ",
+      "1. Về chính trị"
+    ],
+    "hop1_quote": "u, trong đó, thủ đô Hà Nội là Chiến khu 11. Ban chấp hành Trung ương Đảng Cộng sản lập thêm đảng ủy Mặt trận Hà Nội, ông Nguyễn Văn Trân là Bí thư Thành ủy được cử làm Bí thư Đảng ủy Mặt trận kiêm Chủ tịch Ủy ban bảo vệ Khu 11, chỉ huy trưởng mặt trận Khu 11 là ông Vương Thừa Vũ. Tổng Tham mưu trưởn",
+    "hop2_quote": " thương. Việt Nam công an vụ được thành lập ngày 21-12-1946, đến tháng 2-1953 đã được đổi thành Thứ Bộ Công an và đến tháng 8-1953 thành Bộ Công an do Trần Quốc Hoàn giữ chức Bộ trưởng. Tháng 3-1954, Nghiêm Xuân Yêm được bổ nhiệm giữ chức Bộ trưởng Bộ Canh nông."
+  },
+  {
+    "score": 12,
+    "bridge": "Trần Quốc Hoàn",
+    "anchor": "Bộ Công an",
+    "anchor_relation": "lãnh đạo",
+    "target": "Mặt trận Hà Nội",
+    "target_relation": "phái đến",
+    "hop1_chunk_id": "phi-su-kien_clean-000332",
+    "hop2_chunk_id": "lichsu_clean-000192",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương III. CUỘC KHÁNG CHIẾN PHÁT TRIỂN MẠNH MẼ VÀ KẾT THÚC THẮNG LỢI (1951 - 1954)",
+      "II- SỰ LỚN MẠNH CỦA NỀN DÂN CHỦ CỘNG HOÀ",
+      "1. Về chính trị"
+    ],
+    "hop2_heading": [
+      "3. Chiến tranh Đông Dương",
+      "Giai đoạn 1946-1949",
+      "Trận Hà Nội 1946"
+    ],
+    "hop1_quote": " thương. Việt Nam công an vụ được thành lập ngày 21-12-1946, đến tháng 2-1953 đã được đổi thành Thứ Bộ Công an và đến tháng 8-1953 thành Bộ Công an do Trần Quốc Hoàn giữ chức Bộ trưởng. Tháng 3-1954, Nghiêm Xuân Yêm được bổ nhiệm giữ chức Bộ trưởng Bộ Canh nông.",
+    "hop2_quote": "u, trong đó, thủ đô Hà Nội là Chiến khu 11. Ban chấp hành Trung ương Đảng Cộng sản lập thêm đảng ủy Mặt trận Hà Nội, ông Nguyễn Văn Trân là Bí thư Thành ủy được cử làm Bí thư Đảng ủy Mặt trận kiêm Chủ tịch Ủy ban bảo vệ Khu 11, chỉ huy trưởng mặt trận Khu 11 là ông Vương Thừa Vũ. Tổng Tham mưu trưởn"
+  },
+  {
+    "score": 12,
+    "bridge": "Ngô Đình Khôi",
+    "anchor": "Đại Việt Phục hưng Hội",
+    "anchor_relation": "lãnh đạo",
+    "target": "Chính quyền thực dân Pháp ở Đông Dương",
+    "target_relation": "dựa vào",
+    "hop1_chunk_id": "lichsu_clean-000148",
+    "hop2_chunk_id": "phi-su-kien_clean-000269",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "2. Xung đột đảng phái tại Việt Nam (1945-1949)",
+      "Đại Việt Phục hưng Hội",
+      null
+    ],
+    "hop2_heading": [
+      "Chương XII. CAO TRÀO VẬN ĐỘNG GIẢI PHÓNG DÂN TỘC (1939 - 1945) VÀ CÁCH MẠNG THÁNG TÁM",
+      "IV. TÌNH CẢNH NHÂN DÂN ĐÔNG DƯƠNG DƯỚI HAI TẦNG ÁP BỨC PHÁP - NHẬT",
+      null
+    ],
+    "hop1_quote": "Đại Việt Phục hưng Hội được thành lập đầu năm 1942, do 3 anh em Ngô Đình Khôi, Ngô Đình Diệm và Ngô Đình Nhu lãnh đạo. Hội ủng hộ Hoàng thân Cường Để, chủ trương liên kết với Đế quốc Nhật Bản để gạt ả",
+    "hop2_quote": ".  Về chính trị và tư tưởng, sau khi chiếm đóng Đông Dương, bọn quân phiệt Nhật không lật đổ bộ máy chính quyền thực dân Pháp ở Đông Dương mà sử dụng nó như một công cụ. Thứ nhất, để đàn áp phong trào cách mạng Đông Dương, giữ yên hậu phương cho quân đội Nhật. Thứ hai, để vơ vét, bóc lột sức người, "
+  },
+  {
+    "score": 12,
+    "bridge": "Ngô Đình Khôi",
+    "anchor": "Chính quyền thực dân Pháp ở Đông Dương",
+    "anchor_relation": "dựa vào",
+    "target": "Đại Việt Phục hưng Hội",
+    "target_relation": "lãnh đạo",
+    "hop1_chunk_id": "phi-su-kien_clean-000269",
+    "hop2_chunk_id": "lichsu_clean-000148",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "Chương XII. CAO TRÀO VẬN ĐỘNG GIẢI PHÓNG DÂN TỘC (1939 - 1945) VÀ CÁCH MẠNG THÁNG TÁM",
+      "IV. TÌNH CẢNH NHÂN DÂN ĐÔNG DƯƠNG DƯỚI HAI TẦNG ÁP BỨC PHÁP - NHẬT",
+      null
+    ],
+    "hop2_heading": [
+      "2. Xung đột đảng phái tại Việt Nam (1945-1949)",
+      "Đại Việt Phục hưng Hội",
+      null
+    ],
+    "hop1_quote": ".  Về chính trị và tư tưởng, sau khi chiếm đóng Đông Dương, bọn quân phiệt Nhật không lật đổ bộ máy chính quyền thực dân Pháp ở Đông Dương mà sử dụng nó như một công cụ. Thứ nhất, để đàn áp phong trào cách mạng Đông Dương, giữ yên hậu phương cho quân đội Nhật. Thứ hai, để vơ vét, bóc lột sức người, ",
+    "hop2_quote": "Đại Việt Phục hưng Hội được thành lập đầu năm 1942, do 3 anh em Ngô Đình Khôi, Ngô Đình Diệm và Ngô Đình Nhu lãnh đạo. Hội ủng hộ Hoàng thân Cường Để, chủ trương liên kết với Đế quốc Nhật Bản để gạt ả"
+  },
+  {
+    "score": 12,
+    "bridge": "Phạm Hùng",
+    "anchor": "Mikhail Zyminanin",
+    "anchor_relation": "gặp",
+    "target": "Hội nghị hiệp thương chính trị thống nhất đất nước",
+    "target_relation": "tham gia",
+    "hop1_chunk_id": "lichsu_clean-000523",
+    "hop2_chunk_id": "phi-su-kien_clean-000399",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "3. Chiến tranh Đông Dương",
+      "Sự tham gia của các nước ở chiến tranh Đông Dương",
+      "Hiệp định Genève"
+    ],
+    "hop2_heading": [
+      "Chương IX. VIỆT NAM XÂY DỰNG LẠI ĐẤT NƯỚC (1975 - 1986)",
+      "I- VIỆT NAM NĂM ĐẦU SAU ĐẠI THẮNG MÙA XUÂN (1975 - 1976)",
+      "3. Hoàn thành thống nhất đất nước về mặt Nhà nước"
+    ],
+    "hop1_quote": "sự hỗ trợ quốc tế mà họ kêu gọi. Tới ngày 11/04/1956, trong cuộc gặp giữa Đại sứ Liên Xô tại Hà Nội Mikhail Zyminanin, Ủy viên TW Đảng Phạm Hùng tiếp tục khẳng định Việt Nam Dân chủ Cộng hòa tiếp tục theo đuổi biện pháp hòa bình để thực thi nghiêm chỉnh Hiệp định, thậm chí sẵn sàng đàm phán trực tiế",
+    "hop2_quote": " biểu miền Nam tham dự hội nghị hiệp thương với đoàn đại biểu miền Bắc.  Từ ngày 15 đến 21-11-1975, Hội nghị hiệp thương chính trị thống nhất đất nước được tổ chức tại Sài Gòn. Hai đoàn đại biểu đại diện cho hai miền tham dự Hội nghị. Đoàn miền Bắc gồm 25 đại biểu, do Trường Chinh làm Trưởng đoàn; đ"
+  }
+]

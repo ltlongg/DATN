@@ -1,0 +1,587 @@
+[
+  {
+    "id": "plan-001",
+    "question": "Trương Định chống Pháp như thế nào?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Trương Định chống Pháp như thế nào?",
+    "gold_entities": [
+      "Trương Định"
+    ],
+    "notes": "Baseline: câu đã độc lập, giữ nguyên văn."
+  },
+  {
+    "id": "plan-002",
+    "question": "Hiệp ước Nhâm Tuất được ký năm nào?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Hiệp ước Nhâm Tuất được ký năm nào?",
+    "gold_entities": [
+      "Hiệp ước Nhâm Tuất"
+    ],
+    "notes": "Câu RẤT đơn giản nhưng vẫn hybrid — đơn giản KHÔNG phải lý do chọn traditional."
+  },
+  {
+    "id": "plan-003",
+    "question": "Vì sao các phong trào yêu nước cuối thế kỉ XIX đều thất bại?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "traditional",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Vì sao các phong trào yêu nước cuối thế kỉ XIX đều thất bại?",
+    "gold_entities": [],
+    "notes": "Không tên riêng -> traditional."
+  },
+  {
+    "id": "plan-004",
+    "question": "Nghĩa quân thời đó tự trang bị vũ khí bằng cách nào?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "traditional",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Nghĩa quân thời đó tự trang bị vũ khí bằng cách nào?",
+    "gold_entities": [],
+    "notes": "Bẫy: câu khó, đáp án nhiều tên riêng, nhưng CÂU HỎI không có tên riêng -> traditional."
+  },
+  {
+    "id": "plan-005",
+    "question": "Làng chiến đấu có vai trò gì trong các cuộc khởi nghĩa nông dân?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "traditional",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Làng chiến đấu có vai trò gì trong các cuộc khởi nghĩa nông dân?",
+    "gold_entities": [],
+    "notes": ""
+  },
+  {
+    "id": "plan-006",
+    "question": "Ông ấy mất năm nào?",
+    "history": [
+      {
+        "role": "user",
+        "content": "Đề Thám lãnh đạo khởi nghĩa Yên Thế ra sao?"
+      },
+      {
+        "role": "assistant",
+        "content": "Đề Thám trở thành thủ lĩnh tối cao của nghĩa quân Yên Thế sau khi Đề Nắm bị giết tháng 4-1892."
+      }
+    ],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Đề Thám mất năm nào?",
+    "gold_entities": [
+      "Đề Thám"
+    ],
+    "notes": "Co-reference cơ bản. Tên do model điền vào standalone_query là entity HỢP LỆ."
+  },
+  {
+    "id": "plan-007",
+    "question": "Trận đó diễn ra ở đâu?",
+    "history": [
+      {
+        "role": "user",
+        "content": "Rivière tử trận trong trận đánh nào?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ông tử trận trong trận Cầu Giấy ngày 19-5-1883."
+      }
+    ],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Trận Cầu Giấy diễn ra ở đâu?",
+    "gold_entities": [
+      "Cầu Giấy"
+    ],
+    "notes": "Chỉ định 'trận đó' resolve được từ CÂU TRẢ LỜI của trợ lý, không phải từ câu hỏi user."
+  },
+  {
+    "id": "plan-008",
+    "question": "Còn người kia thì sao?",
+    "history": [
+      {
+        "role": "user",
+        "content": "Phan Bội Châu chủ trương cứu nước bằng cách nào?"
+      },
+      {
+        "role": "assistant",
+        "content": "Phan Bội Châu theo xu hướng bạo động, lập Duy tân hội và tổ chức phong trào Đông du."
+      }
+    ],
+    "expected_route": "ambiguous",
+    "expected_mode": "hybrid",
+    "expected_step_count": 0,
+    "gold_standalone_query": "",
+    "gold_entities": [],
+    "notes": "'Người kia' KHÔNG resolve được — lịch sử chỉ nhắc một người. Phải hỏi lại, không được đoán Phan Châu Trinh."
+  },
+  {
+    "id": "plan-009",
+    "question": "Sự kiện đó có ý nghĩa gì?",
+    "history": [],
+    "expected_route": "ambiguous",
+    "expected_mode": "hybrid",
+    "expected_step_count": 0,
+    "gold_standalone_query": "",
+    "gold_entities": [],
+    "notes": "Không có lịch sử hội thoại -> không có gì để resolve."
+  },
+  {
+    "id": "plan-010",
+    "question": "Thế còn ở miền Nam thì sao?",
+    "history": [
+      {
+        "role": "user",
+        "content": "Khởi nghĩa Yên Thế nổ ra ở đâu?"
+      },
+      {
+        "role": "assistant",
+        "content": "Khởi nghĩa Yên Thế nổ ra ở vùng Yên Thế Thượng, sau đó lan sang Thái Nguyên."
+      }
+    ],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "traditional",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Các cuộc khởi nghĩa chống Pháp ở miền Nam nổ ra ở đâu?",
+    "gold_entities": [],
+    "notes": "Ca khó: rewrite phải mở rộng chủ đề chứ không thay đại từ. 'miền Nam' không tính là tên riêng -> traditional. Chấp nhận biến thể diễn đạt."
+  },
+  {
+    "id": "plan-011",
+    "question": "2 mũ 10 bằng bao nhiêu?",
+    "history": [],
+    "expected_route": "out_of_scope",
+    "expected_mode": "hybrid",
+    "expected_step_count": 0,
+    "gold_standalone_query": "2 mũ 10 bằng bao nhiêu?",
+    "gold_entities": [],
+    "notes": "route != needs_retrieval -> steps rỗng, mode để mặc định hybrid (không dùng tới)."
+  },
+  {
+    "id": "plan-012",
+    "question": "Hôm nay trời có mưa không?",
+    "history": [],
+    "expected_route": "out_of_scope",
+    "expected_mode": "hybrid",
+    "expected_step_count": 0,
+    "gold_standalone_query": "Hôm nay trời có mưa không?",
+    "gold_entities": [],
+    "notes": ""
+  },
+  {
+    "id": "plan-013",
+    "question": "Viết giúp mình hàm sắp xếp trong Python.",
+    "history": [],
+    "expected_route": "out_of_scope",
+    "expected_mode": "hybrid",
+    "expected_step_count": 0,
+    "gold_standalone_query": "Viết giúp mình hàm sắp xếp trong Python.",
+    "gold_entities": [],
+    "notes": "Có tên riêng (Python) nhưng route out_of_scope -> mode không được dùng."
+  },
+  {
+    "id": "plan-014",
+    "question": "Cách mạng Pháp 1789 diễn ra thế nào?",
+    "history": [],
+    "expected_route": "out_of_scope",
+    "expected_mode": "hybrid",
+    "expected_step_count": 0,
+    "gold_standalone_query": "Cách mạng Pháp 1789 diễn ra thế nào?",
+    "gold_entities": [],
+    "notes": "Ca khó: là lịch sử, có chữ 'Pháp', nhưng ngoài phạm vi lịch sử Việt Nam giai đoạn này."
+  },
+  {
+    "id": "plan-015",
+    "question": "Chào bạn!",
+    "history": [],
+    "expected_route": "smalltalk",
+    "expected_mode": "hybrid",
+    "expected_step_count": 0,
+    "gold_standalone_query": "Chào bạn!",
+    "gold_entities": [],
+    "notes": ""
+  },
+  {
+    "id": "plan-016",
+    "question": "Cảm ơn bạn, câu trả lời rất rõ ràng.",
+    "history": [
+      {
+        "role": "user",
+        "content": "Đề Nắm bị giết khi nào?"
+      },
+      {
+        "role": "assistant",
+        "content": "Đề Nắm bị giết vào tháng 4-1892."
+      }
+    ],
+    "expected_route": "smalltalk",
+    "expected_mode": "hybrid",
+    "expected_step_count": 0,
+    "gold_standalone_query": "Cảm ơn bạn, câu trả lời rất rõ ràng.",
+    "gold_entities": [],
+    "notes": "Bẫy: có lịch sử hội thoại về lịch sử nhưng lượt này chỉ là xã giao."
+  },
+  {
+    "id": "plan-017",
+    "question": "Bạn là ai vậy?",
+    "history": [],
+    "expected_route": "smalltalk",
+    "expected_mode": "hybrid",
+    "expected_step_count": 0,
+    "gold_standalone_query": "Bạn là ai vậy?",
+    "gold_entities": [],
+    "notes": ""
+  },
+  {
+    "id": "plan-018",
+    "question": "Người trở thành thủ lĩnh tối cao của nghĩa quân Yên Thế sau khi Đề Nắm bị giết là ai, và về sau người đó bị ai sát hại?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "gold_standalone_query": "Người trở thành thủ lĩnh tối cao của nghĩa quân Yên Thế sau khi Đề Nắm bị giết là ai, và về sau người đó bị ai sát hại?",
+    "gold_entities": [
+      "Yên Thế",
+      "Đề Nắm"
+    ],
+    "notes": "MẮT XÍCH ẨN -> phải tách 2 bước, bước 1 có resolve, bước 2 dùng placeholder <1>. Đối chứng với plan-019."
+  },
+  {
+    "id": "plan-019",
+    "question": "Đề Thám trở thành thủ lĩnh Yên Thế khi nào và bị ai sát hại?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Đề Thám trở thành thủ lĩnh Yên Thế khi nào và bị ai sát hại?",
+    "gold_entities": [
+      "Đề Thám",
+      "Yên Thế"
+    ],
+    "notes": "ĐỐI CHỨNG plan-018: cùng nội dung nhưng đã nêu đủ tên -> KHÔNG được tách bước. Tách bước ở đây là LỖI."
+  },
+  {
+    "id": "plan-020",
+    "question": "Người được Phan Đình Phùng giao quyền chỉ huy nghĩa quân Hương Khê khi ông ra Bắc năm 1887 sinh và mất năm nào?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "gold_standalone_query": "Người được Phan Đình Phùng giao quyền chỉ huy nghĩa quân Hương Khê khi ông ra Bắc năm 1887 sinh và mất năm nào?",
+    "gold_entities": [
+      "Phan Đình Phùng",
+      "Hương Khê"
+    ],
+    "notes": "Mắt xích ẩn: tên Cao Thắng không có trong câu hỏi."
+  },
+  {
+    "id": "plan-021",
+    "question": "Kẻ đã sát hại thủ lĩnh cuối cùng của khởi nghĩa Yên Thế trước đó là chỉ huy của đội quân nào?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "gold_standalone_query": "Kẻ đã sát hại thủ lĩnh cuối cùng của khởi nghĩa Yên Thế trước đó là chỉ huy của đội quân nào?",
+    "gold_entities": [
+      "Yên Thế"
+    ],
+    "notes": "Mắt xích ẩn: Lương Tam Kỳ."
+  },
+  {
+    "id": "plan-022",
+    "question": "Khởi nghĩa Hương Khê do ai lãnh đạo và kéo dài bao lâu?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Khởi nghĩa Hương Khê do ai lãnh đạo và kéo dài bao lâu?",
+    "gold_entities": [
+      "Hương Khê"
+    ],
+    "notes": "Hai ý nhưng KHÔNG có mắt xích ẩn -> 1 bước (có thể nhiều query song song)."
+  },
+  {
+    "id": "plan-023",
+    "question": "Nguyên nhân, diễn biến và kết quả của khởi nghĩa Bảy Thưa là gì?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Nguyên nhân, diễn biến và kết quả của khởi nghĩa Bảy Thưa là gì?",
+    "gold_entities": [
+      "Bảy Thưa"
+    ],
+    "notes": "Ba ý cần TỪ KHOÁ KHÁC NHAU -> hợp lý nếu tách nhiều query trong CÙNG một bước. Vẫn step_count=1."
+  },
+  {
+    "id": "plan-024",
+    "question": "So sánh chủ trương của Phan Bội Châu và Phan Châu Trinh.",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "So sánh chủ trương của Phan Bội Châu và Phan Châu Trinh.",
+    "gold_entities": [
+      "Phan Bội Châu",
+      "Phan Châu Trinh"
+    ],
+    "notes": "Hai thực thể đều có tên -> 1 bước, nên có 2 query song song."
+  },
+  {
+    "id": "plan-025",
+    "question": "Còn Phan Châu Trinh thì sao?",
+    "history": [
+      {
+        "role": "user",
+        "content": "Phan Bội Châu chủ trương cứu nước bằng cách nào?"
+      },
+      {
+        "role": "assistant",
+        "content": "Phan Bội Châu theo xu hướng bạo động, lập Duy tân hội và tổ chức phong trào Đông du."
+      }
+    ],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Phan Châu Trinh chủ trương cứu nước bằng cách nào?",
+    "gold_entities": [
+      "Phan Châu Trinh"
+    ],
+    "notes": "Rewrite phải MƯỢN vị ngữ từ lượt trước. Đối chứng plan-008 (không resolve được)."
+  },
+  {
+    "id": "plan-026",
+    "question": "Thế còn lần thứ hai?",
+    "history": [
+      {
+        "role": "user",
+        "content": "Nghĩa quân Yên Thế giảng hòa với Pháp lần thứ nhất khi nào?"
+      },
+      {
+        "role": "assistant",
+        "content": "Lần thứ nhất vào tháng 10-1894, sau vụ bắt cóc Chesnay."
+      }
+    ],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Nghĩa quân Yên Thế giảng hòa với Pháp lần thứ hai khi nào?",
+    "gold_entities": [
+      "Yên Thế"
+    ],
+    "notes": "Elliptical follow-up: phải khôi phục cả vị ngữ lẫn thực thể."
+  },
+  {
+    "id": "plan-027",
+    "question": "Vụ đó ai là người chỉ huy?",
+    "history": [
+      {
+        "role": "user",
+        "content": "Chiến tranh biên giới Việt - Trung 1979 bắt đầu khi nào?"
+      },
+      {
+        "role": "assistant",
+        "content": "Ngày 17-2-1979, Trung Quốc tấn công trên toàn tuyến biên giới."
+      }
+    ],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Ai chỉ huy cuộc tấn công của Trung Quốc trong chiến tranh biên giới Việt - Trung 1979?",
+    "gold_entities": [
+      "Trung Quốc"
+    ],
+    "notes": "Chấp nhận biến thể; miễn 'vụ đó' đã bị thay bằng sự kiện cụ thể."
+  },
+  {
+    "id": "plan-028",
+    "question": "Nguyễn Trung Trực đốt tàu Pháp ở đâu?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Nguyễn Trung Trực đốt tàu Pháp ở đâu?",
+    "gold_entities": [
+      "Nguyễn Trung Trực"
+    ],
+    "notes": "Bẫy entities: 'Pháp' là tên riêng nhưng là quốc gia — chấp nhận cả có lẫn không, miễn có Nguyễn Trung Trực."
+  },
+  {
+    "id": "plan-029",
+    "question": "Ai lãnh đạo cuộc kháng chiến ở Nam Kỳ năm 1860?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Ai lãnh đạo cuộc kháng chiến ở Nam Kỳ năm 1860?",
+    "gold_entities": [
+      "Nam Kỳ"
+    ],
+    "notes": "Bẫy: model KHÔNG được tự điền tên người mà nó nhớ ra (Trương Định) vào entities — tên đó không có trong standalone_query."
+  },
+  {
+    "id": "plan-030",
+    "question": "Vị vua nào đã ban chiếu Cần vương?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Vị vua nào đã ban chiếu Cần vương?",
+    "gold_entities": [
+      "Cần vương"
+    ],
+    "notes": "Bẫy: KHÔNG được thêm 'Hàm Nghi' vào entities dù biết đáp án. Cũng KHÔNG tách 2 bước (chỉ một ý)."
+  },
+  {
+    "id": "plan-031",
+    "question": "Khởi nghĩa Yên Thế kéo dài trong bao lâu?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Khởi nghĩa Yên Thế kéo dài trong bao lâu?",
+    "gold_entities": [
+      "Yên Thế"
+    ],
+    "notes": ""
+  },
+  {
+    "id": "plan-032",
+    "question": "Bối cảnh xã hội nào khiến nông dân phải bỏ làng đi lưu tán?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "traditional",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Bối cảnh xã hội nào khiến nông dân phải bỏ làng đi lưu tán?",
+    "gold_entities": [],
+    "notes": ""
+  },
+  {
+    "id": "plan-033",
+    "question": "Các hiệp ước mà triều đình ký với Pháp có điểm chung gì?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Các hiệp ước mà triều đình ký với Pháp có điểm chung gì?",
+    "gold_entities": [
+      "Pháp"
+    ],
+    "notes": "Ca ranh giới mode: chỉ có tên quốc gia. Ghi nhận cả hai nhãn là chấp nhận được, nhưng nhất quán mới là thứ cần đo."
+  },
+  {
+    "id": "plan-034",
+    "question": "hom qua minh hoc ve de tham ma quen mat ong ay bi giet nam nao roi",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Đề Thám bị giết năm nào?",
+    "gold_entities": [
+      "Đề Thám"
+    ],
+    "notes": "ROBUSTNESS: viết không dấu, lan man. Rewrite phải khôi phục dấu và cắt phần thừa."
+  },
+  {
+    "id": "plan-035",
+    "question": "cho hoi khoi nghia huong khe do ai lanh dao vay a",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Khởi nghĩa Hương Khê do ai lãnh đạo?",
+    "gold_entities": [
+      "Hương Khê"
+    ],
+    "notes": "ROBUSTNESS: không dấu."
+  },
+  {
+    "id": "plan-036",
+    "question": "Trận Điện Biên Phủ kết thúc ngày nào thế bạn ơi???",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Trận Điện Biên Phủ kết thúc ngày nào?",
+    "gold_entities": [
+      "Điện Biên Phủ"
+    ],
+    "notes": "ROBUSTNESS: văn nói + dấu câu thừa."
+  },
+  {
+    "id": "plan-037",
+    "question": "Đề Thám ấy, ông làm gì sau khi đình chiến lần hai với Pháp?",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Đề Thám làm gì sau khi đình chiến lần hai với Pháp?",
+    "gold_entities": [
+      "Đề Thám"
+    ],
+    "notes": "Đại từ 'ông' resolve được ngay TRONG câu -> không phải ambiguous."
+  },
+  {
+    "id": "plan-038",
+    "question": "Kể cho mình nghe về khởi nghĩa Yên Thế và cả khởi nghĩa Bãi Sậy nữa.",
+    "history": [],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Kể về khởi nghĩa Yên Thế và khởi nghĩa Bãi Sậy.",
+    "gold_entities": [
+      "Yên Thế",
+      "Bãi Sậy"
+    ],
+    "notes": "Hai chủ đề độc lập -> 1 bước, 2 query song song. Tách 2 BƯỚC là lỗi (không có phụ thuộc)."
+  },
+  {
+    "id": "plan-039",
+    "question": "Nói tiếp đi.",
+    "history": [
+      {
+        "role": "user",
+        "content": "Khởi nghĩa Bảy Thưa diễn ra thế nào?"
+      },
+      {
+        "role": "assistant",
+        "content": "Trần Văn Thành lập căn cứ ở Láng Linh, phất cờ chống Pháp năm 1867."
+      }
+    ],
+    "expected_route": "needs_retrieval",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "gold_standalone_query": "Diễn biến tiếp theo của khởi nghĩa Bảy Thưa là gì?",
+    "gold_entities": [
+      "Bảy Thưa"
+    ],
+    "notes": "Ca ranh giới ambiguous vs needs_retrieval: chủ đề rõ, chỉ thiếu vị ngữ -> resolve được."
+  },
+  {
+    "id": "plan-040",
+    "question": "Cái đó thì sao?",
+    "history": [
+      {
+        "role": "user",
+        "content": "Chào bạn"
+      },
+      {
+        "role": "assistant",
+        "content": "Chào bạn, mình có thể giúp gì về lịch sử Việt Nam?"
+      }
+    ],
+    "expected_route": "ambiguous",
+    "expected_mode": "hybrid",
+    "expected_step_count": 0,
+    "gold_standalone_query": "",
+    "gold_entities": [],
+    "notes": "Lịch sử chỉ có xã giao -> không có gì để resolve."
+  }
+]

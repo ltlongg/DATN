@@ -1,0 +1,21 @@
+{
+  "ragas_version": "0.4.3",
+  "language": "vietnamese",
+  "instruction": "Cho một câu hỏi và một câu trả lời, hãy phân tích độ phức tạp của từng câu trong câu trả lời. Tách mỗi câu thành một hoặc nhiều mệnh đề độc lập, đọc riêng vẫn hiểu được đầy đủ. Bảo đảm không mệnh đề nào còn dùng đại từ hay từ thay thế (ông, bà, họ, nơi đó, sự kiện này...) — phải thay bằng tên riêng hoặc cụm danh từ đầy đủ. Trả kết quả ở định dạng JSON.",
+  "examples": [
+    {
+      "input": {
+        "question": "Albert Einstein là ai và ông nổi tiếng nhất vì điều gì?",
+        "answer": "Ông là một nhà vật lý lý thuyết sinh tại Đức, được công nhận rộng rãi là một trong những nhà vật lý vĩ đại nhất và có ảnh hưởng nhất mọi thời đại. Ông nổi tiếng nhất với việc phát triển thuyết tương đối, ông cũng có những đóng góp quan trọng vào sự phát triển của thuyết cơ học lượng tử."
+      },
+      "output": {
+        "statements": [
+          "Albert Einstein là một nhà vật lý lý thuyết sinh tại Đức.",
+          "Albert Einstein được công nhận là một trong những nhà vật lý vĩ đại nhất và có ảnh hưởng nhất mọi thời đại.",
+          "Albert Einstein nổi tiếng nhất với việc phát triển thuyết tương đối.",
+          "Albert Einstein cũng có những đóng góp quan trọng vào sự phát triển của thuyết cơ học lượng tử."
+        ]
+      }
+    }
+  ]
+}

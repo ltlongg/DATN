@@ -1,0 +1,2341 @@
+[
+  {
+    "id": "qa-001",
+    "question": "Trương Định được nhân dân và nghĩa quân tôn làm chức danh gì?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Khởi nghĩa Trương Định",
+    "gold_chunk_ids": [
+      "lichsu_clean-000001"
+    ],
+    "supporting_chunk_ids": [
+      "phi-su-kien_clean-000020",
+      "phi-su-kien_clean-000021"
+    ],
+    "key_facts": [
+      "Bình Tây Đại Nguyên soái"
+    ],
+    "gold_answer": "Nhân dân và nghĩa quân đã tôn Trương Định làm Bình Tây Đại Nguyên soái.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Có mặt ở cả hai nguồn tài liệu — kiểm hệ có gộp trùng nguồn không. | Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ bối cảnh chống lệnh triều đình và chức lãnh binh An Giang)."
+  },
+  {
+    "id": "qa-002",
+    "question": "Trương Định hi sinh vào ngày nào và trong hoàn cảnh nào?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Khởi nghĩa Trương Định",
+    "gold_chunk_ids": [
+      "lichsu_clean-000002"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Ngày 20 tháng 8 năm 1864",
+      "gẫy xương sống",
+      "rút gươm tự sát",
+      "44 tuổi"
+    ],
+    "gold_answer": "Ngày 20 tháng 8 năm 1864, trong một trận chiến đấu quyết tử với giặc, Trương Định bị bắn gãy xương sống. Không để rơi vào tay giặc, ông đã rút gươm tự sát để bảo toàn khí tiết khi mới 44 tuổi.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-003",
+    "question": "Nguyễn Trung Trực đã đốt cháy chiếc tàu nào của Pháp, ở đâu và vào ngày nào?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Khởi nghĩa Nguyễn Trung Trực",
+    "gold_chunk_ids": [
+      "lichsu_clean-000006"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "pháo hạm L'Espérance",
+      "tàu Hi Vọng",
+      "Nhật Tảo",
+      "10 tháng 12 năm 1861"
+    ],
+    "gold_answer": "Sáng ngày 10 tháng 12 năm 1861, Nguyễn Trung Trực cùng nghĩa quân giả làm thuyền buôn tiếp cận và đốt cháy pháo hạm L'Espérance (tàu Hi Vọng) của Pháp trên vàm Nhật Tảo.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Tên tàu có dấu nháy và tên Pháp — kiểm khả năng khớp từ khoá của BM25."
+  },
+  {
+    "id": "qa-004",
+    "question": "Trước khi bị xử tử, Nguyễn Trung Trực đã nói câu gì với quân Pháp?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Khởi nghĩa Nguyễn Trung Trực",
+    "gold_chunk_ids": [
+      "lichsu_clean-000007"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Bao giờ nước Nam hết cỏ, thì mới hết người Nam đánh Tây"
+    ],
+    "gold_answer": "Ông dõng dạc nói: \"Bao giờ nước Nam hết cỏ, thì mới hết người Nam đánh Tây\".",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Câu trích nguyên văn — kiểm hệ có trích đúng, không diễn giải lại."
+  },
+  {
+    "id": "qa-005",
+    "question": "Sau khi bị bắt lần đầu, Nguyễn Hữu Huân bị thực dân Pháp xử ra sao?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Nguyễn Hữu Huân",
+    "gold_chunk_ids": [
+      "lichsu_clean-000005"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "10 năm tù khổ sai",
+      "Rêuyniông",
+      "đến năm 1869 mới được thả về",
+      "quản thúc tại Chợ Lớn"
+    ],
+    "gold_answer": "Nguyễn Hữu Huân bị kết án 10 năm tù khổ sai và bị đày sang đảo Rêuyniông. Đến năm 1869 ông mới được thả về và bị quản thúc tại Chợ Lớn.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-006",
+    "question": "Ai là thủ lĩnh của cuộc khởi nghĩa Bảy Thưa?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Khởi nghĩa Bảy Thưa",
+    "gold_chunk_ids": [
+      "lichsu_clean-000008"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000009",
+      "lichsu_clean-000010"
+    ],
+    "key_facts": [
+      "Trần Văn Thành",
+      "Quản cơ"
+    ],
+    "gold_answer": "Khởi nghĩa Bảy Thưa là cuộc kháng Pháp do Quản cơ Trần Văn Thành làm thủ lĩnh.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Gold là một chunk RẤT NGẮN (1 câu) — ca kiểm chunk ngắn có bị rerank dìm không. | Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ địa bàn tỉnh An Giang)."
+  },
+  {
+    "id": "qa-007",
+    "question": "Đội quân của Trần Văn Thành mang tên gì và có bao nhiêu người?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Bảy Thưa",
+    "gold_chunk_ids": [
+      "lichsu_clean-000010"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Binh Gia Nghị",
+      "khoảng 1.200 nghĩa quân"
+    ],
+    "gold_answer": "Trần Văn Thành lấy tên Binh Gia Nghị đặt cho đội quân của mình; lực lượng có khoảng 1.200 nghĩa quân.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ mốc phất cờ tháng 8-1867)."
+  },
+  {
+    "id": "qa-008",
+    "question": "Đại tá Henri Rivière tử trận trong trận đánh nào, vào ngày nào?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Chiến tranh Pháp - Thanh",
+    "gold_chunk_ids": [
+      "lichsu_clean-000017"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000016"
+    ],
+    "key_facts": [
+      "Cầu Giấy",
+      "19 tháng 5 năm 1883"
+    ],
+    "gold_answer": "Rivière tử trận trong trận Cầu Giấy ngày 19 tháng 5 năm 1883.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Ngày tháng nằm ở chunk 16, cái chết ở chunk 17 — cần cả hai để trả lời trọn. | Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ chi tiết cái chết và việc quân Cờ đen cắt đầu)."
+  },
+  {
+    "id": "qa-009",
+    "question": "Ai chỉ huy hạm đội Pháp tấn công cửa Thuận An tháng 8 năm 1883?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Trận cửa Thuận An",
+    "gold_chunk_ids": [
+      "lichsu_clean-000018"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000019"
+    ],
+    "key_facts": [
+      "Đô đốc Amédée Courbet"
+    ],
+    "gold_answer": "Đô đốc Amédée Courbet chỉ huy lực lượng thủy quân Pháp tấn công các pháo đài ở cửa Thuận An.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ giờ và ngày khai hỏa)."
+  },
+  {
+    "id": "qa-010",
+    "question": "Đề Nắm bị giết vào thời điểm nào?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Khởi nghĩa Yên Thế",
+    "gold_chunk_ids": [
+      "lichsu_clean-000031"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000032"
+    ],
+    "key_facts": [
+      "tháng 4 - 1892"
+    ],
+    "gold_answer": "Đề Nắm bị giết vào tháng 4 năm 1892.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ cuộc tấn công của 2.200 quân Pháp do Voarông chỉ huy)."
+  },
+  {
+    "id": "qa-011",
+    "question": "Đề Thám bị sát hại ngày nào và bởi ai?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Yên Thế",
+    "gold_chunk_ids": [
+      "lichsu_clean-000035"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "10 tháng 2 năm 1913",
+      "hai tên thủ hạ Lương Tam Kỳ"
+    ],
+    "gold_answer": "Ngày 10 tháng 2 năm 1913, Đề Thám bị hai tên thủ hạ của Lương Tam Kỳ giết hại.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Đích của hop 2 trong qa-030 — giữ nguyên để so đơn-lượt vs multi-step. | Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ vị trí khu rừng, động cơ lấy thưởng và ý nghĩa sự kiện)."
+  },
+  {
+    "id": "qa-012",
+    "question": "Ai là thủ lĩnh cao nhất của nghĩa quân Bãi Sậy từ năm 1885?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Khởi nghĩa Bãi Sậy",
+    "gold_chunk_ids": [
+      "lichsu_clean-000066"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Nguyễn Thiện Thuật"
+    ],
+    "gold_answer": "Từ năm 1885 trở đi, vai trò lãnh đạo khởi nghĩa Bãi Sậy thuộc về Nguyễn Thiện Thuật — ông là thủ lĩnh cao nhất của nghĩa quân Bãi Sậy.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-013",
+    "question": "Người Pháp đã đặt cho Nguyễn Thiện Thuật danh hiệu gì?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Bãi Sậy",
+    "gold_chunk_ids": [
+      "lichsu_clean-000068"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Vua Bãi Sậy"
+    ],
+    "gold_answer": "Nhiều lần không thắng được nghĩa quân, người Pháp phải tặng Nguyễn Thiện Thuật danh hiệu \"Vua Bãi Sậy\".",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-014",
+    "question": "Đinh Công Tráng bị sát hại vào thời gian nào và vì nguyên nhân gì?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Ba Đình",
+    "gold_chunk_ids": [
+      "lichsu_clean-000056"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000055"
+    ],
+    "key_facts": [
+      "Tháng 10 năm 1887",
+      "lý trưởng làng Chính An",
+      "vì tham tiền thưởng"
+    ],
+    "gold_answer": "Tháng 10 năm 1887, vì tham tiền thưởng, viên lý trưởng làng Chính An đã mật báo cho quân Pháp đến bắt và sát hại Đinh Công Tráng.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-015",
+    "question": "Ai lãnh đạo khởi nghĩa Hương Khê?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Khởi nghĩa Hương Khê",
+    "gold_chunk_ids": [
+      "lichsu_clean-000044"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000045",
+      "lichsu_clean-000047"
+    ],
+    "key_facts": [
+      "Phan Đình Phùng",
+      "Cao Thắng"
+    ],
+    "gold_answer": "Lãnh đạo chính của khởi nghĩa Hương Khê là Đình nguyên tiến sĩ Phan Đình Phùng, cộng sự đắc lực của ông là tướng Cao Thắng.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ năm sinh - năm mất của hai người)."
+  },
+  {
+    "id": "qa-016",
+    "question": "Duy tân hội được thành lập khi nào và ai được cử làm Hội chủ?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Duy tân hội",
+    "gold_chunk_ids": [
+      "phi-su-kien_clean-000083"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "đầu năm 1904",
+      "Cường Để",
+      "Nguyễn Hàm",
+      "Phan Bội Châu"
+    ],
+    "gold_answer": "Đầu năm 1904, Phan Bội Châu cùng Cường Để và hơn 20 đồng chí họp tại nhà riêng Nguyễn Hàm, thành lập tổ chức bí mật Duy tân hội. Cường Để được cử làm Hội chủ.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-017",
+    "question": "Đông Kinh nghĩa thục được thành lập vào thời gian nào và ai đứng đầu?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Đông Kinh nghĩa thục",
+    "gold_chunk_ids": [
+      "phi-su-kien_clean-000096"
+    ],
+    "supporting_chunk_ids": [
+      "phi-su-kien_clean-000051"
+    ],
+    "key_facts": [
+      "tháng 3 - 1907",
+      "Hà Nội",
+      "Lương Văn Can"
+    ],
+    "gold_answer": "Tháng 3 năm 1907, Đông Kinh nghĩa thục được thành lập và hoạt động ngay ở Hà Nội, do các nhà yêu nước đứng đầu là Lương Văn Can tổ chức.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Người đứng đầu và thời điểm nằm ở hai chunk khác chương — kiểm recall đa nguồn. | Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ vai trò Phan Châu Trinh và gương Khánh Ứng nghĩa thục)."
+  },
+  {
+    "id": "qa-018",
+    "question": "Chiến tranh biên giới Việt - Trung năm 1979 bắt đầu vào ngày nào?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Chiến tranh biên giới Việt - Trung 1979",
+    "gold_chunk_ids": [
+      "lichsu_clean-001212"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-001234"
+    ],
+    "key_facts": [
+      "17 tháng 2 năm 1979"
+    ],
+    "gold_answer": "Cuộc chiến nổ ra ngày 17 tháng 2 năm 1979, khi Trung Quốc đưa quân tấn công Việt Nam trên toàn tuyến biên giới giữa hai nước.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Nằm ở cuối corpus (chunk ~1212/1683) — kiểm retrieval có thiên vị phần đầu tài liệu không."
+  },
+  {
+    "id": "qa-019",
+    "question": "Trung Quốc huy động bao nhiêu quân bộ binh trong đợt tấn công mở đầu ngày 17-2-1979?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Chiến tranh biên giới Việt - Trung 1979",
+    "gold_chunk_ids": [
+      "lichsu_clean-001234"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "khoảng 120.000 quân",
+      "5 giờ sáng",
+      "Lạng Sơn"
+    ],
+    "gold_answer": "Rạng sáng 17 tháng 2 năm 1979, khoảng 120.000 quân bộ binh Trung Quốc bắt đầu tiến vào Việt Nam trên toàn tuyến biên giới.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ thứ tự binh chủng mở màn)."
+  },
+  {
+    "id": "qa-020",
+    "question": "Quân Pháp thất bại ở Điện Biên Phủ vào ngày nào?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Chiến dịch Điện Biên Phủ",
+    "gold_chunk_ids": [
+      "lichsu_clean-000550"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000339"
+    ],
+    "key_facts": [
+      "7 tháng 5 năm 1954"
+    ],
+    "gold_answer": "Quân đội Pháp thất bại ở Điện Biên Phủ ngày 7 tháng 5 năm 1954.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Chủ đề Điện Biên Phủ có hàng trăm chunk — ca kiểm precision khi nhiễu lớn. | Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ việc Hội nghị Genève khai mạc 8-5-1954)."
+  },
+  {
+    "id": "qa-021",
+    "question": "Vì sao vùng Yên Thế Thượng lại trở thành nơi bùng phát khởi nghĩa?",
+    "type": "synthesis",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Yên Thế",
+    "gold_chunk_ids": [
+      "lichsu_clean-000030"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000029"
+    ],
+    "key_facts": [
+      "nông dân lưu tán",
+      "công khai chống lại triều đình",
+      "những đội vũ trang tự vệ",
+      "vùng đất thiếu an ninh nhất của Bắc Kỳ"
+    ],
+    "gold_answer": "Yên Thế Thượng giữa thế kỷ 19 là vùng đất hoang, nơi tá túc của nông dân lưu tán, giặc Khách và thổ phỉ. Những người dân lưu tán ở đây vốn đã công khai chống lại triều đình và phải lập các đội vũ trang tự vệ, làng chiến đấu để chống áp bức lẫn cướp bóc. Khi Pháp đến bình định, các toán vũ trang sẵn có ấy chống Pháp để bảo vệ miền đất tự do của mình.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-022",
+    "question": "Khởi nghĩa Yên Thế trải qua mấy giai đoạn và đặc điểm của từng giai đoạn là gì?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Khởi nghĩa Yên Thế",
+    "gold_chunk_ids": [
+      "lichsu_clean-000031",
+      "lichsu_clean-000032",
+      "lichsu_clean-000033",
+      "lichsu_clean-000034",
+      "lichsu_clean-000035"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000029"
+    ],
+    "key_facts": [
+      "tháng 4 - 1892",
+      "tháng 10 - 1894",
+      "tháng 12-1897",
+      "Tháng 1-1909",
+      "10 tháng 2 năm 1913"
+    ],
+    "gold_answer": "Bốn giai đoạn: 1884-1892 chưa có chỉ huy thống nhất, nhiều toán nghĩa quân riêng lẻ, kết thúc bằng việc Đề Nắm bị giết tháng 4-1892; 1893-1897 Đề Thám lãnh đạo, hai lần đình chiến với Pháp (10-1894 và 12-1897); 1898-1908 hoà hoãn, xây dựng căn cứ Phồn Xương, mở rộng quan hệ với các nhà yêu nước; 1909-1913 Pháp mở cuộc tổng tấn công, nghĩa quân tan rã dần và Đề Thám bị sát hại ngày 10-2-1913.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Recall@k phải bắt được cả 5 chunk — ca đo nặng nhất về recall."
+  },
+  {
+    "id": "qa-023",
+    "question": "Nghĩa quân Yên Thế đã hai lần giảng hòa với Pháp vào lúc nào và với điều kiện gì?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Khởi nghĩa Yên Thế",
+    "gold_chunk_ids": [
+      "lichsu_clean-000032",
+      "lichsu_clean-000033"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "tháng 10 - 1894",
+      "15.000 francs",
+      "4 tổng Nhã Nam, Mục Sơn, Yên Lễ và Hữu Thượng",
+      "tháng 12-1897",
+      "phải nộp cho Pháp tất cả vũ khí và phải bãi binh"
+    ],
+    "gold_answer": "Lần thứ nhất tháng 10-1894 sau vụ bắt cóc Chesnay: Pháp trả 15.000 francs tiền chuộc, rút khỏi Yên Thế và để Đề Thám kiểm soát 4 tổng Nhã Nam, Mục Sơn, Yên Lễ, Hữu Thượng cùng quyền thu thuế trong 3 năm. Lần thứ hai tháng 12-1897 với điều kiện ràng buộc chặt hơn: nghĩa quân phải nộp toàn bộ vũ khí và bãi binh, nhưng Đề Thám chỉ phục tùng bề ngoài, bên trong vẫn ngầm củng cố lực lượng.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Hai vế nằm ở hai chunk liền kề — kiểm hệ có lấy đủ cả hai không."
+  },
+  {
+    "id": "qa-024",
+    "question": "Diễn biến cuộc khởi nghĩa Trương Định từ năm 1859 đến năm 1864 như thế nào?",
+    "type": "synthesis",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Trương Định",
+    "gold_chunk_ids": [
+      "lichsu_clean-000001",
+      "lichsu_clean-000002"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000000"
+    ],
+    "key_facts": [
+      "thành Gia Định",
+      "Gò Công",
+      "phó lãnh binh tỉnh Gia Định",
+      "ngày 28 tháng 2 năm 1863",
+      "Ngày 20 tháng 8 năm 1864"
+    ],
+    "gold_answer": "Năm 1859 Trương Định đem nghĩa binh lên đóng ở Gia Định khi Pháp đánh chiếm thành. Đầu 1861 ông rút về Gò Công xây căn cứ kháng chiến lâu dài. Năm 1862 triều đình phong ông chức phó lãnh binh Gia Định, phong trào lan rộng khắp Gò Công, Mỹ Tho, Tân An, Chợ Lớn. Sau Hiệp ước Nhâm Tuất 5-6-1862 ông chống lệnh triều đình, được tôn làm Bình Tây Đại Nguyên soái. Ngày 28-2-1863 căn cứ Tân Hòa thất thủ, và ngày 20-8-1864 ông tự sát khi bị trọng thương.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-025",
+    "question": "Vì sao nổ ra chiến tranh Pháp - Thanh trên lãnh thổ Việt Nam?",
+    "type": "synthesis",
+    "difficulty": "medium",
+    "topic": "Chiến tranh Pháp - Thanh",
+    "gold_chunk_ids": [
+      "lichsu_clean-000012"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000013"
+    ],
+    "key_facts": [
+      "đồng bằng Bắc Bộ Việt Nam",
+      "tỉnh Vân Nam",
+      "biên giới phía nam",
+      "Đại Nam"
+    ],
+    "gold_answer": "Pháp muốn kiểm soát vùng đồng bằng Bắc Bộ và con đường nối Hà Nội đến Vân Nam; ngược lại nhà Thanh muốn ngăn sự hiện diện quân sự của Pháp ở Bắc Kỳ vì điều đó uy hiếp trực tiếp biên giới phía nam của họ, đồng thời muốn nhân cơ hội chiếm đoạt hoặc duy trì ảnh hưởng đối với Đại Nam.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-026",
+    "question": "Sau khi được thả năm 1869, Nguyễn Hữu Huân đã gây dựng lại lực lượng kháng Pháp như thế nào?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Khởi nghĩa Nguyễn Hữu Huân",
+    "gold_chunk_ids": [
+      "lichsu_clean-000005"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "vừa dạy học, vừa bí mật tìm cách liên lạc",
+      "Năm 1872, Nguyễn Hữu Huân bỏ trốn về vùng Mĩ Tho",
+      "hơn 3 nghìn quân",
+      "Âu Dương Lân"
+    ],
+    "gold_answer": "Bị quản thúc ở Chợ Lớn, ông vừa dạy học vừa bí mật liên lạc với những người yêu nước. Năm 1872 ông bỏ trốn về vùng Mĩ Tho, Tân An cùng Tuấn Đức, Âu Dương Lân khởi binh; phong trào lan khắp Mĩ Tho, Tân An, Chợ Lớn, nhiều thủ lĩnh địa phương quy tụ về, xây dựng được lực lượng hơn 3 nghìn quân cùng hệ thống cơ sở kháng chiến tới tận thôn xã.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Đáp án nằm GIỮA một chunk rất dài — ca kiểm chunk dài có bị rerank bỏ sót không."
+  },
+  {
+    "id": "qa-027",
+    "question": "Bối cảnh nào dẫn tới cuộc khởi nghĩa Bảy Thưa ở An Giang?",
+    "type": "synthesis",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Bảy Thưa",
+    "gold_chunk_ids": [
+      "lichsu_clean-000009"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000010"
+    ],
+    "key_facts": [
+      "Đại đồn Chí Hòa thất thủ",
+      "tỉnh An Giang mất ngày 22 tháng 6 năm 1867",
+      "Vua Tự Đức"
+    ],
+    "gold_answer": "Sau khi Đại đồn Chí Hòa thất thủ tháng 2-1861 và Pháp chiếm ba tỉnh miền Đông, vua Tự Đức kêu gọi sĩ dân chống xâm lược, Trần Văn Thành trở lại đội ngũ. Ngày 22 tháng 6 năm 1867 tỉnh An Giang mất sau khi Tổng đốc Phan Khắc Thận đầu hàng, nhiều binh sĩ và người dân chống lại, hình thành cuộc khởi nghĩa của Trần Văn Thành ở cánh đồng Láng Linh.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-028",
+    "question": "Chủ trương cứu nước của Phan Bội Châu và Phan Châu Trinh khác nhau như thế nào?",
+    "type": "comparison",
+    "difficulty": "hard",
+    "topic": "Phong trào yêu nước đầu thế kỉ XX",
+    "gold_chunk_ids": [
+      "phi-su-kien_clean-000083",
+      "phi-su-kien_clean-000094"
+    ],
+    "supporting_chunk_ids": [
+      "phi-su-kien_clean-000108",
+      "phi-su-kien_clean-000119",
+      "phi-su-kien_clean-000099"
+    ],
+    "key_facts": [
+      "Duy tân hội",
+      "Đông du",
+      "Tự lực khai hoá",
+      "dân quyền"
+    ],
+    "gold_answer": "Phan Bội Châu theo xu hướng bạo động: lập Duy tân hội (1904) với mục đích đánh Pháp giành độc lập, tổ chức phong trào Đông du đưa người sang Nhật, sau lập Việt Nam Quang phục hội. Phan Châu Trinh theo xu hướng cải cách: yêu cầu chính quyền thuộc địa sửa đổi chính sách cai trị, đề cao phương châm \"Tự lực khai hoá\", vận động thức tỉnh dân chúng và tuyên truyền tư tưởng dân quyền.",
+    "expected_confidence": "vừa",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Hai cụm chunk cách nhau ~10 chunk và ở hai mục khác nhau — ca so sánh kinh điển."
+  },
+  {
+    "id": "qa-029",
+    "question": "Khởi nghĩa Yên Thế khác với các cuộc khởi nghĩa trong phong trào Cần vương ở điểm nào?",
+    "type": "comparison",
+    "difficulty": "hard",
+    "topic": "Khởi nghĩa Yên Thế",
+    "gold_chunk_ids": [
+      "lichsu_clean-000029",
+      "lichsu_clean-000030"
+    ],
+    "supporting_chunk_ids": [
+      "phi-su-kien_clean-000037",
+      "lichsu_clean-000055"
+    ],
+    "key_facts": [
+      "nông dân lưu tán",
+      "công khai chống lại triều đình",
+      "Hoàng Hoa Thám"
+    ],
+    "gold_answer": "Khởi nghĩa Yên Thế là cuộc đối đầu vũ trang của những nông dân lưu tán tự đứng lên bảo vệ cuộc sống của mình — họ vốn đã công khai chống lại triều đình trước khi Pháp đến, nên không xuất phát từ chiếu Cần vương của vua Hàm Nghi như các cuộc khởi nghĩa Ba Đình, Bãi Sậy, Hương Khê. Yên Thế cũng kéo dài hơn hẳn, tới tận năm 1913, trong khi phong trào Cần vương kết thúc với thất bại của Hương Khê năm 1896.",
+    "expected_confidence": "vừa",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Câu đòi tổng hợp xuyên hai nguồn tài liệu; dễ sinh nội dung ngoài corpus — kiểm faithfulness."
+  },
+  {
+    "id": "qa-030",
+    "question": "Người trở thành thủ lĩnh tối cao của nghĩa quân Yên Thế sau khi Đề Nắm bị giết là ai, và về sau người đó bị ai sát hại, nhằm mục đích gì?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Khởi nghĩa Yên Thế",
+    "gold_chunk_ids": [
+      "lichsu_clean-000031",
+      "lichsu_clean-000035"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Đề Thám",
+      "hai tên thủ hạ Lương Tam Kỳ",
+      "nộp đầu cho Pháp lấy thưởng"
+    ],
+    "gold_answer": "Đó là Đề Thám: sau khi Đề Nắm bị giết tháng 4-1892, Đề Thám đứng ra tổ chức lại phong trào và trở thành thủ lĩnh tối cao của nghĩa quân Yên Thế. Ngày 10-2-1913, ông bị hai tên thủ hạ của Lương Tam Kỳ giết hại để nộp đầu cho Pháp lấy thưởng.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Đề Thám",
+    "hop1_chunk_ids": [
+      "lichsu_clean-000031"
+    ],
+    "hop2_chunk_ids": [
+      "lichsu_clean-000035"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "Ví dụ multi-hop CHÍNH THỨC của plan (agentic-retrieval-loop-plan §2.0). Tên cầu nối không có trong câu hỏi. Lưu ý trung thực: cả ba chunk cùng nằm trong mục Yên Thế nên hybrid một lượt VẪN CÓ THỂ vớ được cả hai — đó chính là thứ phải đo."
+  },
+  {
+    "id": "qa-031",
+    "question": "Kẻ đã sát hại thủ lĩnh cuối cùng của khởi nghĩa Yên Thế trước đó là chỉ huy của đội quân nào?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Khởi nghĩa Yên Thế",
+    "gold_chunk_ids": [
+      "lichsu_clean-000035",
+      "lichsu_clean-000031"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Lương Tam Kỳ",
+      "quân Cờ đen"
+    ],
+    "gold_answer": "Đề Thám bị hai thủ hạ của Lương Tam Kỳ giết hại ngày 10-2-1913. Lương Tam Kỳ là một chỉ huy quân Cờ đen — chính lực lượng mà trước đó Đề Thám từng liên kết.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Lương Tam Kỳ",
+    "hop1_chunk_ids": [
+      "lichsu_clean-000035"
+    ],
+    "hop2_chunk_ids": [
+      "lichsu_clean-000031"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "Đã verify: \"Lương Tam Kỳ\" chỉ xuất hiện ở 2 chunk (31, 35); chunk 35 có vụ sát hại nhưng KHÔNG có \"Cờ đen\", chunk 31 có \"Cờ đen\" nhưng không có vụ sát hại."
+  },
+  {
+    "id": "qa-032",
+    "question": "Người được Phan Đình Phùng giao quyền chỉ huy nghĩa quân Hương Khê khi ông ra Bắc đầu năm 1887 sinh và mất năm nào?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Khởi nghĩa Hương Khê",
+    "gold_chunk_ids": [
+      "lichsu_clean-000048",
+      "lichsu_clean-000044"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000047"
+    ],
+    "key_facts": [
+      "Cao Thắng",
+      "1864",
+      "1893"
+    ],
+    "gold_answer": "Đó là Cao Thắng — đầu năm 1887 Phan Đình Phùng giao quyền chỉ huy cho ông để ra Bắc tìm sự hỗ trợ. Cao Thắng sinh năm 1864 và mất năm 1893.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Cao Thắng",
+    "hop1_chunk_ids": [
+      "lichsu_clean-000048"
+    ],
+    "hop2_chunk_ids": [
+      "lichsu_clean-000044"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "Đã verify điều kiện (b): không chunk nào chứa đồng thời \"ra Bắc\" và \"1864\"."
+  },
+  {
+    "id": "qa-033",
+    "question": "Đề Thám đã liên kết với những thủ lĩnh nào?",
+    "type": "relation",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Yên Thế",
+    "gold_chunk_ids": [
+      "lichsu_clean-000031"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Lương Tam Kỳ",
+      "chỉ huy quân Cờ đen",
+      "Đèo Văn Trị",
+      "thủ lĩnh người Thái"
+    ],
+    "gold_answer": "Đề Thám liên kết với lực lượng của Lương Tam Kỳ — một chỉ huy quân Cờ đen — và với Đèo Văn Trị, thủ lĩnh người Thái.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Ca kiểm giá trị của graph context: câu hỏi QUAN HỆ giữa các thực thể, mode hybrid phải hơn traditional ở đây."
+  },
+  {
+    "id": "qa-034",
+    "question": "Những nhà yêu nước nào đã lên Yên Thế gặp Đề Thám?",
+    "type": "relation",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Yên Thế",
+    "gold_chunk_ids": [
+      "lichsu_clean-000034"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Phan Bội Châu",
+      "hai lần đón tiếp",
+      "Châu Trinh",
+      "Giữa năm 1906"
+    ],
+    "gold_answer": "Nghĩa quân Hoàng Hoa Thám đã hai lần đón tiếp Phan Bội Châu; giữa năm 1906 Phan Châu Trinh cũng lên Yên Thế gặp Đề Thám.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Chunk gốc ghi \"Châu Trinh\" chứ không ghi đủ \"Phan Châu Trinh\" — ca kiểm alias/entity linking. | Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ việc lập đồn Tú Nghệ)."
+  },
+  {
+    "id": "qa-035",
+    "question": "Trần Văn Thành đã tìm cách liên kết với những lực lượng nào ở nước ngoài và kết quả ra sao?",
+    "type": "relation",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Bảy Thưa",
+    "gold_chunk_ids": [
+      "lichsu_clean-000010"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Pu Kom Pô",
+      "thủ lĩnh kháng Pháp ở Campuchia",
+      "Xiêm La",
+      "Cao Miên",
+      "không thành công"
+    ],
+    "gold_answer": "Ông cho người liên hệ với Pu Kom Pô, thủ lĩnh kháng Pháp ở Campuchia, nhưng người này cũng đang gặp khó khăn nên việc liên kết không hiệu quả. Ông còn cho người sang Xiêm La và Cao Miên mua súng đạn nhưng không thành công, vì hai nước ấy không muốn nhúng tay vào việc Nam Kỳ, e mất lòng Pháp.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-036",
+    "question": "Những ai đã theo giúp Phan Đình Phùng trong khởi nghĩa Hương Khê?",
+    "type": "relation",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Hương Khê",
+    "gold_chunk_ids": [
+      "lichsu_clean-000047"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000044"
+    ],
+    "key_facts": [
+      "Phan Trọng Mưu",
+      "Phan Quảng Cư",
+      "Lê Ninh",
+      "Cao Thắng"
+    ],
+    "gold_answer": "Theo giúp Phan Đình Phùng có các trí thức như tiến sĩ Phan Trọng Mưu, cử nhân Phan Quảng Cư, Ấm Ninh (Lê Ninh), cùng rất nhiều chỉ huy xuất thân từ nhân dân lao động nghèo khổ như Cao Thắng, Nguyễn Chanh, Nguyễn Trạch, Lê Văn Tạc, Phan Đình Can, Phan Đình Phong, Nguyễn Mục, Phan Bá Niên.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Đáp án là một danh sách dài — kiểm hệ có liệt kê đủ hay cắt bớt tuỳ tiện."
+  },
+  {
+    "id": "qa-037",
+    "question": "Nguyễn Hữu Huân có quan hệ gì với Trương Định?",
+    "type": "relation",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Nguyễn Hữu Huân",
+    "gold_chunk_ids": [
+      "lichsu_clean-000004"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Sau Hiệp ước Nhâm Tuất (1862)",
+      "Phó Quản đạo"
+    ],
+    "gold_answer": "Sau Hiệp ước Nhâm Tuất (1862), Nguyễn Hữu Huân đem toàn bộ lực lượng của mình gia nhập nghĩa quân Trương Định và được cử làm Phó Quản đạo. Khi nghĩa quân gặp khó khăn và Trương Định rút về Phúc Lộc, ông đưa quân về xây dựng căn cứ Bình Cách, trực tiếp lãnh đạo kháng chiến ở Định Tường.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Quan hệ hai nhân vật — ca so mode graph vs traditional."
+  },
+  {
+    "id": "qa-038",
+    "question": "Trần Văn Thành đã hỗ trợ cuộc khởi nghĩa của Nguyễn Trung Trực như thế nào?",
+    "type": "relation",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Bảy Thưa",
+    "gold_chunk_ids": [
+      "lichsu_clean-000010"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000011"
+    ],
+    "key_facts": [
+      "Ba Bần",
+      "Trà Kên",
+      "ngăn cản tàu chiến Pháp đi tái chiếm tỉnh lỵ Rạch Giá"
+    ],
+    "gold_answer": "Tháng 6-1868, khi Nguyễn Trung Trực chiếm được đồn Kiên Giang rồi bị Pháp phản công, Trần Văn Thành cho quân đắp cản ở Ba Bần, Trà Kên để ngăn tàu chiến Pháp đi tái chiếm tỉnh lỵ Rạch Giá. Cuộc cản phá thất bại; Nguyễn Trung Trực rút ra Hòn Chông còn Trần Văn Thành dẫn lực lượng vào Láng Linh.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Quan hệ xuyên hai mục khởi nghĩa khác nhau."
+  },
+  {
+    "id": "qa-039",
+    "question": "Những sự kiện nào đã diễn ra tại Gò Công trong cuộc khởi nghĩa Trương Định?",
+    "type": "temporal_spatial",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Trương Định",
+    "gold_chunk_ids": [
+      "lichsu_clean-000001",
+      "lichsu_clean-000002"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000000"
+    ],
+    "key_facts": [
+      "Gò Công",
+      "căn cứ Tân Hòa",
+      "ngày 28 tháng 2 năm 1863"
+    ],
+    "gold_answer": "Năm 1850 Trương Định chiêu mộ khoảng 500 dân nghèo khai hoang lập ấp ở Gò Công. Đầu năm 1861 ông rút quân về Gò Công, xây nơi đây thành căn cứ kháng chiến với hàng ngàn nghĩa quân. Khi bị triều đình buộc giải giáp, ông ở lại Gò Công kháng chiến và được tôn làm Bình Tây Đại Nguyên soái. Pháp mở cuộc tiến công lớn vào căn cứ và ngày 28-2-1863 căn cứ Tân Hòa (Gò Công) thất thủ.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Câu theo ĐỊA ĐIỂM — dùng chung cho bộ visualization sau này (marker Gò Công)."
+  },
+  {
+    "id": "qa-040",
+    "question": "Hãy nêu các mốc thời gian chính của khởi nghĩa Yên Thế theo thứ tự.",
+    "type": "temporal_spatial",
+    "difficulty": "hard",
+    "topic": "Khởi nghĩa Yên Thế",
+    "gold_chunk_ids": [
+      "lichsu_clean-000031",
+      "lichsu_clean-000032",
+      "lichsu_clean-000033",
+      "lichsu_clean-000035"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000034"
+    ],
+    "key_facts": [
+      "Cao Thượng",
+      "tháng 4 - 1892",
+      "tháng 10 - 1894",
+      "tháng 12-1897",
+      "Tháng 1-1909",
+      "10 tháng 2 năm 1913"
+    ],
+    "gold_answer": "Tháng 11-1890 thắng trận chống càn ở Cao Thượng; tháng 12-1890 ba lần đánh bại Pháp ở Hố Chuối; tháng 3-1892 Pháp huy động hơn 2.200 quân tấn công; tháng 4-1892 Đề Nắm bị giết, Đề Thám lên thay; tháng 10-1894 đình chiến lần thứ nhất; tháng 12-1897 đình chiến lần thứ hai; 27-7-1908 vụ đầu độc binh lính Pháp ở Hà Nội; tháng 1-1909 Pháp huy động khoảng 15.000 quân tổng tấn công; 10-2-1913 Đề Thám bị sát hại, phong trào thất bại hoàn toàn.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Câu dòng thời gian — dùng lại cho bộ visualization (timeline)."
+  },
+  {
+    "id": "qa-041",
+    "question": "Sau năm 1895, nghĩa quân Đề Thám phải di chuyển hoạt động ở những tỉnh nào?",
+    "type": "temporal_spatial",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Yên Thế",
+    "gold_chunk_ids": [
+      "lichsu_clean-000032"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Bắc Ninh",
+      "Bắc Giang",
+      "Thái Nguyên",
+      "Phúc Yên"
+    ],
+    "gold_answer": "Để tránh đụng độ lớn với quân Pháp, Đề Thám chia nghĩa quân thành những toán nhỏ phân tán, phải di chuyển hoạt động trong bốn tỉnh: Bắc Ninh, Bắc Giang, Thái Nguyên và Phúc Yên.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-042",
+    "question": "Căn cứ chính của khởi nghĩa Bảy Thưa đặt ở đâu và được bố phòng ra sao?",
+    "type": "temporal_spatial",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Bảy Thưa",
+    "gold_chunk_ids": [
+      "lichsu_clean-000010"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000011"
+    ],
+    "key_facts": [
+      "Hưng Trung doanh",
+      "đồn Cái Môn",
+      "đồn Lương",
+      "khoảng 150 nghĩa quân phòng thủ"
+    ],
+    "gold_answer": "Căn cứ chính là Hưng Trung doanh ở vùng Láng Linh (nay thuộc ấp Hưng Trung, xã Đào Hữu Cảnh, huyện Châu Phú). Xung quanh thiết lập các đồn làm tuyến ngăn cản như đồn Cái Môn, đồn Lương, đồn Giồng Nghệ, trạm canh Ông Tà, đồn Hờ ở vàm rạch Cái Dầu; mỗi đồn trang bị súng thần công, súng điểu thương, hỏa hổ với khoảng 150 nghĩa quân phòng thủ.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-043",
+    "question": "Trận Cầu Giấy năm 1883 diễn ra ở khu vực nào của Hà Nội ngày nay?",
+    "type": "temporal_spatial",
+    "difficulty": "hard",
+    "topic": "Chiến tranh Pháp - Thanh",
+    "gold_chunk_ids": [
+      "lichsu_clean-000016"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000017"
+    ],
+    "key_facts": [
+      "sông Tô Lịch",
+      "làng Tiên Đồng",
+      "làng Yên Khê",
+      "Trung Tường"
+    ],
+    "gold_answer": "Trận diễn ra quanh Cầu Giấy — cây cầu bắc qua sông Tô Lịch — và các làng lân cận thuộc xã Dịch Vọng: làng Tiên Đồng, làng Yên Khê và làng Trung Tường, nay thuộc quận Cầu Giấy, Hà Nội.",
+    "expected_confidence": "vừa",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Nhiều địa danh cổ - mới lồng nhau; dễ bịa. Kiểm faithfulness về địa danh. | Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ hướng chảy sông Tô Lịch, tên thôn và vị trí hai bên cầu)."
+  },
+  {
+    "id": "qa-044",
+    "question": "Vì sao nhiều thủ lĩnh nghĩa quân lại bị chính người trong hàng ngũ hoặc người địa phương phản bội?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Xuyên chủ đề",
+    "gold_chunk_ids": [
+      "lichsu_clean-000005",
+      "lichsu_clean-000056",
+      "lichsu_clean-000035"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000010"
+    ],
+    "key_facts": [
+      "Đốc binh Hương",
+      "lý trưởng làng Chính An",
+      "vì tham tiền thưởng",
+      "nộp đầu cho Pháp lấy thưởng"
+    ],
+    "gold_answer": "Tài liệu cho thấy nguyên nhân chung là Pháp treo giải thưởng cao cho đầu các thủ lĩnh và cài người phá hoại từ bên trong: Nguyễn Hữu Huân bị Đốc binh Hương phản bội chỉ điểm (1875); Đinh Công Tráng bị lý trưởng làng Chính An mật báo vì tham tiền thưởng (1887); Đề Thám bị hai thủ hạ của Lương Tam Kỳ giết để nộp đầu cho Pháp lấy thưởng (1913).",
+    "expected_confidence": "vừa",
+    "expected_mode": "traditional",
+    "expected_step_count": 1,
+    "notes": "KHÔNG có tên riêng trong câu hỏi -> plan phải chọn traditional. Gold trải 3 mục khởi nghĩa khác nhau: ca recall xuyên chủ đề khó nhất trong bộ."
+  },
+  {
+    "id": "qa-045",
+    "question": "Nông dân lưu tán là ai và vì sao họ phải lập ra các đội vũ trang tự vệ?",
+    "type": "synthesis",
+    "difficulty": "medium",
+    "topic": "Khởi nghĩa Yên Thế",
+    "gold_chunk_ids": [
+      "lichsu_clean-000030"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "nông dân lưu tán",
+      "chống lại ách áp bức, sự truy bắt của chính quyền",
+      "bọn giặc Khách"
+    ],
+    "gold_answer": "Đó là những nông dân bị lưu tán hoặc đang bị truy đuổi, đến ẩn náu và sinh sống ở vùng đất hoang từ những năm 60-70 của thế kỷ 19, cùng khai phá đất hoang, kiếm lâm sản, sống lẫn với giặc Khách và thổ phỉ. Họ phải lập các đội vũ trang tự vệ và làng chiến đấu để vừa chống ách áp bức, sự truy bắt của chính quyền, vừa chống cướp bóc, tàn phá của giặc cướp.",
+    "expected_confidence": "cao",
+    "expected_mode": "traditional",
+    "expected_step_count": 1,
+    "notes": "Không tên riêng -> traditional."
+  },
+  {
+    "id": "qa-046",
+    "question": "Trong khởi nghĩa Bảy Thưa và khởi nghĩa Hương Khê, nghĩa quân tự trang bị vũ khí bằng những cách nào?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Xuyên chủ đề",
+    "gold_chunk_ids": [
+      "lichsu_clean-000010",
+      "lichsu_clean-000048"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000011",
+      "lichsu_clean-000046"
+    ],
+    "key_facts": [
+      "rèn đúc vũ khí",
+      "mua súng đạn",
+      "không thành công"
+    ],
+    "gold_answer": "Chủ yếu bằng hai cách: tự rèn đúc vũ khí ngay tại căn cứ (Trần Văn Thành lập lò đúc ở Láng Linh, nghĩa quân Hương Khê rèn đúc vũ khí ở Lê Động); và tìm mua súng đạn từ bên ngoài — nhưng hướng này thường thất bại, như việc Trần Văn Thành cho người sang Xiêm La và Cao Miên mua súng mà không thành công.",
+    "expected_confidence": "vừa",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10. Câu hỏi cũ 'Nghĩa quân thời kỳ đó...' có đại từ không tiền ngữ (bộ nhãn không có history) nên hệ trả rỗng, 0 chunk, lặp lại được. Nêu tên hai cuộc khởi nghĩa để câu hỏi tự đứng được; đổi lại mất ca kiểm luật 'không tên riêng -> traditional', expected_mode theo đó thành hybrid. gold_answer cũ còn nêu 'thu vũ khí của địch sau các trận đánh' — có thật trong corpus (Trương Định lichsu_clean-000001, Nguyễn Trung Trực -000007, Thanh Sơn -000071/-000074) nhưng KHÔNG thuộc Bảy Thưa/Hương Khê, nên đã bỏ cho khớp phạm vi câu hỏi và khớp key_facts."
+  },
+  {
+    "id": "qa-047",
+    "question": "Chức năng của các làng chiến đấu và hệ thống đồn lũy trong các cuộc khởi nghĩa là gì?",
+    "type": "synthesis",
+    "difficulty": "medium",
+    "topic": "Xuyên chủ đề",
+    "gold_chunk_ids": [
+      "lichsu_clean-000030",
+      "lichsu_clean-000010"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000031"
+    ],
+    "key_facts": [
+      "7 hệ thống công sự",
+      "ngăn chặn các cuộc hành quân càn quét",
+      "khoảng 150 nghĩa quân phòng thủ"
+    ],
+    "gold_answer": "Làng chiến đấu và đồn lũy vừa để tự vệ trước áp bức và cướp bóc, vừa làm tuyến ngăn cản đối phương: ở Bảy Thưa các đồn bao quanh Hưng Trung doanh làm tuyến chặn, mỗi đồn khoảng 150 nghĩa quân với súng thần công, điểu thương, hỏa hổ; ở Yên Thế nghĩa quân lập cụm cứ điểm gồm 7 hệ thống công sự ở phía bắc để ngăn các cuộc hành quân càn quét của Pháp.",
+    "expected_confidence": "vừa",
+    "expected_mode": "traditional",
+    "expected_step_count": 1,
+    "notes": "Không tên riêng -> traditional."
+  },
+  {
+    "id": "qa-048",
+    "question": "Việt Nam Quang phục hội ra đời thay cho tổ chức nào và có tôn chỉ gì?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Việt Nam Quang phục hội",
+    "gold_chunk_ids": [
+      "phi-su-kien_clean-000119"
+    ],
+    "supporting_chunk_ids": [
+      "phi-su-kien_clean-000118"
+    ],
+    "key_facts": [
+      "thủ tiêu Duy tân hội",
+      "Đánh đuổi giặc Pháp, khôi phục nước Việt Nam"
+    ],
+    "gold_answer": "Hội nghị đại biểu khắp ba kì đã quyết định thủ tiêu Duy tân hội và thành lập Việt Nam Quang phục hội. Tôn chỉ duy nhất của Hội là: Đánh đuổi giặc Pháp, khôi phục nước Việt Nam, thành lập nước cộng hòa dân quốc.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ cuộc tranh luận quân chủ - dân chủ)."
+  },
+  {
+    "id": "qa-049",
+    "question": "Người đã hỗ trợ Đề Thám tuyển mộ phu từ một đồn điền của Pháp về sau bị thực dân Pháp đày ra đảo nào?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Khởi nghĩa Yên Thế / phong trào Kỳ Đồng",
+    "gold_chunk_ids": [
+      "lichsu_clean-000032",
+      "phi-su-kien_clean-000036"
+    ],
+    "supporting_chunk_ids": [
+      "phi-su-kien_clean-000035"
+    ],
+    "key_facts": [
+      "Kỳ Đồng",
+      "đày ra đảo Haiti"
+    ],
+    "gold_answer": "Đó là Kỳ Đồng — người quản lý một đồn điền của Pháp và đã hỗ trợ Đề Thám tuyển mộ người từ thành phần phu của đồn điền đó. Sau khi cuộc khởi nghĩa của Kỳ Đồng và Mạc Đĩnh Phúc thất bại, Kỳ Đồng bị thực dân Pháp đày ra đảo Haiti.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Kỳ Đồng",
+    "hop1_chunk_ids": [
+      "lichsu_clean-000032"
+    ],
+    "hop2_chunk_ids": [
+      "phi-su-kien_clean-000036"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "Sinh bởi find_multihop_candidates.py, verify tay. Hai mắt xích nằm ở HAI FILE khác nhau (lichsu vs phi-su-kien) và hai chủ đề khác nhau — khó hơn ca Yên Thế vốn cùng một mục."
+  },
+  {
+    "id": "qa-050",
+    "question": "Người cùng Võ Trứ lãnh đạo cuộc khởi nghĩa ở Phú Yên năm 1898 về sau cùng ai lãnh đạo cuộc vận động khởi nghĩa năm 1916?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Phong trào yêu nước mang màu sắc tôn giáo / khởi nghĩa 1916",
+    "gold_chunk_ids": [
+      "phi-su-kien_clean-000036",
+      "phi-su-kien_clean-000140"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Trần Cao Vân",
+      "Thái Phiên"
+    ],
+    "gold_answer": "Đó là Trần Cao Vân — người cùng Võ Trứ lãnh đạo cuộc khởi nghĩa ở Phú Yên năm 1898. Về sau ông cùng Thái Phiên, một thành viên của Việt Nam Quang phục hội, lãnh đạo cuộc vận động khởi nghĩa năm 1916.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Trần Cao Vân",
+    "hop1_chunk_ids": [
+      "phi-su-kien_clean-000036"
+    ],
+    "hop2_chunk_ids": [
+      "phi-su-kien_clean-000140"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "Hai mắt xích cách nhau 3 chương (Chương III -> Chương VI) và 18 năm. Đã verify: không chunk nào chứa cả \"Võ Trứ\" lẫn \"Thái Phiên\"."
+  },
+  {
+    "id": "qa-051",
+    "question": "Vị đại thần nhà Thanh từng gặp Đại sứ Pháp Bourée để bàn việc nhượng vùng Lào Cai về sau đã ký điều ước nào với Nhật Bản, vào ngày nào?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Chiến tranh Pháp - Thanh / tình hình Trung Quốc",
+    "gold_chunk_ids": [
+      "lichsu_clean-000014",
+      "phi-su-kien_clean-000074"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Lý Hồng Chương",
+      "Điều ước Mã Quan",
+      "Ngày 17-4-1895"
+    ],
+    "gold_answer": "Đó là Lý Hồng Chương — Phó vương Trực Lệ, người gặp Đại sứ Pháp Bourée tháng 11 năm 1882 để bàn khả năng nhượng vùng Lào Cai cho nhà Thanh. Ngày 17-4-1895, ông ký kết Điều ước Mã Quan với Nhật Bản.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Lý Hồng Chương",
+    "hop1_chunk_ids": [
+      "lichsu_clean-000014"
+    ],
+    "hop2_chunk_ids": [
+      "phi-su-kien_clean-000074"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "Cầu nối là nhân vật nước ngoài, hai mắt xích ở hai file và cách nhau 13 năm. \"Bourée\" chỉ xuất hiện 1 chunk, \"Điều ước Mã Quan\" 1 chunk, giao rỗng."
+  },
+  {
+    "id": "qa-052",
+    "question": "Người đã hùn vốn mở hiệu buôn Đồng Lợi Tế ở phố Mã Mây về sau bị Pháp bắt và xử tử ở đâu, cùng bao nhiêu đồng chí?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Đông Kinh nghĩa thục / Việt Nam Quang phục hội",
+    "gold_chunk_ids": [
+      "phi-su-kien_clean-000113",
+      "phi-su-kien_clean-000137"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Đỗ Chân Thiết",
+      "58 đồng chí",
+      "xử tử tại Hà Khẩu"
+    ],
+    "gold_answer": "Đó là Đỗ Chân Thiết — người hùn vốn với các đồng chí mở hiệu buôn Đồng Lợi Tế ở phố Mã Mây để ủng hộ phong trào. Sau khi kế hoạch đánh chiếm Hà Nội của cơ sở Quang phục hội ở Vân Nam bị lộ, ông cùng 58 đồng chí bị bắt và bị xử tử tại Hà Khẩu.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Đỗ Chân Thiết",
+    "hop1_chunk_ids": [
+      "phi-su-kien_clean-000113"
+    ],
+    "hop2_chunk_ids": [
+      "phi-su-kien_clean-000137"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "Mắt xích 1 là hoạt động KINH TẾ (hội buôn), mắt xích 2 là hoạt động VŨ TRANG — hai trường từ vựng hoàn toàn khác nhau, nên truy vấn dựng từ chữ trong câu hỏi rất khó chạm tới chunk 2."
+  },
+  {
+    "id": "qa-053",
+    "question": "Người chỉ đạo trận công kích đồn Tà Lùng ở Cao Bằng được giao chỉ huy đội thứ mấy và đánh về đâu trong kế hoạch vượt biên giới đầu năm 1915?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Việt Nam Quang phục hội",
+    "gold_chunk_ids": [
+      "lichsu_clean-000089",
+      "phi-su-kien_clean-000138"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Hoàng Trọng Mậu",
+      "đội thứ ba",
+      "Hà Khẩu"
+    ],
+    "gold_answer": "Đó là Hoàng Trọng Mậu — người chỉ đạo cuộc công kích đồn Tà Lùng (Cao Bằng) của Việt Nam Quang phục Hội. Trong kế hoạch vượt biên giới đầu năm 1915, ông chỉ huy đội thứ ba đánh về Hà Khẩu.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Hoàng Trọng Mậu",
+    "hop1_chunk_ids": [
+      "lichsu_clean-000089"
+    ],
+    "hop2_chunk_ids": [
+      "phi-su-kien_clean-000138"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "hop1 là chunk RẤT NGẮN (mục Trận Tà Lùng chỉ có 1 chunk) — vừa test multi-hop vừa test chunk ngắn. Bẫy: hop2 liệt kê 3 người chỉ huy 3 đội, hệ dễ gán nhầm Móng Cái hoặc Lạng Sơn."
+  },
+  {
+    "id": "qa-054",
+    "question": "Người lập Quan hải tùng thư ở Huế về sau nắm quyền lãnh đạo cơ quan Tổng bộ của tổ chức nào?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Phong trào dân tộc 1925-1930",
+    "gold_chunk_ids": [
+      "phi-su-kien_clean-000206",
+      "phi-su-kien_clean-000218"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Đào Duy Anh",
+      "Tân Việt Cách mạng đảng",
+      "Tổng bộ"
+    ],
+    "gold_answer": "Đó là Đào Duy Anh — người lập Quan hải tùng thư ở Huế. Ông nằm trong số những trí thức nắm quyền lãnh đạo các cơ quan Tổng bộ của Tân Việt Cách mạng đảng.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Đào Duy Anh",
+    "hop1_chunk_ids": [
+      "phi-su-kien_clean-000206"
+    ],
+    "hop2_chunk_ids": [
+      "phi-su-kien_clean-000218"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "hop1 là một chunk ngắn dạng liệt kê 3 nhà xuất bản — dễ bị rerank dìm. Giai đoạn 1925-1930, bù cho phần corpus ít được phủ. | Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ danh sách bốn đồng sự)."
+  },
+  {
+    "id": "qa-055",
+    "question": "Người đã cùng Ủy ban Thường vụ Quốc hội ra lệnh thả đại biểu Nguyễn Đổng Lâm giữ chức vụ gì trong Ban thường trực do Quốc hội bầu?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Xây dựng chế độ Dân chủ Cộng hoà 1945-1946",
+    "gold_chunk_ids": [
+      "lichsu_clean-000163",
+      "phi-su-kien_clean-000287"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Nguyễn Văn Tố",
+      "Trưởng ban"
+    ],
+    "gold_answer": "Đó là Nguyễn Văn Tố — Chủ tịch Ủy ban Thường vụ Quốc hội, người cùng Ủy ban ra lệnh thả đại biểu Nguyễn Đổng Lâm. Trong Ban thường trực do Quốc hội bầu, ông giữ chức Trưởng ban.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Nguyễn Văn Tố",
+    "hop1_chunk_ids": [
+      "lichsu_clean-000163"
+    ],
+    "hop2_chunk_ids": [
+      "phi-su-kien_clean-000287"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "Bẫy thuật ngữ: hop1 gọi ông là \"Chủ tịch Ủy ban Thường vụ Quốc hội\", hop2 gọi cơ quan là \"Ban thường trực\" — hệ phải nối được hai cách gọi. Giai đoạn 1945-1946, mở rộng phủ corpus. | Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ ngày 21-8-1946 và cơ cấu 15 uỷ viên chính thức, 3 dự khuyết)."
+  },
+  {
+    "id": "qa-056",
+    "question": "Trận Hà Nội trong đông xuân 1946-1947 diễn ra từ khi nào đến khi nào?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Chiến tranh Đông Dương",
+    "gold_chunk_ids": [
+      "lichsu_clean-000191"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "đêm 19 tháng 12 năm 1946 đến trưa 18 tháng 2 năm 1947"
+    ],
+    "gold_answer": "Trận Hà Nội đông xuân 1946-47 là sự kiện khởi động Chiến tranh Đông Dương, diễn ra từ đêm 19 tháng 12 năm 1946 đến trưa 18 tháng 2 năm 1947.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Gold là chunk chỉ có MỘT câu — ca kiểm chunk cực ngắn."
+  },
+  {
+    "id": "qa-057",
+    "question": "Chiến dịch Biên giới Thu đông 1950 còn có tên gọi nào khác và diễn ra trong thời gian nào?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Chiến dịch Biên giới 1950",
+    "gold_chunk_ids": [
+      "lichsu_clean-000220"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Chiến dịch Lê Hồng Phong 2",
+      "từ ngày 16 tháng 9 đến 14 tháng 10 năm 1950"
+    ],
+    "gold_answer": "Chiến dịch Biên giới Thu đông 1950 còn gọi là Chiến dịch Lê Hồng Phong 2, do Quân đội nhân dân Việt Nam thực hiện từ ngày 16 tháng 9 đến 14 tháng 10 năm 1950.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-058",
+    "question": "Chiến dịch Hà Nam Ninh còn có tên gọi nào khác và đạt kết quả gì?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Chiến dịch Hà Nam Ninh",
+    "gold_chunk_ids": [
+      "lichsu_clean-000262"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "chiến dịch Quang Trung",
+      "khoảng 4.000 đối phương",
+      "phòng tuyến sông Đáy"
+    ],
+    "gold_answer": "Chiến dịch Hà Nam Ninh còn gọi là chiến dịch Quang Trung, nhằm phá vỡ phòng tuyến sông Đáy. Kết quả loại khỏi vòng chiến đấu khoảng 4.000 đối phương, giải phóng Bình Lục, Lý Nhân.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Đối chứng trực tiếp với neg-015: cùng cụm từ \"Quang Trung\" nhưng ở đây là câu TRẢ LỜI ĐƯỢC. | Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ khoảng thời gian 28-5 đến 20-6-1951)."
+  },
+  {
+    "id": "qa-059",
+    "question": "Chiến dịch Hòa Bình diễn ra trong thời gian nào và nhằm phá vỡ phòng tuyến nào?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Chiến dịch Hòa Bình",
+    "gold_chunk_ids": [
+      "lichsu_clean-000276"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "10 tháng 12 năm 1951 - 25 tháng 2 năm 1952",
+      "phòng tuyến Sông Đà"
+    ],
+    "gold_answer": "Chiến dịch Hòa Bình diễn ra từ 10 tháng 12 năm 1951 đến 25 tháng 2 năm 1952 ở khu vực thị xã Hoà Bình - Sông Đà - Đường 6, nhằm đánh bại kế hoạch chiếm đóng Hòa Bình của Pháp và phá vỡ phòng tuyến Sông Đà.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-060",
+    "question": "Chiến dịch Tây Bắc năm 1952 nhằm làm thất bại ý đồ gì của thực dân Pháp?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Chiến dịch Tây Bắc",
+    "gold_chunk_ids": [
+      "lichsu_clean-000290"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Xứ Thái tự trị"
+    ],
+    "gold_answer": "Chiến dịch Tây Bắc nhằm làm thất bại ý đồ lập \"Xứ Thái tự trị\" của thực dân Pháp.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ khoảng thời gian chiến dịch và các mục tiêu không thuộc câu hỏi)."
+  },
+  {
+    "id": "qa-061",
+    "question": "Chiến dịch Thượng Lào năm 1953 phối hợp với lực lượng nào và diễn ra trên địa bàn nào?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Chiến dịch Thượng Lào",
+    "gold_chunk_ids": [
+      "lichsu_clean-000304"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Pathet Lào",
+      "Sầm Nưa",
+      "Xiêng Khoảng"
+    ],
+    "gold_answer": "Chiến dịch Thượng Lào (13.4-18.5.1953) là chiến dịch tiến công của Quân đội Nhân dân Việt Nam phối hợp với lực lượng Pathet Lào trên địa bàn hai tỉnh Sầm Nưa và Xiêng Khoảng.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-062",
+    "question": "Ai là chỉ huy mới của Pháp đến Đông Dương tháng 7 năm 1953?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Kế hoạch Navarre",
+    "gold_chunk_ids": [
+      "lichsu_clean-000311"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Henri Navarre"
+    ],
+    "gold_answer": "Tháng 7 năm 1953, tướng Henri Navarre đến Đông Dương làm chỉ huy mới của Pháp.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ việc chuẩn bị tổng phản công và tên Kế hoạch Navarre)."
+  },
+  {
+    "id": "qa-063",
+    "question": "Cuộc hành quân Hirondelle của Navarre đánh vào đâu và vào ngày nào?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Kế hoạch Navarre",
+    "gold_chunk_ids": [
+      "lichsu_clean-000311"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "18 tháng 7 năm 1953",
+      "Hirondelle",
+      "Lạng Sơn"
+    ],
+    "gold_answer": "Ngày 18 tháng 7 năm 1953, Navarre mở cuộc hành quân Hirondelle (\"Con én\") vào Lạng Sơn.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ cuộc hành binh Camargue vào Quảng Trị)."
+  },
+  {
+    "id": "qa-064",
+    "question": "Chiến dịch Điện Biên Phủ diễn ra tại địa danh nào?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Chiến dịch Điện Biên Phủ",
+    "gold_chunk_ids": [
+      "lichsu_clean-000339"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "lòng chảo Mường Thanh",
+      "châu Điện Biên, tỉnh Lai Châu"
+    ],
+    "gold_answer": "Chiến dịch Điện Biên Phủ diễn ra tại lòng chảo Mường Thanh, châu Điện Biên, tỉnh Lai Châu (nay thuộc thành phố Điện Biên Phủ, tỉnh Điện Biên).",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Chủ đề có 135 chunk — kiểm precision khi nhiễu cực lớn."
+  },
+  {
+    "id": "qa-065",
+    "question": "Giữa trận Điện Biên Phủ, quân Pháp đã tăng quân số lên bao nhiêu người?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Chiến dịch Điện Biên Phủ",
+    "gold_chunk_ids": [
+      "lichsu_clean-000339"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "16.200 người"
+    ],
+    "gold_answer": "Giữa trận, quân Pháp đã gia tăng lên đến 16.200 người.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ ngày đầu hàng và thời gian cầm cự)."
+  },
+  {
+    "id": "qa-066",
+    "question": "Thuật ngữ \"thuyết domino\" lần đầu xuất hiện dưới thời tổng thống Mỹ nào?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Thuyết Domino",
+    "gold_chunk_ids": [
+      "lichsu_clean-000536"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Dwight D. Eisenhower",
+      "thuyết domino"
+    ],
+    "gold_answer": "Thuật ngữ \"thuyết domino\" lần đầu tiên xuất hiện dưới thời Tổng thống Dwight D. Eisenhower, để chỉ nguy cơ phát triển của chủ nghĩa cộng sản tại Đông Dương mà trọng tâm là miền Nam Việt Nam.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-067",
+    "question": "Khu phi quân sự tạm thời sau Hiệp định Genève được lập dọc con sông nào và quân đội hai bên phải rút trong bao lâu?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Hai vùng tập kết quân sự",
+    "gold_chunk_ids": [
+      "lichsu_clean-000597"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "sông Bến Hải",
+      "trong vòng 300 ngày",
+      "Vĩ tuyến 17"
+    ],
+    "gold_answer": "Vĩ tuyến 17 được xem là ranh giới và một khu phi quân sự tạm thời được lập dọc hai bờ sông Bến Hải thuộc tỉnh Quảng Trị. Quân đội hai bên phải rút về khu vực quy định trong vòng 300 ngày.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-068",
+    "question": "Ngô Đình Diệm trở thành tổng thống sau sự kiện nào, và vì sao sự kiện đó bị tố cáo gian lận?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Giai đoạn 1954-1959",
+    "gold_chunk_ids": [
+      "lichsu_clean-000614"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "23 tháng 10 năm 1955",
+      "605.025 lá phiếu",
+      "450.000 cử tri"
+    ],
+    "gold_answer": "Ngô Đình Diệm trở thành tổng thống sau một cuộc trưng cầu ý dân ngày 23 tháng 10 năm 1955. Cuộc trưng cầu bị tố cáo gian lận rõ ràng: tại Sài Gòn ông chiếm được 605.025 lá phiếu trong khi cả khu vực này chỉ có 450.000 cử tri.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-069",
+    "question": "Trận Ấp Bắc diễn ra vào ngày nào và ở đâu?",
+    "type": "factoid",
+    "difficulty": "easy",
+    "topic": "Trận Ấp Bắc",
+    "gold_chunk_ids": [
+      "lichsu_clean-000628"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "ngày 2 tháng 1 năm 1963",
+      "tỉnh Mỹ Tho",
+      "65 km"
+    ],
+    "gold_answer": "Trận Ấp Bắc diễn ra ngày 2 tháng 1 năm 1963, gần Ấp Bắc thuộc tỉnh Mỹ Tho lúc bấy giờ (nay là tỉnh Tiền Giang), cách Sài Gòn 65 km về phía Tây Nam.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-070",
+    "question": "Trận đánh nào diễn ra tại thung lũng sông Ia Drang tháng 11 năm 1965?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Các chiến dịch Tìm-diệt",
+    "gold_chunk_ids": [
+      "lichsu_clean-000656"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Ia Drang",
+      "trận Xray và trận Albany",
+      "Sư đoàn 1 Kỵ binh bay"
+    ],
+    "gold_answer": "Tháng 11 năm 1965 xảy ra trận đánh ác liệt tại thung lũng sông Ia Drang, gồm hai trận liên tiếp là trận Xray và trận Albany, giữa hai trung đoàn Quân Giải phóng miền Nam và một lữ đoàn thuộc Sư đoàn 1 Kỵ binh bay của Mỹ.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ độ dài bốn ngày đêm)."
+  },
+  {
+    "id": "qa-071",
+    "question": "Chiến dịch Đường 9 - Khe Sanh kéo dài bao lâu theo cách tính của Quân đội Nhân dân Việt Nam?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Chiến dịch Đường 9 - Khe Sanh",
+    "gold_chunk_ids": [
+      "lichsu_clean-000743"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "77 ngày",
+      "170 ngày",
+      "hàng rào điện tử McNamara"
+    ],
+    "gold_answer": "Tài liệu Hoa Kỳ ghi nhận 77 ngày (tháng 1 đến tháng 4 năm 1968), nhưng với Quân đội Nhân dân Việt Nam đó chỉ là giai đoạn 1; cộng cả giai đoạn 2 (9 tháng 4 đến 25 tháng 7) thì chiến dịch kéo dài 170 ngày, kết thúc khi lính Mỹ cuối cùng rút khỏi Khe Sanh, đánh dấu sự thất bại của hàng rào điện tử McNamara.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Hai cách tính khác nhau trong CÙNG một chunk — kiểm hệ có nêu đủ cả hai hay chỉ lấy một."
+  },
+  {
+    "id": "qa-072",
+    "question": "Vì sao quả đồi trong trận A Bia được lính Mỹ gọi là \"Đồi Thịt Băm\"?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Trận Đồi Thịt Băm",
+    "gold_chunk_ids": [
+      "lichsu_clean-000776"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Cao điểm 937",
+      "Hamburger Hill",
+      "gần 2.000 quân"
+    ],
+    "gold_answer": "Trận A Bia diễn ra khi Mỹ tập trung gần 2.000 quân đánh chiếm núi A Bia (phía Mỹ gọi là Cao điểm 937). Sau trận đánh, lính Mỹ gọi ngọn đồi này là \"Đồi Thịt Băm\" - Hamburger Hill, như một cách thể hiện độ khốc liệt và thương vong cao của lính Mỹ.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ khoảng thời gian 10-20/5/1969)."
+  },
+  {
+    "id": "qa-073",
+    "question": "Chiến lược Việt Nam hóa chiến tranh được áp dụng từ ngày nào và dưới thời tổng thống Mỹ nào?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Việt Nam hóa chiến tranh",
+    "gold_chunk_ids": [
+      "lichsu_clean-000798"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "8 tháng 6 năm 1969",
+      "Richard Nixon"
+    ],
+    "gold_answer": "Việt Nam hóa chiến tranh là chiến lược của Chính phủ Hoa Kỳ dưới thời tổng thống Richard Nixon, được áp dụng từ ngày 8 tháng 6 năm 1969 trên toàn Đông Dương nhằm từng bước chuyển trách nhiệm chiến đấu cho Việt Nam Cộng hòa để Mỹ rút dần quân về nước.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-074",
+    "question": "Mục tiêu của chiến dịch Lam Sơn 719 là gì?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Chiến dịch Lam Sơn 719",
+    "gold_chunk_ids": [
+      "lichsu_clean-000814"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Tchepone",
+      "42 km",
+      "Đường mòn Hồ Chí Minh"
+    ],
+    "gold_answer": "Mục tiêu là phá vỡ hệ thống hậu cần của Quân đội Nhân dân Việt Nam và Quân Giải phóng miền Nam tại Lào, cắt đứt Đường mòn Hồ Chí Minh tại thị trấn Tchepone (Xê-pôn) nằm cách biên giới Việt-Lào 42 km về phía Tây.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-075",
+    "question": "Trận Thành cổ Quảng Trị kéo dài bao nhiêu ngày đêm và kết quả ra sao?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Trận Thành cổ Quảng Trị",
+    "gold_chunk_ids": [
+      "lichsu_clean-000928"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "81 ngày đêm"
+    ],
+    "gold_answer": "Trận chiến kéo dài suốt 81 ngày đêm. Hoa Kỳ và Việt Nam Cộng hòa tái chiếm được Thành cổ nhưng không giành lại được nửa Bắc tỉnh Quảng Trị; kế hoạch tái chiếm bị kéo dài tới 3 tháng so với dự kiến ban đầu là 2 tuần.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-076",
+    "question": "Chiến dịch Tây Nguyên có mật danh gì và mở màn bằng trận đánh vào đâu?",
+    "type": "factoid",
+    "difficulty": "medium",
+    "topic": "Chiến dịch Tây Nguyên",
+    "gold_chunk_ids": [
+      "lichsu_clean-001054"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Chiến dịch 275",
+      "Buôn Ma Thuột",
+      "ngày 10 tháng 3 năm 1975"
+    ],
+    "gold_answer": "Chiến dịch Tây Nguyên có mật danh Chiến dịch 275, mở màn bằng cuộc tiến công vào Buôn Ma Thuột ngày 10 tháng 3 năm 1975.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ khoảng thời gian chiến dịch và hệ quả với Quân đoàn II)."
+  },
+  {
+    "id": "qa-077",
+    "question": "Ba chiến dịch lớn của Quân đội nhân dân Việt Nam trong đông-xuân 1950-1951 là những chiến dịch nào?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Chiến tranh Đông Dương",
+    "gold_chunk_ids": [
+      "lichsu_clean-000243",
+      "lichsu_clean-000255",
+      "lichsu_clean-000262"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Chiến dịch Trần Hưng Đạo",
+      "Chiến dịch Hoàng Hoa Thám",
+      "Chiến dịch Hà Nam Ninh"
+    ],
+    "gold_answer": "Ba chiến dịch lớn trong đông-xuân 1950-1951 là: Chiến dịch Trần Hưng Đạo (còn gọi Chiến dịch Trung du) đánh vào phòng tuyến trung du Bắc Bộ; Chiến dịch Hoàng Hoa Thám đánh vào khu vực Hải Phòng; và Chiến dịch Hà Nam Ninh (Quang Trung) phá phòng tuyến sông Đáy.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Cả 3 chunk đều tự nhận là \"một trong 3 chiến dịch lớn\" nhưng KHÔNG chunk nào liệt kê đủ ba — buộc phải gom từ ba chỗ."
+  },
+  {
+    "id": "qa-078",
+    "question": "Cuộc Tổng tiến công mùa Xuân 1975 gồm những chiến dịch lớn nào?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Chiến dịch Mùa Xuân 1975",
+    "gold_chunk_ids": [
+      "lichsu_clean-001038",
+      "lichsu_clean-001054",
+      "lichsu_clean-001081",
+      "lichsu_clean-001109"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000995"
+    ],
+    "key_facts": [
+      "Chiến dịch Đường 14 - Phước Long",
+      "Chiến dịch Tây Nguyên",
+      "Chiến dịch Huế - Đà Nẵng",
+      "Chiến dịch Hồ Chí Minh"
+    ],
+    "gold_answer": "Mở đầu là Chiến dịch Đường 14 - Phước Long (12-12-1974 đến 6-1-1975) mang ý nghĩa trinh sát chiến lược; tiếp đó Chiến dịch Tây Nguyên (4 đến 24-3-1975, mật danh 275); Chiến dịch Huế - Đà Nẵng (5 đến 29-3-1975); và cuối cùng Chiến dịch Hồ Chí Minh (26 đến 30-4-1975) giải phóng Sài Gòn.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Recall@k phải bắt được 4 chunk nằm rải trong 100 chunk — ca đo recall nặng nhất vùng corpus sau."
+  },
+  {
+    "id": "qa-079",
+    "question": "Chiến dịch Xuân - Hè 1972 gồm những chiến dịch chính nào và diễn ra trên các hướng nào?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Chiến dịch Xuân - Hè 1972",
+    "gold_chunk_ids": [
+      "lichsu_clean-000838",
+      "lichsu_clean-000850",
+      "lichsu_clean-000882",
+      "lichsu_clean-000907"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Mùa hè đỏ lửa",
+      "Chiến dịch Trị Thiên",
+      "Bắc Tây Nguyên",
+      "Chiến dịch Nguyễn Huệ"
+    ],
+    "gold_answer": "Chiến dịch Xuân - Hè 1972 (Mùa hè đỏ lửa) diễn ra từ 30-3-1972 đến 31-1-1973 trên ba hướng chiến lược, gồm ba chiến dịch chính: Chiến dịch Trị Thiên ở Quảng Trị - Thừa Thiên - Huế, Chiến dịch Bắc Tây Nguyên 1972, và Chiến dịch Nguyễn Huệ ở miền Đông Nam Bộ.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-080",
+    "question": "Chiến dịch Tây Bắc 1952 và Chiến dịch Thượng Lào 1953 khác nhau về mục tiêu như thế nào?",
+    "type": "comparison",
+    "difficulty": "hard",
+    "topic": "Chiến tranh Đông Dương",
+    "gold_chunk_ids": [
+      "lichsu_clean-000290",
+      "lichsu_clean-000304"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Xứ Thái tự trị",
+      "Pathet Lào",
+      "căn cứ kháng chiến của nhân dân Lào"
+    ],
+    "gold_answer": "Chiến dịch Tây Bắc (1952) nhằm tiêu diệt sinh lực đối phương, giải phóng đất đai và làm thất bại ý đồ lập \"Xứ Thái tự trị\" của Pháp trên lãnh thổ Việt Nam. Chiến dịch Thượng Lào (1953) lại phối hợp với lực lượng Pathet Lào trên đất Lào, nhằm giải phóng đất đai và mở rộng căn cứ kháng chiến của nhân dân Lào.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-081",
+    "question": "Theo Hiệp định Genève, Việt Nam được chia thành hai vùng tập kết như thế nào?",
+    "type": "synthesis",
+    "difficulty": "medium",
+    "topic": "Hiệp định Genève",
+    "gold_chunk_ids": [
+      "lichsu_clean-000527",
+      "lichsu_clean-000597"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Ngày 1/8/1954",
+      "vĩ tuyến 17",
+      "sông Bến Hải",
+      "trong vòng 300 ngày"
+    ],
+    "gold_answer": "Hiệp định Genève được ấn định ngày 1/8/1954. Việt Nam tạm thời chia thành hai khu tập kết quân sự lấy vĩ tuyến 17 làm ranh giới, với khu phi quân sự dọc sông Bến Hải: Quân đội Nhân dân Việt Nam tập kết phía Bắc, lực lượng Liên hiệp Pháp và Quân đội Quốc gia Việt Nam ở phía Nam. Quân đội hai bên rút về khu vực quy định trong vòng 300 ngày, chờ tổng tuyển cử thống nhất.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-082",
+    "question": "Nguyễn Văn Thiệu đã có những quyết định sai lầm nào trong năm 1975?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Chiến dịch Mùa Xuân 1975",
+    "gold_chunk_ids": [
+      "lichsu_clean-001054",
+      "lichsu_clean-001081"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "ngày 14 tháng 3",
+      "60.000 quân",
+      "con đường số 7",
+      "cố thủ"
+    ],
+    "gold_answer": "Ngày 14 tháng 3 năm 1975, sau các thất bại dồn dập ở Buôn Ma Thuột, Nguyễn Văn Thiệu quyết định rút quân trên toàn địa bàn Tây Nguyên về giữ miền duyên hải Trung Bộ; việc rút quân tiến hành rất kém nên chỉ ba ngày sau gần như toàn bộ Quân đoàn II với 60.000 quân bị tiêu diệt, đầu hàng hoặc tan rã trên con đường số 7. Tiếp đó, chiến lược \"cố thủ\" mới của ông cũng là một trong những nguyên nhân đưa đến việc Quân khu I thất thủ.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-083",
+    "question": "Tương quan lực lượng giữa Quân Giải phóng và Quân lực Việt Nam Cộng hòa trong giai đoạn 1973-1975 như thế nào?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Giai đoạn 1973-1975",
+    "gold_chunk_ids": [
+      "lichsu_clean-000986",
+      "lichsu_clean-000980"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "219.000 người",
+      "920.000 người",
+      "171.166 tấn/năm",
+      "16.415 tấn/năm"
+    ],
+    "gold_answer": "Viện trợ của Liên Xô và Trung Quốc giảm mạnh, từ khoảng 171.166 tấn/năm thời kỳ 1969-72 xuống còn khoảng 16.415 tấn/năm thời kỳ 1973-75. Quân số Quân Giải phóng là 219.000 người so với 920.000 người của Quân lực Việt Nam Cộng hòa. Tuy nhiên Hiệp định Paris không cho phép Mỹ không kích đường mòn Hồ Chí Minh nên tuyến chi viện thông suốt cả ngày lẫn đêm.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-084",
+    "question": "Chiến tranh biên giới Việt - Trung 1979 bắt đầu và kết thúc như thế nào?",
+    "type": "synthesis",
+    "difficulty": "medium",
+    "topic": "Chiến tranh biên giới Việt - Trung 1979",
+    "gold_chunk_ids": [
+      "lichsu_clean-001212",
+      "lichsu_clean-001234"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "17 tháng 2 năm 1979",
+      "khoảng 120.000 quân",
+      "18 tháng 3 năm 1979",
+      "Tôn Đức Thắng"
+    ],
+    "gold_answer": "Rạng sáng 17 tháng 2 năm 1979, khoảng 120.000 quân bộ binh Trung Quốc tiến vào Việt Nam trên toàn tuyến biên giới. Cuộc chiến kết thúc khi Trung Quốc tuyên bố hoàn thành việc rút quân ngày 18 tháng 3 năm 1979, sau khi Chủ tịch Tôn Đức Thắng ký lệnh Tổng động viên toàn dân và Trung Quốc đã đánh chiếm các thị xã Lạng Sơn, Lào Cai, Cao Bằng.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-085",
+    "question": "Chiến dịch Lam Sơn 719 liên quan thế nào tới chiến lược Việt Nam hóa chiến tranh?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Việt Nam hóa chiến tranh",
+    "gold_chunk_ids": [
+      "lichsu_clean-000798",
+      "lichsu_clean-000814"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "8 tháng 6 năm 1969",
+      "Richard Nixon",
+      "một thử nghiệm về chiến lược Việt Nam hóa chiến tranh"
+    ],
+    "gold_answer": "Việt Nam hóa chiến tranh là chiến lược của Nixon áp dụng từ 8-6-1969, chuyển dần trách nhiệm chiến đấu cho Quân lực Việt Nam Cộng hòa để Mỹ rút quân. Lam Sơn 719 chính là một thử nghiệm về chiến lược Việt Nam hóa chiến tranh và về năng lực hoạt động độc lập của Quân lực Việt Nam Cộng hòa khi Mỹ tiếp tục rút quân, do quân này thực hiện với sự yểm trợ của không quân và pháo binh Mỹ.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-086",
+    "question": "Kế hoạch Navarre là gì và phía Việt Nam đối phó bằng cách nào?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Kế hoạch Navarre",
+    "gold_chunk_ids": [
+      "lichsu_clean-000311",
+      "lichsu_clean-000313"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Henri Navarre",
+      "Hirondelle",
+      "Chiến cục Đông Xuân 1953-1954",
+      "đánh bại Kế hoạch Navarre"
+    ],
+    "gold_answer": "Tháng 7-1953, tướng Henri Navarre đến Đông Dương và chuẩn bị một cuộc tổng phản công gọi là \"Kế hoạch Navarre\", mở các cuộc hành quân Hirondelle vào Lạng Sơn, Camargue vào Quảng Trị, Moutte vào Ninh Bình và Thanh Hóa. Phía Việt Nam đối phó bằng Chiến cục Đông Xuân 1953-1954 — chuỗi tiến công chiến lược trên toàn chiến trường Đông Dương phối hợp với Lào, Campuchia, nhằm đánh bại Kế hoạch Navarre.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-087",
+    "question": "Sau trận Hà Nội 1946, Pháp đã tiến công lên Việt Bắc như thế nào?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Chiến tranh Đông Dương",
+    "gold_chunk_ids": [
+      "lichsu_clean-000191",
+      "lichsu_clean-000213"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Ngày 7 tháng 10 năm 1947"
+    ],
+    "gold_answer": "Sau khi đánh rộng ra đồng bằng, ngày 7 tháng 10 năm 1947 Pháp mở cuộc hành quân Léa tấn công vào chiến khu Việt Bắc để sớm kết thúc chiến tranh.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": "Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ mốc trận Hà Nội và quy mô lực lượng chủ lực VNDCCH)."
+  },
+  {
+    "id": "qa-088",
+    "question": "Vì sao Hội nghị Genève được coi là một sự dàn xếp của các nước lớn, và kết quả với Hà Nội ra sao?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Hiệp định Genève",
+    "gold_chunk_ids": [
+      "lichsu_clean-000486",
+      "lichsu_clean-000527"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Vũ Khoan",
+      "Liên Xô, Mỹ, Anh và Pháp",
+      "Ngày 1/8/1954",
+      "Phủ Lỗ"
+    ],
+    "gold_answer": "Theo Phó Thủ tướng kiêm Ngoại trưởng Vũ Khoan, Hội nghị Genève là một sự dàn xếp của các nước lớn gồm Liên Xô, Mỹ, Anh và Pháp — mỗi nước đều có nhu cầu riêng, còn Trung Quốc chưa có ghế trong Hội đồng Bảo an nên ban đầu chưa được tham gia. Kết quả, ngày 1/8/1954 Hiệp định được ấn định, Việt Nam Dân chủ Cộng hòa được quyền kiểm soát Hà Nội và các tỉnh phía Bắc vĩ tuyến 17; Hà Nội nằm trong khu tập kết 80 ngày của quân Pháp và hai bên đàm phán tiếp quản thủ đô tại Phủ Lỗ.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-089",
+    "question": "Giai đoạn 1965-1968 được gọi là gì và quân Mỹ đã áp dụng chính sách nào ở miền Nam?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Giai đoạn 1965-1968",
+    "gold_chunk_ids": [
+      "lichsu_clean-000637",
+      "lichsu_clean-000656"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Chiến tranh cục bộ",
+      "Lyndon B. Johnson",
+      "chất độc da cam",
+      "tìm-diệt"
+    ],
+    "gold_answer": "Giai đoạn 1965-1968 là giai đoạn ác liệt nhất, được gọi là Chiến tranh cục bộ, dưới thời Tổng thống Lyndon B. Johnson. Ở miền Nam, sau khi kế hoạch chiếm lòng dân của cố vấn Edward Lansdale thất bại, Mỹ chuyển sang dùng chất độc da cam và chính sách tìm-diệt, truy tìm Quân Giải phóng bằng không quân và kỵ binh bay.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-090",
+    "question": "Sự kiện Tết Mậu Thân và chiến dịch Đường 9 - Khe Sanh có quan hệ gì với nhau?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Sự kiện Tết Mậu Thân",
+    "gold_chunk_ids": [
+      "lichsu_clean-000707",
+      "lichsu_clean-000743"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Tết Mậu Thân",
+      "170 ngày",
+      "hàng rào điện tử McNamara"
+    ],
+    "gold_answer": "Tết Mậu Thân 1968 là cuộc tổng tiến công và nổi dậy trên hầu hết các đô thị miền Nam, mang tính bước ngoặt trong Chiến tranh Việt Nam. Chiến dịch Đường 9 - Khe Sanh là một chiến dịch chính yếu trong cùng chiến cục năm 1968: kéo dài 170 ngày theo cách tính của Quân đội Nhân dân Việt Nam, kết thúc khi lính Mỹ cuối cùng rút khỏi Khe Sanh, đánh dấu sự thất bại của hàng rào điện tử McNamara.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-091",
+    "question": "Việt Nam Dân chủ Cộng hòa bắt đầu nhận viện trợ từ khi nào và điều đó liên quan gì tới Chiến dịch Biên giới 1950?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Chiến tranh Đông Dương",
+    "gold_chunk_ids": [
+      "lichsu_clean-000474",
+      "lichsu_clean-000220"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Từ năm 1950",
+      "khai thông biên giới Việt-Trung",
+      "Chiến dịch Lê Hồng Phong 2"
+    ],
+    "gold_answer": "Từ năm 1950, Việt Nam Dân chủ Cộng hòa bắt đầu nhận viện trợ quân sự từ Liên Xô, Trung Quốc và các nước xã hội chủ nghĩa, còn Pháp nhận viện trợ từ Mỹ. Chiến dịch Biên giới Thu đông 1950 (Chiến dịch Lê Hồng Phong 2) chính nhằm phá vòng vây của Pháp quanh Việt Bắc để khai thông biên giới Việt-Trung, mở đầu cầu tiếp nhận viện trợ đó.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-092",
+    "question": "Xung đột biên giới Việt Nam - Campuchia dẫn tới hệ quả gì với Thái Lan?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Xung đột biên giới Tây Nam",
+    "gold_chunk_ids": [
+      "lichsu_clean-001178",
+      "lichsu_clean-001195"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Chiến tranh biên giới Tây Nam",
+      "Pol Pot",
+      "Khmer Đỏ",
+      "Thái Lan"
+    ],
+    "gold_answer": "Xung đột biên giới Việt Nam - Campuchia 1975-1978 với các cuộc tấn công của Khmer Đỏ đã dẫn tới Chiến tranh biên giới Tây Nam đầu năm 1979. Sau khi Quân đội nhân dân Việt Nam tiến vào Campuchia lật đổ chế độ Pol Pot, tàn quân Khmer Đỏ chạy về vùng biên giới gần Thái Lan, tái tập hợp với sự trợ giúp của Trung Quốc và tiến hành chiến tranh du kích từ các trại tị nạn trong lãnh thổ Thái Lan, làm nảy sinh xung đột Thái Lan - Việt Nam 1979-1989.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-093",
+    "question": "Chiến dịch Campuchia 1970 nhằm mục đích gì và bối cảnh chính trị Campuchia lúc đó ra sao?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Chiến dịch Campuchia",
+    "gold_chunk_ids": [
+      "lichsu_clean-000790"
+    ],
+    "supporting_chunk_ids": [
+      "lichsu_clean-000814"
+    ],
+    "key_facts": [
+      "Norodom Sihanouk",
+      "Khmer Xanh",
+      "Khmer Đỏ",
+      "Trung ương Cục miền Nam"
+    ],
+    "gold_answer": "Chiến dịch Campuchia năm 1970 là cuộc tấn công vào miền Đông Campuchia của quân đội Hoa Kỳ và Quân lực Việt Nam Cộng hòa nhằm truy quét các lực lượng của Trung ương Cục miền Nam đóng trên lãnh thổ Campuchia. Bối cảnh: Quốc trưởng Norodom Sihanouk nắm quyền từ 1954 nhưng bị cả phe Khmer Xanh (thân Mỹ) lẫn Khmer Đỏ (thân Trung Quốc) chống đối; năm 1965 ông chuyển sang ủng hộ Trung Quốc, cắt quan hệ với Mỹ và cho Việt Nam Dân chủ Cộng hòa dùng các tuyến vận chuyển trên đất Campuchia.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-094",
+    "question": "Vì sao Việt Nam Cộng hòa và Mỹ cự tuyệt tổng tuyển cử thống nhất?",
+    "type": "synthesis",
+    "difficulty": "hard",
+    "topic": "Giai đoạn 1954-1959",
+    "gold_chunk_ids": [
+      "lichsu_clean-000602",
+      "lichsu_clean-000614"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Edward Lansdale",
+      "23 tháng 10 năm 1955"
+    ],
+    "gold_answer": "Theo Việt Nam Dân chủ Cộng hòa và Mặt trận Dân tộc Giải phóng miền Nam, nguyên nhân chính là họ biết chắc mình không thể thắng và không muốn Việt Nam thống nhất. Mỹ coi miền Nam là địa bàn quan trọng trong chiến lược chống chủ nghĩa cộng sản ở Đông Nam Á nên can thiệp: năm 1955 phái đoàn quân sự do Edward Lansdale của CIA chỉ huy tiến hành tuyên truyền tâm lý chiến; Ngô Đình Diệm được Mỹ ủng hộ, trở thành tổng thống sau cuộc trưng cầu ý dân ngày 23 tháng 10 năm 1955.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 1,
+    "notes": ""
+  },
+  {
+    "id": "qa-095",
+    "question": "Vị Bộ trưởng Tư pháp của chính phủ Trần Trọng Kim từng ra lệnh thả hàng ngàn tù chính trị về sau làm Chủ tịch tổ chức nào ra đời từ Tết Mậu Thân?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Cách mạng Tháng Tám / Tết Mậu Thân",
+    "gold_chunk_ids": [
+      "lichsu_clean-000127",
+      "lichsu_clean-000731"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Trịnh Đình Thảo",
+      "Uỷ ban Trung ương Liên minh"
+    ],
+    "gold_answer": "Đó là Trịnh Đình Thảo — Bộ trưởng Tư pháp của chính phủ Trần Trọng Kim, người khi nhậm chức đã ra lệnh thả hàng ngàn tù chính trị bị Pháp giam giữ. Về sau, Liên minh các Lực lượng Dân tộc, Dân chủ và Hòa bình Việt Nam ra đời từ Tổng tiến công và nổi dậy Tết Mậu Thân đã bầu ông làm Chủ tịch Uỷ ban Trung ương Liên minh.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Trịnh Đình Thảo",
+    "hop1_chunk_ids": [
+      "lichsu_clean-000127"
+    ],
+    "hop2_chunk_ids": [
+      "lichsu_clean-000731"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "Hai mắt xích cách nhau 23 năm (1945 -> 1968) và ở hai mục hoàn toàn khác nhau."
+  },
+  {
+    "id": "qa-096",
+    "question": "Người giữ chức Phó bí thư Trung ương Cục kiêm Bí thư Thành ủy Sài Gòn về sau ký văn bản nào về việc bảo vệ khu vực bãi ngầm trong thềm lục địa phía nam?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Kháng chiến chống Mỹ / Trường Sa 1988",
+    "gold_chunk_ids": [
+      "lichsu_clean-000806",
+      "lichsu_clean-001262"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Nguyễn Văn Linh",
+      "19/NQ-TW"
+    ],
+    "gold_answer": "Đó là Nguyễn Văn Linh — Phó bí thư Trung ương Cục kiêm Bí thư Thành ủy Sài Gòn. Trên cương vị Tổng Bí thư, ngày 17 tháng 10 ông ký văn bản 19/NQ-TW về việc bảo vệ khu vực bãi ngầm trong thềm lục địa phía nam (khu DK1).",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Nguyễn Văn Linh",
+    "hop1_chunk_ids": [
+      "lichsu_clean-000806"
+    ],
+    "hop2_chunk_ids": [
+      "lichsu_clean-001262"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "Cách nhau ~19 năm và hai mục khác hẳn (Việt Nam hóa chiến tranh -> Trường Sa 1988)."
+  },
+  {
+    "id": "qa-097",
+    "question": "Người được cử làm Tư lệnh Quân khu 9 ở miền Tây Nam Bộ về sau đọc lời thề tại quần đảo nào, vào ngày nào?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Kháng chiến chống Mỹ / Trường Sa 1988",
+    "gold_chunk_ids": [
+      "lichsu_clean-000806",
+      "lichsu_clean-001261"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Lê Đức Anh",
+      "Trường Sa",
+      "Ngày 7 tháng 5 năm 1988"
+    ],
+    "gold_answer": "Đó là Lê Đức Anh — người được cử làm Tư lệnh Quân khu 9 khi miền Tây Nam Bộ được tăng cường lãnh đạo chỉ huy. Ngày 7 tháng 5 năm 1988, trên cương vị Đại tướng, ông đọc lời thề tại quần đảo Trường Sa.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Lê Đức Anh",
+    "hop1_chunk_ids": [
+      "lichsu_clean-000806"
+    ],
+    "hop2_chunk_ids": [
+      "lichsu_clean-001261"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "Bẫy: hop1 nêu cùng lúc ba nhân vật (Nguyễn Văn Linh, Võ Văn Kiệt, Lê Đức Anh) — hệ dễ trích nhầm mắt xích."
+  },
+  {
+    "id": "qa-098",
+    "question": "Người phụ trách Bộ Tư lệnh tiền phương cánh Nam trong Tết Mậu Thân về sau được cử giữ chức gì ở miền Tây Nam Bộ?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Tết Mậu Thân / Việt Nam hóa chiến tranh",
+    "gold_chunk_ids": [
+      "lichsu_clean-000717",
+      "lichsu_clean-000806"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Võ Văn Kiệt",
+      "Bí thư Khu ủy"
+    ],
+    "gold_answer": "Đó là Võ Văn Kiệt — người cùng Trần Bạch Đằng và Trần Hải Phụng phụ trách Bộ Tư lệnh tiền phương cánh Nam trong Tết Mậu Thân. Về sau ông được cử làm Bí thư Khu ủy khi miền Tây Nam Bộ được tăng cường lãnh đạo chỉ huy.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Võ Văn Kiệt",
+    "hop1_chunk_ids": [
+      "lichsu_clean-000717"
+    ],
+    "hop2_chunk_ids": [
+      "lichsu_clean-000806"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "Cả hai chunk cùng thuộc mục kháng chiến chống Mỹ — ca multi-hop \"gần\", đối chứng với qa-096/097 vốn xa nhau."
+  },
+  {
+    "id": "qa-099",
+    "question": "Vị thủ tướng chấp thuận cho quân đội Mỹ đổ bộ vào Việt Nam theo đề nghị của Đại sứ Maxwell Taylor trước đó từng được ai đưa lên giữ chức Tổng trưởng Bộ Quốc phòng?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Mỹ can dự vào chiến tranh",
+    "gold_chunk_ids": [
+      "lichsu_clean-000556",
+      "phi-su-kien_clean-000327"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Phan Huy Quát",
+      "Maxwell Taylor",
+      "Nguyễn Văn Tâm"
+    ],
+    "gold_answer": "Đó là Phan Huy Quát — Thủ tướng đã chấp thuận cho quân đội Mỹ đổ bộ vào Việt Nam sau đề nghị của Đại sứ Mỹ Maxwell Taylor. Trước đó, ông được Nguyễn Văn Tâm đưa lên giữ chức Tổng trưởng Bộ Quốc phòng trong nội các cải tổ năm 1952.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Phan Huy Quát",
+    "hop1_chunk_ids": [
+      "lichsu_clean-000556"
+    ],
+    "hop2_chunk_ids": [
+      "phi-su-kien_clean-000327"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "Xuyên file và ngược dòng thời gian (1965 -> 1952) — hệ phải hiểu \"trước đó\" chứ không suy diễn xuôi."
+  },
+  {
+    "id": "qa-100",
+    "question": "Viên tuần phủ Hưng Hóa được Pháp điều đến đối phó với lực lượng của Đốc Ngữ ở thượng du Bắc Kỳ nắm quyền chỉ huy lực lượng nào trong bộ máy quân sự thuộc địa?",
+    "type": "multihop",
+    "difficulty": "hard",
+    "topic": "Phong trào Cần vương / bộ máy thuộc địa",
+    "gold_chunk_ids": [
+      "lichsu_clean-000075",
+      "phi-su-kien_clean-000046"
+    ],
+    "supporting_chunk_ids": [],
+    "key_facts": [
+      "Lê Hoan",
+      "quân đội thân binh"
+    ],
+    "gold_answer": "Đó là Lê Hoan — tuần phủ Hưng Hóa, một trong các viên quan giàu kinh nghiệm được Pháp điều đến khiến lực lượng kháng chiến ở thượng du Bắc Kỳ, trong đó có quân của Đốc Ngữ, gặp khó khăn. Trong bộ máy quân sự thuộc địa, ông nằm trong số những người nắm quyền chỉ huy quân đội thân binh.",
+    "expected_confidence": "cao",
+    "expected_mode": "hybrid",
+    "expected_step_count": 2,
+    "bridge_entity": "Lê Hoan",
+    "hop1_chunk_ids": [
+      "lichsu_clean-000075"
+    ],
+    "hop2_chunk_ids": [
+      "phi-su-kien_clean-000046"
+    ],
+    "single_chunk_contains_both": false,
+    "notes": "Mắt xích 1 ở góc nhìn KHỞI NGHĨA, mắt xích 2 ở góc nhìn BỘ MÁY CAI TRỊ — hai trường từ vựng đối lập. | Sửa 2026-08-10: rút gold_answer về đúng phạm vi câu hỏi (bỏ danh sách Nguyễn Thân, Hoàng Cao Khải, Trần Bá Lộc)."
+  }
+]

@@ -1,0 +1,28 @@
+{
+  "ragas_version": "0.4.3",
+  "language": "vietnamese",
+  "instruction": "Hãy tách mỗi câu đầu vào thành một hoặc nhiều mệnh đề độc lập. Mỗi mệnh đề phải là một khẳng định đứng riêng được và có thể kiểm chứng độc lập. Giữ đúng mức độ nguyên tử (atomicity) và mức độ bao phủ (coverage) như trong các ví dụ.",
+  "examples": [
+    {
+      "input": {
+        "response": "Charles Babbage là một nhà toán học, nhà triết học và nhà phê bình ẩm thực người Pháp."
+      },
+      "output": {
+        "claims": [
+          "Charles Babbage là một nhà toán học và nhà triết học."
+        ]
+      }
+    },
+    {
+      "input": {
+        "response": "Albert Einstein là một nhà vật lý lý thuyết người Đức. Ông phát triển thuyết tương đối và cũng đóng góp vào sự phát triển của cơ học lượng tử."
+      },
+      "output": {
+        "claims": [
+          "Albert Einstein là một nhà vật lý người Đức.",
+          "Albert Einstein phát triển thuyết tương đối và đóng góp vào cơ học lượng tử."
+        ]
+      }
+    }
+  ]
+}

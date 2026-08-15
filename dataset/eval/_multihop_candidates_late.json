@@ -1,0 +1,722 @@
+[
+  {
+    "score": 12,
+    "bridge": "Trịnh Đình Thảo",
+    "anchor": "Chính phủ Trần Trọng Kim",
+    "anchor_relation": "tham gia",
+    "target": "Uỷ ban Trung ương Liên minh",
+    "target_relation": "bầu làm",
+    "hop1_chunk_id": "lichsu_clean-000127",
+    "hop2_chunk_id": "lichsu_clean-000731",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "10. Cách mạng Tháng Tám 1945",
+      null,
+      null
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Sự kiện Tết Mậu Thân",
+      "Diễn biến"
+    ],
+    "hop1_quote": "ặp Phan Kế Toại để nắm bắt tư tưởng và vận động ông ủng hộ Việt Minh, đồng thời thăm dò thái độ của Chính phủ Trần Trọng Kim. Sau đó, Khâm sai Phan Kế Toại gặp Nguyễn Khang, người do Xứ ủy Bắc Kỳ cử đến. Ông đề nghị Việt Minh tham gia Chính phủ Bảo Đại và ngừng các hoạt động chống Nhật nhưng Nguyễn ",
+    "hop2_quote": "và Hòa bình Việt Nam ra đời từ trong Tổng tiến công và nổi dậy Tết Mậu Thân, tổ chức Đại hội bầu ra Uỷ ban Trung ương Liên minh do Luật sư Trịnh Đình Thảo làm Chủ tịch.  Ngày 4.5.68, một chất nổ được mang trên xe taxi gồm 60 ký TNT, nổ lúc 13 giờ trưa khiến 3 người chết chừng 30 người bị thương và l"
+  },
+  {
+    "score": 12,
+    "bridge": "Trịnh Đình Thảo",
+    "anchor": "Uỷ ban Trung ương Liên minh",
+    "anchor_relation": "bầu làm",
+    "target": "Chính phủ Trần Trọng Kim",
+    "target_relation": "tham gia",
+    "hop1_chunk_id": "lichsu_clean-000731",
+    "hop2_chunk_id": "lichsu_clean-000127",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Sự kiện Tết Mậu Thân",
+      "Diễn biến"
+    ],
+    "hop2_heading": [
+      "10. Cách mạng Tháng Tám 1945",
+      null,
+      null
+    ],
+    "hop1_quote": "và Hòa bình Việt Nam ra đời từ trong Tổng tiến công và nổi dậy Tết Mậu Thân, tổ chức Đại hội bầu ra Uỷ ban Trung ương Liên minh do Luật sư Trịnh Đình Thảo làm Chủ tịch.  Ngày 4.5.68, một chất nổ được mang trên xe taxi gồm 60 ký TNT, nổ lúc 13 giờ trưa khiến 3 người chết chừng 30 người bị thương và l",
+    "hop2_quote": "ặp Phan Kế Toại để nắm bắt tư tưởng và vận động ông ủng hộ Việt Minh, đồng thời thăm dò thái độ của Chính phủ Trần Trọng Kim. Sau đó, Khâm sai Phan Kế Toại gặp Nguyễn Khang, người do Xứ ủy Bắc Kỳ cử đến. Ông đề nghị Việt Minh tham gia Chính phủ Bảo Đại và ngừng các hoạt động chống Nhật nhưng Nguyễn "
+  },
+  {
+    "score": 12,
+    "bridge": "Nguyễn Văn Linh",
+    "anchor": "Bí thư Thành ủy Sài Gòn",
+    "anchor_relation": "giữ chức",
+    "target": "19/NQ-TW",
+    "target_relation": "ký",
+    "hop1_chunk_id": "lichsu_clean-000806",
+    "hop2_chunk_id": "lichsu_clean-001262",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1969-1972",
+      "Việt Nam hóa chiến tranh"
+    ],
+    "hop2_heading": [
+      "9. Chiến tranh biên giới Việt - Trung 1979",
+      "Xung đột giành quyền kiểm soát tại quần đảo Trường Sa 1988",
+      "Kết quả"
+    ],
+    "hop1_quote": "rước kia tách về các phân khu, nay nhập lại như cũ. Nguyễn Văn Linh, Phó bí thư Trung ương Cục kiêm Bí thư Thành ủy Sài Gòn. Miền Tây Nam Bộ cũng được tăng cường lãnh đạo chỉ huy. Võ Văn Kiệt được cử làm Bí thư Khu ủy, Lê Đức Anh làm Tư lệnh Quân khu 9.  Tại Khu 5, tháng 9 năm 1969, Quân khu ủy cũng",
+    "hop2_quote": "quân ra đóng giữ tiếp 11 bãi đá ngầm khác. Ngày 17 tháng 10, Tổng Bí thư Nguyễn Văn Linh ký văn bản 19/NQ-TW về việc bảo vệ khu vực bãi ngầm trong thềm lục địa phía nam (khu DK1). Ngày 5 tháng 7 năm 1989, Thủ tướng Chính phủ ra chỉ thị số 180UT về việc xây dựng Cụm Dịch vụ Kinh tế - Khoa học - Kỹ th"
+  },
+  {
+    "score": 12,
+    "bridge": "Nguyễn Văn Linh",
+    "anchor": "19/NQ-TW",
+    "anchor_relation": "ký",
+    "target": "Bí thư Thành ủy Sài Gòn",
+    "target_relation": "giữ chức",
+    "hop1_chunk_id": "lichsu_clean-001262",
+    "hop2_chunk_id": "lichsu_clean-000806",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "9. Chiến tranh biên giới Việt - Trung 1979",
+      "Xung đột giành quyền kiểm soát tại quần đảo Trường Sa 1988",
+      "Kết quả"
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1969-1972",
+      "Việt Nam hóa chiến tranh"
+    ],
+    "hop1_quote": "quân ra đóng giữ tiếp 11 bãi đá ngầm khác. Ngày 17 tháng 10, Tổng Bí thư Nguyễn Văn Linh ký văn bản 19/NQ-TW về việc bảo vệ khu vực bãi ngầm trong thềm lục địa phía nam (khu DK1). Ngày 5 tháng 7 năm 1989, Thủ tướng Chính phủ ra chỉ thị số 180UT về việc xây dựng Cụm Dịch vụ Kinh tế - Khoa học - Kỹ th",
+    "hop2_quote": "rước kia tách về các phân khu, nay nhập lại như cũ. Nguyễn Văn Linh, Phó bí thư Trung ương Cục kiêm Bí thư Thành ủy Sài Gòn. Miền Tây Nam Bộ cũng được tăng cường lãnh đạo chỉ huy. Võ Văn Kiệt được cử làm Bí thư Khu ủy, Lê Đức Anh làm Tư lệnh Quân khu 9.  Tại Khu 5, tháng 9 năm 1969, Quân khu ủy cũng"
+  },
+  {
+    "score": 12,
+    "bridge": "Lê Đức Anh",
+    "anchor": "Tư lệnh Quân khu 9",
+    "anchor_relation": "được cử",
+    "target": "Đại tướng",
+    "target_relation": "giữ chức",
+    "hop1_chunk_id": "lichsu_clean-000806",
+    "hop2_chunk_id": "lichsu_clean-001261",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1969-1972",
+      "Việt Nam hóa chiến tranh"
+    ],
+    "hop2_heading": [
+      "9. Chiến tranh biên giới Việt - Trung 1979",
+      "Xung đột giành quyền kiểm soát tại quần đảo Trường Sa 1988",
+      "Kết quả"
+    ],
+    "hop1_quote": "Nam Bộ cũng được tăng cường lãnh đạo chỉ huy. Võ Văn Kiệt được cử làm Bí thư Khu ủy, Lê Đức Anh làm Tư lệnh Quân khu 9.  Tại Khu 5, tháng 9 năm 1969, Quân khu ủy cũng họp và chỉ rõ nhiệm vụ trọng tâm hàng đầu của quân khu là: \"Diệt kẹp, giành dân\". Mọi hoạt động tác chiến của bộ đội chủ lực cũng như",
+    "hop2_quote": "ữ được đá và hoàn thành việc xây dựng nhà trên đá. Ngày 7 tháng 5 năm 1988, tại quần đảo Trường Sa, Đại tướng Lê Đức Anh đã đọc lời thề: \"Chúng ta xin thề trước hương hồn của Tổ tiên ta, trước hương hồn của cán bộ, chiến sĩ đã hy sinh vì Tổ quốc, xin hứa trước đồng bào cả nước, xin nhắn nhủ với các "
+  },
+  {
+    "score": 12,
+    "bridge": "Lê Đức Anh",
+    "anchor": "Đại tướng",
+    "anchor_relation": "giữ chức",
+    "target": "Tư lệnh Quân khu 9",
+    "target_relation": "được cử",
+    "hop1_chunk_id": "lichsu_clean-001261",
+    "hop2_chunk_id": "lichsu_clean-000806",
+    "same_section": false,
+    "bridge_chunk_count": 2,
+    "hop1_heading": [
+      "9. Chiến tranh biên giới Việt - Trung 1979",
+      "Xung đột giành quyền kiểm soát tại quần đảo Trường Sa 1988",
+      "Kết quả"
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1969-1972",
+      "Việt Nam hóa chiến tranh"
+    ],
+    "hop1_quote": "ữ được đá và hoàn thành việc xây dựng nhà trên đá. Ngày 7 tháng 5 năm 1988, tại quần đảo Trường Sa, Đại tướng Lê Đức Anh đã đọc lời thề: \"Chúng ta xin thề trước hương hồn của Tổ tiên ta, trước hương hồn của cán bộ, chiến sĩ đã hy sinh vì Tổ quốc, xin hứa trước đồng bào cả nước, xin nhắn nhủ với các ",
+    "hop2_quote": "Nam Bộ cũng được tăng cường lãnh đạo chỉ huy. Võ Văn Kiệt được cử làm Bí thư Khu ủy, Lê Đức Anh làm Tư lệnh Quân khu 9.  Tại Khu 5, tháng 9 năm 1969, Quân khu ủy cũng họp và chỉ rõ nhiệm vụ trọng tâm hàng đầu của quân khu là: \"Diệt kẹp, giành dân\". Mọi hoạt động tác chiến của bộ đội chủ lực cũng như"
+  },
+  {
+    "score": 11,
+    "bridge": "Nguyễn Văn Tâm",
+    "anchor": "Eisenhower",
+    "anchor_relation": "mời thăm",
+    "target": "Nội các Nguyễn Văn Tâm",
+    "target_relation": "đứng đầu",
+    "hop1_chunk_id": "lichsu_clean-000547",
+    "hop2_chunk_id": "phi-su-kien_clean-000327",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Mỹ can dự vào Chiến tranh Đông Dương (1945-1954)",
+      "Thời kỳ Eisenhower-Nixon (1952-1954)"
+    ],
+    "hop2_heading": [
+      "Chương III. CUỘC KHÁNG CHIẾN PHÁT TRIỂN MẠNH MẼ VÀ KẾT THÚC THẮNG LỢI (1951 - 1954)",
+      "I- ĐẾ QUỐC PHÁP VÀ CAN THIỆP MĨ KÉO DÀI CHIẾN TRANH XÂM LƯỢC ĐÔNG DƯƠNG",
+      null
+    ],
+    "hop1_quote": "Năm 1953, Eisenhower - Nixon chính thức cầm quyền sau khi đánh giá lại tình hình, đã đề ra \"chủ nghĩa Eisenhower\", thay cho \"học thuyết Truman\" và lấy chiến lược \"trả đũa ào ạt\" làm chiến lược quân sự toàn cầu ",
+    "hop2_quote": "Tháng 6-1952, Nguyễn Văn Tâm ra lập nôi các mới, hi vong tập hợp được những phần tử hoạt động chống lai cuộc kháng chiến của dân tộc ta một cách ráo riết và hữu hiệu hơn, theo khẩu hiệu chống cách man"
+  },
+  {
+    "score": 11,
+    "bridge": "Nguyễn Văn Tâm",
+    "anchor": "Eisenhower",
+    "anchor_relation": "mời thăm",
+    "target": "Phan Huy Quát",
+    "target_relation": "bổ nhiệm",
+    "hop1_chunk_id": "lichsu_clean-000547",
+    "hop2_chunk_id": "phi-su-kien_clean-000327",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Mỹ can dự vào Chiến tranh Đông Dương (1945-1954)",
+      "Thời kỳ Eisenhower-Nixon (1952-1954)"
+    ],
+    "hop2_heading": [
+      "Chương III. CUỘC KHÁNG CHIẾN PHÁT TRIỂN MẠNH MẼ VÀ KẾT THÚC THẮNG LỢI (1951 - 1954)",
+      "I- ĐẾ QUỐC PHÁP VÀ CAN THIỆP MĨ KÉO DÀI CHIẾN TRANH XÂM LƯỢC ĐÔNG DƯƠNG",
+      null
+    ],
+    "hop1_quote": "Năm 1953, Eisenhower - Nixon chính thức cầm quyền sau khi đánh giá lại tình hình, đã đề ra \"chủ nghĩa Eisenhower\", thay cho \"học thuyết Truman\" và lấy chiến lược \"trả đũa ào ạt\" làm chiến lược quân sự toàn cầu ",
+    "hop2_quote": "Văn Hoach và Nguyễn Huy Lai, Bộ Quốc phòng do Lê Quang Huy làm quyền Tổng trưởng. Sau đó mấy tháng, Phan Huy Quát được Nguyễn Văn Tâm đưa lên giữ chức Tổng trưởng Bô Quốc phòng. Thủ tướng Tâm và Tổng trưởng Quát rất chú trọng xây dưng quân đôi bằng các phương pháp đặc biệt để tặng quân số và đào tạo"
+  },
+  {
+    "score": 11,
+    "bridge": "Nguyễn Văn Tâm",
+    "anchor": "Nội các Nguyễn Văn Tâm",
+    "anchor_relation": "đứng đầu",
+    "target": "Eisenhower",
+    "target_relation": "mời thăm",
+    "hop1_chunk_id": "phi-su-kien_clean-000327",
+    "hop2_chunk_id": "lichsu_clean-000547",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "Chương III. CUỘC KHÁNG CHIẾN PHÁT TRIỂN MẠNH MẼ VÀ KẾT THÚC THẮNG LỢI (1951 - 1954)",
+      "I- ĐẾ QUỐC PHÁP VÀ CAN THIỆP MĨ KÉO DÀI CHIẾN TRANH XÂM LƯỢC ĐÔNG DƯƠNG",
+      null
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Mỹ can dự vào Chiến tranh Đông Dương (1945-1954)",
+      "Thời kỳ Eisenhower-Nixon (1952-1954)"
+    ],
+    "hop1_quote": "Tháng 6-1952, Nguyễn Văn Tâm ra lập nôi các mới, hi vong tập hợp được những phần tử hoạt động chống lai cuộc kháng chiến của dân tộc ta một cách ráo riết và hữu hiệu hơn, theo khẩu hiệu chống cách man",
+    "hop2_quote": "Năm 1953, Eisenhower - Nixon chính thức cầm quyền sau khi đánh giá lại tình hình, đã đề ra \"chủ nghĩa Eisenhower\", thay cho \"học thuyết Truman\" và lấy chiến lược \"trả đũa ào ạt\" làm chiến lược quân sự toàn cầu "
+  },
+  {
+    "score": 11,
+    "bridge": "Phan Huy Quát",
+    "anchor": "Maxwell Taylor",
+    "anchor_relation": "đề nghị",
+    "target": "Nguyễn Văn Tâm",
+    "target_relation": "bổ nhiệm",
+    "hop1_chunk_id": "lichsu_clean-000556",
+    "hop2_chunk_id": "phi-su-kien_clean-000327",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Mỹ can dự vào Chiến tranh Đông Dương (1945-1954)",
+      "Sau chiến tranh Đông Dương (1954-1963)"
+    ],
+    "hop2_heading": [
+      "Chương III. CUỘC KHÁNG CHIẾN PHÁT TRIỂN MẠNH MẼ VÀ KẾT THÚC THẮNG LỢI (1951 - 1954)",
+      "I- ĐẾ QUỐC PHÁP VÀ CAN THIỆP MĨ KÉO DÀI CHIẾN TRANH XÂM LƯỢC ĐÔNG DƯƠNG",
+      null
+    ],
+    "hop1_quote": "rợ và cố vấn như trong các giai đoạn trước đó. Sau khi nhận được đề nghị của Đại sứ Mỹ tại Việt Nam Maxwell Taylor, Thủ tướng Phan Huy Quát, được Tướng Nguyễn Văn Thiệu, Chánh văn phòng Hội đồng Lực lượng Vũ trang, đồng ý đã chấp thuận cho quân đội Mỹ đổ bộ vào Việt Nam. Nguyễn Văn Thiệu chấp thuận,",
+    "hop2_quote": "Tháng 6-1952, Nguyễn Văn Tâm ra lập nôi các mới, hi vong tập hợp được những phần tử hoạt động chống lai cuộc kháng chiến của dân tộc ta một cách ráo riết và hữu hiệu hơn, theo khẩu hiệu chống cách mang quyết liệt c"
+  },
+  {
+    "score": 11,
+    "bridge": "Phan Huy Quát",
+    "anchor": "Maxwell Taylor",
+    "anchor_relation": "đề nghị",
+    "target": "Nội các Bửu Lộc",
+    "target_relation": "bổ nhiệm",
+    "hop1_chunk_id": "lichsu_clean-000556",
+    "hop2_chunk_id": "phi-su-kien_clean-000327",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Mỹ can dự vào Chiến tranh Đông Dương (1945-1954)",
+      "Sau chiến tranh Đông Dương (1954-1963)"
+    ],
+    "hop2_heading": [
+      "Chương III. CUỘC KHÁNG CHIẾN PHÁT TRIỂN MẠNH MẼ VÀ KẾT THÚC THẮNG LỢI (1951 - 1954)",
+      "I- ĐẾ QUỐC PHÁP VÀ CAN THIỆP MĨ KÉO DÀI CHIẾN TRANH XÂM LƯỢC ĐÔNG DƯƠNG",
+      null
+    ],
+    "hop1_quote": "rợ và cố vấn như trong các giai đoạn trước đó. Sau khi nhận được đề nghị của Đại sứ Mỹ tại Việt Nam Maxwell Taylor, Thủ tướng Phan Huy Quát, được Tướng Nguyễn Văn Thiệu, Chánh văn phòng Hội đồng Lực lượng Vũ trang, đồng ý đã chấp thuận cho quân đội Mỹ đổ bộ vào Việt Nam. Nguyễn Văn Thiệu chấp thuận,",
+    "hop2_quote": " Bửu Lộc làm Thủ tướng, Nguyễn Trung Vinh - Phó Thủ tướng, Phan Huy Quát - Tổng trưởng Quốc phòng.  Nội các Bửu Lộc cũng chỉ tồn tại được 6 tháng."
+  },
+  {
+    "score": 11,
+    "bridge": "Phan Huy Quát",
+    "anchor": "Maxwell Taylor",
+    "anchor_relation": "đề nghị",
+    "target": "Tổng trưởng Bộ Quốc phòng",
+    "target_relation": "nắm giữ",
+    "hop1_chunk_id": "lichsu_clean-000556",
+    "hop2_chunk_id": "phi-su-kien_clean-000327",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Mỹ can dự vào Chiến tranh Đông Dương (1945-1954)",
+      "Sau chiến tranh Đông Dương (1954-1963)"
+    ],
+    "hop2_heading": [
+      "Chương III. CUỘC KHÁNG CHIẾN PHÁT TRIỂN MẠNH MẼ VÀ KẾT THÚC THẮNG LỢI (1951 - 1954)",
+      "I- ĐẾ QUỐC PHÁP VÀ CAN THIỆP MĨ KÉO DÀI CHIẾN TRANH XÂM LƯỢC ĐÔNG DƯƠNG",
+      null
+    ],
+    "hop1_quote": "rợ và cố vấn như trong các giai đoạn trước đó. Sau khi nhận được đề nghị của Đại sứ Mỹ tại Việt Nam Maxwell Taylor, Thủ tướng Phan Huy Quát, được Tướng Nguyễn Văn Thiệu, Chánh văn phòng Hội đồng Lực lượng Vũ trang, đồng ý đã chấp thuận cho quân đội Mỹ đổ bộ vào Việt Nam. Nguyễn Văn Thiệu chấp thuận,",
+    "hop2_quote": "Tháng 6-1952, Nguyễn Văn Tâm ra lập nôi các mới, hi vong tập hợp được những phần tử hoạt động chống lai cuộc kháng chiến của dân tộc ta một cách ráo riết và hữu hiệu hơn, theo khẩu hiệu chống cách man"
+  },
+  {
+    "score": 11,
+    "bridge": "Phan Huy Quát",
+    "anchor": "Nguyễn Văn Tâm",
+    "anchor_relation": "bổ nhiệm",
+    "target": "Maxwell Taylor",
+    "target_relation": "đề nghị",
+    "hop1_chunk_id": "phi-su-kien_clean-000327",
+    "hop2_chunk_id": "lichsu_clean-000556",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "Chương III. CUỘC KHÁNG CHIẾN PHÁT TRIỂN MẠNH MẼ VÀ KẾT THÚC THẮNG LỢI (1951 - 1954)",
+      "I- ĐẾ QUỐC PHÁP VÀ CAN THIỆP MĨ KÉO DÀI CHIẾN TRANH XÂM LƯỢC ĐÔNG DƯƠNG",
+      null
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Mỹ can dự vào Chiến tranh Đông Dương (1945-1954)",
+      "Sau chiến tranh Đông Dương (1954-1963)"
+    ],
+    "hop1_quote": "Tháng 6-1952, Nguyễn Văn Tâm ra lập nôi các mới, hi vong tập hợp được những phần tử hoạt động chống lai cuộc kháng chiến của dân tộc ta một cách ráo riết và hữu hiệu hơn, theo khẩu hiệu chống cách mang quyết liệt c",
+    "hop2_quote": "rợ và cố vấn như trong các giai đoạn trước đó. Sau khi nhận được đề nghị của Đại sứ Mỹ tại Việt Nam Maxwell Taylor, Thủ tướng Phan Huy Quát, được Tướng Nguyễn Văn Thiệu, Chánh văn phòng Hội đồng Lực lượng Vũ trang, đồng ý đã chấp thuận cho quân đội Mỹ đổ bộ vào Việt Nam. Nguyễn Văn Thiệu chấp thuận,"
+  },
+  {
+    "score": 11,
+    "bridge": "Phan Huy Quát",
+    "anchor": "Nguyễn Văn Tâm",
+    "anchor_relation": "bổ nhiệm",
+    "target": "Bùi Diễm",
+    "target_relation": "chỉ đạo soạn thông cáo",
+    "hop1_chunk_id": "phi-su-kien_clean-000327",
+    "hop2_chunk_id": "lichsu_clean-000567",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "Chương III. CUỘC KHÁNG CHIẾN PHÁT TRIỂN MẠNH MẼ VÀ KẾT THÚC THẮNG LỢI (1951 - 1954)",
+      "I- ĐẾ QUỐC PHÁP VÀ CAN THIỆP MĨ KÉO DÀI CHIẾN TRANH XÂM LƯỢC ĐÔNG DƯƠNG",
+      null
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Mỹ can dự vào Chiến tranh Đông Dương (1945-1954)",
+      "Sau chiến tranh Đông Dương (1954-1963)"
+    ],
+    "hop1_quote": "Tháng 6-1952, Nguyễn Văn Tâm ra lập nôi các mới, hi vong tập hợp được những phần tử hoạt động chống lai cuộc kháng chiến của dân tộc ta một cách ráo riết và hữu hiệu hơn, theo khẩu hiệu chống cách mang quyết liệt c",
+    "hop2_quote": ", Thủ tướng Việt Nam Cộng hòa phải hợp thức hóa việc này bằng cách gọi Tổng trưởng Phủ Thủ tướng là Bùi Diễm cùng với một viên chức Mỹ là Melvin Manfull soạn ngay thông cáo chào mừng quân Mỹ, với chỉ đạo: \"Viết càng ngắn càng tốt. Chỉ mô tả sự kiện rồi khẳng định rằng chúng ta đã đồng ý mà thôi\". Tr"
+  },
+  {
+    "score": 11,
+    "bridge": "Lê Đức Thọ",
+    "anchor": "Henry Kissinger",
+    "anchor_relation": "đàm phán bí mật",
+    "target": "Đàm phán Paris",
+    "target_relation": "tham gia",
+    "hop1_chunk_id": "lichsu_clean-000945",
+    "hop2_chunk_id": "lichsu_clean-000959",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1969-1972",
+      "Vừa đánh vừa đàm"
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1969-1972",
+      "Chiến dịch Linebacker II"
+    ],
+    "hop1_quote": "có các cuộc tiếp xúc bí mật của Cố vấn đặc biệt Lê Đức Thọ của Việt Nam Dân chủ Cộng hòa và Tiến sĩ Henry Kissinger, cố vấn của tổng thống Mỹ, là đi vào thảo luận thực chất nhưng không đi được đến thỏa hiệp.  Mục đích của Việt Nam Dân chủ Cộng hòa khi tham gia đàm phán là buộc Mỹ rút quân về nước và",
+    "hop2_quote": "Hướng thứ nhất (chủ yếu): lấy ngã ba sông Việt Trì làm điểm kiểm tra tập hợp đội hình và tấn công Hà Nội theo trục sông Hồng (Tây Bắc - Đông Nam); sau khi cắt bom thoát ly ra biển theo hướng Đông Nam "
+  },
+  {
+    "score": 11,
+    "bridge": "Lê Đức Thọ",
+    "anchor": "Đàm phán Paris",
+    "anchor_relation": "tham gia",
+    "target": "Henry Kissinger",
+    "target_relation": "đàm phán bí mật",
+    "hop1_chunk_id": "lichsu_clean-000959",
+    "hop2_chunk_id": "lichsu_clean-000945",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1969-1972",
+      "Chiến dịch Linebacker II"
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1969-1972",
+      "Vừa đánh vừa đàm"
+    ],
+    "hop1_quote": "Hướng thứ nhất (chủ yếu): lấy ngã ba sông Việt Trì làm điểm kiểm tra tập hợp đội hình và tấn công Hà Nội theo trục sông Hồng (Tây Bắc - Đông Nam); sau khi cắt bom thoát ly ra biển theo hướng Đông Nam ",
+    "hop2_quote": "có các cuộc tiếp xúc bí mật của Cố vấn đặc biệt Lê Đức Thọ của Việt Nam Dân chủ Cộng hòa và Tiến sĩ Henry Kissinger, cố vấn của tổng thống Mỹ, là đi vào thảo luận thực chất nhưng không đi được đến thỏa hiệp.  Mục đích của Việt Nam Dân chủ Cộng hòa khi tham gia đàm phán là buộc Mỹ rút quân về nước và"
+  },
+  {
+    "score": 11,
+    "bridge": "Lê Đức Thọ",
+    "anchor": "Henry Kissinger",
+    "anchor_relation": "đàm phán bí mật",
+    "target": "Đại hội đại biểu toàn quốc lần thứ III của Đảng",
+    "target_relation": "trình bày báo cáo",
+    "hop1_chunk_id": "lichsu_clean-000945",
+    "hop2_chunk_id": "phi-su-kien_clean-000362",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1969-1972",
+      "Vừa đánh vừa đàm"
+    ],
+    "hop2_heading": [
+      "Chương IV. XÂY DỰNG MIỀN BẮC VÀ ĐẤU TRANH CÁCH MẠNG CHỐNG MĨ - DIỆM Ở MIỀN NAM (1954 - 1960)",
+      "I- MIỀN BẮC KHÔI PHỤC KINH TẾ VÀ CẢI TẠO XÃ HỘI CHỦ NGHĨA (1954 - 1960)",
+      "2. Cải tạo xã hội chủ nghĩa (1958 - 1960)"
+    ],
+    "hop1_quote": "có các cuộc tiếp xúc bí mật của Cố vấn đặc biệt Lê Đức Thọ của Việt Nam Dân chủ Cộng hòa và Tiến sĩ Henry Kissinger, cố vấn của tổng thống Mỹ, là đi vào thảo luận thực chất nhưng không đi được đến thỏa hiệp.  Mục đích của Việt Nam Dân chủ Cộng hòa khi tham gia đàm phán là buộc Mỹ rút quân về nước và",
+    "hop2_quote": "iển kinh tế và văn hoá ở miền Bắc sắp hoàn thành và cách mạng ở miền Nam đã tiến một bước nhảy vọt, Đại hội đại biểu toàn quốc lần thứ III của Đảng họp tại Hà Nội, từ ngày 5 đến ngày 10-9-1960. Dự đại hội có 525 đại biểu chính thức và 51 đại biểu dự khuyết, thay mặt cho hơn 50 vạn đảng viên của Đảng"
+  },
+  {
+    "score": 11,
+    "bridge": "Võ Văn Kiệt",
+    "anchor": "Bộ Tư lệnh tiền phương cánh Nam",
+    "anchor_relation": "phụ trách",
+    "target": "Bí thư Khu ủy",
+    "target_relation": "được cử",
+    "hop1_chunk_id": "lichsu_clean-000717",
+    "hop2_chunk_id": "lichsu_clean-000806",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Sự kiện Tết Mậu Thân",
+      "Diễn biến"
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1969-1972",
+      "Việt Nam hóa chiến tranh"
+    ],
+    "hop1_quote": "o Trần Văn Trà, Mai Chí Thọ, Lê Đức Anh phụ trách các hướng Bắc, Tây Bắc và Đông thành phố Sài Gòn. Bộ Tư lệnh tiền phương cánh Nam do Võ Văn Kiệt, Trần Bạch Đằng, Trần Hải Phụng phụ trách các hướng phía Nam, Tây Nam, các lực lượng biệt động và chỉ đạo quần chúng nổi dậy ở nội thành Sài Gòn. Ở Quân ",
+    "hop2_quote": "hư Thành ủy Sài Gòn. Miền Tây Nam Bộ cũng được tăng cường lãnh đạo chỉ huy. Võ Văn Kiệt được cử làm Bí thư Khu ủy, Lê Đức Anh làm Tư lệnh Quân khu 9.  Tại Khu 5, tháng 9 năm 1969, Quân khu ủy cũng họp và chỉ rõ nhiệm vụ trọng tâm hàng đầu của quân khu là: \"Diệt kẹp, giành dân\". Mọi hoạt động tác chi"
+  },
+  {
+    "score": 11,
+    "bridge": "Võ Văn Kiệt",
+    "anchor": "Bí thư Khu ủy",
+    "anchor_relation": "được cử",
+    "target": "Bộ Tư lệnh tiền phương cánh Nam",
+    "target_relation": "phụ trách",
+    "hop1_chunk_id": "lichsu_clean-000806",
+    "hop2_chunk_id": "lichsu_clean-000717",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1969-1972",
+      "Việt Nam hóa chiến tranh"
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Sự kiện Tết Mậu Thân",
+      "Diễn biến"
+    ],
+    "hop1_quote": "hư Thành ủy Sài Gòn. Miền Tây Nam Bộ cũng được tăng cường lãnh đạo chỉ huy. Võ Văn Kiệt được cử làm Bí thư Khu ủy, Lê Đức Anh làm Tư lệnh Quân khu 9.  Tại Khu 5, tháng 9 năm 1969, Quân khu ủy cũng họp và chỉ rõ nhiệm vụ trọng tâm hàng đầu của quân khu là: \"Diệt kẹp, giành dân\". Mọi hoạt động tác chi",
+    "hop2_quote": "o Trần Văn Trà, Mai Chí Thọ, Lê Đức Anh phụ trách các hướng Bắc, Tây Bắc và Đông thành phố Sài Gòn. Bộ Tư lệnh tiền phương cánh Nam do Võ Văn Kiệt, Trần Bạch Đằng, Trần Hải Phụng phụ trách các hướng phía Nam, Tây Nam, các lực lượng biệt động và chỉ đạo quần chúng nổi dậy ở nội thành Sài Gòn. Ở Quân "
+  },
+  {
+    "score": 11,
+    "bridge": "Võ Văn Kiệt",
+    "anchor": "Bộ Tư lệnh tiền phương cánh Nam",
+    "anchor_relation": "phụ trách",
+    "target": "Uỷ ban nhân dân cách mạng thành phố",
+    "target_relation": "lãnh đạo",
+    "hop1_chunk_id": "lichsu_clean-000717",
+    "hop2_chunk_id": "phi-su-kien_clean-000394",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Sự kiện Tết Mậu Thân",
+      "Diễn biến"
+    ],
+    "hop2_heading": [
+      "Chương IX. VIỆT NAM XÂY DỰNG LẠI ĐẤT NƯỚC (1975 - 1986)",
+      "I- VIỆT NAM NĂM ĐẦU SAU ĐẠI THẮNG MÙA XUÂN (1975 - 1976)",
+      "2. Ổn định tình hình miền Nam, khắc phục hậu quả chiến tranh, khôi phục và phát triển kinh tế - văn hoá ở hai miền đất nước"
+    ],
+    "hop1_quote": "o Trần Văn Trà, Mai Chí Thọ, Lê Đức Anh phụ trách các hướng Bắc, Tây Bắc và Đông thành phố Sài Gòn. Bộ Tư lệnh tiền phương cánh Nam do Võ Văn Kiệt, Trần Bạch Đằng, Trần Hải Phụng phụ trách các hướng phía Nam, Tây Nam, các lực lượng biệt động và chỉ đạo quần chúng nổi dậy ở nội thành Sài Gòn. Ở Quân ",
+    "hop2_quote": "ạng được thành lập để thay thế các Uỷ ban quân quản và Uỷ ban tự quản. Tại Sài Gòn, ngày 21-1-1976, Uỷ ban nhân dân cách mạng thành phố, do Võ Văn Kiệt làm Chủ tịch, tiếp nhận sự bàn giao của Uỷ ban quân quản thành phố."
+  },
+  {
+    "score": 11,
+    "bridge": "Võ Văn Kiệt",
+    "anchor": "Bộ Tư lệnh tiền phương cánh Nam",
+    "anchor_relation": "phụ trách",
+    "target": "Chủ tịch",
+    "target_relation": "giữ chức",
+    "hop1_chunk_id": "lichsu_clean-000717",
+    "hop2_chunk_id": "phi-su-kien_clean-000394",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Sự kiện Tết Mậu Thân",
+      "Diễn biến"
+    ],
+    "hop2_heading": [
+      "Chương IX. VIỆT NAM XÂY DỰNG LẠI ĐẤT NƯỚC (1975 - 1986)",
+      "I- VIỆT NAM NĂM ĐẦU SAU ĐẠI THẮNG MÙA XUÂN (1975 - 1976)",
+      "2. Ổn định tình hình miền Nam, khắc phục hậu quả chiến tranh, khôi phục và phát triển kinh tế - văn hoá ở hai miền đất nước"
+    ],
+    "hop1_quote": "o Trần Văn Trà, Mai Chí Thọ, Lê Đức Anh phụ trách các hướng Bắc, Tây Bắc và Đông thành phố Sài Gòn. Bộ Tư lệnh tiền phương cánh Nam do Võ Văn Kiệt, Trần Bạch Đằng, Trần Hải Phụng phụ trách các hướng phía Nam, Tây Nam, các lực lượng biệt động và chỉ đạo quần chúng nổi dậy ở nội thành Sài Gòn. Ở Quân ",
+    "hop2_quote": "ỷ ban tự quản. Tại Sài Gòn, ngày 21-1-1976, Uỷ ban nhân dân cách mạng thành phố, do Võ Văn Kiệt làm Chủ tịch, tiếp nhận sự bàn giao của Uỷ ban quân quản thành phố."
+  },
+  {
+    "score": 11,
+    "bridge": "Ngô Đình Nhu",
+    "anchor": "Đại Việt Phục hưng Hội",
+    "anchor_relation": "lãnh đạo",
+    "target": "Chính phủ Sài Gòn",
+    "target_relation": "cố vấn cho",
+    "hop1_chunk_id": "lichsu_clean-000148",
+    "hop2_chunk_id": "lichsu_clean-000563",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "2. Xung đột đảng phái tại Việt Nam (1945-1949)",
+      "Đại Việt Phục hưng Hội",
+      null
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Mỹ can dự vào Chiến tranh Đông Dương (1945-1954)",
+      "Sau chiến tranh Đông Dương (1954-1963)"
+    ],
+    "hop1_quote": "Đại Việt Phục hưng Hội được thành lập đầu năm 1942, do 3 anh em Ngô Đình Khôi, Ngô Đình Diệm và Ngô Đình Nhu lãnh đạo. Hội ủng hộ Hoàng thân Cường Để, chủ trương liên kết với Đế quốc Nhật Bản để gạt ả",
+    "hop2_quote": "Trong khi đó, chính phủ Sài Gòn dần suy yếu. Quân lực Việt Nam Cộng hòa bị thiệt hại nặng nề sau những thất bại liên tiếp ở trận Ấp Bắc và trận Bình Giã. Người Mỹ thậm chí nhận định rằng chế độ Việt Nam Cộng hòa có"
+  },
+  {
+    "score": 11,
+    "bridge": "Ngô Đình Nhu",
+    "anchor": "Chính phủ Sài Gòn",
+    "anchor_relation": "cố vấn cho",
+    "target": "Đại Việt Phục hưng Hội",
+    "target_relation": "lãnh đạo",
+    "hop1_chunk_id": "lichsu_clean-000563",
+    "hop2_chunk_id": "lichsu_clean-000148",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Mỹ can dự vào Chiến tranh Đông Dương (1945-1954)",
+      "Sau chiến tranh Đông Dương (1954-1963)"
+    ],
+    "hop2_heading": [
+      "2. Xung đột đảng phái tại Việt Nam (1945-1949)",
+      "Đại Việt Phục hưng Hội",
+      null
+    ],
+    "hop1_quote": "Trong khi đó, chính phủ Sài Gòn dần suy yếu. Quân lực Việt Nam Cộng hòa bị thiệt hại nặng nề sau những thất bại liên tiếp ở trận Ấp Bắc và trận Bình Giã. Người Mỹ thậm chí nhận định rằng chế độ Việt Nam Cộng hòa có",
+    "hop2_quote": "Đại Việt Phục hưng Hội được thành lập đầu năm 1942, do 3 anh em Ngô Đình Khôi, Ngô Đình Diệm và Ngô Đình Nhu lãnh đạo. Hội ủng hộ Hoàng thân Cường Để, chủ trương liên kết với Đế quốc Nhật Bản để gạt ả"
+  },
+  {
+    "score": 11,
+    "bridge": "Ngô Đình Nhu",
+    "anchor": "Đại Việt Phục hưng Hội",
+    "anchor_relation": "lãnh đạo",
+    "target": "Đảo chính 1-11-1963",
+    "target_relation": "giết chết",
+    "hop1_chunk_id": "lichsu_clean-000148",
+    "hop2_chunk_id": "lichsu_clean-000625",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "2. Xung đột đảng phái tại Việt Nam (1945-1949)",
+      "Đại Việt Phục hưng Hội",
+      null
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1960-1965",
+      null
+    ],
+    "hop1_quote": "Đại Việt Phục hưng Hội được thành lập đầu năm 1942, do 3 anh em Ngô Đình Khôi, Ngô Đình Diệm và Ngô Đình Nhu lãnh đạo. Hội ủng hộ Hoàng thân Cường Để, chủ trương liên kết với Đế quốc Nhật Bản để gạt ả",
+    "hop2_quote": "Sau gần hai năm đối phó với chiến tranh đặc biệt, Quân Giải phóng miền Nam đã đúc kết kinh nghiệm đối phó với chiến thuật trực thăng vận và thiết xa vận của quân đội Việt Nam Cộng hòa. Điều này đã tạo"
+  },
+  {
+    "score": 11,
+    "bridge": "Allen Dulles",
+    "anchor": "Dwight Eisenhower",
+    "anchor_relation": "đệ trình báo cáo cho",
+    "target": "Dwight Eisenhower",
+    "target_relation": "đệ trình báo cáo cho",
+    "hop1_chunk_id": "lichsu_clean-000551",
+    "hop2_chunk_id": "lichsu_clean-000604",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Mỹ can dự vào Chiến tranh Đông Dương (1945-1954)",
+      "Sau chiến tranh Đông Dương (1954-1963)"
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1954-1959",
+      "Việt Nam Cộng hòa cự tuyệt Tổng tuyển cử thống nhất Việt Nam"
+    ],
+    "hop1_quote": "Báo cáo của CIA cho Tổng thống Mỹ Eisenhower thấy rằng khoảng 80% dân số Việt Nam sẽ bầu cho Hồ Chí Minh nếu cuộc tổng tuyển cử được thi hành, và không ai có thể thắng Hồ Chí Minh trong cuộc Tổng Tuyể",
+    "hop2_quote": "Theo Tuyên bố cuối cùng của Hiệp định Genève thì tổng tuyển cử ở hai miền được dự trù vào tháng 7 năm 1956 nhưng Tổng thống Ngô Đình Diệm bác bỏ mọi cuộc thảo luận sơ khởi, hành động này khiến Ngô Đìn"
+  },
+  {
+    "score": 11,
+    "bridge": "Maxwell D. Taylor",
+    "anchor": "Phương án C",
+    "anchor_relation": "đề xuất giải pháp",
+    "target": "Nhà nước Mỹ",
+    "target_relation": "phái sang",
+    "hop1_chunk_id": "lichsu_clean-000564",
+    "hop2_chunk_id": "lichsu_clean-000624",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Mỹ can dự vào Chiến tranh Đông Dương (1945-1954)",
+      "Sau chiến tranh Đông Dương (1954-1963)"
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1960-1965",
+      null
+    ],
+    "hop1_quote": " ô tô và đường sắt kết nối với Trung Quốc cho đến khi những yêu sách của Mỹ được đáp ứng đầy đủ.  - Phương án C: \"bóp nghẹt dần dần\", đánh các mục tiêu thâm nhập trước hết ở Lào, miền bắc Việt Nam, rồi đến các mục tiêu khác tại khu vực này. Phương thức này gồm cả khả năng triển khai quân bộ ở phía b",
+    "hop2_quote": "ng bị bằng vũ khí tối tân do Mỹ cung cấp và thực hiện các kế hoạch quân sự do cố vấn Mỹ hoạch định. Nhà nước Mỹ cũng tăng thêm nguồn viện trợ kinh tế cho chính phủ Ngô Đình Diệm nhằm tăng quân số và tiêu dùng cho các chi phí quân sự. Với khả năng cơ động cao, Quân lực Việt Nam Cộng hòa đã giành được"
+  },
+  {
+    "score": 11,
+    "bridge": "Maxwell D. Taylor",
+    "anchor": "Nhà nước Mỹ",
+    "anchor_relation": "phái sang",
+    "target": "Phương án C",
+    "target_relation": "đề xuất giải pháp",
+    "hop1_chunk_id": "lichsu_clean-000624",
+    "hop2_chunk_id": "lichsu_clean-000564",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1960-1965",
+      null
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Mỹ can dự vào Chiến tranh Đông Dương (1945-1954)",
+      "Sau chiến tranh Đông Dương (1954-1963)"
+    ],
+    "hop1_quote": "ng bị bằng vũ khí tối tân do Mỹ cung cấp và thực hiện các kế hoạch quân sự do cố vấn Mỹ hoạch định. Nhà nước Mỹ cũng tăng thêm nguồn viện trợ kinh tế cho chính phủ Ngô Đình Diệm nhằm tăng quân số và tiêu dùng cho các chi phí quân sự. Với khả năng cơ động cao, Quân lực Việt Nam Cộng hòa đã giành được",
+    "hop2_quote": " ô tô và đường sắt kết nối với Trung Quốc cho đến khi những yêu sách của Mỹ được đáp ứng đầy đủ.  - Phương án C: \"bóp nghẹt dần dần\", đánh các mục tiêu thâm nhập trước hết ở Lào, miền bắc Việt Nam, rồi đến các mục tiêu khác tại khu vực này. Phương thức này gồm cả khả năng triển khai quân bộ ở phía b"
+  },
+  {
+    "score": 11,
+    "bridge": "Nguyễn Khánh",
+    "anchor": "Kế hoạch Bắc tiến",
+    "anchor_relation": "tuyên bố ủng hộ",
+    "target": "Trần Văn Hương",
+    "target_relation": "cử đi",
+    "hop1_chunk_id": "lichsu_clean-000627",
+    "hop2_chunk_id": "lichsu_clean-001112",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1960-1965",
+      null
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Các chiến dịch trong chiến dịch Mùa Xuân (1975)",
+      "Chiến dịch Hồ Chí Minh"
+    ],
+    "hop1_quote": "ng nhất Việt Nam. Năm 1963, Tổng thống Ngô Đình Diệm đã ra lệnh cho Phủ Đặc Ủy Công Dân Vụ chuẩn bị kế hoạch Bắc tiến, tiêu diệt nhà nước Việt Nam Dân chủ Cộng hòa, thống nhất Việt Nam. Ngày 14 tháng 7 năm 1964, người đứng đầu chính phủ là tướng Nguyễn Khánh công khai tuyên bố sẵn sàng Bắc tiến. Hai",
+    "hop2_quote": "lle Saint Cloud, phái đoàn Chính phủ Cách mạng Lâm thời Cộng hòa miền Nam Việt Nam tuyên bố nội các Trần Văn Hương bản chất là nội các Nguyễn Văn Thiệu nhưng không có Nguyễn Văn Thiệu nên họ tiếp tục từ chối đàm phán với Việt Nam Cộng hòa. Họ chỉ đàm phán khi toàn bộ nội các của chính quyền Nguyễn V"
+  },
+  {
+    "score": 11,
+    "bridge": "Nguyễn Khánh",
+    "anchor": "Trần Văn Hương",
+    "anchor_relation": "cử đi",
+    "target": "Kế hoạch Bắc tiến",
+    "target_relation": "tuyên bố ủng hộ",
+    "hop1_chunk_id": "lichsu_clean-001112",
+    "hop2_chunk_id": "lichsu_clean-000627",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Các chiến dịch trong chiến dịch Mùa Xuân (1975)",
+      "Chiến dịch Hồ Chí Minh"
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1960-1965",
+      null
+    ],
+    "hop1_quote": "lle Saint Cloud, phái đoàn Chính phủ Cách mạng Lâm thời Cộng hòa miền Nam Việt Nam tuyên bố nội các Trần Văn Hương bản chất là nội các Nguyễn Văn Thiệu nhưng không có Nguyễn Văn Thiệu nên họ tiếp tục từ chối đàm phán với Việt Nam Cộng hòa. Họ chỉ đàm phán khi toàn bộ nội các của chính quyền Nguyễn V",
+    "hop2_quote": "ng nhất Việt Nam. Năm 1963, Tổng thống Ngô Đình Diệm đã ra lệnh cho Phủ Đặc Ủy Công Dân Vụ chuẩn bị kế hoạch Bắc tiến, tiêu diệt nhà nước Việt Nam Dân chủ Cộng hòa, thống nhất Việt Nam. Ngày 14 tháng 7 năm 1964, người đứng đầu chính phủ là tướng Nguyễn Khánh công khai tuyên bố sẵn sàng Bắc tiến. Hai"
+  },
+  {
+    "score": 11,
+    "bridge": "Lyndon Johnson",
+    "anchor": "Chính quyền Hoa Kỳ",
+    "anchor_relation": "do lãnh đạo",
+    "target": "Robert McNamara",
+    "target_relation": "gửi báo cáo cho",
+    "hop1_chunk_id": "lichsu_clean-000563",
+    "hop2_chunk_id": "lichsu_clean-000798",
+    "same_section": false,
+    "bridge_chunk_count": 3,
+    "hop1_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Mỹ can dự vào Chiến tranh Đông Dương (1945-1954)",
+      "Sau chiến tranh Đông Dương (1954-1963)"
+    ],
+    "hop2_heading": [
+      "5. Kháng chiến chống Mỹ (1955 - 1975)",
+      "Giai đoạn 1969-1972",
+      "Việt Nam hóa chiến tranh"
+    ],
+    "hop1_quote": "ị chủ quản.  Cuộc \"chiến tranh đặc biệt\" của Mỹ ở miền Nam Việt Nam thất bại. Lúc này, trong nội bộ chính quyền Hoa Kỳ rộ lên những lời cảnh báo mới về sự thất bại của họ trong cuộc chiến tranh Việt Nam. John A. Mc Cone - Giám đốc Cục Tình báo Trung ương Mỹ cho rằng: \"Chúng ta (Mỹ) sẽ bị sa lầy tron",
+    "hop2_quote": " đảo Đông Dương trong tầm ảnh hưởng của Hoa Kỳ.  Ngày 14 tháng 10 năm 1966, Bộ trưởng Quốc phòng Mỹ Robert McNamara, người chịu trách nhiệm chính cho cuộc chiến của Hoa Kỳ tại Nam Việt Nam, đã thừa nhận thất bại của mình. Hơn một năm trước, khi chính thức từ chức Bộ trưởng, McNamara đã gửi một báo c"
+  }
+]
