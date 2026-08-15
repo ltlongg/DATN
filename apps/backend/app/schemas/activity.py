@@ -9,7 +9,6 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-
 class ActivityLogItem(BaseModel):
     id: str
     created_at: datetime
@@ -21,7 +20,6 @@ class ActivityLogItem(BaseModel):
     severity: str  # 'ok' | 'error'
     latency_ms: int | None
     error: str | None
-
 
 class ActivityLogResponse(BaseModel):
     items: list[ActivityLogItem]

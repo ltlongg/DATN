@@ -69,7 +69,6 @@ ON MATCH SET r.descriptions = CASE WHEN rel.description IN r.descriptions
                                        THEN r.source_chunk_ids ELSE r.source_chunk_ids + $chunk_id END
 """
 
-
 def _merge_tx(
     tx: ManagedTransaction,
     chunk_id: str,
@@ -80,7 +79,6 @@ def _merge_tx(
         tx.run(_MERGE_ENTITIES, entities=entities, chunk_id=chunk_id)
     if relations:
         tx.run(_MERGE_RELATIONS, relations=relations, chunk_id=chunk_id)
-
 
 def merge_graph(
     chunk_id: str, extraction: GraphExtraction, driver: Driver | None = None
@@ -110,7 +108,6 @@ def merge_graph(
         session.execute_write(_merge_tx, chunk_id, entities, relations)
     return {"entities": len(entities), "relations": len(relations)}
 
-
 # ===========================================================================
 # Query-side: seed matching + 1-hop expand (GraphRAG retrieval)
 # ===========================================================================
@@ -137,7 +134,6 @@ _HUB_WEIGHT = 0.25
 _SEED_HIT = 2.0  # chunk là source của chính seed
 _EDGE_HIT = 1.0  # chunk là source của một cạnh 1-hop
 
-
 # shortestPath giữa 2 seed (C2): trả node + relation TRÊN đường nối để trả lời câu hỏi
 # quan hệ. Match VÔ HƯỚNG (recall) nhưng RETURN startNode/endNode giữ hướng thật của cạnh.
 def _path_cypher(max_hop: int) -> str:
@@ -160,7 +156,6 @@ RETURN [n IN nodes(path) | {{name: n.name, norm: n.norm_name,
                                      tgt_name: endNode(r).name, tgt_norm: endNode(r).norm_name}}] AS rels
 """
 
-
 @dataclass(frozen=True)
 class GraphSeed:
     """Một seed đã ground: mention gốc + node KG + số token (độ đặc thù)."""
@@ -168,7 +163,6 @@ class GraphSeed:
     mention: str
     info: Any  # EntityInfo
     token_count: int
-
 
 def match_seed_entities(
     seed_mentions: Sequence[str],
@@ -217,7 +211,6 @@ def match_seed_entities(
         uniq.append(s)
     return uniq[:limit]
 
-
 def _join_descriptions(descriptions: Any) -> str:
     """Gộp descriptions[] (dedup, giữ thứ tự) thành một string cho LLM."""
     if not descriptions:
@@ -229,7 +222,6 @@ def _join_descriptions(descriptions: Any) -> str:
             seen.add(desc)
             out.append(str(desc))
     return "\n".join(out)
-
 
 def search_graph(
     seed_mentions: Sequence[str],
@@ -411,7 +403,6 @@ def search_graph(
 
     return candidates, graph_context
 
-
 # ===========================================================================
 # Read-side cho KB Inspector (admin, read-only) — xem backend-additions-plan.md §2.2
 # ===========================================================================
@@ -454,14 +445,12 @@ RETURN e.name AS name, e.norm_name AS norm_name, e.type AS type,
        } END) AS edges
 """
 
-
 def _clean(value: str | None) -> str | None:
     """None/rỗng -> None (bỏ filter); ngược lại strip."""
     if value is None:
         return None
     v = value.strip()
     return v or None
-
 
 def count_entities(
     *,
@@ -476,7 +465,6 @@ def count_entities(
             _COUNT_ENTITIES, type=_clean(type), q=_clean(q), chunk_id=_clean(chunk_id)
         ).single()
     return int(record["total"]) if record else 0
-
 
 def list_entities(
     *,
@@ -508,7 +496,6 @@ def list_entities(
             }
             for r in result
         ]
-
 
 def get_entity(
     norm_name: str, *, driver: Driver | None = None

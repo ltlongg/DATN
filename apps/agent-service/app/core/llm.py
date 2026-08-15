@@ -12,16 +12,13 @@ from openai import AsyncOpenAI, OpenAI
 
 from app.core.config import get_settings
 
-
 @lru_cache(maxsize=4)
 def _build_client(api_key: str, base_url: str | None) -> OpenAI:
     return OpenAI(api_key=api_key, base_url=base_url, max_retries=2, timeout=60.0)
 
-
 @lru_cache(maxsize=4)
 def _build_async_client(api_key: str, base_url: str | None) -> AsyncOpenAI:
     return AsyncOpenAI(api_key=api_key, base_url=base_url, max_retries=2, timeout=60.0)
-
 
 def get_openai_client() -> OpenAI:
     settings = get_settings()
@@ -31,7 +28,6 @@ def get_openai_client() -> OpenAI:
             "để chỉ chạy fallback chunker."
         )
     return _build_client(settings.openai_api_key, settings.openai_base_url)
-
 
 def get_async_openai_client() -> AsyncOpenAI:
     """Async client cho orchestrator (plan/resolve + synthesize streaming).

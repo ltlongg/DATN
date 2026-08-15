@@ -30,22 +30,18 @@ __all__ = [
     "answer_context_chunks",
 ]
 
-
 def is_citation_only(chunk: RetrievedChunk) -> bool:
     return bool(chunk.debug.get("citation_only"))
-
 
 def answer_context_chunks(chunks: list[RetrievedChunk]) -> list[RetrievedChunk]:
     """Phần đưa vào prompt: bỏ chunk provenance-only (chúng đã có mặt qua graph_context,
     kèm chunk_id nguồn, nên LLM vẫn trích dẫn được mà không cần đọc toàn văn)."""
     return [c for c in chunks if not is_citation_only(c)]
 
-
 def _as_provenance(chunk: RetrievedChunk) -> RetrievedChunk:
     if is_citation_only(chunk):
         return chunk
     return chunk.model_copy(update={"debug": {**chunk.debug, "citation_only": True}})
-
 
 def dedupe_graph_context(items: Iterable[GraphContextItem]) -> list[GraphContextItem]:
     """Dedupe theo `dedup_key`, giữ thứ tự gặp đầu tiên. Dùng cho cả gộp trong-bước
@@ -54,7 +50,6 @@ def dedupe_graph_context(items: Iterable[GraphContextItem]) -> list[GraphContext
     for item in items:
         merged.setdefault(item.dedup_key(), item)
     return list(merged.values())
-
 
 def _with_provenance(
     answer: list[RetrievedChunk],
@@ -75,7 +70,6 @@ def _with_provenance(
         if cid not in kept and cid in pool
     ]
     return answer + provenance
-
 
 def fuse_query_results(
     results: list[RetrievalResult], *, rrf_k: int, final_k: int
@@ -111,7 +105,6 @@ def fuse_query_results(
     ordered = sorted(scores, key=lambda cid: (-scores[cid], cid))[:final_k]
     fused = [pool[cid] for cid in ordered]
     return _with_provenance(fused, pool, graph_context), graph_context
-
 
 def merge_across_steps(
     previous: list[RetrievedChunk],

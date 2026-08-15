@@ -15,7 +15,6 @@ from app.schemas.activity import ActivityLogItem, ActivityLogResponse
 
 router = APIRouter(dependencies=[Depends(require_admin)])
 
-
 @router.get("", response_model=ActivityLogResponse)
 async def list_activity(
     severity: str | None = Query(default=None, pattern="^(ok|error)$"),

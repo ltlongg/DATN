@@ -23,7 +23,6 @@ EntityType = Literal[
     "Chức danh",
 ]
 
-
 class GraphEntity(BaseModel):
     name: str = Field(
         description=(
@@ -36,7 +35,6 @@ class GraphEntity(BaseModel):
         description="Mô tả ngắn ngôi thứ ba, chỉ dựa vào nội dung đoạn."
     )
 
-
 class GraphRelation(BaseModel):
     source: str = Field(description="Tên entity nguồn (khớp một name trong entities).")
     target: str = Field(description="Tên entity đích (khớp một name trong entities).")
@@ -44,7 +42,6 @@ class GraphRelation(BaseModel):
         description="Cụm động từ ngắn (vd 'ký kết', 'lãnh đạo', 'đánh chiếm', 'dẫn đến')."
     )
     description: str = Field(description="Mô tả ngắn về quan hệ, dựa vào nội dung đoạn.")
-
 
 class GraphExtraction(BaseModel):
     entities: list[GraphEntity]

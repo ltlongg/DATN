@@ -40,14 +40,12 @@ import psycopg  # noqa: E402
 from app.core.config import get_settings  # noqa: E402
 from app.tools.graph_rag.chunk_store import _database_url  # noqa: E402
 
-
 def reset_postgres() -> None:
     with psycopg.connect(_database_url()) as conn:
         with conn.cursor() as cur:
             cur.execute("DROP TABLE IF EXISTS rag_chunks;")
         conn.commit()
     print("[postgres] DROP TABLE rag_chunks — xong.")
-
 
 def reset_qdrant() -> None:
     from app.core.qdrant import get_qdrant_client
@@ -59,7 +57,6 @@ def reset_qdrant() -> None:
         print(f"[qdrant]   delete collection {name} — xong.")
     else:
         print(f"[qdrant]   collection {name} không tồn tại — bỏ qua.")
-
 
 def reset_neo4j() -> None:
     from app.core.neo4j import get_neo4j_driver
@@ -76,14 +73,12 @@ def reset_neo4j() -> None:
     finally:
         driver.close()
 
-
 def reset_cache() -> None:
     if _ARTIFACT.exists():
         _ARTIFACT.unlink()
         print(f"[cache]    xóa {_ARTIFACT} — xong.")
     else:
         print(f"[cache]    {_ARTIFACT} không tồn tại — bỏ qua.")
-
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Reset dataset ở Postgres + Qdrant + Neo4j.")
@@ -110,7 +105,6 @@ def main() -> None:
     if args.cache:
         reset_cache()
     print("\nHoàn tất reset. Chạy lại scripts/run_graph_index.py để index từ đầu.")
-
 
 if __name__ == "__main__":
     main()

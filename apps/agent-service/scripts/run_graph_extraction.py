@@ -61,7 +61,6 @@ from app.tools.graph_rag.chunks import prepare_chunk_records  # noqa: E402
 _DEFAULT_FILE = _REPO_ROOT / "dataset" / "chunks_llm.json"
 _ARTIFACT = _REPO_ROOT / "dataset" / "graph_extractions.json"
 
-
 def _load_artifact(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
@@ -74,7 +73,6 @@ def _load_artifact(path: Path) -> dict[str, Any]:
         return {}  # cache hỏng/ghi dở -> bỏ qua, trích lại từ đầu
     return data if isinstance(data, dict) else {}
 
-
 def _write_artifact(path: Path, cache: dict[str, Any]) -> None:
     # Ghi atomic: file tạm cùng thư mục rồi os.replace (crash giữa chừng không hỏng cache).
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -82,12 +80,10 @@ def _write_artifact(path: Path, cache: dict[str, Any]) -> None:
     tmp.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
     os.replace(tmp, path)
 
-
 def _summary(cache: dict[str, Any]) -> dict[str, int]:
     n_ent = sum(len(v.get("entities", [])) for v in cache.values())
     n_rel = sum(len(v.get("relations", [])) for v in cache.values())
     return {"chunks": len(cache), "entities": n_ent, "relations": n_rel}
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -218,7 +214,6 @@ def main() -> int:
     print(f"Cache -> {artifact_path}")
     print("Merge vào Neo4j: python scripts/run_graph_index.py --remerge --skip-vectors")
     return 1 if errors else 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

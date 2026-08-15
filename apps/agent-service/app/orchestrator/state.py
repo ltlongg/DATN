@@ -23,12 +23,10 @@ from app.schemas.ask import (
 from app.schemas.retrieval import RetrievalMode, RetrievalResult
 from app.schemas.visualization import VisualizationPayload
 
-
 def _merge_debug(
     a: dict[str, object], b: dict[str, object]
 ) -> dict[str, object]:
     return {**a, **b}
-
 
 class AgentState(TypedDict):
     question: str

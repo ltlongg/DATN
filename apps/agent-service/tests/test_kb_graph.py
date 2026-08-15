@@ -15,7 +15,6 @@ from app.core.internal_auth import INTERNAL_KEY_HEADER
 from app.main import app
 from app.tools.graph_rag import graph_store as G
 
-
 class _Result:
     def __init__(self, records):
         self._records = records
@@ -25,7 +24,6 @@ class _Result:
 
     def __iter__(self):
         return iter(self._records)
-
 
 class _Session:
     def __init__(self, records, calls):
@@ -42,7 +40,6 @@ class _Session:
         self._calls.append(kwargs)
         return _Result(self._records)
 
-
 class _Driver:
     def __init__(self, records):
         self._records = records
@@ -51,9 +48,7 @@ class _Driver:
     def session(self):
         return _Session(self._records, self.calls)
 
-
 # --- list / count -----------------------------------------------------------
-
 
 def test_list_entities_maps_rows() -> None:
     driver = _Driver(
@@ -79,7 +74,6 @@ def test_list_entities_maps_rows() -> None:
     assert rows[0]["description_count"] == 3
     assert rows[0]["source_chunk_count"] == 5
 
-
 def test_list_entities_forwards_chunk_id_filter() -> None:
     driver = _Driver([])
     G.list_entities(chunk_id="c-42", limit=10, offset=0, driver=driver)
@@ -87,14 +81,11 @@ def test_list_entities_forwards_chunk_id_filter() -> None:
     # q/type rỗng -> None (bỏ filter) chứ không phải "" (tránh CONTAINS chuỗi rỗng).
     assert driver.calls[0]["q"] is None and driver.calls[0]["type"] is None
 
-
 def test_count_entities() -> None:
     assert G.count_entities(driver=_Driver([{"total": 7}])) == 7
     assert G.count_entities(driver=_Driver([])) == 0
 
-
 # --- get (ego-graph) --------------------------------------------------------
-
 
 def _entity_record():
     return {
@@ -120,7 +111,6 @@ def _entity_record():
         ],
     }
 
-
 def test_get_entity_builds_ego_graph() -> None:
     entity = G.get_entity("trương định", driver=_Driver([_entity_record()]))
     assert entity is not None
@@ -135,20 +125,16 @@ def test_get_entity_builds_ego_graph() -> None:
     # neighbor suy từ nb_* (distinct).
     assert [n["norm_name"] for n in entity["neighbors"]] == ["triều đình huế"]
 
-
 def test_get_entity_none_when_missing() -> None:
     assert G.get_entity("không tồn tại", driver=_Driver([])) is None
-
 
 # --- endpoint /kb/entities* -------------------------------------------------
 
 # /kb/* gác X-Internal-Key như /ask -> client mang key thật (xem core/internal_auth.py).
 _client = TestClient(app, headers={INTERNAL_KEY_HEADER: get_settings().internal_api_key})
 
-
 def test_endpoint_kb_401_without_internal_key() -> None:
     assert TestClient(app).get("/kb/entities").status_code == 401
-
 
 def test_endpoint_list_entities_empty_state(monkeypatch) -> None:
     monkeypatch.setattr(kb_module.graph_store, "list_entities", lambda **kw: [])
@@ -157,7 +143,6 @@ def test_endpoint_list_entities_empty_state(monkeypatch) -> None:
     assert r.status_code == 200
     body = r.json()
     assert body == {"items": [], "total": 0, "limit": 50, "offset": 0}
-
 
 def test_endpoint_list_entities_shape(monkeypatch) -> None:
     monkeypatch.setattr(
@@ -179,7 +164,6 @@ def test_endpoint_list_entities_shape(monkeypatch) -> None:
     body = r.json()
     assert body["total"] == 1
     assert body["items"][0]["norm_name"] == "trương định"
-
 
 def test_endpoint_get_entity_404(monkeypatch) -> None:
     monkeypatch.setattr(kb_module.graph_store, "get_entity", lambda norm_name: None)

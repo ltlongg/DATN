@@ -13,7 +13,6 @@ from __future__ import annotations
 
 GRAPH_PROMPT_VERSION = "graph-extract-v6"
 
-
 SYSTEM_PROMPT = """
 <role>
 Bạn là chuyên gia xây dựng knowledge graph cho hệ thống RAG về lịch sử Việt Nam,
@@ -226,13 +225,11 @@ cần, đổi sang keyword chuẩn hơn hoặc đưa thông tin vào description
 
 Chỉ trả về cấu trúc entities/relations, không thêm chữ nào khác."""
 
-
 _USER_TEMPLATE = """\
 <context>{headings}</context>
 <text>
 {text}
 </text>"""
-
 
 def build_user_prompt(text: str, headings: dict[str, str] | None = None) -> str:
     """Ghép prompt người dùng: ngữ cảnh heading + đoạn văn (giống pass metadata)."""

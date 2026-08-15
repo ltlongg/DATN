@@ -19,7 +19,6 @@ from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 # container, docker-compose nạp .env thành biến môi trường thật (ưu tiên hơn file).
 _ROOT_ENV = Path(__file__).resolve().parents[4] / ".env"
 
-
 class Settings(BaseSettings):
     """Cấu hình runtime, đọc từ môi trường (case-insensitive)."""
 
@@ -85,7 +84,6 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             return [origin.strip() for origin in v.split(",") if origin.strip()]
         return v
-
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

@@ -33,7 +33,6 @@ from app.schemas.ask import ChatMessage
 
 PLAN_PROMPT_VERSION = "plan-v6"
 
-
 SYSTEM_PROMPT = """
 <role>
 Bạn là bộ phân tích câu hỏi cho hệ thống hỏi đáp về lịch sử Việt Nam (giai đoạn Pháp
@@ -246,7 +245,6 @@ Cảm ơn bạn nhé!</user_prompt>
 </example>
 </examples>
 """.strip()
-
 
 def build_user_prompt(question: str, history: list[ChatMessage]) -> str:
     """Giữ tên hàm cho call site cũ (`orchestrator/nodes.py::plan`); phần dựng khối nay dùng

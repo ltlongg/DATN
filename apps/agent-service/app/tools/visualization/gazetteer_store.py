@@ -48,13 +48,11 @@ ON CONFLICT (location_norm) DO UPDATE SET
     updated_at = now();
 """
 
-
 def _database_url(database_url: str | None = None) -> str:
     url = database_url or get_settings().database_url
     if not url:
         raise RuntimeError("Thiếu DATABASE_URL trong .env để ghi gazetteer.")
     return url.replace("postgresql+psycopg://", "postgresql://", 1)
-
 
 def _record_params(record: dict[str, Any]) -> tuple[Any, ...]:
     return (
@@ -65,11 +63,9 @@ def _record_params(record: dict[str, Any]) -> tuple[Any, ...]:
         record["confidence"],
     )
 
-
 def ensure_gazetteer_table(conn: psycopg.Connection[Any]) -> None:
     with conn.cursor() as cur:
         cur.execute(CREATE_GAZETTEER_SQL)
-
 
 def upsert_gazetteer(
     records: Iterable[dict[str, Any]], database_url: str | None = None
@@ -85,7 +81,6 @@ def upsert_gazetteer(
             cur.executemany(UPSERT_GAZETTEER_SQL, [_record_params(r) for r in rows])
         conn.commit()
     return len(rows)
-
 
 def lookup_coords(
     location_norms: list[str], database_url: str | None = None

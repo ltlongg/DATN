@@ -28,7 +28,6 @@ _PAYLOAD = {
     "updated_at": "2026-07-11T00:00:00Z",
 }
 
-
 class _FakeResp:
     def __init__(self, status: int, payload: dict) -> None:
         self.status_code = status
@@ -44,7 +43,6 @@ class _FakeResp:
 
     def json(self) -> dict:
         return self._payload
-
 
 def _install_client(monkeypatch, *, resp=None, exc=None, counter=None):
     """Patch runtime_config.httpx.Client -> fake trả `resp` hoặc raise `exc`; đếm số .get()."""
@@ -68,7 +66,6 @@ def _install_client(monkeypatch, *, resp=None, exc=None, counter=None):
 
     monkeypatch.setattr(RC.httpx, "Client", _FakeClient)
 
-
 def test_parses_backend_response_and_ignores_extra(monkeypatch) -> None:
     _install_client(monkeypatch, resp=_FakeResp(200, _PAYLOAD))
     cfg = RC.get_runtime_config()
@@ -77,18 +74,15 @@ def test_parses_backend_response_and_ignores_extra(monkeypatch) -> None:
     assert cfg.llm_temperature == 0.3
     assert not hasattr(cfg, "updated_at")  # field thừa bị bỏ
 
-
 def test_fallback_default_on_connect_error(monkeypatch) -> None:
     _install_client(monkeypatch, exc=httpx.ConnectError("refused"))
     cfg = RC.get_runtime_config()
     assert cfg == RC.RuntimeConfig()  # đúng mặc định, không vỡ
 
-
 def test_fallback_default_on_non_200(monkeypatch) -> None:
     _install_client(monkeypatch, resp=_FakeResp(500, {}))
     cfg = RC.get_runtime_config()
     assert cfg == RC.RuntimeConfig()
-
 
 def test_cache_hits_within_ttl_only_one_http_call(monkeypatch) -> None:
     counter = {"n": 0}
@@ -98,7 +92,6 @@ def test_cache_hits_within_ttl_only_one_http_call(monkeypatch) -> None:
     assert counter["n"] == 1  # lần 2 lấy từ cache, không gọi HTTP lại
     assert a == b
 
-
 def test_clear_cache_forces_new_http_call(monkeypatch) -> None:
     counter = {"n": 0}
     _install_client(monkeypatch, resp=_FakeResp(200, _PAYLOAD), counter=counter)
@@ -106,7 +99,6 @@ def test_clear_cache_forces_new_http_call(monkeypatch) -> None:
     RC.clear_cache()
     RC.get_runtime_config()
     assert counter["n"] == 2  # sau clear_cache gọi HTTP lần nữa
-
 
 def test_error_result_is_cached_for_ttl(monkeypatch) -> None:
     # Backend down -> cache default đủ TTL để không hammer backend.

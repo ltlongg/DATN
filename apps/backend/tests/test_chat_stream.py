@@ -8,7 +8,6 @@ from fastapi.testclient import TestClient
 
 from app.services.agent_client import format_sse
 
-
 def _parse_stream(text: str) -> list[tuple[str, dict]]:
     """Tách text SSE thành [(event, data), ...]."""
     events: list[tuple[str, dict]] = []
@@ -25,10 +24,8 @@ def _parse_stream(text: str) -> list[tuple[str, dict]]:
         events.append((event, json.loads(data)))
     return events
 
-
 def _new_conversation(client: TestClient, headers: dict[str, str]) -> str:
     return client.post("/api/chat/conversations", json={}, headers=headers).json()["id"]
-
 
 def test_ask_streams_and_persists_answer(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     user = auth("user")
@@ -64,7 +61,6 @@ def test_ask_streams_and_persists_answer(client, auth, mock_agent) -> None:  # t
     assert assistant["confidence"] == "cao"
     assert assistant["citations"] == [{"chunk_id": "c1"}]
 
-
 def test_ask_reports_ttft_in_done_and_persists_it(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     """TTFT đo ở backend (nhận /ask -> token đầu) đi kèm event done VÀ lưu vào message để
     còn thấy sau khi reload. Không assert giá trị cụ thể (phụ thuộc máy), chỉ đòi >= 0 và khớp
@@ -87,7 +83,6 @@ def test_ask_reports_ttft_in_done_and_persists_it(client, auth, mock_agent) -> N
     detail = client.get(f"/api/chat/conversations/{cid}", headers=user).json()
     assert detail["messages"][1]["ttft_ms"] == done["ttft_ms"]
     assert detail["messages"][0]["ttft_ms"] is None  # message user không có TTFT
-
 
 def test_ask_blocked_persists_safe_message_and_forwards_events(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     """Guardrails chặn: agent stream token(safe) rồi blocked, KHÔNG done. Backend forward đúng
@@ -118,7 +113,6 @@ def test_ask_blocked_persists_safe_message_and_forwards_events(client, auth, moc
     assert roles == ["user", "assistant"]
     assert detail["messages"][1]["content"] == "Xin lỗi, mình không hỗ trợ yêu cầu này."
 
-
 def test_ask_blocked_without_content_not_persisted(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     """Blocked mà không có safe message (content rỗng) -> không lưu assistant message."""
     user = auth("user")
@@ -133,7 +127,6 @@ def test_ask_blocked_without_content_not_persisted(client, auth, mock_agent) -> 
     detail = client.get(f"/api/chat/conversations/{cid}", headers=user).json()
     roles = [m["role"] for m in detail["messages"]]
     assert roles == ["user"]  # chỉ có user message, assistant không lưu
-
 
 def test_ask_sends_question_and_first_turn_history_empty(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     user = auth("user")
@@ -154,7 +147,6 @@ def test_ask_sends_question_and_first_turn_history_empty(client, auth, mock_agen
     assert payload["conversation_id"] == cid
     assert isinstance(payload["message_id"], str) and payload["message_id"]
 
-
 def test_ask_forwards_selected_mode(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     user = auth("user")
     cid = _new_conversation(client, user)
@@ -169,7 +161,6 @@ def test_ask_forwards_selected_mode(client, auth, mock_agent) -> None:  # type: 
     )
     assert mock_agent.captured["payload"]["mode"] == "hybrid"
 
-
 def test_ask_rejects_removed_graph_mode(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     """Mode graph đứng riêng đã bỏ -> 422 ngay ở validate, không đẩy xuống agent."""
     user = auth("user")
@@ -181,7 +172,6 @@ def test_ask_rejects_removed_graph_mode(client, auth, mock_agent) -> None:  # ty
     )
     assert resp.status_code == 422
     assert mock_agent.captured == {}
-
 
 def test_ask_default_mode_is_auto(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     """Không truyền mode -> "auto": agent tự chọn traditional/hybrid theo câu hỏi."""
@@ -195,7 +185,6 @@ def test_ask_default_mode_is_auto(client, auth, mock_agent) -> None:  # type: ig
         f"/api/chat/conversations/{cid}/ask", json={"question": "Q"}, headers=user
     )
     assert mock_agent.captured["payload"]["mode"] == "auto"
-
 
 def test_ask_explicit_mode_is_forwarded_as_override(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     user = auth("user")
@@ -213,7 +202,6 @@ def test_ask_explicit_mode_is_forwarded_as_override(client, auth, mock_agent) ->
     )
     assert mock_agent.captured["payload"]["mode"] == "traditional"
 
-
 def test_ask_second_turn_includes_prior_history(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     user = auth("user")
     cid = _new_conversation(client, user)
@@ -229,7 +217,6 @@ def test_ask_second_turn_includes_prior_history(client, auth, mock_agent) -> Non
     assert [h["role"] for h in history] == ["user", "assistant"]
     assert history[0]["content"] == "Q1"
 
-
 def test_ask_first_question_sets_title(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     user = auth("user")
     cid = _new_conversation(client, user)
@@ -244,7 +231,6 @@ def test_ask_first_question_sets_title(client, auth, mock_agent) -> None:  # typ
     )
     detail = client.get(f"/api/chat/conversations/{cid}", headers=user).json()
     assert detail["title"] == "Phong trào Cần Vương là gì?"
-
 
 def test_ask_clarification_persisted(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     user = auth("user")
@@ -264,7 +250,6 @@ def test_ask_clarification_persisted(client, auth, mock_agent) -> None:  # type:
     assert assistant["clarification_needed"] is True
     assert assistant["content"] == "Bạn hỏi giai đoạn nào?"
 
-
 def test_ask_error_event_not_persisted(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     user = auth("user")
     cid = _new_conversation(client, user)
@@ -281,7 +266,6 @@ def test_ask_error_event_not_persisted(client, auth, mock_agent) -> None:  # typ
     detail = client.get(f"/api/chat/conversations/{cid}", headers=user).json()
     assert [m["role"] for m in detail["messages"]] == ["user"]
 
-
 def test_ask_agent_unavailable_returns_503(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     import httpx
 
@@ -293,7 +277,6 @@ def test_ask_agent_unavailable_returns_503(client, auth, mock_agent) -> None:  #
     )
     assert r.status_code == 503
     assert r.json()["code"] == "agent_unavailable"
-
 
 def test_ask_blocked_for_non_owner(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     from app.core.security import hash_password
@@ -311,7 +294,6 @@ def test_ask_blocked_for_non_owner(client, auth, mock_agent) -> None:  # type: i
     )
     assert r.status_code == 403
     assert r.json()["code"] == "forbidden"
-
 
 def test_ask_proxies_progress_events_and_persists_steps(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     """Đường persist panel tiến trình đi qua 7 chỗ (db.py, Message, _MSG_COLS, add_message,
@@ -366,7 +348,6 @@ def test_ask_proxies_progress_events_and_persists_steps(client, auth, mock_agent
     assert assistant["steps"][1]["label"] == "Tìm Trương Định"
     assert assistant["steps"][2]["detail"] == "Soạn từ 8 đoạn · độ tin cậy cao"
 
-
 def _agent_with_internals() -> str:
     return (
         format_sse("steps", {"steps": [{"id": "plan", "label": "Phân tích", "kind": "system"}]})
@@ -382,7 +363,6 @@ def _agent_with_internals() -> str:
         + format_sse("token", {"text": "Đáp án."})
         + format_sse("done", {"confidence": "cao", "retrieval_mode": "hybrid", "warnings": []})
     )
-
 
 def test_step_internals_are_stripped_for_non_admin_but_still_saved(  # type: ignore[no-untyped-def]
     client, auth, mock_agent
@@ -415,7 +395,6 @@ def test_step_internals_are_stripped_for_non_admin_but_still_saved(  # type: ign
         {"label": "Câu viết lại", "value": "Trương Định là ai?"}
     ]
 
-
 def test_step_internals_reach_admin_on_the_wire(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     admin = auth("admin")
     cid = _new_conversation(client, admin)
@@ -427,7 +406,6 @@ def test_step_internals_reach_admin_on_the_wire(client, auth, mock_agent) -> Non
     )
     step = next(d for e, d in _parse_stream(r.text) if e == "step")
     assert step["internals"] == [{"label": "Câu viết lại", "value": "Trương Định là ai?"}]
-
 
 def test_admin_without_debug_flag_does_not_get_internals(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     """Cờ `debug` là công tắc, không phải role: admin tắt debug thì cũng không nhận tầng 2."""
@@ -441,7 +419,6 @@ def test_admin_without_debug_flag_does_not_get_internals(client, auth, mock_agen
     )
     step = next(d for e, d in _parse_stream(r.text) if e == "step")
     assert "internals" not in step
-
 
 def test_persisted_steps_close_out_unfinished_rows(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     """Agent chốt `done` khi bước soạn bài vẫn `running` (ca hiếm nhưng có thật nếu node

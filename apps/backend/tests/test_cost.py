@@ -30,11 +30,9 @@ CREATE TABLE IF NOT EXISTS llm_usage (
 );
 """
 
-
 def _ensure_table(conn: psycopg.Connection) -> None:
     with conn.cursor() as cur:
         cur.execute(_DDL)
-
 
 def _insert(conn, task, tokens, *, created_at, user_id=None, prompt=0, completion=0):  # type: ignore[no-untyped-def]
     with conn.cursor() as cur:
@@ -44,9 +42,7 @@ def _insert(conn, task, tokens, *, created_at, user_id=None, prompt=0, completio
             (str(uuid.uuid4()), created_at, task, "m", prompt, completion, tokens, user_id),
         )
 
-
 # --- pure cost_service ------------------------------------------------------
-
 
 def test_compute_cost_overview() -> None:
     rows = [
@@ -59,11 +55,9 @@ def test_compute_cost_overview() -> None:
     assert o.total_prompt_tokens == 21
     assert o.avg_tokens_per_call == 15.0
 
-
 def test_compute_cost_overview_empty() -> None:
     o = compute_cost_overview([])
     assert o.total_calls == 0 and o.total_tokens == 0 and o.avg_tokens_per_call == 0.0
-
 
 def test_compute_cost_by_day_grouped_sorted() -> None:
     rows = [
@@ -75,7 +69,6 @@ def test_compute_cost_by_day_grouped_sorted() -> None:
     assert [d.day for d in days] == ["2020-01-01", "2020-01-02"]  # sort tăng dần
     assert days[0].calls == 2 and days[0].total_tokens == 10
 
-
 def test_compute_cost_by_task_grouped() -> None:
     rows = [
         {"task": "build_query", "total_tokens": 4},
@@ -86,9 +79,7 @@ def test_compute_cost_by_task_grouped() -> None:
     assert tasks["build_query"].calls == 2 and tasks["build_query"].total_tokens == 10
     assert tasks["synthesize"].total_tokens == 20
 
-
 # --- endpoints --------------------------------------------------------------
-
 
 def test_cost_overview_endpoint(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     _ensure_table(db_conn)
@@ -104,7 +95,6 @@ def test_cost_overview_endpoint(client, auth, db_conn) -> None:  # type: ignore[
     assert body["total_calls"] == 2
     assert body["total_tokens"] == 55
 
-
 def test_cost_by_day_and_by_task_endpoints(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     _ensure_table(db_conn)
     _insert(db_conn, "build_query", 10, created_at="2020-01-01 10:00")
@@ -118,7 +108,6 @@ def test_cost_by_day_and_by_task_endpoints(client, auth, db_conn) -> None:  # ty
         "/api/admin/cost/by-task", params={"from_date": _FROM, "to_date": _TO}, headers=admin
     ).json()
     assert {t["task"] for t in by_task} == {"build_query", "synthesize"}
-
 
 def test_cost_top_users_join(client, auth, db_conn, users) -> None:  # type: ignore[no-untyped-def]
     _ensure_table(db_conn)
@@ -134,7 +123,6 @@ def test_cost_top_users_join(client, auth, db_conn, users) -> None:  # type: ign
     assert top[0]["email"] == "user-test@example.com"
     assert top[0]["total_tokens"] == 100
 
-
 def test_cost_overview_when_table_missing_returns_empty(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     # Regression: bảng llm_usage chưa tồn tại -> 200 số liệu rỗng, KHÔNG 500.
     with db_conn.cursor() as cur:
@@ -142,7 +130,6 @@ def test_cost_overview_when_table_missing_returns_empty(client, auth, db_conn) -
     r = client.get("/api/admin/cost/overview", headers=auth("admin"))
     assert r.status_code == 200
     assert r.json()["total_calls"] == 0
-
 
 def test_cost_requires_admin(client, auth) -> None:  # type: ignore[no-untyped-def]
     assert client.get("/api/admin/cost/overview", headers=auth("user")).status_code == 403

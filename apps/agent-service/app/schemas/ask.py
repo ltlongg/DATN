@@ -31,11 +31,9 @@ RequestedMode = Literal["auto", "traditional", "hybrid"]
 # truy hồi tách biệt ở bất kỳ tầng nào.
 AutoSelectableMode = Literal["traditional", "hybrid"]
 
-
 class ChatMessage(BaseModel):
     role: Literal["user", "assistant"]
     content: str = Field(min_length=1, max_length=4000)
-
 
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=4000)
@@ -53,7 +51,6 @@ class AskRequest(BaseModel):
     conversation_id: str | None = None
     message_id: str | None = None
 
-
 class Citation(BaseModel):
     chunk_id: str
     source_file: str | None = None
@@ -62,7 +59,6 @@ class Citation(BaseModel):
     end_line: int | None = None
     heading_path: list[str] = Field(default_factory=list)
     quote: str | None = None
-
 
 class AskResponse(BaseModel):
     # clarification_needed=True -> answer=None, các field còn lại rỗng. Frontend hiển thị
@@ -78,9 +74,7 @@ class AskResponse(BaseModel):
     warnings: list[str] = Field(default_factory=list)
     debug: dict[str, object] | None = None
 
-
 # --- LLM structured outputs ---
-
 
 class StepQuery(BaseModel):
     """Một truy vấn chạy độc lập. Nhiều StepQuery trong cùng bước -> chạy SONG SONG."""
@@ -91,7 +85,6 @@ class StepQuery(BaseModel):
     # tên model điền vào lúc thay đại từ là hợp lệ, còn tên nó tự nhớ ra thì không. Cưỡng chế
     # bằng code ở `orchestrator/planning.py`, không chỉ bằng prompt.
     entities: list[str] = Field(default_factory=list)
-
 
 class PlanStep(BaseModel):
     """Một bước trong todo list, chạy theo thứ tự `id`.
@@ -108,7 +101,6 @@ class PlanStep(BaseModel):
     resolve: str = ""
     # id bước cung cấp mắt xích. Chỉ để kiểm tính hợp lệ + vẽ UI; thứ tự CHẠY là thứ tự `id`.
     depends_on: int | None = None
-
 
 class PlanOutput(BaseModel):
     """Output 1 LLM call gộp rewrite + routing + phân rã truy vấn (tên cũ: BuildQueryOutput).
@@ -130,7 +122,6 @@ class PlanOutput(BaseModel):
     selected_mode: AutoSelectableMode = "hybrid"
     steps: list[PlanStep] = Field(default_factory=list)
 
-
 class StepResolveOutput(BaseModel):
     """Output node `resolve_step`: mắt xích trích được từ context của bước vừa chạy.
 
@@ -146,7 +137,6 @@ class StepResolveOutput(BaseModel):
     confidence: AnswerConfidence = "thấp"
     source_chunk_ids: list[str] = Field(default_factory=list)
 
-
 class ResolvedFact(BaseModel):
     """Mắt xích đã trích ở một bước, mang sang `synthesize` như một fact CÓ NGUỒN.
 
@@ -159,7 +149,6 @@ class ResolvedFact(BaseModel):
     value: str
     confidence: AnswerConfidence
     source_chunk_ids: list[str] = Field(default_factory=list)
-
 
 class SynthesizedAnswer(BaseModel):
     """Output synthesize. `answer` PHẢI là field đầu -> token stream ra trước, còn

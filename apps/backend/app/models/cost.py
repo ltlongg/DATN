@@ -15,7 +15,6 @@ import psycopg
 
 from app.core.db import connection
 
-
 def _date_filters(
     from_date: str | None, to_date: str | None, column: str = "created_at"
 ) -> tuple[list[str], list[Any]]:
@@ -29,7 +28,6 @@ def _date_filters(
         where.append(f"{column}::date <= %s")
         params.append(to_date)
     return where, params
-
 
 def list_usage_rows(
     from_date: str | None = None, to_date: str | None = None
@@ -48,7 +46,6 @@ def list_usage_rows(
             return cur.fetchall()
     except psycopg.errors.UndefinedTable:
         return []
-
 
 def list_top_users(
     from_date: str | None = None, to_date: str | None = None, limit: int = 10

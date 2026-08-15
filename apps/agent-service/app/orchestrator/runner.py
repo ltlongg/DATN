@@ -17,7 +17,6 @@ from app.orchestrator.state import AgentState
 from app.schemas.ask import AskRequest, AskResponse
 from app.schemas.retrieval import RetrievalBackendError
 
-
 def initial_state(request: AskRequest) -> AgentState:
     return {
         "question": request.question,
@@ -53,7 +52,6 @@ def initial_state(request: AskRequest) -> AgentState:
         "debug": {},
     }
 
-
 async def prepare_state(request: AskRequest) -> AgentState:
     """State khởi tạo + snapshot runtime_config (gọi backend đúng 1 LẦN/request, cache TTL).
     Mọi node sau chỉ đọc từ state["runtime_config"], không gọi lại/không I/O."""
@@ -61,7 +59,6 @@ async def prepare_state(request: AskRequest) -> AgentState:
     cfg = await asyncio.to_thread(get_runtime_config)
     state["runtime_config"] = cfg.model_dump()
     return state
-
 
 def build_response(request: AskRequest, state: dict[str, Any]) -> AskResponse:
     debug = state.get("debug") if request.debug else None
@@ -83,7 +80,6 @@ def build_response(request: AskRequest, state: dict[str, Any]) -> AskResponse:
         debug=debug,
     )
 
-
 async def run_ask(request: AskRequest, *, emitter: Emitter | None = None) -> AskResponse:
     """Chạy graph tới hết, dựng AskResponse từ state cuối (đường stream=False).
 
@@ -98,21 +94,17 @@ async def run_ask(request: AskRequest, *, emitter: Emitter | None = None) -> Ask
         return AskResponse(answer=blocked.safe_message, retrieval_mode="none")
     return build_response(request, final)
 
-
 # --- streaming (SSE) ---
 
 _SENTINEL = object()
 
-
 def _sse(event_type: str, data: dict[str, object]) -> str:
     return f"event: {event_type}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
-
 
 def error_code(exc: BaseException) -> str:
     if isinstance(exc, (RetrievalBackendError, SynthesisError)):
         return exc.code
     return "internal_error"
-
 
 def error_message(exc: BaseException) -> str:
     """Message an toàn — KHÔNG dump stack/secret (cả SSE lẫn HTTP body)."""
@@ -125,7 +117,6 @@ def error_message(exc: BaseException) -> str:
         "empty_synthesis": "Không tạo được câu trả lời.",
     }
     return mapping.get(error_code(exc), "Có lỗi xảy ra khi xử lý câu hỏi.")
-
 
 async def run_ask_stream(request: AskRequest) -> AsyncIterator[str]:
     """Chạy graph, stream SSE: status* -> token* -> citations -> visualization -> done.

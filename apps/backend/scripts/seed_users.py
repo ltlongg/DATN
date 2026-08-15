@@ -22,7 +22,6 @@ _SEED_USERS: list[tuple[str, str, Role, str]] = [
     ("user@example.com", "User Demo", "user", "user123"),
 ]
 
-
 def main() -> None:
     for email, name, role, password in _SEED_USERS:
         if get_user_by_email(email) is not None:
@@ -31,7 +30,6 @@ def main() -> None:
         create_user(email=email, name=name, role=role, password_hash=hash_password(password))
         print(f"  tạo: {email} ({role})")
     print("Seed user demo xong.")
-
 
 if __name__ == "__main__":
     main()

@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-
 class EntityExtraction(BaseModel):
     """Kết quả LLM trích từ một chunk. Giữ nguyên dạng bề mặt (surface form),
     chưa chuẩn hóa alias — canonical để phase sau (xem plan › Alias Và Chuẩn Hóa)."""

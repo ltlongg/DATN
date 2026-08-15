@@ -42,7 +42,6 @@ from app.models.activity import record_activity
 
 logger = logging.getLogger("backend.startup")
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Mở pool Postgres lúc startup (warm sẵn connection) và đóng sạch lúc shutdown.
@@ -54,7 +53,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
     close_pool()
 
-
 class RequestIDMiddleware(BaseHTTPMiddleware):
     """Gắn X-Request-ID cho mỗi request (nhận từ client hoặc sinh mới) để trace log."""
 
@@ -65,7 +63,6 @@ class RequestIDMiddleware(BaseHTTPMiddleware):
         response.headers["X-Request-ID"] = request_id
         return response
 
-
 def _should_log_activity(request: Request) -> bool:
     """Chỉ log request /api/* có ý nghĩa: bỏ CORS preflight, non-API (health/static), và
     chính feed activity (tránh admin refresh tự làm ngập log)."""
@@ -73,7 +70,6 @@ def _should_log_activity(request: Request) -> bool:
         return False
     path = request.url.path
     return path.startswith("/api/") and not path.startswith("/api/admin/activity")
-
 
 def _user_id_from_request(request: Request) -> str | None:
     """Best-effort lấy user_id từ Bearer token (KHÔNG đụng deps.py — request chưa auth vẫn
@@ -87,7 +83,6 @@ def _user_id_from_request(request: Request) -> str | None:
         return None
     sub = payload.get("sub")
     return str(sub) if sub is not None else None
-
 
 class ActivityLogMiddleware(BaseHTTPMiddleware):
     """Ghi 1 dòng activity_log cho mỗi request /api/*. Phải chạy TRONG RequestIDMiddleware
@@ -130,7 +125,6 @@ class ActivityLogMiddleware(BaseHTTPMiddleware):
             )
         )
 
-
 def create_app() -> FastAPI:
     settings = get_settings()
     app = FastAPI(title="Agentic RAG Backend", version="0.1.0", lifespan=lifespan)
@@ -165,6 +159,5 @@ def create_app() -> FastAPI:
     app.include_router(internal.router, prefix="/internal", tags=["internal"])
 
     return app
-
 
 app = create_app()

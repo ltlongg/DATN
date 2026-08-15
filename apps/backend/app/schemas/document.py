@@ -9,14 +9,12 @@ from pydantic import BaseModel, Field
 
 DocumentStatus = Literal["draft", "indexing", "indexed", "failed"]
 
-
 class DocumentCreate(BaseModel):
     # KHÔNG có `source_file`: tài liệu có nguồn trong kho TỰ hiện ở danh mục
     # (models/document.py::sync_kb_documents). Form chỉ tạo được tài liệu chưa gắn nguồn.
     name: str = Field(min_length=1, max_length=300)
     type: str = Field(default="markdown", max_length=50)
     status: DocumentStatus = "draft"
-
 
 class DocumentUpdate(BaseModel):
     # PATCH: chỉ field được gửi mới cập nhật (exclude_unset ở API). KHÔNG có `source_file`
@@ -25,7 +23,6 @@ class DocumentUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=300)
     type: str | None = Field(default=None, max_length=50)
     status: DocumentStatus | None = None
-
 
 class DocumentOut(BaseModel):
     id: str
@@ -37,7 +34,6 @@ class DocumentOut(BaseModel):
     event_count: int
     created_at: datetime
     updated_at: datetime
-
 
 class KbSourceOut(BaseModel):
     """Nguồn có thật trong kho tri thức — dùng cho dropdown lọc ở KB Chunks."""

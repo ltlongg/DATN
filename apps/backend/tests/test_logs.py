@@ -10,9 +10,7 @@ from app.services.quality_service import compute_quality_summary
 
 _USER_EMAIL = "user-test@example.com"
 
-
 # --- pure compute_quality_summary ------------------------------------------
-
 
 def _asst(
     *,
@@ -32,7 +30,6 @@ def _asst(
         "ttft_ms": ttft_ms,
     }
 
-
 def test_quality_summary_no_citation_only_counts_retrieval_attempted() -> None:
     rows = [
         _asst(retrieval_mode="hybrid", citations=[{"chunk_id": "c"}], confidence="cao"),
@@ -47,7 +44,6 @@ def test_quality_summary_no_citation_only_counts_retrieval_attempted() -> None:
     assert s.no_citation_count == 1  # chỉ message hybrid rỗng citation
     assert s.clarification_count == 1  # đếm toàn bộ, bất kể route
 
-
 def test_quality_summary_low_confidence_and_warning_count_all_rows() -> None:
     rows = [
         _asst(retrieval_mode="hybrid", citations=[{"c": 1}], confidence="thấp"),
@@ -58,13 +54,11 @@ def test_quality_summary_low_confidence_and_warning_count_all_rows() -> None:
     assert s.low_confidence_count == 2  # "thấp" + "không đủ dữ liệu", cả route none
     assert s.warning_count == 1
 
-
 def test_quality_summary_empty() -> None:
     s = compute_quality_summary([])
     assert s.total_assistant_messages == 0 and s.no_citation_count == 0
     assert s.ttft_measured_count == 0
     assert s.avg_ttft_ms is None and s.p95_ttft_ms is None
-
 
 def test_quality_summary_ttft_ignores_unmeasured_rows() -> None:
     # Message không đo được TTFT (ttft_ms None) KHÔNG kéo trung bình xuống — mẫu số riêng.
@@ -79,9 +73,7 @@ def test_quality_summary_ttft_ignores_unmeasured_rows() -> None:
     assert s.avg_ttft_ms == 2000
     assert s.p95_ttft_ms == 3000  # nearest-rank trên 2 giá trị -> lớn nhất
 
-
 # --- endpoints --------------------------------------------------------------
-
 
 def test_list_conversations_admin_filter_by_email(client, auth, db_conn, users) -> None:  # type: ignore[no-untyped-def]
     user = users["user"]
@@ -100,7 +92,6 @@ def test_list_conversations_admin_filter_by_email(client, auth, db_conn, users) 
     assert item["user_email"] == _USER_EMAIL
     assert item["user_name"] == "User Test"
     assert item["message_count"] == 2
-
 
 def test_conversation_detail_admin_with_quality_flags(client, auth, db_conn, users) -> None:  # type: ignore[no-untyped-def]
     user = users["user"]
@@ -125,14 +116,12 @@ def test_conversation_detail_admin_with_quality_flags(client, auth, db_conn, use
     assert asst_msg["quality"]["no_citation"] is True
     assert asst_msg["quality"]["low_confidence"] is True
 
-
 def test_conversation_detail_admin_404(client, auth) -> None:  # type: ignore[no-untyped-def]
     r = client.get(
         "/api/admin/logs/conversations/00000000-0000-0000-0000-000000000000",
         headers=auth("admin"),
     )
     assert r.status_code == 404
-
 
 def test_quality_summary_endpoint_delta(client, auth, db_conn, users) -> None:  # type: ignore[no-untyped-def]
     # Delta để tất định dù DB có sẵn assistant message thật.
@@ -146,7 +135,6 @@ def test_quality_summary_endpoint_delta(client, auth, db_conn, users) -> None:  
     assert after["retrieval_attempted_count"] - before["retrieval_attempted_count"] == 2
     assert after["no_citation_count"] - before["no_citation_count"] == 1
     assert after["low_confidence_count"] - before["low_confidence_count"] == 1
-
 
 def test_logs_require_admin(client, auth) -> None:  # type: ignore[no-untyped-def]
     for path in ("/api/admin/logs/conversations", "/api/admin/logs/quality-summary"):

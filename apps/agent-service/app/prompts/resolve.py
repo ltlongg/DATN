@@ -34,7 +34,6 @@ from app.schemas.retrieval import GraphContextItem, RetrievedChunk
 
 RESOLVE_PROMPT_VERSION = "resolve-v4"
 
-
 SYSTEM_PROMPT = """
 <role>
 Bạn là bộ trích mắt xích cho hệ thống hỏi đáp lịch sử Việt Nam. Bạn KHÔNG trả lời câu hỏi của
@@ -120,7 +119,6 @@ Người kế tục Phan Đình Phùng làm gì sau đó?</user_prompt>
 </example>
 </examples>
 """.strip()
-
 
 def build_user_prompt(
     question: str,

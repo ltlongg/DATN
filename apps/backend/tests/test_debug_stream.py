@@ -12,10 +12,8 @@ from app.services.agent_client import format_sse
 
 _DONE = format_sse("done", {"confidence": "cao", "retrieval_mode": "hybrid", "warnings": []})
 
-
 def _new_conversation(client: TestClient, headers: dict[str, str]) -> str:
     return client.post("/api/chat/conversations", json={}, headers=headers).json()["id"]
-
 
 def test_debug_forced_false_for_user(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     user = auth("user")
@@ -27,7 +25,6 @@ def test_debug_forced_false_for_user(client, auth, mock_agent) -> None:  # type:
         headers=user,
     )
     assert mock_agent.captured["payload"]["debug"] is False
-
 
 def test_debug_honored_for_admin(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     admin = auth("admin")

@@ -16,7 +16,6 @@ from fastapi.testclient import TestClient
 
 from app.main import ActivityLogMiddleware, RequestIDMiddleware
 
-
 def _rows_for_path(conn: psycopg.Connection, path: str) -> list[dict[str, Any]]:
     with conn.cursor() as cur:
         cur.execute(
@@ -26,7 +25,6 @@ def _rows_for_path(conn: psycopg.Connection, path: str) -> list[dict[str, Any]]:
         )
         return cur.fetchall()
 
-
 def _insert(conn: psycopg.Connection, *, path: str, severity: str, status_code: int) -> None:
     with conn.cursor() as cur:
         cur.execute(
@@ -35,9 +33,7 @@ def _insert(conn: psycopg.Connection, *, path: str, severity: str, status_code: 
             (str(uuid.uuid4()), path, status_code, severity),
         )
 
-
 # --- middleware ghi log qua request thật ------------------------------------
-
 
 def test_success_request_logged_ok(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     r = client.get("/api/auth/me", headers=auth("admin"))
@@ -52,7 +48,6 @@ def test_success_request_logged_ok(client, auth, db_conn) -> None:  # type: igno
     # request_id của dòng log khớp header X-Request-ID trả về.
     assert row["request_id"] == r.headers["X-Request-ID"]
 
-
 def test_handled_error_logs_error_code(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     # user gọi endpoint admin -> 403 forbidden (AppError handled). Middleware đọc
     # error_code do handler set lên request.state.
@@ -62,7 +57,6 @@ def test_handled_error_logs_error_code(client, auth, db_conn) -> None:  # type: 
     assert len(rows) == 1
     assert rows[0]["severity"] == "error"
     assert rows[0]["error"] == "forbidden"
-
 
 def test_unhandled_500_logs_exception_type(db_conn) -> None:  # type: ignore[no-untyped-def]
     # App phụ tối giản có route ném exception CHƯA handled -> đi qua nhánh `except` của
@@ -83,17 +77,14 @@ def test_unhandled_500_logs_exception_type(db_conn) -> None:  # type: ignore[no-
     assert rows[0]["severity"] == "error"
     assert rows[0]["error"].startswith("RuntimeError:")
 
-
 def test_non_api_path_not_logged(client, db_conn) -> None:  # type: ignore[no-untyped-def]
     assert client.get("/health").status_code == 200
     assert _rows_for_path(db_conn, "/health") == []
-
 
 def test_user_id_attributed_from_token(client, auth, users, db_conn) -> None:  # type: ignore[no-untyped-def]
     client.get("/api/auth/me", headers=auth("admin"))
     rows = _rows_for_path(db_conn, "/api/auth/me")
     assert rows[0]["user_id"] == users["admin"].id
-
 
 def test_user_id_null_without_token(client, db_conn) -> None:  # type: ignore[no-untyped-def]
     # Không token -> 401 (handled), user_id NULL vì không có Bearer.
@@ -104,13 +95,10 @@ def test_user_id_null_without_token(client, db_conn) -> None:  # type: ignore[no
     assert rows[0]["user_id"] is None
     assert rows[0]["severity"] == "error"
 
-
 # --- endpoint đọc (admin) ---------------------------------------------------
-
 
 def test_list_activity_requires_admin(client, auth) -> None:  # type: ignore[no-untyped-def]
     assert client.get("/api/admin/activity", headers=auth("user")).status_code == 403
-
 
 def test_list_activity_filter_severity(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     _insert(db_conn, path="/api/x/ok-only", severity="ok", status_code=200)
@@ -122,7 +110,6 @@ def test_list_activity_filter_severity(client, auth, db_conn) -> None:  # type: 
     assert "/api/x/err-only" in paths
     assert "/api/x/ok-only" not in paths
     assert all(it["severity"] == "error" for it in body["items"])
-
 
 def test_list_activity_filter_path_and_pagination(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     for i in range(3):

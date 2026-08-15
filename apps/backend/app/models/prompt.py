@@ -22,7 +22,6 @@ _VERSION_META_COLS = (
     "version_no, note, status, created_by, created_at, promoted_by, promoted_at"
 )
 
-
 def list_prompts() -> list[dict[str, Any]]:
     """Mỗi prompt: meta + version_no production hiện hành + số version. Bảng chưa seed -> []."""
     try:
@@ -42,7 +41,6 @@ def list_prompts() -> list[dict[str, Any]]:
     for r in rows:
         r["version_count"] = int(r["version_count"])
     return rows
-
 
 def get_prompt(key: str) -> dict[str, Any] | None:
     """Meta + versions[] (không content) + content production hiện hành. None nếu key không có
@@ -76,7 +74,6 @@ def get_prompt(key: str) -> dict[str, Any] | None:
     meta["versions"] = versions
     return meta
 
-
 def get_version(key: str, version_no: int) -> dict[str, Any] | None:
     """Content + status của 1 version cụ thể (phục vụ So sánh / nạp editor). None nếu không có."""
     try:
@@ -89,7 +86,6 @@ def get_version(key: str, version_no: int) -> dict[str, Any] | None:
             return cur.fetchone()
     except psycopg.errors.UndefinedTable:
         return None
-
 
 def create_version(key: str, content: str, note: str | None, by: str) -> dict[str, Any] | None:
     """Tạo version mới (version_no = max+1) và đẩy thẳng lên production trong cùng transaction:
@@ -120,7 +116,6 @@ def create_version(key: str, content: str, note: str | None, by: str) -> dict[st
         created = cur.fetchone()
         cur.execute("UPDATE managed_prompts SET updated_at = now() WHERE key = %s", (key,))
     return created
-
 
 def promote(key: str, version_no: int, by: str) -> bool:
     """Rollback: đưa 1 version cũ trở lại production (transaction 1 connection): production

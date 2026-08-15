@@ -2,8 +2,6 @@
 
 Nếu đồng ý gộp: thêm cụm `["<canonical>", "<alias>"]` vào `dataset/alias_seed.json` (mục `clusters`) rồi chạy lại script.
 
-
-
 ---
 ## Đã gộp tự động (confidence cao): 118 cụm
 

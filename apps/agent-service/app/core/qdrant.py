@@ -24,7 +24,6 @@ __all__ = ["get_qdrant_client", "ensure_chunks_collection", "point_id_for"]
 # nếu không point id sẽ lệch và tạo bản trùng thay vì ghi đè.
 _NS = uuid.UUID("a3f1c2e4-5b6d-4e8a-9c0f-1d2e3f4a5b6c")
 
-
 @lru_cache(maxsize=1)
 def get_qdrant_client() -> QdrantClient:
     s = get_settings()
@@ -41,11 +40,9 @@ def get_qdrant_client() -> QdrantClient:
         timeout=60,
     )
 
-
 def point_id_for(chunk_id: str) -> str:
     """Map chunk_id (chuỗi) -> UUID5 deterministic làm Qdrant point id."""
     return str(uuid.uuid5(_NS, chunk_id))
-
 
 def ensure_chunks_collection(client: QdrantClient | None = None) -> str:
     """Tạo collection chunk vector nếu chưa có.

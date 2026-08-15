@@ -18,7 +18,6 @@ from app.schemas.ask import ChatMessage
 HISTORY_LABEL = "[LỊCH SỬ HỘI THOẠI]"
 QUESTION_LABEL = "[CÂU HỎI HIỆN TẠI]"
 
-
 def render_history(history: list[ChatMessage]) -> str:
     """Lịch sử hội thoại -> text. Rỗng -> "(không có)" chứ không phải chuỗi rỗng: khối trống
     trơn dễ bị đọc là dữ liệu bị mất, còn "(không có)" nói rõ đây là lượt đầu."""
@@ -28,7 +27,6 @@ def render_history(history: list[ChatMessage]) -> str:
         f"{'Người dùng' if msg.role == 'user' else 'Trợ lý'}: {msg.content}"
         for msg in history
     )
-
 
 def build_history_question_prompt(question: str, history: list[ChatMessage]) -> str:
     """User prompt chuẩn cho node chỉ cần lịch sử + câu hỏi (plan, guardrails_input)."""

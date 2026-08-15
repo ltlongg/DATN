@@ -51,7 +51,6 @@ from app.indexing.timeline.segmenter import (  # noqa: E402
 _DEFAULT_CHUNKS = _REPO_ROOT / "dataset" / "chunks_llm.json"
 _DEFAULT_UNITS = _REPO_ROOT / "dataset" / "timeline_units.json"
 
-
 def _valid_input_ids(chunks: list[dict]) -> list[str]:
     """ID các chunk segmenter THỰC SỰ xét (có id + text không rỗng) — khớp _prepare()."""
     out: list[str] = []
@@ -61,7 +60,6 @@ def _valid_input_ids(chunks: list[dict]) -> list[str]:
         if cid and text.strip():
             out.append(str(cid))
     return out
-
 
 def _write_units(path: Path, cap: int, source: str, units: list[Unit]) -> None:
     """Ghi atomic artifact units (envelope kèm cap + nguồn để bước 2 đọc lại)."""
@@ -76,7 +74,6 @@ def _write_units(path: Path, cap: int, source: str, units: list[Unit]) -> None:
     tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     os.replace(tmp, path)
 
-
 def _check_invariant(units: list[Unit], input_ids: list[str] | None) -> list[str]:
     """Kiểm tra "mỗi chunk đúng một unit". Trả danh sách vi phạm (rỗng = đạt)."""
     usage = Counter(cid for u in units for cid in u.chunk_ids)
@@ -87,7 +84,6 @@ def _check_invariant(units: list[Unit], input_ids: list[str] | None) -> list[str
         problems += [f"chunk {cid} KHÔNG vào unit nào" for cid in missing]
         problems += [f"chunk {cid} LẠ (không có trong nguồn)" for cid in extra]
     return problems
-
 
 def _report(units: list[Unit], cap: int, input_ids: list[str] | None) -> None:
     """Report kiểm tra phân đoạn: phủ chunk, overlap, phân bố độ dài, unit vượt cap."""
@@ -131,7 +127,6 @@ def _report(units: list[Unit], cap: int, input_ids: list[str] | None) -> None:
             path = " > ".join(u.heading_path) or "(không heading)"
             print(f"    {u.char_len:>7,} chữ | {u.unit_id} | {path}", flush=True)
 
-
 def _list_units(units: list[Unit], cap: int, limit: int) -> None:
     """Liệt kê unit theo THỨ TỰ VĂN BẢN (dòng tóm tắt) để soi ranh giới tuần tự."""
     shown = units if limit < 0 else units[:limit]
@@ -145,7 +140,6 @@ def _list_units(units: list[Unit], cap: int, limit: int) -> None:
             flush=True,
         )
 
-
 def _show_full(units: list[Unit], n: int) -> None:
     """In FULL text n unit đầu, TÁCH THEO CHUNK — đúng dạng LLM sẽ nhận ở bước 2."""
     for u in units[:n]:
@@ -157,7 +151,6 @@ def _show_full(units: list[Unit], n: int) -> None:
         )
         for i, c in enumerate(u.chunks, start=1):
             print(f"{'-' * 70}\n[ref={i}] {c.chunk_id} ({len(c.text):,} chữ)\n{c.text}", flush=True)
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(
@@ -224,7 +217,6 @@ def main() -> int:
         flush=True,
     )
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

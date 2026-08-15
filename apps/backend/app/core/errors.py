@@ -12,7 +12,6 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-
 class AppError(Exception):
     """Lỗi nghiệp vụ có status + code + message an toàn để trả frontend."""
 
@@ -21,7 +20,6 @@ class AppError(Exception):
         self.status_code = status_code
         self.code = code
         self.message = message
-
 
 # Code mặc định theo status, dùng cho HTTPException(detail=str) hoặc lỗi framework.
 _DEFAULT_CODE: dict[int, str] = {
@@ -37,10 +35,8 @@ _DEFAULT_CODE: dict[int, str] = {
     504: "timeout",
 }
 
-
 def _body(code: str, message: str) -> dict[str, str]:
     return {"code": code, "message": message}
-
 
 def register_error_handlers(app: FastAPI) -> None:
     # Mỗi handler ghi `code` lên request.state để ActivityLogMiddleware đọc lại sau call_next

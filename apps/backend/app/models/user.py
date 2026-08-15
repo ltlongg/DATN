@@ -15,7 +15,6 @@ from pydantic import BaseModel
 from app.core.db import connection
 from app.schemas.common import Role
 
-
 class User(BaseModel):
     id: str
     email: str
@@ -26,7 +25,6 @@ class User(BaseModel):
     is_active: bool = True
     question_quota: int | None = None  # None = không giới hạn
     created_at: datetime
-
 
 def _row_to_user(row: dict[str, Any]) -> User:
     return User(
@@ -41,12 +39,10 @@ def _row_to_user(row: dict[str, Any]) -> User:
         created_at=row["created_at"],
     )
 
-
 _COLUMNS = (
     "id, email, name, role, password_hash, google_sub, is_active, question_quota, created_at"
 )
 _SELECT = f"SELECT {_COLUMNS} FROM users"
-
 
 def normalize_email(raw: str) -> str:
     """Cắt khoảng trắng + hạ chữ thường.
@@ -59,13 +55,11 @@ def normalize_email(raw: str) -> str:
     """
     return raw.strip().lower()
 
-
 def get_user_by_email(email: str) -> User | None:
     with connection() as conn, conn.cursor() as cur:
         cur.execute(f"{_SELECT} WHERE email = %s", (normalize_email(email),))
         row = cur.fetchone()
     return _row_to_user(row) if row else None
-
 
 def get_user_by_id(user_id: str) -> User | None:
     with connection() as conn, conn.cursor() as cur:
@@ -73,13 +67,11 @@ def get_user_by_id(user_id: str) -> User | None:
         row = cur.fetchone()
     return _row_to_user(row) if row else None
 
-
 def get_user_by_google_sub(google_sub: str) -> User | None:
     with connection() as conn, conn.cursor() as cur:
         cur.execute(f"{_SELECT} WHERE google_sub = %s", (google_sub,))
         row = cur.fetchone()
     return _row_to_user(row) if row else None
-
 
 def create_user(
     email: str,
@@ -101,13 +93,11 @@ def create_user(
     assert row is not None  # RETURNING luôn có 1 dòng sau INSERT thành công
     return _row_to_user(row)
 
-
 def list_users() -> list[User]:
     with connection() as conn, conn.cursor() as cur:
         cur.execute(f"{_SELECT} ORDER BY created_at ASC")
         rows = cur.fetchall()
     return [_row_to_user(r) for r in rows]
-
 
 def update_user(user_id: str, fields: dict[str, Any]) -> User | None:
     """PATCH một phần (role/is_active/question_quota). `fields` đã lọc cột hợp lệ ở API."""

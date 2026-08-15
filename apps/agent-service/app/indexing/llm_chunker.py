@@ -21,7 +21,6 @@ from app.indexing.chunk_slicer import ChunkSpan, build_chunk, build_line_starts
 from app.indexing.heading_parser import parse_sections
 from app.indexing.token_counter import count_tokens
 
-
 @dataclass
 class ChunkStats:
     """Số liệu quan sát quá trình chunking (để log/debug)."""
@@ -41,12 +40,10 @@ class ChunkStats:
             "llm_errors": list(self.llm_errors),
         }
 
-
 def _chonkie_token_counter(text: str) -> int:
     """Wrapper để Chonkie đếm token qua count_tokens (tra cứu global lúc gọi -> test
     monkeypatch được, dù chunker bị cache)."""
     return count_tokens(text)
-
 
 @lru_cache(maxsize=4)
 def _section_chunker(max_tokens: int, min_chars: int):
@@ -66,7 +63,6 @@ def _section_chunker(max_tokens: int, min_chars: int):
         rules=rules,
         min_characters_per_chunk=min_chars,
     )
-
 
 def _split_with_slumber(text: str, abs_start: int, max_tokens: int, settings: Settings) -> list[ChunkSpan]:
     """Dùng SlumberChunker (OpenAI-compatible) để tách khối quá khổ theo ngữ nghĩa.
@@ -103,7 +99,6 @@ def _split_with_slumber(text: str, abs_start: int, max_tokens: int, settings: Se
         spans.append(ChunkSpan(abs_start + s, abs_start + e))
     return spans if len(spans) > 1 else []
 
-
 def _fallback_sentence_merge(text: str, abs_start: int, max_tokens: int, min_chars: int) -> list[ChunkSpan]:
     """Fallback khi LLM lỗi: Chonkie tách tới mức câu, không xuống từ/ký tự.
 
@@ -133,7 +128,6 @@ def _fallback_sentence_merge(text: str, abs_start: int, max_tokens: int, min_cha
         spans.append(ChunkSpan(abs_start + s, abs_start + e))
     return spans or [ChunkSpan(abs_start, abs_start + len(text))]
 
-
 def _chunk_slumber_or_fallback(
     text: str, abs_start: int, max_tokens: int, use_llm: bool, settings: Settings, stats: ChunkStats,
     *, verbose: bool = False,
@@ -159,7 +153,6 @@ def _chunk_slumber_or_fallback(
         print(f"  [Fallback] sentence-merge ({count_tokens(text)} token)...", flush=True)
     return _fallback_sentence_merge(text, abs_start, max_tokens, settings.min_characters_per_chunk)
 
-
 def _chunk_block(
     body: str, block_start: int, *, max_tokens: int, use_llm: bool, settings: Settings, stats: ChunkStats,
     verbose: bool = False,
@@ -182,7 +175,6 @@ def _chunk_block(
             spans.append(ChunkSpan(block_start + s, block_start + e))
     return spans
 
-
 def _chunk_id_prefix(source_file: str) -> str:
     """Suy prefix chunk_id từ source_file: bỏ '.md', đổi '.' -> '_'.
 
@@ -190,7 +182,6 @@ def _chunk_id_prefix(source_file: str) -> str:
     'tap1_clean'. Nhờ vậy mỗi source_file có prefix riêng -> chunk_id không đụng nhau.
     """
     return source_file.removesuffix(".md").replace(".", "_")
-
 
 def chunk_document(
     clean_text: str,

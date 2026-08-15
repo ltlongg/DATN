@@ -28,7 +28,6 @@ _SELECT_COLS = (
     "latency_ms, error"
 )
 
-
 def record_activity(
     *,
     request_id: str | None,
@@ -60,7 +59,6 @@ def record_activity(
             )
     except Exception as exc:  # noqa: BLE001 — log lỗi không được làm fail request
         logger.warning("record_activity bỏ qua (path=%s): %s", path, type(exc).__name__)
-
 
 def list_activity(
     *,

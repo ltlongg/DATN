@@ -34,11 +34,9 @@ REQUIRED_FIELDS = {
     "negative.json": ["id", "question", "kind", "expected_behavior"],
 }
 
-
 def normalize(text: str) -> str:
     """Chuẩn hoá NFC + hạ chữ để so khớp key_fact với text chunk."""
     return unicodedata.normalize("NFC", text).lower()
-
 
 def load_json(path: Path) -> list[dict]:
     """Đọc file nhãn — JSON mảng in dọc."""
@@ -46,7 +44,6 @@ def load_json(path: Path) -> list[dict]:
         return json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         raise SystemExit(f"[{path.name}] JSON hỏng: {exc}") from exc
-
 
 def main() -> int:
     chunks = {c["chunk_id"]: c for c in json.load(CHUNKS_PATH.open(encoding="utf-8"))}
@@ -103,7 +100,6 @@ def main() -> int:
         print(f"LỖI     {e}")
     print(f"\n{len(errors)} lỗi, {len(warnings)} cảnh báo, {len(seen_ids)} item tổng cộng.")
     return 1 if errors else 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

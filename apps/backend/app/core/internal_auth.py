@@ -27,7 +27,6 @@ INTERNAL_KEY_HEADER = "X-Internal-Key"
 
 _key_header = APIKeyHeader(name=INTERNAL_KEY_HEADER, auto_error=False)
 
-
 async def verify_internal_key(key: str | None = Depends(_key_header)) -> None:
     """Chặn request `/internal/*` không mang đúng `X-Internal-Key` (gắn ở api/internal.py)."""
     expected = get_settings().internal_api_key
@@ -37,7 +36,6 @@ async def verify_internal_key(key: str | None = Depends(_key_header)) -> None:
         )
     if not key or not secrets.compare_digest(key, expected):
         raise AppError(401, "unauthenticated", f"Thiếu hoặc sai header {INTERNAL_KEY_HEADER}.")
-
 
 def internal_headers() -> dict[str, str]:
     """Header để GỬI khi backend gọi agent-service (`/ask`, `/kb/*`).

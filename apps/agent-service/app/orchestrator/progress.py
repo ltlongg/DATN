@@ -78,19 +78,15 @@ _NON_RETRIEVAL_DETAIL: dict[RouteDecision, str] = {
     "out_of_scope": "Ngoài phạm vi tài liệu",
 }
 
-
 def todo_step_id(step_id: int) -> str:
     return f"todo:{step_id}"
-
 
 def synthesize_step_id(attempt: int) -> str:
     """`attempt` đếm từ 1. Lượt soạn lại ra id KHÁC để dòng cũ còn nguyên trên panel."""
     return f"synthesize:{attempt}"
 
-
 def validate_step_id(attempt: int) -> str:
     return f"validate:{attempt}"
-
 
 def build_step_list(
     route: RouteDecision, steps: list[PlanStep], *, attempts: int = 1
@@ -136,7 +132,6 @@ def build_step_list(
     )
     return rows
 
-
 def plan_detail(route: RouteDecision, steps: list[PlanStep]) -> str:
     """Dòng phụ của bước `plan`: nói cái ĐÁNG kể nhất của kế hoạch vừa dựng.
 
@@ -152,7 +147,6 @@ def plan_detail(route: RouteDecision, steps: list[PlanStep]) -> str:
         return f"Tách {query_count} truy vấn · tìm song song"
     return "Câu hỏi đơn · 1 bước"
 
-
 def retrieve_detail(mode: RetrievalMode, *, query_count: int, chunk_count: int) -> str:
     if chunk_count == 0:
         return "Không tìm thấy đoạn phù hợp"
@@ -161,7 +155,6 @@ def retrieve_detail(mode: RetrievalMode, *, query_count: int, chunk_count: int) 
         parts.append(f"{query_count} truy vấn song song")
     parts.append(f"{chunk_count} đoạn")
     return " · ".join(parts)
-
 
 def retrieve_state(chunk_count: int, *, awaiting_resolve: bool = False) -> StepState:
     """`awaiting_resolve` = bước này còn phải trích mắt xích -> giữ `running`.
@@ -173,23 +166,18 @@ def retrieve_state(chunk_count: int, *, awaiting_resolve: bool = False) -> StepS
         return "partial"
     return "running" if awaiting_resolve else "done"
 
-
 def resolve_detail(*, label: str, value: str) -> str:
     return f"{label} → {value}"
 
-
 def resolve_missing_detail(target: str) -> str:
     return f"Chưa xác định được {target}"
-
 
 def synthesize_detail(*, context_count: int, confidence: AnswerConfidence | None) -> str:
     base = f"Soạn từ {context_count} đoạn"
     return f"{base} · độ tin cậy {confidence}" if confidence else base
 
-
 def synthesize_state(confidence: AnswerConfidence | None) -> StepState:
     return "partial" if confidence in WEAK_CONFIDENCE else "done"
-
 
 def validate_detail(*, valid: int, total: int, will_retry: bool) -> str:
     """Chữ phải khớp ĐÚNG việc node làm (plan §6 + §7.3 mục 2).
@@ -208,13 +196,10 @@ def validate_detail(*, valid: int, total: int, will_retry: bool) -> str:
     )
     return f"{base} · soạn lại" if will_retry else base
 
-
 def validate_state(valid: int) -> StepState:
     return "done" if valid > 0 else "partial"
 
-
 # --- visualization ---
-
 
 def visualization_detail(
     *, event_count: int, marker_count: int, timeline_count: int, unplaced: int
@@ -231,17 +216,13 @@ def visualization_detail(
         parts.append(f"{unplaced} thiếu dữ liệu hiển thị")
     return " · ".join(parts)
 
-
 def visualization_state(event_count: int) -> StepState:
     return "done" if event_count > 0 else "partial"
 
-
 # --- internals (tầng 2, chỉ admin thấy — xem docstring module) ---
-
 
 def _row(label: str, value: object) -> InternalRow:
     return {"label": label, "value": str(value)}
-
 
 def plan_internals(
     *, standalone_query: str, route: str, selected_mode: str, mode_source: str
@@ -252,7 +233,6 @@ def plan_internals(
         _row("Định tuyến", route),
         _row("Cách truy hồi", f"{selected_mode} ({source})"),
     ]
-
 
 def retrieve_internals(
     queries: list[dict[str, Any]], *, total_chunks: int, graph_context: int
@@ -272,7 +252,6 @@ def retrieve_internals(
     rows.append(_row("Tổng đã gộp", f"{total_chunks} đoạn"))
     rows.append(_row("Ngữ cảnh graph", f"{graph_context} quan hệ"))
     return rows
-
 
 def resolve_internals(
     *,
@@ -299,7 +278,6 @@ def resolve_internals(
         rows.append(_row("Nguồn bịa (bị loại)", ", ".join(dropped)))
     return rows
 
-
 def synthesize_internals(
     *, prompt_chunks: int, citation_only_chunks: int, model: str, attempt: int
 ) -> list[InternalRow]:
@@ -316,7 +294,6 @@ def synthesize_internals(
         rows.append(_row("Lượt soạn", f"lần {attempt}"))
     return rows
 
-
 def validate_internals(
     *, claimed: int, valid: int, dropped: list[str], will_retry: bool
 ) -> list[InternalRow]:
@@ -330,7 +307,6 @@ def validate_internals(
     if will_retry:
         rows.append(_row("Hành động", "soạn lại"))
     return rows
-
 
 def visualization_internals(
     *, event_count: int, marker_count: int, timeline_count: int, unplaced: int

@@ -19,7 +19,6 @@ from dotenv import load_dotenv
 
 _GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Test Google forward geocoding")
     parser.add_argument("query", nargs="?", default="Hồ Hoàn Kiếm, Hà Nội")
@@ -67,7 +66,6 @@ def main() -> int:
     print(f"Tọa độ: {latitude}, {longitude}")
     print(f"Map: https://www.google.com/maps?q={latitude},{longitude}")
     return 0
-
 
 if __name__ == "__main__":
     try:

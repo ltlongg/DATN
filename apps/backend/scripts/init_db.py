@@ -16,12 +16,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.core.db import SCHEMA_STATEMENTS, connection, init_schema  # noqa: E402
 
-
 def main() -> None:
     with connection() as conn:
         init_schema(conn)
     print(f"Đã tạo/kiểm tra {len(SCHEMA_STATEMENTS)} câu DDL cho 4 bảng backend.")
-
 
 if __name__ == "__main__":
     main()

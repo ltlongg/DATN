@@ -16,13 +16,11 @@ from app.schemas.retrieval import (
     RetrievedChunk,
 )
 
-
 def test_retrieval_result_defaults_graph_context_and_warnings_empty() -> None:
     result = RetrievalResult(mode="traditional", query="x", chunks=[])
     assert result.graph_context == []
     assert result.warnings == []
     assert result.debug == {}
-
 
 def test_retrieved_chunk_scores_default_none_and_sources_empty() -> None:
     chunk = RetrievedChunk(chunk_id="c-1", text="t", metadata={}, heading_path=[])
@@ -32,19 +30,16 @@ def test_retrieved_chunk_scores_default_none_and_sources_empty() -> None:
     assert chunk.rerank_score is None
     assert chunk.sources == []
 
-
 def test_candidate_keeps_source_and_rank() -> None:
     cand = RetrievalCandidate(chunk_id="c-1", source="vector", rank=3, score=0.5)
     assert cand.source == "vector"
     assert cand.rank == 3
-
 
 def test_graph_context_dedup_key_entity_uses_norm_name() -> None:
     item = GraphContextItem(
         kind="entity", name="Hồ Chí Minh", norm_name="hồ chí minh", description="d"
     )
     assert item.dedup_key() == ("entity", "hồ chí minh")
-
 
 def test_graph_context_dedup_key_relation_uses_structured_triple() -> None:
     item = GraphContextItem(
@@ -58,12 +53,10 @@ def test_graph_context_dedup_key_relation_uses_structured_triple() -> None:
     )
     assert item.dedup_key() == ("relation", "phan bội châu", "ủng hộ", "cường để")
 
-
 def test_backend_error_carries_code() -> None:
     err = RetrievalBackendError("qdrant_unavailable")
     assert err.code == "qdrant_unavailable"
     assert isinstance(err, Exception)
-
 
 def test_config_has_retrieval_knobs_with_expected_defaults() -> None:
     s = get_settings()

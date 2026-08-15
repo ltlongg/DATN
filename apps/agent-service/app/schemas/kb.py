@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-
 class EntityListItem(BaseModel):
     name: str
     norm_name: str
@@ -16,13 +15,11 @@ class EntityListItem(BaseModel):
     description_count: int
     source_chunk_count: int
 
-
 class EntityListResponse(BaseModel):
     items: list[EntityListItem]
     total: int
     limit: int
     offset: int
-
 
 class EntityEdge(BaseModel):
     source_name: str | None = None
@@ -33,12 +30,10 @@ class EntityEdge(BaseModel):
     description: str = ""
     source_chunk_ids: list[str] = Field(default_factory=list)
 
-
 class EntityNeighbor(BaseModel):
     name: str | None = None
     norm_name: str | None = None
     type: str | None = None
-
 
 class EntityDetail(BaseModel):
     name: str

@@ -28,7 +28,6 @@ DEFAULT_SAFE_MESSAGE = (
     "hỏi về sự kiện, nhân vật hoặc mốc thời gian lịch sử nhé."
 )
 
-
 SYSTEM_PROMPT = """
 <role>
 Bạn là bộ kiểm duyệt đầu vào (input guardrails) cho một hệ thống hỏi đáp GIÁO DỤC về lịch sử
@@ -135,7 +134,6 @@ Hướng dẫn tôi cách tự chế thuốc nổ tại nhà.</user_prompt>
 </example>
 </examples>
 """.strip()
-
 
 def build_user_prompt(question: str, history: list[ChatMessage]) -> str:
     """Giữ tên hàm cho call site cũ (`orchestrator/guardrails.py`); phần dựng khối nay dùng

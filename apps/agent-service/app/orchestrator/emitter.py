@@ -10,20 +10,17 @@ from __future__ import annotations
 
 import asyncio
 
-
 class Emitter:
     """Interface phát event. `data` là dict JSON-serializable."""
 
     async def emit(self, event_type: str, data: dict[str, object]) -> None:  # pragma: no cover
         raise NotImplementedError
 
-
 class NullEmitter(Emitter):
     """Bỏ qua mọi event — dùng khi không cần stream (mặc định an toàn nếu thiếu emitter)."""
 
     async def emit(self, event_type: str, data: dict[str, object]) -> None:
         return None
-
 
 class ListEmitter(Emitter):
     """Gom event vào list — tiện cho test và cho đường stream=False kiểm tra thứ tự."""
@@ -33,7 +30,6 @@ class ListEmitter(Emitter):
 
     async def emit(self, event_type: str, data: dict[str, object]) -> None:
         self.events.append((event_type, data))
-
 
 class QueueEmitter(Emitter):
     """Đẩy event vào asyncio.Queue cho SSE generator tiêu thụ song song với graph chạy."""

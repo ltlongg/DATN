@@ -24,10 +24,8 @@ __all__ = ["resolve", "load_alias_map", "alias_map_path"]
 _REPO_ROOT = Path(__file__).resolve().parents[5]
 _DEFAULT_MAP = _REPO_ROOT / "dataset" / "alias_map.json"
 
-
 def alias_map_path() -> Path:
     return _DEFAULT_MAP
-
 
 @lru_cache(maxsize=1)
 def load_alias_map() -> dict[str, dict[str, str]]:
@@ -41,7 +39,6 @@ def load_alias_map() -> dict[str, dict[str, str]]:
         return {}
     data = json.loads(path.read_text(encoding="utf-8"))
     return data.get("map", {})
-
 
 def resolve(name: str) -> tuple[str, str]:
     """Trả (canonical_name hiển thị, canonical_norm khóa) cho một tên entity.

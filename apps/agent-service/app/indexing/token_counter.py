@@ -18,14 +18,12 @@ from app.core.config import get_settings
 if TYPE_CHECKING:
     from transformers import PreTrainedTokenizerBase
 
-
 @lru_cache(maxsize=2)
 def _get_tokenizer(name: str) -> "PreTrainedTokenizerBase":
     # Import nội bộ để không bắt buộc cài transformers khi chỉ dùng phần khác của app.
     from transformers import AutoTokenizer
 
     return AutoTokenizer.from_pretrained(name)
-
 
 def count_tokens(text: str) -> int:
     """Trả về số token của `text` theo tokenizer cấu hình.

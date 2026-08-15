@@ -13,10 +13,8 @@ import pytest
 from app.tools.graph_rag import graph_store as G
 from app.tools.graph_rag.entity_index import EntityIndex
 
-
 def _index(entities):
     return EntityIndex.from_entities(entities, alias_map_version="a", kg_version="k")
-
 
 class _Result:
     def __init__(self, record):
@@ -24,7 +22,6 @@ class _Result:
 
     def single(self):
         return self._record
-
 
 class _Session:
     """Fake session: route 1-hop expand (kwarg norm_name) vs path query (kwargs a,b)."""
@@ -46,7 +43,6 @@ class _Session:
             return _Result(self._paths.get(frozenset({kwargs["a"], kwargs["b"]})))
         return _Result(self._records.get(kwargs.get("norm_name")))
 
-
 class _Driver:
     def __init__(self, records_by_norm, paths_by_pair=None):
         # search_graph mở MỘT session (with) -> giữ 1 instance để test soi path_calls.
@@ -55,36 +51,29 @@ class _Driver:
     def session(self):
         return self.session_obj
 
-
 # --- match_seed_entities --------------------------------------------------
-
 
 def test_match_seed_entities_grounds_injected_mentions() -> None:
     idx = _index([{"name": "Trương Định", "norm_name": "trương định", "source_count": 3}])
     seeds = G.match_seed_entities(["Trương Định"], limit=5, index=idx)
     assert [s.info.norm_name for s in seeds] == ["trương định"]
 
-
 def test_match_seed_entities_empty_when_no_mention() -> None:
     """Không còn dò tên từ chuỗi câu hỏi: rỗng vào -> rỗng ra, graph tắt cho query đó."""
     idx = _index([{"name": "Trương Định", "norm_name": "trương định", "source_count": 3}])
     assert G.match_seed_entities([], limit=5, index=idx) == []
-
 
 def test_match_seed_entities_drops_single_token_hub_seed() -> None:
     idx = _index([{"name": "Pháp", "norm_name": "pháp", "source_count": 500}])
     seeds = G.match_seed_entities(["Pháp"], limit=5, index=idx)
     assert seeds == []  # 1 từ + source_count cao -> hub, bỏ
 
-
 def test_match_seed_entities_keeps_multiword_even_if_high_count() -> None:
     idx = _index([{"name": "Quân Pháp", "norm_name": "quân pháp", "source_count": 500}])
     seeds = G.match_seed_entities(["Quân Pháp"], limit=5, index=idx)
     assert [s.info.norm_name for s in seeds] == ["quân pháp"]
 
-
 # --- search_graph ---------------------------------------------------------
-
 
 def _pbc_records():
     return {
@@ -106,7 +95,6 @@ def _pbc_records():
         }
     }
 
-
 def test_search_graph_returns_candidates_and_graph_context() -> None:
     idx = _index([{"name": "Phan Bội Châu", "norm_name": "phan bội châu", "source_count": 10}])
     cands, ctx = G.search_graph(
@@ -119,7 +107,6 @@ def test_search_graph_returns_candidates_and_graph_context() -> None:
     assert [c.rank for c in cands] == list(range(1, len(cands) + 1))
     kinds = {i.kind for i in ctx}
     assert kinds == {"entity", "relation"}
-
 
 def _hue_records():
     # Index: Triều đình Huế -[phong chức cho]-> Trương Định. Seed = Trương Định (TARGET).
@@ -142,7 +129,6 @@ def _hue_records():
         }
     }
 
-
 def test_search_graph_relation_direction_follows_true_edge_not_seed() -> None:
     # Seed là TARGET của cạnh -> KHÔNG được render ngược thành source.
     idx = _index([{"name": "Trương Định", "norm_name": "trương định", "source_count": 5}])
@@ -152,7 +138,6 @@ def test_search_graph_relation_direction_follows_true_edge_not_seed() -> None:
     assert rel.source_name == "Triều đình Huế"
     assert rel.target_norm == "trương định"
     assert rel.keyword == "phong chức cho"
-
 
 def test_search_graph_relation_keeps_structured_source_keyword_target() -> None:
     idx = _index([{"name": "Phan Bội Châu", "norm_name": "phan bội châu", "source_count": 10}])
@@ -167,7 +152,6 @@ def test_search_graph_relation_keeps_structured_source_keyword_target() -> None:
     assert "Cường Để" in rel.description
     assert rel.source_chunk_ids == ["c-2", "c-3"]  # provenance giữ trên item
 
-
 def test_search_graph_collects_descriptions_into_context() -> None:
     idx = _index([{"name": "Phan Bội Châu", "norm_name": "phan bội châu", "source_count": 10}])
     _, ctx = G.search_graph(
@@ -178,12 +162,10 @@ def test_search_graph_collects_descriptions_into_context() -> None:
     assert entity.norm_name == "phan bội châu"
     assert entity.matched_seed == "Phan Bội Châu"
 
-
 def test_search_graph_empty_when_no_seed() -> None:
     idx = _index([])
     cands, ctx = G.search_graph(["Thực Thể Lạ"], driver=_Driver({}), index=idx)
     assert cands == [] and ctx == []
-
 
 def test_search_graph_caps_chunks_per_seed(monkeypatch) -> None:
     monkeypatch.setattr(
@@ -203,9 +185,7 @@ def test_search_graph_caps_chunks_per_seed(monkeypatch) -> None:
     )
     assert len(cands) == 1  # cap chặn bùng nổ chunk per seed
 
-
 # --- C2: path-finding giữa các seed (kích hoạt khi >=2 seed) -----------------
-
 
 def _two_seed_index():
     return _index(
@@ -214,7 +194,6 @@ def _two_seed_index():
             {"name": "Phan Châu Trinh", "norm_name": "phan châu trinh", "source_count": 10},
         ]
     )
-
 
 def _expand_two_seeds():
     # 1-hop của mỗi seed: node cô lập (edges rỗng) -> chỉ có seed chunk, để path là nguồn relation duy nhất.
@@ -233,7 +212,6 @@ def _expand_two_seeds():
         },
     }
 
-
 def _path_between_two():
     return {
         frozenset({"phan bội châu", "phan châu trinh"}): {
@@ -250,7 +228,6 @@ def _path_between_two():
             ],
         }
     }
-
 
 def test_search_graph_pathfinding_two_seeds_links_entities() -> None:
     idx = _two_seed_index()
@@ -269,7 +246,6 @@ def test_search_graph_pathfinding_two_seeds_links_entities() -> None:
     # chunk c-9 nằm trên path -> được score + thành candidate (provenance).
     assert "c-9" in {c.chunk_id for c in cands}
 
-
 def test_search_graph_no_path_skips_pair() -> None:
     idx = _two_seed_index()
     cands, ctx = G.search_graph(
@@ -280,13 +256,11 @@ def test_search_graph_no_path_skips_pair() -> None:
     assert "c-9" not in {c.chunk_id for c in cands}  # không bịa chunk path
     assert not [i for i in ctx if i.kind == "relation"]  # không relation path
 
-
 def test_search_graph_single_seed_skips_pathfinding() -> None:
     idx = _index([{"name": "Phan Bội Châu", "norm_name": "phan bội châu", "source_count": 10}])
     drv = _Driver(_pbc_records())
     G.search_graph(["Phan Bội Châu"], driver=drv, index=idx)
     assert drv.session_obj.path_calls == 0  # 1 seed -> KHÔNG gọi path cypher
-
 
 def test_path_cypher_rejects_non_int_maxhop() -> None:
     # Cận var-length nội suy vào chuỗi Cypher -> chỉ chấp nhận int (chặn injection).

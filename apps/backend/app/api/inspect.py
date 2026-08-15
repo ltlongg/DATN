@@ -26,9 +26,7 @@ from app.services.agent_client import agent_get
 # require_admin áp cho toàn router -> user thường gọi bất kỳ route nào đều nhận 403.
 router = APIRouter(dependencies=[Depends(require_admin)])
 
-
 # --- chunks (Postgres) ---
-
 
 @router.get("/chunks", response_model=ChunkListResponse)
 async def list_chunks(
@@ -45,7 +43,6 @@ async def list_chunks(
         items=[ChunkListItem(**r) for r in rows], total=total, limit=limit, offset=offset
     )
 
-
 @router.get("/chunks/{chunk_id}", response_model=ChunkDetail)
 async def get_chunk(chunk_id: str) -> ChunkDetail:
     chunk = await anyio.to_thread.run_sync(repo.get_chunk, chunk_id)
@@ -60,9 +57,7 @@ async def get_chunk(chunk_id: str) -> ChunkDetail:
         referencing_events=[EventRef(**e) for e in events],
     )
 
-
 # --- events (Postgres) ---
-
 
 @router.get("/events", response_model=EventListResponse)
 async def list_events(
@@ -76,7 +71,6 @@ async def list_events(
         items=[EventListItem(**r) for r in rows], total=total, limit=limit, offset=offset
     )
 
-
 @router.get("/events/{event_id}", response_model=EventDetail)
 async def get_event(event_id: str) -> EventDetail:
     event = await anyio.to_thread.run_sync(repo.get_event, event_id)
@@ -84,9 +78,7 @@ async def get_event(event_id: str) -> EventDetail:
         raise AppError(404, "not_found", "Không tìm thấy sự kiện.")
     return EventDetail(**event)
 
-
 # --- entities (proxy Neo4j qua agent-service) ---
-
 
 @router.get("/entities")
 async def list_entities(
@@ -100,7 +92,6 @@ async def list_entities(
         "/kb/entities",
         {"q": q, "type": type, "chunk_id": chunk_id, "limit": limit, "offset": offset},
     )
-
 
 @router.get("/entities/{norm_name}")
 async def get_entity(norm_name: str) -> object:

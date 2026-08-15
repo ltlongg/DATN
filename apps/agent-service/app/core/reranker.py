@@ -40,7 +40,6 @@ _lock = Lock()
 _GPU_SLOTS = 1
 _gpu_lock = Semaphore(_GPU_SLOTS)
 
-
 def _load(name: str):
     """Lazy-load + cache (tokenizer, model, device) theo tên model. eval() để tắt dropout;
     tự chuyển model sang GPU nếu `torch.cuda.is_available()`, fallback CPU."""
@@ -63,7 +62,6 @@ def _load(name: str):
                 cached = (tokenizer, model, device)
                 _models[name] = cached
     return cached
-
 
 def _score(
     name: str, pairs: list[list[str]], max_length: int, batch_size: int
@@ -90,7 +88,6 @@ def _score(
                 logits = model(**inputs, return_dict=True).logits.view(-1).float()
             scores.extend(logits.tolist())
     return scores
-
 
 async def rerank(question: str, chunks: list[RetrievedChunk]) -> list[RetrievedChunk]:
     """Sort chunks theo độ liên quan cross-encoder. Rỗng model/chunks -> giữ nguyên."""

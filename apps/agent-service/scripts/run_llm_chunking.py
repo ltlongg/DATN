@@ -40,11 +40,9 @@ from app.schemas.chunk import Chunk  # noqa: E402
 _DEFAULT_INPUT = _REPO_ROOT / "lichsu.clean.md"
 _DEFAULT_OUTPUT = _REPO_ROOT / "dataset" / "chunks_llm.json"
 
-
 def _source_file(chunk: dict) -> str | None:
     md = chunk.get("metadata")
     return md.get("source_file") if isinstance(md, dict) else None
-
 
 def _load_existing(path: Path) -> list[dict]:
     """Đọc file chunks sẵn có để gộp. Chưa có -> []. HỎNG -> nổ, KHÔNG trả [].
@@ -61,7 +59,6 @@ def _load_existing(path: Path) -> list[dict]:
     if not isinstance(data, list):
         raise ValueError(f"{path} không phải JSON list.")
     return data
-
 
 def _merge_chunks(existing: list[dict], new: list[dict], source_file: str) -> tuple[list[dict], int]:
     """Thay trọn nhóm chunk cùng `source_file` bằng bản mới, giữ nguyên tài liệu khác.
@@ -89,13 +86,11 @@ def _merge_chunks(existing: list[dict], new: list[dict], source_file: str) -> tu
     at = sum(1 for c in existing[:first] if _source_file(c) != source_file)
     return kept[:at] + new + kept[at:], replaced
 
-
 def _by_document(chunks: list[dict]) -> dict[str, int]:
     counts: dict[str, int] = {}
     for c in chunks:
         counts[_source_file(c) or "(không rõ)"] = counts.get(_source_file(c) or "(không rõ)", 0) + 1
     return counts
-
 
 def _token_summary(chunks: list[dict]) -> dict[str, object]:
     counts = [c["metadata"]["text_token_count"] for c in chunks]
@@ -108,7 +103,6 @@ def _token_summary(chunks: list[dict]) -> dict[str, object]:
         "avg": round(sum(counts) / len(counts), 1),
         "over_700": sum(1 for c in counts if c > 700),
     }
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -193,7 +187,6 @@ def main() -> int:
     print(f"\nĐã ghi {len(merged)} chunk -> {output_path} ({action}, +{len(chunks)} chunk).")
     print("Theo tài liệu:", json.dumps(_by_document(merged), ensure_ascii=False))
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

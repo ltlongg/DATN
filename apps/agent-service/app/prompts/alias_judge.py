@@ -13,7 +13,6 @@ from __future__ import annotations
 
 ALIAS_JUDGE_VERSION = "alias-judge-v1"
 
-
 SYSTEM_PROMPT = """
 <role>
 Bạn là chuyên gia lịch sử Việt Nam giai đoạn Pháp thuộc đến thống nhất đất nước,
@@ -79,12 +78,10 @@ B: "Hồ Chí Minh" — Chủ tịch nước Việt Nam Dân chủ Cộng hòa, 
 
 Chỉ trả về object đúng schema, không thêm chữ nào khác."""
 
-
 _USER_TEMPLATE = """\
 Loại: {type}
 A: "{name_a}" — {desc_a}
 B: "{name_b}" — {desc_b}"""
-
 
 def build_user_prompt(entity_type: str, a: dict, b: dict) -> str:
     """Ghép prompt người dùng từ hai record entity (name + descs)."""

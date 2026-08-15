@@ -18,7 +18,6 @@ from app.tools.graph_rag.vector_store import search_dense_sparse
 
 __all__ = ["retrieve_traditional"]
 
-
 async def retrieve_traditional(
     question: str,
     *,

@@ -18,9 +18,7 @@ from app.core.db import connection
 # Số ký tự preview text cắt cho danh sách chunk (đủ để nhận ra nội dung, không kéo cả chunk).
 _PREVIEW_CHARS = 200
 
-
 # --- chunks (rag_chunks) ---
-
 
 def list_chunks(
     q: str | None, heading: str | None, source_file: str | None, limit: int, offset: int
@@ -61,7 +59,6 @@ def list_chunks(
         rows = cur.fetchall()
     return rows, total
 
-
 def get_chunk(chunk_id: str) -> dict[str, Any] | None:
     """Full text + metadata JSONB + heading_path của một chunk.
 
@@ -81,7 +78,6 @@ def get_chunk(chunk_id: str) -> dict[str, Any] | None:
     except psycopg.errors.UndefinedTable:
         return None
 
-
 def list_events_for_chunk(chunk_id: str) -> list[dict[str, Any]]:
     """Event tham chiếu chunk (`source_chunk_ids @> [chunk_id]`) — panel 'được tham chiếu
     bởi' phía event. Entity dùng cơ chế khác (proxy agent-service /kb/entities?chunk_id)."""
@@ -94,9 +90,7 @@ def list_events_for_chunk(chunk_id: str) -> list[dict[str, Any]]:
         )
         return cur.fetchall()
 
-
 # --- events (timeline_events) ---
-
 
 def list_events(
     q: str | None, confidence: str | None, limit: int, offset: int
@@ -125,7 +119,6 @@ def list_events(
         )
         rows = cur.fetchall()
     return rows, total
-
 
 def get_event(event_id: str) -> dict[str, Any] | None:
     """Chi tiết event đầy đủ (kèm summary, parent_event_norm, source_chunk_ids)."""

@@ -60,7 +60,6 @@ EVAL_DIR = ROOT / "dataset" / "eval"
 EvalPipeline = Literal["full", "rag"]
 EvalMode = Literal["auto", "traditional", "hybrid"]
 
-
 @lru_cache(maxsize=1)
 def get_rag_graph() -> CompiledStateGraph:
     """Graph dành riêng cho eval: cùng wiring production nhưng bỏ input guardrail.
@@ -108,11 +107,9 @@ def get_rag_graph() -> CompiledStateGraph:
     builder.add_edge("build_visualization", END)
     return builder.compile()
 
-
 def load_json(path: Path) -> list[dict]:
     """Đọc file nhãn — JSON mảng in dọc."""
     return json.loads(path.read_text(encoding="utf-8"))
-
 
 def write_rows(path: Path, rows_by_id: dict[str, dict]) -> None:
     """Checkpoint nguyên tử để file cũ không hỏng nếu tiến trình dừng lúc đang ghi."""
@@ -123,7 +120,6 @@ def write_rows(path: Path, rows_by_id: dict[str, dict]) -> None:
     )
     temp_path.replace(path)
 
-
 def can_resume(existing: dict | None, item: dict) -> bool:
     """Chỉ dùng lại kết quả thành công và vẫn thuộc đúng câu hỏi hiện tại."""
     return bool(
@@ -132,7 +128,6 @@ def can_resume(existing: dict | None, item: dict) -> bool:
         and not existing.get("error")
         and not existing.get("blocked")
     )
-
 
 async def run_one(item: dict, mode: EvalMode, pipeline: EvalPipeline = "full") -> dict:
     """Chạy 1 câu qua graph, trả bản ghi thô. Lỗi được GHI LẠI chứ không nuốt —
@@ -168,7 +163,6 @@ async def run_one(item: dict, mode: EvalMode, pipeline: EvalPipeline = "full") -
         "response": final.get("answer") or "",
         "retrieved_contexts": [c.text for c in (retrieval.chunks if retrieval else [])],
     }
-
 
 async def main_async(args: argparse.Namespace) -> int:
     all_items = load_json(EVAL_DIR / args.dataset)
@@ -221,7 +215,6 @@ async def main_async(args: argparse.Namespace) -> int:
             print(f"  {r['id']}: {r['error']}")
     return 1 if errors else 0
 
-
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dataset", default="retrieval_qa.json", help="tên file trong dataset/eval/")
@@ -235,7 +228,6 @@ def main() -> int:
     ap.add_argument("--concurrency", type=int, default=2,
                     help="số câu chạy song song. Để thấp — mỗi câu đã tốn nhiều LLM call.")
     return asyncio.run(main_async(ap.parse_args()))
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -14,7 +14,6 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field, model_validator
 
-
 class SystemConfigResponse(BaseModel):
     # --- retrieval ---
     rag_top_k: int
@@ -32,7 +31,6 @@ class SystemConfigResponse(BaseModel):
     # --- synthesize ---
     llm_temperature: float
     updated_at: datetime
-
 
 class SystemConfigUpdate(BaseModel):
     # --- retrieval (số nguyên dương) ---

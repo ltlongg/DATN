@@ -38,7 +38,6 @@ __all__ = ["retrieve_hybrid"]
 
 _SOURCE_ORDER = {"vector": 0, "sparse": 1, "graph": 2}
 
-
 async def _vector_candidates(
     question: str, *, top_k: int | None
 ) -> tuple[list[RetrievalCandidate], RetrievalBackendError | None]:
@@ -47,7 +46,6 @@ async def _vector_candidates(
     except RetrievalBackendError as exc:
         return [], exc
 
-
 async def _bm25_candidates(
     question: str, *, top_k: int | None
 ) -> tuple[list[RetrievalCandidate], RetrievalBackendError | None]:
@@ -55,7 +53,6 @@ async def _bm25_candidates(
         return await search_bm25(question, top_k=top_k), None
     except RetrievalBackendError as exc:
         return [], exc
-
 
 async def _graph_candidates(
     seed_mentions: Sequence[str],
@@ -85,7 +82,6 @@ async def _graph_candidates(
         return [], [], exc
     except Exception:  # thiếu env/driver hoặc kết nối Neo4j lỗi
         return [], [], RetrievalBackendError("neo4j_unavailable")
-
 
 async def retrieve_hybrid(
     question: str,

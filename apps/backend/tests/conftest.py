@@ -38,13 +38,11 @@ _DB_MODULES = (
     "app.models.config",
 )
 
-
 @pytest.fixture(scope="session", autouse=True)
 def _ensure_schema() -> None:
     # CREATE TABLE IF NOT EXISTS — an toàn chạy lại; commit thật 1 lần ở session scope.
     with psycopg.connect(db._database_url()) as conn:
         db.init_schema(conn)
-
 
 @pytest.fixture
 def db_conn(monkeypatch: pytest.MonkeyPatch) -> psycopg.Connection:
@@ -62,11 +60,9 @@ def db_conn(monkeypatch: pytest.MonkeyPatch) -> psycopg.Connection:
     conn.rollback()
     conn.close()
 
-
 @pytest.fixture
 def client(db_conn: psycopg.Connection) -> TestClient:
     return TestClient(app)
-
 
 @pytest.fixture
 def users(db_conn: psycopg.Connection) -> dict[str, object]:
@@ -78,7 +74,6 @@ def users(db_conn: psycopg.Connection) -> dict[str, object]:
         "user-test@example.com", "User Test", "user", hash_password("userpw")
     )
     return {"admin": admin, "user": user}
-
 
 @pytest.fixture
 def auth(client: TestClient, users: dict[str, object]):  # type: ignore[no-untyped-def]
@@ -94,7 +89,6 @@ def auth(client: TestClient, users: dict[str, object]):  # type: ignore[no-untyp
         return {"Authorization": f"Bearer {resp.json()['access_token']}"}
 
     return headers_for
-
 
 @pytest.fixture
 def mock_agent(monkeypatch: pytest.MonkeyPatch):  # type: ignore[no-untyped-def]

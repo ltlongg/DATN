@@ -39,12 +39,10 @@ ROOT = Path(__file__).resolve().parents[3]
 EVAL_DIR = ROOT / "dataset" / "eval"
 TEXT_COLUMNS = ("user_input", "retrieved_contexts", "response", "reference")
 
-
 def read_csv(path: Path) -> pd.DataFrame:
     if not path.exists():
         raise SystemExit(f"Không có file: {path}")
     return pd.read_csv(path, encoding="utf-8-sig")
-
 
 def ensure_id_column(frame: pd.DataFrame, dataset: str, label: str) -> pd.DataFrame:
     """Thêm cột `id` nếu thiếu, suy từ `user_input` qua file nhãn."""
@@ -71,7 +69,6 @@ def ensure_id_column(frame: pd.DataFrame, dataset: str, label: str) -> pd.DataFr
     frame = frame.copy()
     frame.insert(0, "id", ids)
     return frame
-
 
 def find_stale_metrics(
     base: pd.DataFrame, patch: pd.DataFrame, ids: list[str]
@@ -100,7 +97,6 @@ def find_stale_metrics(
             stale[row_id] = untouched
     return stale
 
-
 def merge(base: pd.DataFrame, patch: pd.DataFrame) -> tuple[pd.DataFrame, list[str], list[str]]:
     """Vá `patch` lên `base` theo id. Trả (kết quả, id đã vá, id thêm mới)."""
     merged = base.set_index("id")
@@ -116,7 +112,6 @@ def merge(base: pd.DataFrame, patch: pd.DataFrame) -> tuple[pd.DataFrame, list[s
             merged.loc[row_id] = row
             added.append(row_id)
     return merged.reset_index(), patched, added
-
 
 def report_changes(
     base: pd.DataFrame, merged: pd.DataFrame, patch: pd.DataFrame, ids: list[str]
@@ -134,7 +129,6 @@ def report_changes(
             new = after.at[row_id, column]
             parts.append(f"{column}: {old} -> {new}")
         print(f"  {row_id}  " + " | ".join(parts))
-
 
 def main() -> int:
     ap = argparse.ArgumentParser()
@@ -181,7 +175,6 @@ def main() -> int:
     merged.to_csv(out_path, index=False, encoding="utf-8-sig")
     print(f"-> {out_path}")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -21,7 +21,6 @@ __all__ = ["encode_documents", "encode_query"]
 _model: dict[str, object] = {}
 _lock = Lock()
 
-
 def _get():
     """Lazy-load + cache SparseTextEmbedding theo bm25_model trong config."""
     cached = _model.get("m")
@@ -35,12 +34,10 @@ def _get():
                 _model["m"] = cached
     return cached
 
-
 def encode_documents(texts: list[str]) -> list[tuple[list[int], list[float]]]:
     """Encode nhiều document -> [(indices, values), ...] cùng thứ tự `texts`."""
     embeddings = _get().embed(texts)  # type: ignore[attr-defined]
     return [(e.indices.tolist(), e.values.tolist()) for e in embeddings]
-
 
 def encode_query(text: str) -> tuple[list[int], list[float]]:
     """Encode 1 query -> (indices, values). query_embed khác embed (không TF weighting)."""

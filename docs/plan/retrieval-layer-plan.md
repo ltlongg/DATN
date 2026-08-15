@@ -178,14 +178,12 @@ from pydantic import BaseModel, Field
 RetrievalMode = Literal["traditional", "graph", "hybrid"]
 CandidateSource = Literal["vector", "graph"]
 
-
 class RetrievalCandidate(BaseModel):
     chunk_id: str
     source: CandidateSource
     rank: int
     score: float | None = None
     debug: dict[str, object] = Field(default_factory=dict)
-
 
 class RetrievedChunk(BaseModel):
     chunk_id: str
@@ -198,7 +196,6 @@ class RetrievedChunk(BaseModel):
     rerank_score: float | None = None
     sources: list[CandidateSource] = Field(default_factory=list)
     debug: dict[str, object] = Field(default_factory=dict)
-
 
 class GraphContextItem(BaseModel):
     """Tri thức đã chưng cất từ KG, đưa THẲNG cho LLM (không chỉ trỏ tới chunk).
@@ -222,7 +219,6 @@ class GraphContextItem(BaseModel):
     description: str                # gộp từ Neo4j (descriptions[] đã dedup)
     source_chunk_ids: list[str] = Field(default_factory=list)
     matched_seed: str | None = None
-
 
 class RetrievalResult(BaseModel):
     mode: RetrievalMode

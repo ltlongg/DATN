@@ -72,7 +72,6 @@ _REGISTRY: list[tuple[str, str, str, str, str]] = [
      alias_judge.SYSTEM_PROMPT),
 ]
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -114,7 +113,6 @@ def main() -> None:
     print(
         f"[seed] xong — {created} prompt mới, {published} version publish / {len(registry)} key."
     )
-
 
 if __name__ == "__main__":
     main()

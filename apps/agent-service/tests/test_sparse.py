@@ -10,13 +10,11 @@ from qdrant_client.models import SparseVector
 
 from app.core import sparse
 
-
 def test_encode_query_builds_sparse_vector() -> None:
     indices, values = sparse.encode_query("Trương Định kháng Pháp ở Gò Công")
     assert len(indices) == len(values) > 0
     sv = SparseVector(indices=indices, values=values)  # Qdrant phải chấp nhận
     assert len(sv.indices) == len(indices)
-
 
 def test_encode_documents_one_per_input_and_buildable() -> None:
     out = sparse.encode_documents(["Phan Bội Châu Đông Du", "Cần Vương Hàm Nghi"])

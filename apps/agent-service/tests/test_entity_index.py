@@ -13,15 +13,12 @@ from app.indexing.graph.normalize import normalize_name
 from app.tools.graph_rag import entity_index as EI
 from app.tools.graph_rag.entity_index import EntityIndex
 
-
 def _index(entities):
     return EntityIndex.from_entities(
         entities, alias_map_version="a", kg_version="k"
     )
 
-
 # --- Grounding (bước B) ---------------------------------------------------
-
 
 def test_ground_returns_entity_when_norm_name_in_kg() -> None:
     idx = _index([{"name": "Trương Định", "norm_name": "trương định", "source_count": 5}])
@@ -30,11 +27,9 @@ def test_ground_returns_entity_when_norm_name_in_kg() -> None:
     assert got.norm_name == "trương định"
     assert got.source_count == 5
 
-
 def test_ground_returns_none_when_entity_not_in_kg() -> None:
     idx = _index([{"name": "Trương Định", "norm_name": "trương định", "source_count": 5}])
     assert idx.ground("Phan Bội Châu") is None
-
 
 def test_grounding_resolves_alias_on_accented_mention(monkeypatch) -> None:
     # "Nguyễn Ái Quốc" là alias của "Hồ Chí Minh" -> ground phải đi qua resolve() và
@@ -52,16 +47,13 @@ def test_grounding_resolves_alias_on_accented_mention(monkeypatch) -> None:
     assert got.norm_name == "hồ chí minh"
     assert got.name == "Hồ Chí Minh"
 
-
 def test_grounding_uses_inverted_index_not_per_phrase_cypher() -> None:
     # ground() chỉ tra dict in-memory: index dựng KHÔNG có driver nào, vẫn ground được
     # -> chứng tỏ không bắn Cypher exact-match cho từng cụm.
     idx = _index([{"name": "Đà Nẵng", "norm_name": "đà nẵng", "source_count": 3}])
     assert idx.ground("đà nẵng").norm_name == "đà nẵng"
 
-
 # --- Build từ Neo4j (fake driver) ----------------------------------------
-
 
 class _FakeSession:
     def __init__(self, rows):
@@ -76,14 +68,12 @@ class _FakeSession:
     def run(self, cypher, **kwargs):
         return list(self._rows)
 
-
 class _FakeDriver:
     def __init__(self, rows):
         self._rows = rows
 
     def session(self):
         return _FakeSession(self._rows)
-
 
 def test_build_entity_index_maps_neo4j_rows(monkeypatch) -> None:
     rows = [{"name": "Trương Định", "norm_name": "trương định", "source_count": 5}]
@@ -94,9 +84,7 @@ def test_build_entity_index_maps_neo4j_rows(monkeypatch) -> None:
     got = idx.ground("Trương Định")
     assert got is not None and got.source_count == 5
 
-
 # --- Cache version --------------------------------------------------------
-
 
 def test_entity_index_rebuilds_when_alias_or_kg_version_changes(tmp_path, monkeypatch) -> None:
     cache = tmp_path / "entity_index.json"
@@ -124,7 +112,6 @@ def test_entity_index_rebuilds_when_alias_or_kg_version_changes(tmp_path, monkey
     assert idx.ground("X") is not None
     data = json.loads(cache.read_text(encoding="utf-8"))
     assert data["alias_map_version"] == "NEW" and data["kg_version"] == "NEW"  # cache mới
-
 
 def test_entity_index_loads_from_cache_when_versions_match(tmp_path, monkeypatch) -> None:
     cache = tmp_path / "entity_index.json"

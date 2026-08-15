@@ -32,7 +32,6 @@ if hasattr(sys.stderr, "reconfigure"):
 
 _GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 
-
 def geocode(query: str, api_key: str) -> tuple[float, float, str]:
     """Geocode 1 địa danh (region=vn bias, cho phép cả nước ngoài). Trả (lat, lng, formatted_address)."""
     response = httpx.get(
@@ -58,7 +57,6 @@ def geocode(query: str, api_key: str) -> tuple[float, float, str]:
     location = place["geometry"]["location"]
     name = place.get("formatted_address") or query
     return float(location["lat"]), float(location["lng"]), name
-
 
 def page(api_key: str, map_id: str, lat: float, lng: float, name: str) -> bytes:
     values = json.dumps(
@@ -146,7 +144,6 @@ def page(api_key: str, map_id: str, lat: float, lng: float, name: str) -> bytes:
 </html>"""
     return document.replace("__MAP_DATA__", values).encode("utf-8")
 
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Hiển thị địa điểm trên Google Maps")
     parser.add_argument("query", nargs="?", default="Hồ Hoàn Kiếm, Hà Nội")
@@ -186,7 +183,6 @@ def main() -> int:
     finally:
         server.server_close()
     return 0
-
 
 if __name__ == "__main__":
     try:

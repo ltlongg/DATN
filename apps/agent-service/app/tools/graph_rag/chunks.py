@@ -20,13 +20,11 @@ CHUNK_VECTOR_META_FIELDS: set[str] = {
 
 _HEADING_KEY_RE = re.compile(r"^h(\d+)$", re.IGNORECASE)
 
-
 def _string_or_none(value: Any) -> str | None:
     if value is None:
         return None
     text = str(value).strip()
     return text or None
-
 
 def _string_list(value: Any) -> list[str]:
     if not isinstance(value, list):
@@ -37,7 +35,6 @@ def _string_list(value: Any) -> list[str]:
         if text:
             items.append(text)
     return items
-
 
 def build_heading_path(metadata: dict[str, Any]) -> list[str]:
     """Trả heading path theo thứ tự h1..hN, bỏ cấp thiếu/rỗng."""
@@ -53,7 +50,6 @@ def build_heading_path(metadata: dict[str, Any]) -> list[str]:
             ordered.append((int(match.group(1)), text))
 
     return [text for _, text in sorted(ordered, key=lambda item: item[0])]
-
 
 def prepare_chunk_record(raw: dict[str, Any]) -> dict[str, Any]:
     """Chuẩn hóa một item từ `chunks_llm.json`.
@@ -89,7 +85,6 @@ def prepare_chunk_record(raw: dict[str, Any]) -> dict[str, Any]:
         "times": _string_list(metadata.get("times")),
         "locations": _string_list(metadata.get("locations")),
     }
-
 
 def prepare_chunk_records(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [prepare_chunk_record(chunk) for chunk in chunks]

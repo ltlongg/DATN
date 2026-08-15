@@ -1,6 +1,5 @@
 # Entities theo loại — tổng 6072
 
-
 ## Địa điểm (2227)
 
 - 132 phố Duvigneau

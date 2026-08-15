@@ -27,7 +27,6 @@ _COLS = "id, name, type, status, source_file, created_at, updated_at"
 # nhưng trỏ nguồn rỗng). Muốn đổi nguồn thì xoá rồi khai báo lại.
 UPDATABLE_COLS = ("name", "type", "status")
 
-
 class Document(BaseModel):
     id: str
     name: str
@@ -40,7 +39,6 @@ class Document(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-
 class KbSource(BaseModel):
     """Một nguồn CÓ THẬT trong kho tri thức (`rag_chunks`), kèm document đã khai báo cho
     nó (nếu có). `document_id = None` = chunk trong kho chưa được khai báo ở danh mục."""
@@ -49,7 +47,6 @@ class KbSource(BaseModel):
     chunk_count: int
     event_count: int
     document_id: str | None = None
-
 
 def _to_document(row: dict[str, Any], counts: dict[str, tuple[int, int]]) -> Document:
     chunk_count, event_count = counts.get(row["source_file"] or "", (0, 0))
@@ -64,7 +61,6 @@ def _to_document(row: dict[str, Any], counts: dict[str, tuple[int, int]]) -> Doc
         created_at=row["created_at"],
         updated_at=row["updated_at"],
     )
-
 
 def kb_counts() -> dict[str, tuple[int, int]]:
     """`source_file` -> (số chunk, số event) đếm thật từ kho.
@@ -96,7 +92,6 @@ def kb_counts() -> dict[str, tuple[int, int]]:
         return {}
     return {r["source_file"]: (int(r["chunk_count"]), int(r["event_count"])) for r in rows}
 
-
 def list_kb_sources() -> list[KbSource]:
     """Mọi nguồn có thật trong kho + document đang giữ nó. Dùng cho dropdown lọc ở KB
     Chunks (sau `sync_kb_documents` thì `document_id` luôn khác None)."""
@@ -118,7 +113,6 @@ def list_kb_sources() -> list[KbSource]:
         )
         for source_file, (chunk_count, event_count) in sorted(counts.items())
     ]
-
 
 def sync_kb_documents(source_files: list[str]) -> None:
     """Nguồn đã có chunk trong kho -> TỰ hiện trong danh mục, không bắt admin khai báo.
@@ -143,7 +137,6 @@ def sync_kb_documents(source_files: list[str]) -> None:
         )
         conn.commit()
 
-
 def create_document(name: str, type_: str, status: str) -> Document:
     """Tạo tài liệu THỦ CÔNG — luôn không gắn nguồn (draft/placeholder). Tài liệu có nguồn
     do `sync_kb_documents` tự tạo từ kho, không qua đây."""
@@ -159,7 +152,6 @@ def create_document(name: str, type_: str, status: str) -> Document:
     assert row is not None
     return _to_document(row, {})
 
-
 def list_documents() -> list[Document]:
     """Danh mục = tài liệu đã lưu + nguồn trong kho (tự đồng bộ vào trước khi đọc)."""
     counts = kb_counts()
@@ -169,13 +161,11 @@ def list_documents() -> list[Document]:
         rows = cur.fetchall()
     return [_to_document(r, counts) for r in rows]
 
-
 def get_document(document_id: str) -> Document | None:
     with connection() as conn, conn.cursor() as cur:
         cur.execute(f"SELECT {_COLS} FROM documents WHERE id = %s", (document_id,))
         row = cur.fetchone()
     return _to_document(row, kb_counts()) if row else None
-
 
 def update_document(document_id: str, fields: dict[str, Any]) -> Document | None:
     """Cập nhật một phần (PATCH). `fields` chỉ chứa cột trong `UPDATABLE_COLS`."""
@@ -193,7 +183,6 @@ def update_document(document_id: str, fields: dict[str, Any]) -> Document | None
         row = cur.fetchone()
         conn.commit()
     return _to_document(row, kb_counts()) if row else None
-
 
 def delete_document(document_id: str) -> bool:
     """Xoá khỏi danh mục. CHỈ dùng cho tài liệu KHÔNG gắn nguồn (API chặn phần còn lại):

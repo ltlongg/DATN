@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-
 class ChunkMetadata(BaseModel):
     document_title: str
     headings: dict[str, str] = Field(default_factory=dict)
@@ -34,7 +33,6 @@ class ChunkMetadata(BaseModel):
     # Thống kê token.
     text_token_count: int
     embedding_token_count: int
-
 
 class Chunk(BaseModel):
     chunk_id: str

@@ -54,7 +54,6 @@ _COMBINING = "̀-ͯ"
 _END = rf"(?![a-zđ{_COMBINING}])"
 _TONE_DIPHTHONG = re.compile(rf"(?<!q)([ou])([aey])([{_TONES}]){_END}")
 
-
 def normalize_name(name: str) -> str:
     """Khóa chuẩn hóa cho tên entity.
 

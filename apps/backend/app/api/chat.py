@@ -46,12 +46,10 @@ logger = logging.getLogger("backend.chat")
 
 router = APIRouter()
 
-
 def _to_out(conv: Conversation) -> ConversationOut:
     return ConversationOut(
         id=conv.id, title=conv.title, created_at=conv.created_at, updated_at=conv.updated_at
     )
-
 
 @router.post("/conversations", response_model=ConversationOut, status_code=201)
 async def create_conversation(
@@ -61,12 +59,10 @@ async def create_conversation(
     conv = await anyio.to_thread.run_sync(conv_repo.create_conversation, user.id, title)
     return _to_out(conv)
 
-
 @router.get("/conversations", response_model=list[ConversationOut])
 async def list_conversations(user: User = Depends(get_current_user)) -> list[ConversationOut]:
     convs = await anyio.to_thread.run_sync(conv_repo.list_conversations, user.id)
     return [_to_out(c) for c in convs]
-
 
 @router.patch("/conversations/{conversation_id}", response_model=ConversationOut)
 async def rename_conversation(
@@ -79,13 +75,11 @@ async def rename_conversation(
     await anyio.to_thread.run_sync(conv_repo.update_title, conv.id, title)
     return _to_out(conv.model_copy(update={"title": title}))
 
-
 @router.delete("/conversations/{conversation_id}", status_code=204)
 async def delete_conversation(
     conv: Conversation = Depends(get_owned_conversation),
 ) -> None:
     await anyio.to_thread.run_sync(conv_repo.delete_conversation, conv.id)
-
 
 @router.get("/conversations/{conversation_id}", response_model=ConversationDetail)
 async def get_conversation(
@@ -112,9 +106,7 @@ async def get_conversation(
         ],
     )
 
-
 # --- xem nguồn (citation-viewer-plan §4) ---
-
 
 @router.get("/sources/{chunk_id}", response_model=SourceDetail)
 async def get_source(chunk_id: str, user: User = Depends(get_current_user)) -> SourceDetail:
@@ -136,7 +128,6 @@ async def get_source(chunk_id: str, user: User = Depends(get_current_user)) -> S
         end_line=meta.get("end_line"),
     )
 
-
 async def _persist_assistant(
     conversation_id: str, assistant_id: str, collector: SseCollector
 ) -> str | None:
@@ -152,7 +143,6 @@ async def _persist_assistant(
     await anyio.to_thread.run_sync(conv_repo.touch_conversation, conversation_id)
     return assistant_id
 
-
 def _visible_step(data: dict[str, Any], debug: bool) -> dict[str, Any]:
     """Bóc `internals` (tầng 2 của panel tiến trình) khỏi event `step` khi không phải admin.
 
@@ -163,7 +153,6 @@ def _visible_step(data: dict[str, Any], debug: bool) -> dict[str, Any]:
     if debug or "internals" not in data:
         return data
     return {k: v for k, v in data.items() if k != "internals"}
-
 
 async def _proxy_stream(
     stream: AgentStream,
@@ -245,7 +234,6 @@ async def _proxy_stream(
                         error=str(code) if code else "stream_error",
                     )
                 )
-
 
 @router.post("/conversations/{conversation_id}/ask")
 async def ask(

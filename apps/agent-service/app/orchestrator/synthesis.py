@@ -23,12 +23,10 @@ from app.schemas.ask import SynthesizedAnswer
 STATIC_STREAM_CHUNK_CHARS = 24
 STATIC_STREAM_DELAY_SECONDS = 0.03
 
-
 async def emit_text_as_batches(text: str, emitter: Emitter, batch_chars: int) -> None:
     """Stream một đoạn text tĩnh (honest/smalltalk) — emit nguyên khối, không guardrails."""
     if text:
         await emitter.emit("token", {"text": text})
-
 
 async def stream_static_text(
     text: str,
@@ -53,7 +51,6 @@ async def stream_static_text(
         await emitter.emit("token", {"text": chunk})
         if remaining and delay > 0:
             await asyncio.sleep(delay)
-
 
 async def stream_synthesis(
     messages: list[dict[str, str]],

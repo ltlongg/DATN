@@ -21,7 +21,6 @@ from app.schemas.config import SystemConfigResponse
 # Gác ở cấp router -> route nội bộ thêm sau tự động được bảo vệ.
 router = APIRouter(dependencies=[Depends(verify_internal_key)])
 
-
 @router.get("/config", response_model=SystemConfigResponse)
 async def get_internal_config() -> SystemConfigResponse:
     return await anyio.to_thread.run_sync(repo.get_config)

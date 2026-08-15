@@ -52,7 +52,6 @@ log = logging.getLogger(__name__)
 # luôn completeness pass lượt-2 của cap 50K (xem plan §8).
 CAP_CHARS = 30_000
 
-
 @dataclass(frozen=True)
 class UnitChunk:
     """Một chunk nguyên vẹn bên trong unit (đơn vị quy kết event của LLM)."""
@@ -60,13 +59,11 @@ class UnitChunk:
     chunk_id: str
     text: str
 
-
 @dataclass(frozen=True)
 class _Chunk:
     chunk_id: str
     text: str
     path: tuple[str, ...]  # heading_path (h1, h2, ...)
-
 
 @dataclass
 class Unit:
@@ -84,7 +81,6 @@ class Unit:
     def char_len(self) -> int:
         """Tổng ký tự nội dung — đại lượng so với CAP (không tính marker của prompt)."""
         return sum(len(c.text) for c in self.chunks)
-
 
 def _prepare(chunks: list[dict]) -> list[list[_Chunk]]:
     """Lọc + gom theo TÀI LIỆU (`source_file`), mỗi khối sắp theo `chunk_index`.
@@ -112,10 +108,8 @@ def _prepare(chunks: list[dict]) -> list[list[_Chunk]]:
         out.append([r[1] for r in rows])
     return out
 
-
 def _total(items: list[_Chunk]) -> int:
     return sum(len(it.text) for it in items)
-
 
 def _lcp(paths: list[tuple[str, ...]]) -> list[str]:
     """Tiền tố heading chung dài nhất (longest common prefix) của các path."""
@@ -128,14 +122,12 @@ def _lcp(paths: list[tuple[str, ...]]) -> list[str]:
             break
     return out
 
-
 def _make_unit(items: list[_Chunk]) -> Unit:
     return Unit(
         unit_id=f"{items[0].chunk_id}__{items[-1].chunk_id}",
         heading_path=_lcp([it.path for it in items]),
         chunks=[UnitChunk(it.chunk_id, it.text) for it in items],
     )
-
 
 def _group(items: list[_Chunk], depth: int) -> list[list[_Chunk]]:
     """Chia thành các run LIÊN TIẾP theo heading ở cấp `depth` (giữ thứ tự).
@@ -158,7 +150,6 @@ def _group(items: list[_Chunk], depth: int) -> list[list[_Chunk]]:
         groups.append(cur)
     return groups
 
-
 def _chunk_split(items: list[_Chunk], cap: int, out: list[Unit]) -> None:
     """Section quái vật không còn heading con: cắt theo chunk, greedy tới CAP.
 
@@ -177,7 +168,6 @@ def _chunk_split(items: list[_Chunk], cap: int, out: list[Unit]) -> None:
     if part:
         out.append(_make_unit(part))
 
-
 def _segment(items: list[_Chunk], depth: int, cap: int, out: list[Unit]) -> None:
     if not items:
         return
@@ -193,7 +183,6 @@ def _segment(items: list[_Chunk], depth: int, cap: int, out: list[Unit]) -> None
         _segment(items, depth + 1, cap, out)
     else:
         _chunk_split(items, cap, out)
-
 
 def build_units(chunks: list[dict], cap: int = CAP_CHARS) -> list[Unit]:
     """Gom danh sách chunk (dạng `chunks_llm.json`) thành các unit ≤ cap ký tự.
@@ -216,10 +205,8 @@ def build_units(chunks: list[dict], cap: int = CAP_CHARS) -> list[Unit]:
         _segment(block, 0, cap, out)
     return out
 
-
 # --- Serialize: cầu nối giữa BƯỚC 1 (run_segmentation.py ghi artifact units) và BƯỚC 2
 # (run_timeline_index.py đọc lại artifact đó để trích). Giữ định dạng ở một chỗ. ---
-
 
 def unit_to_dict(u: Unit) -> dict[str, object]:
     """Unit -> dict JSON (để ghi `dataset/timeline_units.json`).
@@ -232,7 +219,6 @@ def unit_to_dict(u: Unit) -> dict[str, object]:
         "heading_path": list(u.heading_path),
         "chunks": [{"chunk_id": c.chunk_id, "text": c.text} for c in u.chunks],
     }
-
 
 def unit_from_dict(d: dict) -> Unit:
     """dict (đọc từ artifact units) -> Unit."""

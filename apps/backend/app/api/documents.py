@@ -20,23 +20,19 @@ from app.schemas.document import DocumentCreate, DocumentOut, DocumentUpdate, Kb
 # require_admin áp cho toàn router -> user thường gọi bất kỳ route nào đều nhận 403.
 router = APIRouter(dependencies=[Depends(require_admin)])
 
-
 def _to_out(doc: Document) -> DocumentOut:
     return DocumentOut(**doc.model_dump())
-
 
 @router.get("", response_model=list[DocumentOut])
 async def list_documents() -> list[DocumentOut]:
     docs = await anyio.to_thread.run_sync(doc_repo.list_documents)
     return [_to_out(d) for d in docs]
 
-
 @router.get("/sources", response_model=list[KbSourceOut])
 async def list_kb_sources() -> list[KbSourceOut]:
     """Nguồn CÓ THẬT trong kho tri thức (dropdown lọc chunk ở KB Inspector)."""
     sources = await anyio.to_thread.run_sync(doc_repo.list_kb_sources)
     return [KbSourceOut(**s.model_dump()) for s in sources]
-
 
 @router.post("", response_model=DocumentOut, status_code=201)
 async def create_document(body: DocumentCreate) -> DocumentOut:
@@ -47,7 +43,6 @@ async def create_document(body: DocumentCreate) -> DocumentOut:
     )
     return _to_out(doc)
 
-
 @router.patch("/{document_id}", response_model=DocumentOut)
 async def update_document(document_id: str, body: DocumentUpdate) -> DocumentOut:
     fields = body.model_dump(exclude_unset=True)
@@ -55,7 +50,6 @@ async def update_document(document_id: str, body: DocumentUpdate) -> DocumentOut
     if doc is None:
         raise AppError(404, "not_found", "Không tìm thấy tài liệu.")
     return _to_out(doc)
-
 
 @router.delete("/{document_id}", response_model=OkResponse)
 async def delete_document(document_id: str) -> OkResponse:

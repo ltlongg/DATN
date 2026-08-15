@@ -4,14 +4,12 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
-
 class SynthesisError(RuntimeError):
     """LLM synthesize thất bại (refusal / rỗng / lỗi stream). `code` để map error event."""
 
     def __init__(self, code: str) -> None:
         super().__init__(code)
         self.code = code
-
 
 class GuardrailsBlocked(RuntimeError):
     """Guardrails chặn input -> dừng flow. Node guard_input đã emit `token(safe_message)` +

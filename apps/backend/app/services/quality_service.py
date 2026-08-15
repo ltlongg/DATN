@@ -17,7 +17,6 @@ from app.schemas.logs import MessageQuality, QualitySummary
 # Đồng bộ AnswerConfidence của agent-service: "thấp"/"không đủ dữ liệu" = chất lượng thấp.
 _LOW_CONFIDENCE = {"thấp", "không đủ dữ liệu"}
 
-
 def message_quality_flags(row: dict[str, Any]) -> MessageQuality:
     """Cờ chất lượng cho MỘT message. `no_citation` chỉ True khi đã thử retrieval mà rỗng
     citation (message không retrieval vốn dĩ không có citation -> không đánh dấu)."""
@@ -31,7 +30,6 @@ def message_quality_flags(row: dict[str, Any]) -> MessageQuality:
         has_warning=bool(row.get("warnings")),
     )
 
-
 def _ttft_stats(rows: list[dict[str, Any]]) -> tuple[int, float | None, int | None]:
     """(số message đo được, TTFT trung bình ms, p95 ms). Bỏ qua row ttft_ms NULL — message
     lưu trước khi có tính năng này hoặc stream hỏng trước token đầu. p95 lấy theo phương pháp
@@ -44,7 +42,6 @@ def _ttft_stats(rows: list[dict[str, Any]]) -> tuple[int, float | None, int | No
     n = len(values)
     rank = -(-95 * n // 100)  # ceil(0.95 * n), tối thiểu 1
     return n, sum(values) / n, values[rank - 1]
-
 
 def compute_quality_summary(rows: list[dict[str, Any]]) -> QualitySummary:
     """Tổng hợp đếm trên các assistant message. Mẫu số khác nhau theo field (xem docstring)."""

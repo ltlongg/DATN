@@ -13,7 +13,6 @@ import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
 
-
 _QUOTE_TRANSLATIONS = {
     "“": '"',  # " left double quote
     "”": '"',  # " right double quote
@@ -30,7 +29,6 @@ _DASH_TRANSLATIONS = {
     "—": "-",  # em-dash (U+2014)
     "…": "...", # ellipsis (U+2026)
 }
-
 
 @dataclass
 class PreprocessReport:
@@ -58,7 +56,6 @@ class PreprocessReport:
             "headings_normalized": self.headings_normalized,
             "warnings": list(self.warnings),
         }
-
 
 def preprocess_text(
     text: str,
@@ -114,7 +111,6 @@ def preprocess_text(
     report.cleaned_chars = len(text)
     return text, report
 
-
 def preprocess_file(
     input_path: str | Path,
     output_path: str | Path | None = None,
@@ -130,17 +126,14 @@ def preprocess_file(
         dst.write_text(cleaned, encoding="utf-8")
     return report
 
-
 def _remove_soft_hyphens(text: str) -> tuple[str, int]:
     count = text.count("\u00ad")
     if count:
         text = text.replace("\u00ad", "")
     return text, count
 
-
 def _normalize_newlines(text: str) -> str:
     return text.replace("\r\n", "\n").replace("\r", "\n")
-
 
 def _normalize_quotes(text: str) -> tuple[str, int]:
     count = sum(text.count(ch) for ch in _QUOTE_TRANSLATIONS)
@@ -148,13 +141,11 @@ def _normalize_quotes(text: str) -> tuple[str, int]:
         text = text.translate({ord(k): v for k, v in _QUOTE_TRANSLATIONS.items()})
     return text, count
 
-
 def _normalize_dashes(text: str) -> tuple[str, int]:
     count = sum(text.count(ch) for ch in _DASH_TRANSLATIONS)
     if count:
         text = text.translate({ord(k): v for k, v in _DASH_TRANSLATIONS.items()})
     return text, count
-
 
 def _normalize_punctuation_spacing(text: str) -> tuple[str, int]:
     """Thêm khoảng trắng sau dấu chấm/dấu phẩy nếu viết liền chữ (ví dụ: tan.Sau -> tan. Sau).
@@ -170,7 +161,6 @@ def _normalize_punctuation_spacing(text: str) -> tuple[str, int]:
     text = re.sub(pattern, r"\1 \2", text)
     return text, len(matches)
 
-
 def _normalize_heading_spacing(text: str) -> tuple[str, int]:
     """Chuẩn hóa khoảng trắng tiêu đề Markdown (ví dụ: ## 1.Khởi nghĩa -> ## 1. Khởi nghĩa)."""
     # Pattern: khớp đầu dòng hoặc sau ký tự xuống dòng
@@ -183,7 +173,6 @@ def _normalize_heading_spacing(text: str) -> tuple[str, int]:
     text = re.sub(pattern, r"\1\2 \3 \4", text)
     return text, len(matches)
 
-
 def _collapse_blank_runs(text: str) -> tuple[str, int]:
     """Gộp >=3 newline liên tiếp về đúng 2 (một paragraph break)."""
     matches = re.findall(r"\n{3,}", text)
@@ -191,7 +180,6 @@ def _collapse_blank_runs(text: str) -> tuple[str, int]:
         return text, 0
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text, len(matches)
-
 
 def _normalize_heading_newlines(text: str) -> str:
     """Đảm bảo mọi tiêu đề (dòng bắt đầu bằng #) được bao quanh bởi đúng 1 dòng trống (tức là \n\n)."""
@@ -212,5 +200,4 @@ def _normalize_heading_newlines(text: str) -> str:
         else:
             new_lines.append(line)
     return "\n".join(new_lines)
-
 

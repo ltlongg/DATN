@@ -35,7 +35,6 @@ _COLUMNS = (
 )
 _SELECT_LIST = ", ".join(_COLUMNS)
 
-
 def get_config() -> SystemConfigResponse:
     """Đọc dòng singleton (id=1). Row luôn tồn tại vì init_schema INSERT sẵn."""
     with connection() as conn, conn.cursor() as cur:
@@ -46,7 +45,6 @@ def get_config() -> SystemConfigResponse:
             500, "internal_error", "system_config chưa được khởi tạo (chạy init_db)."
         )
     return SystemConfigResponse(**row)
-
 
 def update_config(fields: dict[str, Any]) -> SystemConfigResponse:
     """PATCH một phần (fields đã lọc exclude_unset ở API). Cập nhật updated_at; trả dòng mới.

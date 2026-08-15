@@ -57,7 +57,6 @@ CREATE_INDEX_SQLS = [
     "CREATE INDEX IF NOT EXISTS prompt_versions_status_idx ON prompt_versions (prompt_key, status);",
 ]
 
-
 def ensure_prompt_tables(conn: psycopg.Connection[Any]) -> None:
     with conn.cursor() as cur:
         cur.execute(CREATE_MANAGED_PROMPTS_SQL)
@@ -65,17 +64,14 @@ def ensure_prompt_tables(conn: psycopg.Connection[Any]) -> None:
         for sql in CREATE_INDEX_SQLS:
             cur.execute(sql)
 
-
 # --- Runtime loader (hot path online) ---------------------------------------
 
 _CACHE_TTL_SECONDS = 60.0
 _cache: dict[str, tuple[float, str]] = {}
 
-
 def clear_cache() -> None:
     """Xoá cache (test + hook bust khi promote — nếu làm sau)."""
     _cache.clear()
-
 
 def _load_production_content(key: str) -> str | None:
     """Content version production mới nhất của `key`. Bảng chưa tồn tại / DB lỗi -> None
@@ -94,7 +90,6 @@ def _load_production_content(key: str) -> str | None:
         logger.warning("get_active_prompt bỏ qua DB (key=%s): %s", key, type(exc).__name__)
         return None
 
-
 def get_active_prompt(key: str, *, fallback: str) -> str:
     """System prompt đang hiệu lực cho `key`: version production trong DB, hoặc `fallback`
     (hằng code) nếu chưa có/lỗi. Cache kết quả ~TTL giây để không query DB mỗi câu."""
@@ -107,9 +102,7 @@ def get_active_prompt(key: str, *, fallback: str) -> str:
     _cache[key] = (now + _CACHE_TTL_SECONDS, resolved)
     return resolved
 
-
 # --- Seed (idempotent) ------------------------------------------------------
-
 
 def seed_prompt(key: str, grp: str, title: str, description: str, content: str) -> bool:
     """Tạo managed_prompts + version 1 (production) từ hằng code nếu key CHƯA có. Idempotent:
@@ -132,7 +125,6 @@ def seed_prompt(key: str, grp: str, title: str, description: str, content: str) 
                 (str(uuid.uuid4()), key, content, "seed from code", "system"),
             )
     return True
-
 
 def publish_prompt_version(key: str, content: str, *, note: str) -> int | None:
     """Đẩy hằng prompt trong CODE lên production: tạo version mới + hạ version cũ xuống archived.

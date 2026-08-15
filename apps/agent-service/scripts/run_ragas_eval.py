@@ -97,14 +97,11 @@ except ImportError as exc:  # pragma: no cover
         "Script viết theo API ragas 0.4.3 (đã đối chiếu source). Bản 0.1.x khác hẳn."
     ) from exc
 
-
 # --- dựng dataset cho RAGAS ---------------------------------------------------------
-
 
 def load_json(path: Path) -> list[dict]:
     """Đọc file JSON mảng in dọc."""
     return json.loads(path.read_text(encoding="utf-8"))
-
 
 def select_labels(labels: list[dict], ids: t.Sequence[str] | None) -> list[dict]:
     """Lọc nhãn theo danh sách id, giữ nguyên thứ tự trong file nhãn.
@@ -120,7 +117,6 @@ def select_labels(labels: list[dict], ids: t.Sequence[str] | None) -> list[dict]
     if unknown:
         raise SystemExit(f"Không có id này trong bộ nhãn: {unknown}")
     return [item for item in labels if item["id"] in set(wanted)]
-
 
 def build_samples(labels: list[dict], runs: dict[str, dict]) -> tuple[list, list[str], list[str]]:
     """Ghép nhãn + output thật thành SingleTurnSample.
@@ -144,7 +140,6 @@ def build_samples(labels: list[dict], runs: dict[str, dict]) -> tuple[list, list
         )
         ids.append(item["id"])
     return samples, ids, skipped
-
 
 def attach_ids(frame, samples: list, ids: list[str]):
     """Chèn cột `id` vào đầu DataFrame kết quả.
@@ -170,9 +165,7 @@ def attach_ids(frame, samples: list, ids: list[str]):
     frame.insert(0, "id", ids)
     return frame
 
-
 # --- metric ------------------------------------------------------------------------
-
 
 METRIC_NAMES = (
     "context_precision",
@@ -181,7 +174,6 @@ METRIC_NAMES = (
     "faithfulness",
     "answer_relevancy",
 )
-
 
 def build_metrics(llm, embeddings=None, selected: t.Iterable[str] | None = None) -> list:
     """Dựng các metric được chọn theo thứ tự cố định.
@@ -210,7 +202,6 @@ def build_metrics(llm, embeddings=None, selected: t.Iterable[str] | None = None)
     }
     return [factories[name]() for name in METRIC_NAMES if name in selected_names]
 
-
 def build_llm(model: str | None):
     """Bọc LLM cho metric.
 
@@ -233,7 +224,6 @@ def build_llm(model: str | None):
             temperature=0,
         )
     )
-
 
 def build_embeddings(kind: str):
     """Embeddings cho `ResponseRelevancy`.
@@ -266,7 +256,6 @@ def build_embeddings(kind: str):
     embeddings.client.max_seq_length = EMBEDDING_MAX_TOKENS
     return LangchainEmbeddingsWrapper(embeddings)
 
-
 def use_vietnamese_prompts(metrics: list) -> None:
     """Nạp prompt tiếng Việt đã dịch sẵn ở `scripts/ragas_prompts/`.
 
@@ -298,7 +287,6 @@ def use_vietnamese_prompts(metrics: list) -> None:
         metric.set_prompts(**prompts)
         print(f"  prompt tiếng Việt: {metric.name}")
 
-
 def resolve_output_path(
     runs_path: Path,
     selected: t.Sequence[str],
@@ -321,9 +309,7 @@ def resolve_output_path(
         return runs_path.with_suffix(".ragas.csv")
     return runs_path.with_name(f"{runs_path.stem}.{'.'.join(parts)}.csv")
 
-
 # --- main ---------------------------------------------------------------------------
-
 
 def main() -> int:
     ap = argparse.ArgumentParser()
@@ -390,7 +376,6 @@ def main() -> int:
     if args.ids:
         print(f"Ghép vào bảng đầy đủ: python -m scripts.merge_ragas_csv --patch {out}")
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

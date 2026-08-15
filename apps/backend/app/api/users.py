@@ -20,7 +20,6 @@ from app.schemas.user import UserCreate, UserOut, UserUpdate
 
 router = APIRouter(dependencies=[Depends(require_admin)])
 
-
 def _to_out(user: User) -> UserOut:
     return UserOut(
         id=user.id,
@@ -32,12 +31,10 @@ def _to_out(user: User) -> UserOut:
         created_at=user.created_at,
     )
 
-
 @router.get("", response_model=list[UserOut])
 async def list_users() -> list[UserOut]:
     users = await anyio.to_thread.run_sync(user_repo.list_users)
     return [_to_out(u) for u in users]
-
 
 @router.post("", response_model=UserOut, status_code=201)
 async def create_user(body: UserCreate) -> UserOut:
@@ -50,7 +47,6 @@ async def create_user(body: UserCreate) -> UserOut:
     except psycopg.errors.UniqueViolation:
         raise AppError(409, "conflict", "Email đã tồn tại.")
     return _to_out(user)
-
 
 @router.patch("/{user_id}", response_model=UserOut)
 async def update_user(

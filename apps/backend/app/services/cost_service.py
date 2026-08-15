@@ -11,13 +11,11 @@ from typing import Any
 
 from app.schemas.cost import CostOverview, DailyCost, TaskCost
 
-
 def _day_key(created_at: Any) -> str:
     """created_at (datetime hoặc str) -> 'YYYY-MM-DD'."""
     if hasattr(created_at, "date"):
         return created_at.date().isoformat()
     return str(created_at)[:10]
-
 
 def compute_cost_overview(rows: list[dict[str, Any]]) -> CostOverview:
     total_calls = len(rows)
@@ -33,7 +31,6 @@ def compute_cost_overview(rows: list[dict[str, Any]]) -> CostOverview:
         avg_tokens_per_call=round(avg, 2),
     )
 
-
 def compute_cost_by_day(rows: list[dict[str, Any]]) -> list[DailyCost]:
     """Group theo ngày (created_at::date), sort tăng dần — cho biểu đồ theo ngày."""
     calls: dict[str, int] = defaultdict(int)
@@ -46,7 +43,6 @@ def compute_cost_by_day(rows: list[dict[str, Any]]) -> list[DailyCost]:
         DailyCost(day=day, calls=calls[day], total_tokens=tokens[day])
         for day in sorted(calls)
     ]
-
 
 def compute_cost_by_task(rows: list[dict[str, Any]]) -> list[TaskCost]:
     """Group theo task ('plan' | 'synthesize' | ...), sort theo task."""

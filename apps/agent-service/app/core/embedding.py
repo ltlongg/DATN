@@ -29,7 +29,6 @@ _model_lock = Lock()
 EMBEDDING_DIM = 1024  # AITeamVN/Vietnamese_Embedding (BGE-M3 base)
 EMBEDDING_MAX_TOKENS = 2048  # model card: fine-tune tại 2048, ép về đây từ default 8192
 
-
 def _get_model():
     """Lazy-load SentenceTransformer, cache lại cho các lần sau."""
     global _model
@@ -48,14 +47,12 @@ def _get_model():
                 log.info("Embedding model nạp trên device=%s", device)
     return _model
 
-
 def _encode(texts: list[str]) -> np.ndarray:
     # normalize_embeddings=True: vector chuẩn hóa L2 -> cosine = dot product, hợp với
     # vector store. convert_to_numpy: trả np.ndarray (n, dim).
     return _get_model().encode(
         texts, normalize_embeddings=True, convert_to_numpy=True
     )
-
 
 async def embed_texts(texts: list[str]) -> np.ndarray:
     """Sinh embedding cho list văn bản (async, an toàn cho event loop)."""

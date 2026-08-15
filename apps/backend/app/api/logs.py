@@ -26,7 +26,6 @@ from app.services.token_service import build_message_tokens, compute_token_summa
 
 router = APIRouter(dependencies=[Depends(require_admin)])
 
-
 @router.get("/conversations", response_model=ConversationLogResponse)
 async def list_conversations(
     user_email: str | None = Query(default=None),
@@ -41,7 +40,6 @@ async def list_conversations(
     return ConversationLogResponse(
         items=[ConversationLogItem(**r) for r in rows], total=total, limit=limit, offset=offset
     )
-
 
 @router.get("/conversations/{conversation_id}", response_model=ConversationLogDetail)
 async def get_conversation(conversation_id: str) -> ConversationLogDetail:
@@ -63,7 +61,6 @@ async def get_conversation(conversation_id: str) -> ConversationLogDetail:
         messages=messages,
     )
 
-
 @router.get("/quality-summary", response_model=QualitySummary)
 async def quality_summary(
     from_date: str | None = Query(default=None),
@@ -71,7 +68,6 @@ async def quality_summary(
 ) -> QualitySummary:
     rows = await anyio.to_thread.run_sync(repo.list_quality_rows, from_date, to_date)
     return compute_quality_summary(rows)
-
 
 @router.get("/token-summary", response_model=TokenSummary)
 async def token_summary(
@@ -84,7 +80,6 @@ async def token_summary(
         repo.list_attributed_usage_rows, from_date, to_date
     )
     return compute_token_summary(rows)
-
 
 @router.get("/conversations/{conversation_id}/tokens", response_model=list[MessageTokens])
 async def conversation_tokens(conversation_id: str) -> list[MessageTokens]:

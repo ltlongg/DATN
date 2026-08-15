@@ -18,11 +18,9 @@ from app.core.db import check_connection
 
 router = APIRouter(tags=["health"])
 
-
 @router.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok"}
-
 
 async def _ping_agent(url: str) -> bool:
     try:
@@ -31,7 +29,6 @@ async def _ping_agent(url: str) -> bool:
             return resp.status_code == 200
     except Exception:
         return False
-
 
 @router.get("/ready")
 async def ready() -> JSONResponse:

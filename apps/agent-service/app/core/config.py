@@ -27,7 +27,6 @@ os.environ.setdefault("HF_HUB_DISABLE_SYMLINKS", "1")
 # đường dẫn không tồn tại trong container cũng vô hại.
 _ROOT_ENV = Path(__file__).resolve().parents[4] / ".env"
 
-
 class Settings(BaseSettings):
     """Cấu hình runtime, đọc từ môi trường (case-insensitive)."""
 
@@ -177,7 +176,6 @@ class Settings(BaseSettings):
         if isinstance(v, str) and not v.strip():
             return None
         return v
-
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

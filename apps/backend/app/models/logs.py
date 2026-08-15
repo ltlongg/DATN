@@ -19,7 +19,6 @@ _MSG_COLS = (
     "retrieval_mode, confidence, warnings, steps, ttft_ms, created_at"
 )
 
-
 def _date_filters(
     from_date: str | None, to_date: str | None, column: str
 ) -> tuple[list[str], list[Any]]:
@@ -33,7 +32,6 @@ def _date_filters(
         where.append(f"{column}::date <= %s")
         params.append(to_date)
     return where, params
-
 
 def list_conversations_admin(
     user_email: str | None,
@@ -72,7 +70,6 @@ def list_conversations_admin(
         r["id"] = str(r["id"])
     return rows, total
 
-
 def get_conversation_detail_admin(conversation_id: str) -> dict[str, Any] | None:
     """Conversation + owner + TẤT CẢ message (thô). None nếu không tồn tại."""
     with connection() as conn, conn.cursor() as cur:
@@ -97,7 +94,6 @@ def get_conversation_detail_admin(conversation_id: str) -> dict[str, Any] | None
     conv["messages"] = messages
     return conv
 
-
 def list_quality_rows(
     from_date: str | None = None, to_date: str | None = None
 ) -> list[dict[str, Any]]:
@@ -113,11 +109,9 @@ def list_quality_rows(
         )
         return cur.fetchall()
 
-
 # --- Token usage (đọc thẳng llm_usage; agent-service sở hữu DDL, tạo lazy) -----------------
 # Cả 2 hàm bắt UndefinedTable -> [] (y hệt models/cost.py): admin có thể mở tab Hội thoại
 # TRƯỚC câu hỏi đầu tiên (llm_usage chưa tồn tại) mà không 500.
-
 
 def list_attributed_usage_rows(
     from_date: str | None = None, to_date: str | None = None
@@ -137,7 +131,6 @@ def list_attributed_usage_rows(
             return cur.fetchall()
     except psycopg.errors.UndefinedTable:
         return []
-
 
 def get_message_token_rows(conversation_id: str) -> list[dict[str, Any]]:
     """Usage của 1 hội thoại, gộp theo (message_id, task, model) cho breakdown chi tiết.

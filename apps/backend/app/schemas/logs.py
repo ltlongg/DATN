@@ -12,7 +12,6 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-
 class ConversationLogItem(BaseModel):
     id: str
     title: str
@@ -22,13 +21,11 @@ class ConversationLogItem(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-
 class ConversationLogResponse(BaseModel):
     items: list[ConversationLogItem]
     total: int
     limit: int
     offset: int
-
 
 class MessageQuality(BaseModel):
     """Cờ chất lượng suy ra cho một message assistant (user message -> đều False)."""
@@ -38,7 +35,6 @@ class MessageQuality(BaseModel):
     low_confidence: bool
     clarification: bool
     has_warning: bool
-
 
 class MessageLogItem(BaseModel):
     id: str
@@ -58,7 +54,6 @@ class MessageLogItem(BaseModel):
     created_at: datetime
     quality: MessageQuality
 
-
 class ConversationLogDetail(BaseModel):
     id: str
     title: str
@@ -67,7 +62,6 @@ class ConversationLogDetail(BaseModel):
     created_at: datetime
     updated_at: datetime
     messages: list[MessageLogItem]
-
 
 class QualitySummary(BaseModel):
     # Mẫu số KHÁC NHAU theo field (xem quality_service): no_citation chia cho
@@ -84,9 +78,7 @@ class QualitySummary(BaseModel):
     avg_ttft_ms: float | None
     p95_ttft_ms: int | None
 
-
 # --- Token theo hội thoại/message (song song chất lượng, xem admin-restructure-plan §Item 3) ---
-
 
 class TokenOverall(BaseModel):
     """Tổng hợp token của các lượt gọi LLM ĐÃ gắn conversation_id trong khoảng ngày (card đầu
@@ -98,7 +90,6 @@ class TokenOverall(BaseModel):
     total_tokens: int
     avg_tokens_per_call: float
 
-
 class ConversationTokens(BaseModel):
     """Token cộng dồn của 1 hội thoại (cho cột token ở danh sách)."""
 
@@ -106,11 +97,9 @@ class ConversationTokens(BaseModel):
     call_count: int
     total_tokens: int
 
-
 class TokenSummary(BaseModel):
     overall: TokenOverall
     by_conversation: list[ConversationTokens]
-
 
 class MessageTokenTaskRow(BaseModel):
     """1 dòng phân rã theo task trong 1 message. `model` ở mức task vì mỗi task có thể dùng
@@ -121,7 +110,6 @@ class MessageTokenTaskRow(BaseModel):
     prompt_tokens: int
     completion_tokens: int
     total_tokens: int
-
 
 class MessageTokens(BaseModel):
     message_id: str

@@ -25,7 +25,6 @@ GuardrailCategory = Literal[
     "other",
 ]
 
-
 class GuardrailDecision(BaseModel):
     """Kết quả kiểm 1 input. `action="block"` -> emit safe_message + blocked, dừng flow."""
 

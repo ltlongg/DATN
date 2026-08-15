@@ -35,10 +35,8 @@ __all__ = ["upsert_chunk_vectors", "search_vector", "search_dense_sparse", "sear
 
 log = logging.getLogger(__name__)
 
-
 def _payload(record: dict[str, Any]) -> dict[str, Any]:
     return {field: record.get(field) for field in CHUNK_VECTOR_META_FIELDS}
-
 
 def upsert_chunk_vectors(
     records: list[dict[str, Any]],
@@ -79,7 +77,6 @@ def upsert_chunk_vectors(
         log.info("Upsert Qdrant: %d/%d", total, len(records))
     return total
 
-
 async def search_vector(
     query: str,
     *,
@@ -116,7 +113,6 @@ async def search_vector(
 
     return _points_to_candidates(response.points, "vector")
 
-
 def _points_to_candidates(points: list, source: str) -> list[RetrievalCandidate]:
     """Map Qdrant points -> RetrievalCandidate, rank liền mạch, bỏ point thiếu chunk_id."""
     candidates: list[RetrievalCandidate] = []
@@ -134,7 +130,6 @@ def _points_to_candidates(points: list, source: str) -> list[RetrievalCandidate]
             )
         )
     return candidates
-
 
 async def search_dense_sparse(
     query: str,
@@ -185,7 +180,6 @@ async def search_dense_sparse(
         raise RetrievalBackendError("qdrant_unavailable") from exc
 
     return _points_to_candidates(response.points, "vector")
-
 
 async def search_bm25(
     query: str,

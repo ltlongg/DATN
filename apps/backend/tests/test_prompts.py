@@ -27,7 +27,6 @@ _DDL = (
     """,
 )
 
-
 def _seed_prompt(conn: psycopg.Connection, key: str) -> None:  # type: ignore[type-arg]
     with conn.cursor() as cur:
         for sql in _DDL:
@@ -43,9 +42,7 @@ def _seed_prompt(conn: psycopg.Connection, key: str) -> None:  # type: ignore[ty
             (str(uuid.uuid4()), key),
         )
 
-
 # --- model ------------------------------------------------------------------
-
 
 def test_create_version_goes_straight_to_production(db_conn) -> None:  # type: ignore[no-untyped-def]
     key = f"test-{uuid.uuid4().hex[:8]}"
@@ -64,7 +61,6 @@ def test_create_version_goes_straight_to_production(db_conn) -> None:  # type: i
     assert by_no[1]["status"] == "archived"  # production cũ bị demote trong cùng transaction
     assert detail["production_content"] == "V2 CONTENT"
 
-
 def test_promote_rolls_back_to_older_version(db_conn) -> None:  # type: ignore[no-untyped-def]
     key = f"test-{uuid.uuid4().hex[:8]}"
     _seed_prompt(db_conn, key)
@@ -80,12 +76,10 @@ def test_promote_rolls_back_to_older_version(db_conn) -> None:  # type: ignore[n
     assert by_no[2]["status"] == "archived"
     assert detail["production_content"] == "V1 CONTENT"
 
-
 def test_promote_unknown_version_returns_false(db_conn) -> None:  # type: ignore[no-untyped-def]
     key = f"test-{uuid.uuid4().hex[:8]}"
     _seed_prompt(db_conn, key)
     assert repo.promote(key, 99, "admin@example.com") is False
-
 
 def test_get_version_content(db_conn) -> None:  # type: ignore[no-untyped-def]
     key = f"test-{uuid.uuid4().hex[:8]}"
@@ -94,9 +88,7 @@ def test_get_version_content(db_conn) -> None:  # type: ignore[no-untyped-def]
     assert v is not None and v["content"] == "V1 CONTENT" and v["status"] == "production"
     assert repo.get_version(key, 42) is None
 
-
 # --- endpoints --------------------------------------------------------------
-
 
 def test_list_and_detail_endpoints(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     key = f"test-{uuid.uuid4().hex[:8]}"
@@ -113,7 +105,6 @@ def test_list_and_detail_endpoints(client, auth, db_conn) -> None:  # type: igno
     body = detail.json()
     assert body["production_content"] == "V1 CONTENT"
     assert len(body["versions"]) == 1
-
 
 def test_create_version_endpoint_applies_immediately(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     key = f"test-{uuid.uuid4().hex[:8]}"
@@ -136,11 +127,9 @@ def test_create_version_endpoint_applies_immediately(client, auth, db_conn) -> N
     assert rolled_back.status_code == 200
     assert rolled_back.json()["production_content"] == "V1 CONTENT"
 
-
 def test_prompts_require_admin(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     r = client.get("/api/admin/prompts", headers=auth("user"))
     assert r.status_code == 403
-
 
 def test_detail_404_for_unknown_key(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     # Bảng tồn tại (seed thật) nhưng key này không có -> 404 (không phải 500).

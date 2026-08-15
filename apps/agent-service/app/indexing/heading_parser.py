@@ -46,7 +46,6 @@ _BOLD_HEADING_RE = re.compile(r"^\s*(\*{2,})\s*(.+?)\s*\1\s*[:：]?\s*$")
 # Cấp = 5 + số sao: ** -> 7, *** -> 8, **** -> 9, ... (nối tiếp ngay sau ATX 1-6).
 _BOLD_HEADING_LEVEL_OFFSET = 5
 
-
 @dataclass
 class Section:
     """Một khối body cùng chuỗi heading cha của nó.
@@ -63,7 +62,6 @@ class Section:
     abs_start: int
     abs_end: int
 
-
 def _match_heading(line: str) -> tuple[int, str] | None:
     m = _HEADING_RE.match(line)
     if m:
@@ -74,10 +72,8 @@ def _match_heading(line: str) -> tuple[int, str] | None:
         return level, b.group(2).strip().rstrip(":：").strip()
     return None
 
-
 def _stack_to_headings(stack: dict[int, str]) -> dict[str, str]:
     return {f"h{level}": stack[level] for level in sorted(stack)}
-
 
 def parse_sections(text: str) -> list[Section]:
     """Tách `text` thành danh sách Section (Level 1 của pipeline chunking)."""

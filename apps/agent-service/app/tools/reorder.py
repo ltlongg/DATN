@@ -12,7 +12,6 @@ from app.schemas.retrieval import RetrievedChunk
 
 __all__ = ["reorder_for_context"]
 
-
 def reorder_for_context(chunks: list[RetrievedChunk]) -> list[RetrievedChunk]:
     """Best-first -> best ở hai đầu, yếu ở giữa.
 

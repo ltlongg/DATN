@@ -5,12 +5,10 @@ from __future__ import annotations
 import pytest
 from fastapi.testclient import TestClient
 
-
 def _sources(client: TestClient, admin: dict[str, str]) -> list[dict]:
     r = client.get("/api/admin/documents/sources", headers=admin)
     assert r.status_code == 200
     return r.json()
-
 
 def test_admin_document_crud(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
     admin = auth("admin")
@@ -43,7 +41,6 @@ def test_admin_document_crud(client: TestClient, auth) -> None:  # type: ignore[
     assert client.delete(f"/api/admin/documents/{did}", headers=admin).status_code == 200
     assert client.delete(f"/api/admin/documents/{did}", headers=admin).status_code == 404
 
-
 def test_create_document_defaults(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
     r = client.post("/api/admin/documents", json={"name": "doc.md"}, headers=auth("admin"))
     assert r.status_code == 201
@@ -51,13 +48,11 @@ def test_create_document_defaults(client: TestClient, auth) -> None:  # type: ig
     assert r.json()["type"] == "markdown"
     assert r.json()["chunk_count"] == 0
 
-
 def test_invalid_status_rejected(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
     r = client.post(
         "/api/admin/documents", json={"name": "doc.md", "status": "bogus"}, headers=auth("admin")
     )
     assert r.status_code == 422
-
 
 def test_patch_missing_document_404(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
     r = client.patch(
@@ -66,7 +61,6 @@ def test_patch_missing_document_404(client: TestClient, auth) -> None:  # type: 
         headers=auth("admin"),
     )
     assert r.status_code == 404
-
 
 def test_source_file_immutable_qua_patch(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
     """`source_file` là khóa nối -> PATCH gửi lên bị bỏ qua, không đổi được nguồn."""
@@ -77,15 +71,12 @@ def test_source_file_immutable_qua_patch(client: TestClient, auth) -> None:  # t
     assert r.status_code == 200
     assert r.json()["source_file"] is None
 
-
 def test_documents_requires_admin(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
     user = auth("user")
     assert client.get("/api/admin/documents", headers=user).status_code == 403
     assert client.get("/api/admin/documents/sources", headers=user).status_code == 403
 
-
 # --- nối kho thật (cần rag_chunks đã index; DB trống -> skip) ---
-
 
 def test_nguon_trong_kho_tu_hien_o_danh_muc(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
     """Chunk vào kho bằng script offline, không qua UI -> danh mục TỰ đồng bộ: mỗi nguồn
@@ -107,7 +98,6 @@ def test_nguon_trong_kho_tu_hien_o_danh_muc(client: TestClient, auth) -> None:  
     # Idempotent: load lại không đẻ thêm bản ghi trùng.
     docs2 = client.get("/api/admin/documents", headers=admin).json()
     assert len(docs2) == len(docs)
-
 
 def test_khong_xoa_duoc_tai_lieu_con_chunk_trong_kho(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
     """Xoá khỏi danh mục trong khi chunk còn trong kho là vô nghĩa (sync dựng lại ngay)

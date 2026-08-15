@@ -9,7 +9,6 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from app.core.security import validate_bcrypt_password
 from app.schemas.common import Role
 
-
 class UserOut(BaseModel):
     id: str
     email: EmailStr
@@ -18,7 +17,6 @@ class UserOut(BaseModel):
     is_active: bool
     question_quota: int | None  # None = không giới hạn
     created_at: datetime
-
 
 class UserCreate(BaseModel):
     email: EmailStr
@@ -32,7 +30,6 @@ class UserCreate(BaseModel):
     @classmethod
     def _fits_bcrypt(cls, v: str) -> str:
         return validate_bcrypt_password(v)
-
 
 class UserUpdate(BaseModel):
     # PATCH: chỉ field được gửi mới cập nhật (exclude_unset ở API). question_quota=null hợp

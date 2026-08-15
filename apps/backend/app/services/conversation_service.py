@@ -11,7 +11,6 @@ from app.models.conversation import Message
 DEFAULT_TITLE = "Cuộc trò chuyện mới"
 _TITLE_MAX_CHARS = 80
 
-
 def derive_title(question: str) -> str:
     """Title từ câu hỏi đầu: gộp khoảng trắng/xuống dòng, cắt ~80 ký tự. Không gọi LLM."""
     flat = " ".join(question.split())
@@ -20,7 +19,6 @@ def derive_title(question: str) -> str:
     if len(flat) <= _TITLE_MAX_CHARS:
         return flat
     return flat[:_TITLE_MAX_CHARS].rstrip() + "…"
-
 
 def build_bounded_history(
     messages: list[Message], max_messages: int, *, max_chars: int = 4000

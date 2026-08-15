@@ -12,7 +12,6 @@ _APP_ROOT = Path(__file__).resolve().parents[1]  # apps/agent-service
 if str(_APP_ROOT) not in sys.path:
     sys.path.insert(0, str(_APP_ROOT))
 
-
 @pytest.fixture(autouse=True)
 def _isolate_prompt_store(monkeypatch: pytest.MonkeyPatch):
     """Giữ test hermetic (không chạm Postgres remote): chặn DB của prompt_store -> get_active_
@@ -30,7 +29,6 @@ def _isolate_prompt_store(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(prompt_store, "connection", _no_db)
     yield
     prompt_store.clear_cache()
-
 
 @pytest.fixture(autouse=True)
 def _isolate_runtime_config(monkeypatch: pytest.MonkeyPatch):

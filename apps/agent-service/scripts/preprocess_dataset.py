@@ -24,7 +24,6 @@ if str(_APP_ROOT) not in sys.path:
 
 from app.indexing.preprocessing import preprocess_file, preprocess_text  # noqa: E402
 
-
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", required=True, help="File đầu vào (markdown/text).")
@@ -59,7 +58,6 @@ def main() -> int:
     print(f"Đã ghi: {output_path}")
     print(json.dumps(report.as_dict(), ensure_ascii=False, indent=2))
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

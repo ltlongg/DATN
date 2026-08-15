@@ -6,7 +6,6 @@ from datetime import datetime
 
 from pydantic import BaseModel, Field
 
-
 class PromptListItem(BaseModel):
     key: str
     grp: str
@@ -15,7 +14,6 @@ class PromptListItem(BaseModel):
     active_version_no: int | None  # None nếu chưa có version production
     version_count: int
     updated_at: datetime
-
 
 class PromptVersionMeta(BaseModel):
     version_no: int
@@ -26,7 +24,6 @@ class PromptVersionMeta(BaseModel):
     promoted_by: str | None
     promoted_at: datetime | None
 
-
 class PromptDetail(BaseModel):
     key: str
     grp: str
@@ -36,12 +33,10 @@ class PromptDetail(BaseModel):
     production_content: str | None  # content đang chạy (None nếu chưa có production)
     versions: list[PromptVersionMeta]
 
-
 class PromptVersionContent(BaseModel):
     version_no: int
     content: str
     status: str
-
 
 class CreateVersionInput(BaseModel):
     content: str = Field(min_length=1)

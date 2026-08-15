@@ -46,7 +46,6 @@ from app.schemas.chunk import Chunk  # noqa: E402
 # Mặc định IN-PLACE: đọc và ghi cùng `chunks_llm.json` (gộp metadata vào luôn).
 _DEFAULT_FILE = _REPO_ROOT / "dataset" / "chunks_llm.json"
 
-
 def _coverage(chunks: list[dict]) -> dict[str, object]:
     n = len(chunks) or 1
     def _has(field: str) -> int:
@@ -59,7 +58,6 @@ def _coverage(chunks: list[dict]) -> dict[str, object]:
         "with_events": _has("events"),
         "pct_actors": round(_has("actors") * 100 / n, 1),
     }
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -198,7 +196,6 @@ def main() -> int:
         print(f"[CẢNH BÁO] {schema_errors} chunk lỗi schema.")
     print(f"Đã ghi -> {file_path}")
     return 1 if errors else 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

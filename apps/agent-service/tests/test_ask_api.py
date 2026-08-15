@@ -27,7 +27,6 @@ from app.schemas.visualization import VisualizationPayload
 # chạy như trước; đường auth vẫn được đi qua thật chứ không bị dependency_override tắt.
 client = TestClient(app, headers={INTERNAL_KEY_HEADER: get_settings().internal_api_key})
 
-
 @pytest.fixture(autouse=True)
 def _allow_guardrails(monkeypatch):
     """guard_input đứng đầu graph; mặc định allow để test /ask không gọi LLM guardrails thật
@@ -38,7 +37,6 @@ def _allow_guardrails(monkeypatch):
 
     monkeypatch.setattr(nodes, "check_input", allow)
 
-
 def _retrieval(chunk_ids) -> RetrievalResult:
     return RetrievalResult(
         mode="hybrid",
@@ -48,7 +46,6 @@ def _retrieval(chunk_ids) -> RetrievalResult:
             for c in chunk_ids
         ],
     )
-
 
 def _patch_graph(monkeypatch, *, route="needs_retrieval", retrieve_error=None):
     output = PlanOutput(standalone_query="q", mentioned_entities=[], route=route)
@@ -82,9 +79,7 @@ def _patch_graph(monkeypatch, *, route="needs_retrieval", retrieve_error=None):
     monkeypatch.setattr(nodes, "stream_synthesis", fake_synth)
     monkeypatch.setattr(nodes, "build_visualization_payload", lambda ids: VisualizationPayload())
 
-
 # --- /ask stream=False ---
-
 
 def test_ask_happy_path_stream_false(monkeypatch) -> None:
     _patch_graph(monkeypatch)
@@ -95,24 +90,20 @@ def test_ask_happy_path_stream_false(monkeypatch) -> None:
     assert body["retrieval_mode"] == "hybrid"
     assert body["citations"][0]["chunk_id"] == "c-1"
 
-
 def test_ask_empty_question_422() -> None:
     resp = client.post("/ask", json={"question": "", "stream": False})
     assert resp.status_code == 422
-
 
 def test_ask_history_too_large_422() -> None:
     history = [{"role": "user", "content": "x"} for _ in range(13)]
     resp = client.post("/ask", json={"question": "hỏi", "history": history, "stream": False})
     assert resp.status_code == 422
 
-
 def test_ask_dependency_error_503(monkeypatch) -> None:
     _patch_graph(monkeypatch, retrieve_error=RetrievalBackendError("all_backends_failed"))
     resp = client.post("/ask", json={"question": "hỏi", "stream": False})
     assert resp.status_code == 503
     assert resp.json()["detail"]["code"] == "all_backends_failed"
-
 
 def test_ask_timeout_504(monkeypatch) -> None:
     async def slow(request, **kw):
@@ -124,9 +115,7 @@ def test_ask_timeout_504(monkeypatch) -> None:
     assert resp.status_code == 504
     assert resp.json()["detail"]["code"] == "timeout"
 
-
 # --- /ask stream=True (SSE) ---
-
 
 def test_ask_stream_true_returns_sse(monkeypatch) -> None:
     _patch_graph(monkeypatch)
@@ -137,15 +126,12 @@ def test_ask_stream_true_returns_sse(monkeypatch) -> None:
     assert "event: token" in resp.text
     assert "event: citations" in resp.text
 
-
 # --- /health + /ready ---
-
 
 def test_health() -> None:
     resp = client.get("/health")
     assert resp.status_code == 200
     assert resp.json() == {"status": "ok"}
-
 
 def test_ready_ok_when_config_present(monkeypatch) -> None:
     monkeypatch.setattr(
@@ -163,7 +149,6 @@ def test_ready_ok_when_config_present(monkeypatch) -> None:
     assert resp.status_code == 200
     assert resp.json()["status"] == "ready"
 
-
 def test_ready_503_when_config_missing(monkeypatch) -> None:
     monkeypatch.setattr(
         health_module,
@@ -180,16 +165,13 @@ def test_ready_503_when_config_missing(monkeypatch) -> None:
     assert resp.status_code == 503
     assert resp.json()["detail"]["code"] == "not_ready"
 
-
 def test_probes_public_no_internal_key_needed() -> None:
     """Probe KHÔNG gác key — backend `_ping_agent` gọi /ready mà không mang header."""
     bare = TestClient(app)
     assert bare.get("/health").status_code == 200
     assert bare.get("/ready").status_code in (200, 503)  # tuỳ .env, miễn KHÔNG phải 401
 
-
 # --- auth nội bộ X-Internal-Key ---
-
 
 def test_ask_401_without_internal_key() -> None:
     bare = TestClient(app)
@@ -197,12 +179,10 @@ def test_ask_401_without_internal_key() -> None:
     assert resp.status_code == 401
     assert resp.json()["detail"]["code"] == "unauthenticated"
 
-
 def test_ask_401_with_wrong_internal_key() -> None:
     wrong = TestClient(app, headers={INTERNAL_KEY_HEADER: "sai-key"})
     resp = wrong.post("/ask", json={"question": "hỏi", "stream": False})
     assert resp.status_code == 401
-
 
 def test_ask_500_when_server_key_not_configured(monkeypatch) -> None:
     """Key rỗng ở server = chưa cấu hình -> 500 (fail-closed), KHÔNG phải bỏ qua check."""

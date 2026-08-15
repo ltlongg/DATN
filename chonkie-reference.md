@@ -376,7 +376,6 @@ Day la cau hinh gan voi code hien tai trong `llm_chunker.py`:
 def _chonkie_token_counter(text: str) -> int:
     return count_tokens(text)
 
-
 @lru_cache(maxsize=4)
 def _section_chunker(max_tokens: int, min_chars: int):
     from chonkie import RecursiveChunker

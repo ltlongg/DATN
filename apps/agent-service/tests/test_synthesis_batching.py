@@ -19,7 +19,6 @@ from app.schemas.ask import SynthesizedAnswer
 
 # --- emit_text_as_batches ---
 
-
 async def test_emit_text_as_one_token() -> None:
     emitter = ListEmitter()
     text = "Câu một. Câu hai. Câu ba."
@@ -27,15 +26,12 @@ async def test_emit_text_as_one_token() -> None:
     tokens = [d["text"] for t, d in emitter.events if t == "token"]
     assert tokens == [text]  # không batch -> nguyên khối 1 token
 
-
 async def test_emit_text_empty_emits_nothing() -> None:
     emitter = ListEmitter()
     await emit_text_as_batches("", emitter, 160)
     assert emitter.events == []
 
-
 # --- stream_static_text (nhả dần cho guardrails safe message) ---
-
 
 async def test_stream_static_text_chunks_and_rejoins() -> None:
     emitter = ListEmitter()
@@ -46,22 +42,18 @@ async def test_stream_static_text_chunks_and_rejoins() -> None:
     assert "".join(tokens) == text  # ghép lại nguyên vẹn
     assert all(len(t) <= 24 for t in tokens)  # mỗi cụm không vượt ngưỡng
 
-
 async def test_stream_static_text_short_is_single_token() -> None:
     emitter = ListEmitter()
     await stream_static_text("Ngắn thôi.", emitter, chunk_chars=24, delay=0)
     tokens = [d["text"] for t, d in emitter.events if t == "token"]
     assert tokens == ["Ngắn thôi."]
 
-
 async def test_stream_static_text_empty_emits_nothing() -> None:
     emitter = ListEmitter()
     await stream_static_text("", emitter, delay=0)
     assert emitter.events == []
 
-
 # --- stream_synthesis với fake OpenAI stream ---
-
 
 class _FakeStream:
     def __init__(self, events, final):
@@ -87,12 +79,10 @@ class _FakeStream:
     async def get_final_completion(self):
         return self._final
 
-
 class _FakeClient:
     def __init__(self, stream):
         completions = SimpleNamespace(stream=lambda **kw: stream)
         self.chat = SimpleNamespace(completions=completions)
-
 
 async def test_stream_synthesis_emits_raw_deltas_and_returns_final() -> None:
     final = SynthesizedAnswer(

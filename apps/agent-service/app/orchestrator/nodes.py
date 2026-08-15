@@ -64,12 +64,10 @@ HONEST_MESSAGE = (
 # GET /api/chat/sources/{chunk_id} lúc user click — xem docs/plan/citation-viewer-plan.md.
 CITATION_QUOTE_CHARS = 240
 
-
 def _emitter(config: RunnableConfig | None) -> Emitter:
     cfg = (config or {}).get("configurable", {}) or {}
     emitter = cfg.get("emitter")
     return emitter if isinstance(emitter, Emitter) else NullEmitter()
-
 
 async def _emit_step(
     emitter: Emitter,
@@ -91,18 +89,14 @@ async def _emit_step(
         data["internals"] = internals
     await emitter.emit("step", data)
 
-
 def _plan_model() -> str:
     return get_settings().plan_llm_model
-
 
 def _resolve_model() -> str:
     return get_settings().resolve_llm_model
 
-
 def _synthesize_model() -> str:
     return get_settings().synthesize_llm_model
-
 
 async def _record_usage_from_completion(
     completion: Any, task: str, state: AgentState, *, model: str
@@ -129,9 +123,7 @@ async def _record_usage_from_completion(
         message_id=state.get("message_id"),
     )
 
-
 # --- 0. guard_input (guardrails input layer — chạy TRƯỚC `plan`) ---
-
 
 async def guard_input(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     """Kiểm câu hỏi qua guardrails. allow -> đi tiếp `plan` (ghi debug). block -> emit
@@ -167,9 +159,7 @@ async def guard_input(state: AgentState, config: RunnableConfig) -> dict[str, An
         reason="input_guardrails", safe_message=safe, categories=decision.categories
     )
 
-
 # --- 1. plan (1 LLM call: rewrite + route + phân rã truy vấn) ---
-
 
 def _fallback_steps(question: str) -> list[PlanStep]:
     """Không có todo list dùng được -> 1 bước 1 query từ chính câu hỏi (hành vi tiền-B1)."""
@@ -177,11 +167,9 @@ def _fallback_steps(question: str) -> list[PlanStep]:
         PlanStep(id=1, label=DEFAULT_STEP_LABEL, queries=[StepQuery(query=question)])
     ]
 
-
 def _resolve_mode(override: RequestedMode, chosen: AutoSelectableMode) -> RetrievalMode:
     """Override của user THẮNG lựa chọn của agent; chỉ "auto" mới nhường quyền cho agent."""
     return chosen if override == "auto" else override
-
 
 async def plan(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     emitter = _emitter(config)
@@ -281,7 +269,6 @@ async def plan(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
             "warnings": [f"plan lỗi, fallback needs_retrieval: {type(exc).__name__}"],
         }
 
-
 # --- 2. route_intent (conditional edge — chỉ đọc state.route, không LLM) ---
 
 _ROUTE_TARGET: dict[RouteDecision, str] = {
@@ -291,14 +278,11 @@ _ROUTE_TARGET: dict[RouteDecision, str] = {
     "smalltalk": "direct_response",
 }
 
-
 def route_intent(state: AgentState) -> str:
     route = state.get("route") or "needs_retrieval"
     return _ROUTE_TARGET.get(route, "retrieve")
 
-
 # --- 3. retrieve (fan-out mọi query của bước hiện tại; set retrieval_mode = mode đã chọn) ---
-
 
 async def _retrieve_one(
     item: StepQuery, mode: RetrievalMode, cfg: RuntimeConfig
@@ -334,7 +318,6 @@ async def _retrieve_one(
         graph_max_path_hops=cfg.graph_max_path_hops,
         graph_path_hit_weight=cfg.graph_path_hit_weight,
     )
-
 
 async def retrieve(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     emitter = _emitter(config)
@@ -415,9 +398,7 @@ async def retrieve(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
         },
     }
 
-
 # --- 3b. resolve_step + advance_step + các edge fn của vòng lặp todo ---
-
 
 async def _emit_skipped_steps(emitter: Emitter, state: AgentState) -> None:
     """Đánh dấu các bước SAU bước hiện tại là bỏ qua (list dừng sớm).
@@ -427,7 +408,6 @@ async def _emit_skipped_steps(emitter: Emitter, state: AgentState) -> None:
     """
     for step in state["steps"][state["current_step"] + 1:]:
         await _emit_step(emitter, progress.todo_step_id(step.id), "skipped")
-
 
 async def resolve_step(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     """Trích mắt xích từ context của bước vừa chạy (1 LLM call, output ngắn).
@@ -563,7 +543,6 @@ async def resolve_step(state: AgentState, config: RunnableConfig) -> dict[str, A
         },
     }
 
-
 def advance_step(state: AgentState) -> dict[str, Any]:
     """Điểm GHI DUY NHẤT của `current_step`.
 
@@ -573,7 +552,6 @@ def advance_step(state: AgentState) -> dict[str, Any]:
     """
     return {"current_step": state["current_step"] + 1}
 
-
 def after_retrieve(state: AgentState) -> str:
     if state["stop_reason"]:
         return has_context(state)
@@ -581,13 +559,11 @@ def after_retrieve(state: AgentState) -> str:
         return "resolve_step"
     return "advance_step"
 
-
 def after_resolve(state: AgentState) -> str:
     if state["stop_reason"]:
         # Dừng list nhưng KHÔNG vứt phần đã tìm được: trả lời vế có căn cứ, nêu rõ vế chưa tra.
         return has_context(state)
     return "advance_step"
-
 
 def after_advance(state: AgentState) -> str:
     """Chạy SAU khi `advance_step` đã tăng, nên so `<` chứ không phải `+ 1 <` — sai chỗ này
@@ -596,24 +572,19 @@ def after_advance(state: AgentState) -> str:
         return "retrieve"
     return has_context(state)
 
-
 # --- 4. has_context (conditional edge — chỉ check có chunk không) ---
-
 
 def has_context(state: AgentState) -> str:
     retrieval = state.get("retrieval")
     return "synthesize" if (retrieval and retrieval.chunks) else "honest_answer"
 
-
 # --- 5. synthesize (stream structured output, answer field đầu) ---
-
 
 def _unresolved_target(state: AgentState) -> str:
     """Mô tả mắt xích của bước làm todo list dừng lại, "" nếu list chạy hết bình thường."""
     if state["stop_reason"] != "unresolved":
         return ""
     return state["steps"][state["current_step"]].resolve
-
 
 async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     emitter = _emitter(config)
@@ -713,9 +684,7 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
         "synthesize_attempt_count": attempt + 1,
     }
 
-
 # --- 5b. validate_citations + after_validate (B5) ---
-
 
 async def validate_citations(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     """Giữ lại các `used_chunk_ids` CÓ THẬT trong tập vừa truy hồi (dedupe, giữ thứ tự).
@@ -764,7 +733,6 @@ async def validate_citations(state: AgentState, config: RunnableConfig) -> dict[
         },
     }
 
-
 def after_validate(state: AgentState) -> str:
     """Conditional edge — CHỈ ĐỌC state (không emit, không ghi).
 
@@ -781,17 +749,13 @@ def after_validate(state: AgentState) -> str:
         return "synthesize"
     return "honest_answer"
 
-
 # --- 6. citation helpers (dùng trong build_visualization) ---
-
 
 def _as_int(value: object) -> int | None:
     return value if isinstance(value, int) else None
 
-
 def _as_str(value: object) -> str | None:
     return value if isinstance(value, str) else None
-
 
 def _make_quote(text: str) -> str | None:
     """Trích đoạn ngắn LẤY TỪ chunk text (không nhờ LLM — xem orchestrator-plan §citation).
@@ -808,7 +772,6 @@ def _make_quote(text: str) -> str | None:
     cut = head.rfind(" ")
     return f"{head[:cut] if cut > 0 else head}…"
 
-
 def _build_citation(chunk: RetrievedChunk) -> Citation:
     meta = chunk.metadata
     return Citation(
@@ -821,9 +784,7 @@ def _build_citation(chunk: RetrievedChunk) -> Citation:
         quote=_make_quote(chunk.text),
     )
 
-
 # --- 7. honest_answer ---
-
 
 async def honest_answer(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     emitter = _emitter(config)
@@ -852,16 +813,13 @@ async def honest_answer(state: AgentState, config: RunnableConfig) -> dict[str, 
         "used_chunk_ids": [],
     }
 
-
 # --- 7b. direct_response (smalltalk — không retrieve, không dùng message "không đủ corpus") ---
-
 
 def _smalltalk_reply(question: str) -> str:
     q = question.lower()
     if any(w in q for w in ("cảm ơn", "cám ơn", "thank")):
         return "Không có gì! Bạn còn câu hỏi nào về lịch sử Việt Nam không?"
     return "Xin chào! Bạn muốn hỏi về sự kiện hoặc nhân vật lịch sử nào?"
-
 
 async def direct_response(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     emitter = _emitter(config)
@@ -871,9 +829,7 @@ async def direct_response(state: AgentState, config: RunnableConfig) -> dict[str
     await emit_text_as_batches(text, emitter, settings.stream_batch_chars)
     return {"answer": text}
 
-
 # --- 8. clarify (ambiguous — kết thúc ngay, trả clarification, KHÔNG retrieve) ---
-
 
 def _clarification_question(question: str) -> str:
     q = question.lower()
@@ -882,7 +838,6 @@ def _clarification_question(question: str) -> str:
     if any(w in q for w in ("ông ấy", "bà ấy", "ông ta", "bà ta", "họ", "nhân vật")):
         return "Bạn đang hỏi về nhân vật nào ạ? (ví dụ: Hồ Chí Minh, Trương Định...)"
     return "Bạn có thể nói rõ hơn đang hỏi về nhân vật, sự kiện hay mốc thời gian nào không ạ?"
-
 
 async def clarify(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     emitter = _emitter(config)
@@ -894,9 +849,7 @@ async def clarify(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
         "retrieval_mode": "none",
     }
 
-
 # --- 9. build_visualization (dựng Citation + viz; viz fail không làm fail answer) ---
-
 
 async def build_visualization(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
     emitter = _emitter(config)

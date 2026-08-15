@@ -14,11 +14,9 @@ from app.services.agent_client import (
     open_ask_stream,
 )
 
-
 async def _lines(text: str):  # type: ignore[no-untyped-def]
     for line in text.split("\n"):
         yield line
-
 
 async def test_parse_sse_multiple_events() -> None:
     wire = (
@@ -31,12 +29,10 @@ async def test_parse_sse_multiple_events() -> None:
     assert events[0][1] == {"text": "a"}
     assert events[2][1]["confidence"] == "cao"
 
-
 async def test_parse_sse_skips_comment_lines() -> None:
     wire = ": keep-alive\n\n" + format_sse("token", {"text": "x"})
     events = [e.event async for e in _parse_sse(_lines(wire))]
     assert events == ["token"]
-
 
 def _patch_transport(monkeypatch: pytest.MonkeyPatch, handler) -> None:  # type: ignore[no-untyped-def]
     orig = ac.httpx.AsyncClient
@@ -46,7 +42,6 @@ def _patch_transport(monkeypatch: pytest.MonkeyPatch, handler) -> None:  # type:
         return orig(*args, **kwargs)
 
     monkeypatch.setattr(ac.httpx, "AsyncClient", factory)
-
 
 async def test_open_stream_happy_path(monkeypatch: pytest.MonkeyPatch) -> None:
     body = format_sse("token", {"text": "hi"}) + format_sse(
@@ -61,14 +56,12 @@ async def test_open_stream_happy_path(monkeypatch: pytest.MonkeyPatch) -> None:
     events = [e.event async for e in stream.events()]
     assert events == ["token", "done"]
 
-
 async def test_open_stream_422_maps_to_502(monkeypatch: pytest.MonkeyPatch) -> None:
     _patch_transport(monkeypatch, lambda req: httpx.Response(422, json={"detail": "bad"}))
     with pytest.raises(AppError) as exc:
         await open_ask_stream(AgentAskRequest(question="hi"))
     assert exc.value.status_code == 502
     assert exc.value.code == "agent_bad_response"
-
 
 async def test_open_stream_connect_error_maps_to_503(monkeypatch: pytest.MonkeyPatch) -> None:
     def handler(request: httpx.Request) -> httpx.Response:
@@ -79,7 +72,6 @@ async def test_open_stream_connect_error_maps_to_503(monkeypatch: pytest.MonkeyP
         await open_ask_stream(AgentAskRequest(question="hi"))
     assert exc.value.status_code == 503
     assert exc.value.code == "agent_unavailable"
-
 
 async def test_open_stream_connect_timeout_maps_to_504(monkeypatch: pytest.MonkeyPatch) -> None:
     def handler(request: httpx.Request) -> httpx.Response:

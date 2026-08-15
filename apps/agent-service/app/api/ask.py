@@ -21,7 +21,6 @@ from app.schemas.retrieval import RetrievalBackendError
 
 router = APIRouter()
 
-
 @router.post("/ask", response_model=AskResponse)
 async def ask(request: AskRequest):  # type: ignore[no-untyped-def]
     if request.stream:

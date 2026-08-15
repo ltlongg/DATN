@@ -7,11 +7,9 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 from app.core.security import validate_bcrypt_password
 from app.schemas.common import Role
 
-
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
-
 
 class RegisterRequest(BaseModel):
     """Đăng ký công khai. KHÔNG có field `role` — role hardcode `"user"` trong handler;
@@ -27,7 +25,6 @@ class RegisterRequest(BaseModel):
     def _fits_bcrypt(cls, v: str) -> str:
         return validate_bcrypt_password(v)
 
-
 class GoogleLoginRequest(BaseModel):
     """`credential` = ID token (JWT do Google ký) mà nút "Sign in with Google" trả về.
     Backend chỉ verify chữ ký rồi cấp JWT của HỆ THỐNG MÌNH — Google là thêm một cửa vào,
@@ -35,13 +32,11 @@ class GoogleLoginRequest(BaseModel):
 
     credential: str = Field(min_length=1)
 
-
 class UserPublic(BaseModel):
     id: str
     email: EmailStr
     name: str
     role: Role
-
 
 class LoginResponse(BaseModel):
     access_token: str

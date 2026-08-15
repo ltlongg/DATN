@@ -34,16 +34,13 @@ __all__ = ["connection", "get_pool", "close_pool", "DictConnection"]
 
 DictConnection = Connection[dict[str, Any]]
 
-
 def _database_url(database_url: str | None = None) -> str:
     url = database_url or get_settings().database_url
     if not url:
         raise RuntimeError("Thiếu DATABASE_URL trong .env để kết nối Postgres.")
     return url.replace("postgresql+psycopg://", "postgresql://", 1)
 
-
 _pool: ConnectionPool[DictConnection] | None = None
-
 
 def get_pool() -> ConnectionPool[DictConnection]:
     """Trả pool đang mở, tạo lần đầu nếu chưa có. `open()` không blocking."""
@@ -63,14 +60,12 @@ def get_pool() -> ConnectionPool[DictConnection]:
         atexit.register(close_pool)
     return _pool
 
-
 def close_pool() -> None:
     """Đóng pool (idempotent). Gọi lúc shutdown server (lifespan) và atexit cho CLI."""
     global _pool
     if _pool is not None:
         _pool.close()
         _pool = None
-
 
 @contextmanager
 def connection(database_url: str | None = None) -> Iterator[DictConnection]:

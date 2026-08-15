@@ -49,7 +49,6 @@ from app.tools.graph_rag.vector_store import upsert_chunk_vectors  # noqa: E402
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("graph_index")
 
-
 def _parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Index chunk vào Postgres + Qdrant + Neo4j.")
     p.add_argument("--file", default=str(_REPO_ROOT / "dataset" / "chunks_llm.json"))
@@ -63,13 +62,11 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--skip-graph", action="store_true", help="Bỏ qua bước Neo4j graph.")
     return p.parse_args()
 
-
 def _load_chunks(path: Path) -> list[dict]:
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, list):
         raise ValueError(f"{path} không phải JSON list.")
     return data
-
 
 def _load_artifact(path: Path) -> dict[str, Any]:
     if not path.exists():
@@ -77,13 +74,11 @@ def _load_artifact(path: Path) -> dict[str, Any]:
     data = json.loads(path.read_text(encoding="utf-8"))
     return data if isinstance(data, dict) else {}
 
-
 def _write_artifact(path: Path, cache: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
     os.replace(tmp, path)
-
 
 def _run_graph(records: list[dict], args: argparse.Namespace) -> None:
     from app.core.neo4j import ensure_graph_constraints, get_neo4j_driver
@@ -158,7 +153,6 @@ def _run_graph(records: list[dict], args: argparse.Namespace) -> None:
         driver.close()
     log.info("Merge Neo4j: %d entity, %d relation từ %d chunk", n_ent, n_rel, len(merge_ids))
 
-
 def main() -> None:
     args = _parse_args()
     chunks = _load_chunks(Path(args.file))
@@ -187,7 +181,6 @@ def main() -> None:
         _run_graph(records, args)
 
     log.info("Xong.")
-
 
 if __name__ == "__main__":
     main()

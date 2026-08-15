@@ -18,7 +18,6 @@ from app.models.user import User, get_user_by_id
 # auto_error=False -> tự xử lý thiếu header để trả body chuẩn thay vì 403 mặc định.
 _bearer = HTTPBearer(auto_error=False)
 
-
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
 ) -> User:
@@ -37,12 +36,10 @@ async def get_current_user(
         raise AppError(403, "account_locked", "Tài khoản đã bị khóa.")
     return user
 
-
 async def require_admin(user: User = Depends(get_current_user)) -> User:
     if user.role != "admin":
         raise AppError(403, "forbidden", "Chỉ admin được phép truy cập.")
     return user
-
 
 async def get_owned_conversation(
     conversation_id: str, user: User = Depends(get_current_user)

@@ -26,7 +26,6 @@ INTERNAL_KEY_HEADER = "X-Internal-Key"
 # auto_error=False -> tự ném lỗi có body {code,message} thay vì 403 mặc định của FastAPI.
 _key_header = APIKeyHeader(name=INTERNAL_KEY_HEADER, auto_error=False)
 
-
 async def verify_internal_key(key: str | None = Depends(_key_header)) -> None:
     """Chặn request không mang đúng `X-Internal-Key`. Gắn ở cấp router (xem app/main.py)."""
     expected = get_settings().internal_api_key
@@ -48,7 +47,6 @@ async def verify_internal_key(key: str | None = Depends(_key_header)) -> None:
                 "message": f"Thiếu hoặc sai header {INTERNAL_KEY_HEADER}.",
             },
         )
-
 
 def internal_headers() -> dict[str, str]:
     """Header để GỬI khi agent-service gọi ngược backend (`GET /internal/config`).

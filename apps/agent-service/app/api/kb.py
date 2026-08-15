@@ -13,7 +13,6 @@ from app.tools.graph_rag import graph_store
 
 router = APIRouter(prefix="/kb", tags=["kb"])
 
-
 @router.get("/entities", response_model=EntityListResponse)
 def list_entities(
     q: str | None = Query(default=None),
@@ -29,7 +28,6 @@ def list_entities(
     return EntityListResponse(
         items=[EntityListItem(**r) for r in rows], total=total, limit=limit, offset=offset
     )
-
 
 @router.get("/entities/{norm_name}", response_model=EntityDetail)
 def get_entity(norm_name: str) -> EntityDetail:

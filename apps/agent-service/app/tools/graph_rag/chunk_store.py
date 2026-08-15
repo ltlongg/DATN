@@ -51,13 +51,11 @@ ON CONFLICT (chunk_id) DO UPDATE SET
     updated_at = now();
 """
 
-
 def _database_url(database_url: str | None = None) -> str:
     url = database_url or get_settings().database_url
     if not url:
         raise RuntimeError("Thiếu DATABASE_URL trong .env để ghi rag_chunks.")
     return url.replace("postgresql+psycopg://", "postgresql://", 1)
-
 
 def _record_params(record: dict[str, Any]) -> tuple[Any, ...]:
     return (
@@ -68,13 +66,11 @@ def _record_params(record: dict[str, Any]) -> tuple[Any, ...]:
         record.get("heading_path") or [],
     )
 
-
 def ensure_rag_chunks_table(conn: psycopg.Connection[Any]) -> None:
     with conn.cursor() as cur:
         cur.execute(CREATE_RAG_CHUNKS_SQL)
         for sql in CREATE_INDEX_SQLS:
             cur.execute(sql)
-
 
 def upsert_rag_chunks(
     records: Iterable[dict[str, Any]], database_url: str | None = None
@@ -90,7 +86,6 @@ def upsert_rag_chunks(
             cur.executemany(UPSERT_RAG_CHUNK_SQL, [_record_params(row) for row in rows])
         conn.commit()
     return len(rows)
-
 
 def get_rag_chunks_by_ids(
     chunk_ids: list[str], database_url: str | None = None

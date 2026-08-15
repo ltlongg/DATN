@@ -16,11 +16,9 @@ from app.schemas.config import SystemConfigResponse, SystemConfigUpdate
 
 router = APIRouter(dependencies=[Depends(require_admin)])
 
-
 @router.get("", response_model=SystemConfigResponse)
 async def get_system_config() -> SystemConfigResponse:
     return await anyio.to_thread.run_sync(repo.get_config)
-
 
 @router.put("", response_model=SystemConfigResponse)
 async def update_system_config(body: SystemConfigUpdate) -> SystemConfigResponse:

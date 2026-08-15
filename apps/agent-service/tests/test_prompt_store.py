@@ -10,7 +10,6 @@ import pytest
 
 from app.tools.prompts import prompt_store
 
-
 class _Cur:
     def __init__(self, row, log):
         self._row = row
@@ -27,7 +26,6 @@ class _Cur:
 
     def fetchone(self):
         return self._row
-
 
 class _Conn:
     def __init__(self, row, log):
@@ -46,7 +44,6 @@ class _Conn:
     def commit(self):
         pass
 
-
 def _patch_conn(monkeypatch, row, log=None):
     log = log if log is not None else []
 
@@ -57,23 +54,19 @@ def _patch_conn(monkeypatch, row, log=None):
     monkeypatch.setattr(prompt_store, "connection", fake_connection)
     return log
 
-
 @pytest.fixture(autouse=True)
 def _clear_cache():
     prompt_store.clear_cache()
     yield
     prompt_store.clear_cache()
 
-
 def test_get_active_prompt_returns_production_content(monkeypatch) -> None:
     _patch_conn(monkeypatch, {"content": "PROD PROMPT"})
     assert prompt_store.get_active_prompt("plan", fallback="CODE") == "PROD PROMPT"
 
-
 def test_get_active_prompt_fallback_when_no_production(monkeypatch) -> None:
     _patch_conn(monkeypatch, None)  # không có version production
     assert prompt_store.get_active_prompt("synthesize", fallback="CODE") == "CODE"
-
 
 def test_get_active_prompt_fallback_on_db_error(monkeypatch) -> None:
     @contextmanager
@@ -85,7 +78,6 @@ def test_get_active_prompt_fallback_on_db_error(monkeypatch) -> None:
     # Nuốt lỗi -> fallback, KHÔNG raise (answer flow không vỡ).
     assert prompt_store.get_active_prompt("guardrails_input", fallback="CODE") == "CODE"
 
-
 def test_get_active_prompt_caches_within_ttl(monkeypatch) -> None:
     log = _patch_conn(monkeypatch, {"content": "PROD"})
     prompt_store.get_active_prompt("plan", fallback="CODE")
@@ -94,7 +86,6 @@ def test_get_active_prompt_caches_within_ttl(monkeypatch) -> None:
     selects = [e for e in log if "SELECT content" in e[0]]
     assert len(selects) == 1
 
-
 def test_seed_prompt_creates_when_absent(monkeypatch) -> None:
     log = _patch_conn(monkeypatch, None)  # SELECT 1 -> None (chưa có key)
     created = prompt_store.seed_prompt("plan", "ONLINE", "T", "d", "CONTENT")
@@ -102,16 +93,13 @@ def test_seed_prompt_creates_when_absent(monkeypatch) -> None:
     assert any("INSERT INTO managed_prompts" in e[0] for e in log)
     assert any("INSERT INTO prompt_versions" in e[0] for e in log)
 
-
 def test_seed_prompt_idempotent_when_exists(monkeypatch) -> None:
     log = _patch_conn(monkeypatch, {"?column?": 1})  # SELECT 1 -> có row -> đã tồn tại
     created = prompt_store.seed_prompt("plan", "ONLINE", "T", "d", "CONTENT")
     assert created is False
     assert not any("INSERT INTO" in e[0] for e in log)
 
-
 # --- wiring: plan dùng get_active_prompt (key + fallback đúng) --------
-
 
 async def test_plan_wires_get_active_prompt(monkeypatch) -> None:
     from app.orchestrator import nodes

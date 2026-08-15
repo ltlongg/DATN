@@ -30,7 +30,6 @@ logger = logging.getLogger("agent.guardrails")
 
 GUARDRAIL_USAGE_TASK = "guardrail_input"
 
-
 def _fail_closed_decision() -> GuardrailDecision:
     """Quyết định khi model lỗi/timeout với fail_closed=True: chặn + safe message mặc định."""
     return GuardrailDecision(
@@ -38,7 +37,6 @@ def _fail_closed_decision() -> GuardrailDecision:
         categories=["other"],
         safe_message=gi_prompt.DEFAULT_SAFE_MESSAGE,
     )
-
 
 async def _record_usage(
     completion: Any,
@@ -62,7 +60,6 @@ async def _record_usage(
         message_id=message_id,
     )
 
-
 async def _call_llm(
     question: str, history: list[ChatMessage], model: str
 ) -> tuple[GuardrailDecision, Any]:
@@ -85,7 +82,6 @@ async def _call_llm(
     if parsed is None:
         raise ValueError("guardrails trả parsed None")
     return parsed, completion
-
 
 async def check_input(
     question: str,

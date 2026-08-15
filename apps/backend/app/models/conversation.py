@@ -16,14 +16,12 @@ from pydantic import BaseModel, Field
 
 from app.core.db import connection
 
-
 class Conversation(BaseModel):
     id: str
     user_id: str
     title: str
     created_at: datetime
     updated_at: datetime
-
 
 class Message(BaseModel):
     id: str
@@ -44,7 +42,6 @@ class Message(BaseModel):
     ttft_ms: int | None = None
     created_at: datetime
 
-
 def _to_conversation(row: dict[str, Any]) -> Conversation:
     return Conversation(
         id=str(row["id"]),
@@ -53,7 +50,6 @@ def _to_conversation(row: dict[str, Any]) -> Conversation:
         created_at=row["created_at"],
         updated_at=row["updated_at"],
     )
-
 
 def _to_message(row: dict[str, Any]) -> Message:
     return Message(
@@ -72,16 +68,13 @@ def _to_message(row: dict[str, Any]) -> Message:
         created_at=row["created_at"],
     )
 
-
 _CONV_COLS = "id, user_id, title, created_at, updated_at"
 _MSG_COLS = (
     "id, conversation_id, role, content, clarification_needed, citations, "
     "visualization, retrieval_mode, confidence, warnings, steps, ttft_ms, created_at"
 )
 
-
 # --- conversations ---
-
 
 def create_conversation(user_id: str, title: str) -> Conversation:
     conv_id = str(uuid.uuid4())
@@ -96,7 +89,6 @@ def create_conversation(user_id: str, title: str) -> Conversation:
     assert row is not None
     return _to_conversation(row)
 
-
 def list_conversations(user_id: str) -> list[Conversation]:
     with connection() as conn, conn.cursor() as cur:
         cur.execute(
@@ -107,7 +99,6 @@ def list_conversations(user_id: str) -> list[Conversation]:
         rows = cur.fetchall()
     return [_to_conversation(r) for r in rows]
 
-
 def get_conversation(conversation_id: str) -> Conversation | None:
     with connection() as conn, conn.cursor() as cur:
         cur.execute(
@@ -115,7 +106,6 @@ def get_conversation(conversation_id: str) -> Conversation | None:
         )
         row = cur.fetchone()
     return _to_conversation(row) if row else None
-
 
 def update_title(conversation_id: str, title: str) -> None:
     with connection() as conn, conn.cursor() as cur:
@@ -125,13 +115,11 @@ def update_title(conversation_id: str, title: str) -> None:
         )
         conn.commit()
 
-
 def delete_conversation(conversation_id: str) -> None:
     """Xóa conversation; messages xóa theo nhờ ON DELETE CASCADE."""
     with connection() as conn, conn.cursor() as cur:
         cur.execute("DELETE FROM conversations WHERE id = %s", (conversation_id,))
         conn.commit()
-
 
 def touch_conversation(conversation_id: str) -> None:
     """Bump updated_at để conversation vừa hoạt động nổi lên đầu danh sách."""
@@ -141,9 +129,7 @@ def touch_conversation(conversation_id: str) -> None:
         )
         conn.commit()
 
-
 # --- messages ---
-
 
 def add_message(
     conversation_id: str,
@@ -187,7 +173,6 @@ def add_message(
     assert row is not None
     return _to_message(row)
 
-
 def list_messages(conversation_id: str) -> list[Message]:
     with connection() as conn, conn.cursor() as cur:
         cur.execute(
@@ -197,7 +182,6 @@ def list_messages(conversation_id: str) -> list[Message]:
         )
         rows = cur.fetchall()
     return [_to_message(r) for r in rows]
-
 
 def count_user_messages_today(user_id: str) -> int:
     """Số câu hỏi (message role='user') user đã gửi HÔM NAY — cho kiểm tra quota. Mốc

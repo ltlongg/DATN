@@ -7,7 +7,6 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-
 class EventRef(BaseModel):
     """Event tham chiếu một chunk (panel 'được tham chiếu bởi')."""
 
@@ -17,7 +16,6 @@ class EventRef(BaseModel):
     time_end: str | None = None
     confidence: str
 
-
 class ChunkListItem(BaseModel):
     chunk_id: str
     heading_path: list[str] = Field(default_factory=list)
@@ -26,13 +24,11 @@ class ChunkListItem(BaseModel):
     end_line: int | None = None
     preview: str
 
-
 class ChunkListResponse(BaseModel):
     items: list[ChunkListItem]
     total: int
     limit: int
     offset: int
-
 
 class ChunkDetail(BaseModel):
     chunk_id: str
@@ -42,7 +38,6 @@ class ChunkDetail(BaseModel):
     # Event tham chiếu chunk (Postgres). Entity tham chiếu lấy qua GET /kb/entities?chunk_id.
     referencing_events: list[EventRef] = Field(default_factory=list)
 
-
 class EventListItem(BaseModel):
     event_id: str
     label: str
@@ -51,13 +46,11 @@ class EventListItem(BaseModel):
     locations: list[str] = Field(default_factory=list)
     confidence: str
 
-
 class EventListResponse(BaseModel):
     items: list[EventListItem]
     total: int
     limit: int
     offset: int
-
 
 class EventDetail(BaseModel):
     event_id: str

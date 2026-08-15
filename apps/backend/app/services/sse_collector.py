@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 def _merge_declaration(
     previous: list[dict[str, Any]], declaration: list[Any]
 ) -> list[dict[str, Any]]:
@@ -39,7 +38,6 @@ def _merge_declaration(
                 fresh[carried] = old[carried]
         merged.append(fresh)
     return merged
-
 
 class SseCollector:
     def __init__(self) -> None:

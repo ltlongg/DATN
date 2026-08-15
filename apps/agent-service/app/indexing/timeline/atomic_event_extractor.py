@@ -33,10 +33,8 @@ __all__ = [
     "extract_unit_events",
 ]
 
-
 class TimelineExtractionError(RuntimeError):
     """Kết quả LLM không dùng được cho cả unit (refusal hoặc `chunk_ref` sai hợp đồng)."""
-
 
 def extract_unit_events(
     chunks: list[tuple[str, str]],
@@ -87,7 +85,6 @@ def extract_unit_events(
         raise TimelineExtractionError("LLM không trả về cấu trúc parse được.")
 
     return _map_to_chunks(message.parsed, ref_to_chunk_id)
-
 
 def _map_to_chunks(
     parsed: TimelineExtraction, ref_to_chunk_id: dict[str, str]

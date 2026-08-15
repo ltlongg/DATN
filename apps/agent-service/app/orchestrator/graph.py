@@ -30,7 +30,6 @@ from langgraph.graph.state import CompiledStateGraph
 from app.orchestrator import nodes
 from app.orchestrator.state import AgentState
 
-
 @lru_cache(maxsize=1)
 def get_graph() -> CompiledStateGraph:
     """Compile graph một lần (không checkpointer — flow stateless, xem plan §3)."""

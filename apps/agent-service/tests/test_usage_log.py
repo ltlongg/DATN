@@ -14,9 +14,7 @@ from app.orchestrator.emitter import ListEmitter
 from app.orchestrator.synthesis import stream_synthesis
 from app.schemas.ask import PlanOutput, SynthesizedAnswer
 
-
 # --- record_usage -----------------------------------------------------------
-
 
 class _FakeCursor:
     def __init__(self, log):
@@ -30,7 +28,6 @@ class _FakeCursor:
 
     def execute(self, sql, params=None):
         self._log.append((sql, params))
-
 
 class _FakeConn:
     def __init__(self, log):
@@ -47,7 +44,6 @@ class _FakeConn:
 
     def commit(self):
         pass
-
 
 def test_record_usage_inserts_correct_columns(monkeypatch) -> None:
     log: list = []
@@ -67,7 +63,6 @@ def test_record_usage_inserts_correct_columns(monkeypatch) -> None:
         "plan", "gpt", 10, 5, 15, "u-1", "conv-1", "msg-1",
     )
 
-
 def test_record_usage_swallows_errors(monkeypatch) -> None:
     @contextmanager
     def boom(database_url=None):
@@ -78,9 +73,7 @@ def test_record_usage_swallows_errors(monkeypatch) -> None:
     # Không raise -> ghi usage lỗi không làm fail answer.
     usage_log.record_usage("synthesize", "m", 1, 2, 3)
 
-
 # --- plan ghi usage --------------------------------------------------
-
 
 def _client_returning(completion):
     async def fake_parse(**kw):
@@ -90,10 +83,8 @@ def _client_returning(completion):
         chat=SimpleNamespace(completions=SimpleNamespace(parse=fake_parse))
     )
 
-
 def _parsed():
     return PlanOutput(standalone_query="q", mentioned_entities=[], route="needs_retrieval")
-
 
 async def test_plan_records_usage_when_present(monkeypatch) -> None:
     usage = SimpleNamespace(prompt_tokens=10, completion_tokens=5, total_tokens=15)
@@ -123,7 +114,6 @@ async def test_plan_records_usage_when_present(monkeypatch) -> None:
     assert captured["conversation_id"] == "conv-1"
     assert captured["message_id"] == "msg-1"
 
-
 async def test_plan_skips_usage_when_absent(monkeypatch) -> None:
     # completion KHÔNG có attribute usage (như mock cũ) -> không gọi record_usage.
     completion = SimpleNamespace(
@@ -138,9 +128,7 @@ async def test_plan_skips_usage_when_absent(monkeypatch) -> None:
     )
     assert called == []
 
-
 # --- stream_synthesis on_usage ----------------------------------------------
-
 
 class _FakeStream:
     def __init__(self, events, final_completion):
@@ -166,13 +154,11 @@ class _FakeStream:
     async def get_final_completion(self):
         return self._final_completion
 
-
 class _FakeClient:
     def __init__(self, stream):
         self.chat = SimpleNamespace(
             completions=SimpleNamespace(stream=lambda **kw: stream)
         )
-
 
 async def test_stream_synthesis_calls_on_usage() -> None:
     final = SynthesizedAnswer(answer="A.", used_chunk_ids=["c"], confidence="cao")

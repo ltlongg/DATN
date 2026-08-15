@@ -20,7 +20,6 @@ RetrievalMode = Literal["traditional", "hybrid"]
 # "graph" ở đây là NGUỒN candidate bên trong hybrid, KHÔNG phải một `RetrievalMode`.
 CandidateSource = Literal["vector", "graph", "sparse"]
 
-
 class RetrievalBackendError(RuntimeError):
     """Lỗi backend retrieval (Qdrant/Neo4j/embedding). `code` để phân loại + test.
 
@@ -33,7 +32,6 @@ class RetrievalBackendError(RuntimeError):
         super().__init__(code)
         self.code = code
 
-
 class RetrievalCandidate(BaseModel):
     """Candidate nhẹ mỗi retriever trả ra (chưa hydrate text). Hybrid hydrate 1 lần."""
 
@@ -42,7 +40,6 @@ class RetrievalCandidate(BaseModel):
     rank: int
     score: float | None = None
     debug: dict[str, object] = Field(default_factory=dict)
-
 
 class RetrievedChunk(BaseModel):
     """Chunk đã hydrate full text + metadata từ Postgres `rag_chunks`."""
@@ -57,7 +54,6 @@ class RetrievedChunk(BaseModel):
     rerank_score: float | None = None
     sources: list[CandidateSource] = Field(default_factory=list)
     debug: dict[str, object] = Field(default_factory=dict)
-
 
 class GraphContextItem(BaseModel):
     """Tri thức đã chưng cất từ KG, đưa THẲNG cho LLM (không chỉ trỏ tới chunk).
@@ -90,7 +86,6 @@ class GraphContextItem(BaseModel):
             self.keyword or "",
             self.target_norm or "",
         )
-
 
 class RetrievalResult(BaseModel):
     mode: RetrievalMode

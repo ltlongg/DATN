@@ -28,7 +28,6 @@ from app.core.internal_auth import internal_headers
 
 logger = logging.getLogger("backend.agent_client")
 
-
 class AgentAskRequest(BaseModel):
     """Contract BACKEND -> AGENT (`/ask`). Khớp `AskRequest` của agent-service."""
 
@@ -44,18 +43,15 @@ class AgentAskRequest(BaseModel):
     conversation_id: str | None = None
     message_id: str | None = None
 
-
 @dataclass(frozen=True)
 class SseEvent:
     event: str
     data: dict[str, object]
 
-
 def format_sse(event: str, data: dict[str, object]) -> str:
     """Đóng gói 1 event SSE đúng format agent-service dùng (ensure_ascii=False -> giữ
     nguyên tiếng Việt, không đổi nội dung token)."""
     return f"event: {event}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
-
 
 async def _parse_sse(lines: AsyncIterator[str]) -> AsyncIterator[SseEvent]:
     """Parse dòng SSE -> SseEvent. Mỗi event = các dòng `event:`/`data:` tới dòng trống.
@@ -83,7 +79,6 @@ async def _parse_sse(lines: AsyncIterator[str]) -> AsyncIterator[SseEvent]:
             event_type = line[len("event:") :].strip()
         elif line.startswith("data:"):
             data_lines.append(line[len("data:") :].lstrip())
-
 
 class AgentStream:
     """Stream đã mở (HTTP 200). `events()` drain tới hết rồi tự đóng client/response."""
@@ -115,7 +110,6 @@ class AgentStream:
     async def aclose(self) -> None:
         await self._response.aclose()
         await self._client.aclose()
-
 
 async def agent_get(
     path: str, params: dict[str, str | int | None] | None = None
@@ -153,7 +147,6 @@ async def agent_get(
         logger.warning("agent GET %s trả status %s", path, response.status_code)
         raise AppError(502, "agent_bad_response", "Dịch vụ trả lời phản hồi không hợp lệ.")
     return response.json()
-
 
 async def open_ask_stream(request: AgentAskRequest) -> AgentStream:
     """Mở kết nối + kiểm HTTP status TRƯỚC khi trả stream. Lỗi ở bước này còn map được

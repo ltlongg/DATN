@@ -11,7 +11,6 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-
 class AliasVerdict(BaseModel):
     same: bool = Field(description="Hai thực thể có phải CÙNG MỘT đối tượng thực tế không.")
     canonical: str = Field(description="Tên chuẩn nên giữ — PHẢI là một trong hai tên đưa vào.")

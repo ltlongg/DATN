@@ -9,10 +9,8 @@ from types import SimpleNamespace
 from app.schemas.retrieval import RetrievalCandidate
 from app.tools.traditional_rag import retriever as R
 
-
 def _cand(chunk_id, rank, score):
     return RetrievalCandidate(chunk_id=chunk_id, source="vector", rank=rank, score=score)
-
 
 def _row(chunk_id, text="t"):
     return {
@@ -21,7 +19,6 @@ def _row(chunk_id, text="t"):
         "metadata": {"k": "v"},
         "heading_path": ["h1", "h2"],
     }
-
 
 def _patch(monkeypatch, candidates, rows, *, rerank_fn=None, rerank_top_k=8):
     async def fake_search(question, *, top_k=None, bm25_top_k=None, client=None):
@@ -34,7 +31,6 @@ def _patch(monkeypatch, candidates, rows, *, rerank_fn=None, rerank_top_k=8):
     monkeypatch.setattr(R, "get_rag_chunks_by_ids", lambda ids: rows)
     monkeypatch.setattr(R, "rerank", rerank_fn or passthrough_rerank)
     monkeypatch.setattr(R, "get_settings", lambda: SimpleNamespace(rerank_top_k=rerank_top_k))
-
 
 async def test_retrieve_traditional_hydrates_candidates_into_chunks(monkeypatch) -> None:
     _patch(
@@ -50,7 +46,6 @@ async def test_retrieve_traditional_hydrates_candidates_into_chunks(monkeypatch)
     assert result.chunks[0].heading_path == ["h1", "h2"]
     assert result.graph_context == []  # traditional KHÔNG điền graph_context
 
-
 async def test_retrieve_traditional_skips_missing_hydrated_chunk(monkeypatch) -> None:
     # candidate c-2 không có row trong Postgres -> bỏ + warning.
     _patch(monkeypatch, [_cand("c-1", 1, 0.9), _cand("c-2", 2, 0.7)], [_row("c-1")])
@@ -58,13 +53,11 @@ async def test_retrieve_traditional_skips_missing_hydrated_chunk(monkeypatch) ->
     assert [c.chunk_id for c in result.chunks] == ["c-1"]
     assert any("c-2" in w for w in result.warnings)
 
-
 async def test_retrieve_traditional_empty_when_no_candidates(monkeypatch) -> None:
     _patch(monkeypatch, [], [])
     result = await R.retrieve_traditional("câu hỏi mơ hồ")
     assert result.chunks == []
     assert result.graph_context == []
-
 
 async def test_retrieve_traditional_forwards_tuning(monkeypatch) -> None:
     seen: dict = {}
@@ -86,7 +79,6 @@ async def test_retrieve_traditional_forwards_tuning(monkeypatch) -> None:
     result = await R.retrieve_traditional("q", top_k=11, bm25_top_k=9, rerank_top_k=2)
     assert seen == {"top_k": 11, "bm25_top_k": 9}
     assert [c.chunk_id for c in result.chunks] == ["c-1", "c-2"]  # cắt còn rerank_top_k=2
-
 
 async def test_retrieve_traditional_reranks_then_cuts(monkeypatch) -> None:
     # rerank đảo thứ tự (c-3 lên đầu) rồi cắt rerank_top_k=2 -> [c-3, c-2].

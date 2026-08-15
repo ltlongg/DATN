@@ -57,7 +57,6 @@ INSERT INTO llm_usage (
 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);
 """
 
-
 def ensure_llm_usage_table(conn: psycopg.Connection[Any]) -> None:
     with conn.cursor() as cur:
         cur.execute(CREATE_LLM_USAGE_SQL)
@@ -65,7 +64,6 @@ def ensure_llm_usage_table(conn: psycopg.Connection[Any]) -> None:
             cur.execute(sql)
         for sql in CREATE_INDEX_SQLS:
             cur.execute(sql)
-
 
 def record_usage(
     task: str,

@@ -10,10 +10,8 @@ from pydantic import ValidationError
 
 from app.core.config import Settings
 
-
 def test_retrieval_max_steps_defaults_to_two() -> None:
     assert Settings().retrieval_max_steps == 2
-
 
 def test_retrieval_max_steps_rejects_three() -> None:
     """Từ chối THẲNG chứ không im lặng kẹp xuống 2 (plan §8).
@@ -24,7 +22,6 @@ def test_retrieval_max_steps_rejects_three() -> None:
     """
     with pytest.raises(ValidationError):
         Settings(retrieval_max_steps=3)
-
 
 def test_retrieval_max_steps_rejects_zero() -> None:
     with pytest.raises(ValidationError):

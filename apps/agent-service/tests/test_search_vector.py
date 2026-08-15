@@ -13,7 +13,6 @@ import pytest
 from app.schemas.retrieval import RetrievalBackendError
 from app.tools.graph_rag import vector_store as V
 
-
 class _FakeQdrant:
     """Client giả: query_points trả các point cho sẵn."""
 
@@ -25,10 +24,8 @@ class _FakeQdrant:
         self.calls.append(kwargs)
         return SimpleNamespace(points=self._points)
 
-
 def _point(point_id, score, payload):
     return SimpleNamespace(id=point_id, score=score, payload=payload)
-
 
 @pytest.fixture(autouse=True)
 def _stub_embed(monkeypatch):
@@ -36,7 +33,6 @@ def _stub_embed(monkeypatch):
         return np.ones((len(texts), 4), dtype=np.float32)
 
     monkeypatch.setattr(V, "embed_texts", fake_embed)
-
 
 async def test_search_vector_returns_candidates_from_qdrant_payload() -> None:
     client = _FakeQdrant(
@@ -53,7 +49,6 @@ async def test_search_vector_returns_candidates_from_qdrant_payload() -> None:
     # top_k truyền xuống Qdrant.
     assert client.calls[0]["limit"] == 5
 
-
 async def test_search_vector_skips_point_missing_chunk_id() -> None:
     client = _FakeQdrant(
         [
@@ -67,7 +62,6 @@ async def test_search_vector_skips_point_missing_chunk_id() -> None:
     # rank vẫn liền mạch sau khi bỏ point hỏng.
     assert [c.rank for c in cands] == [1, 2]
 
-
 async def test_search_vector_raises_qdrant_unavailable_on_client_error() -> None:
     class _Broken:
         def query_points(self, **kwargs):  # noqa: ANN003
@@ -77,7 +71,6 @@ async def test_search_vector_raises_qdrant_unavailable_on_client_error() -> None
         await V.search_vector("x", client=_Broken())
     assert exc.value.code == "qdrant_unavailable"
 
-
 async def test_search_vector_raises_embedding_failed(monkeypatch) -> None:
     async def boom(texts):
         raise RuntimeError("model down")
@@ -86,7 +79,6 @@ async def test_search_vector_raises_embedding_failed(monkeypatch) -> None:
     with pytest.raises(RetrievalBackendError) as exc:
         await V.search_vector("x", client=_FakeQdrant([]))
     assert exc.value.code == "embedding_failed"
-
 
 async def test_search_dense_sparse_prefetch_limits_use_top_k_and_bm25_top_k(monkeypatch) -> None:
     # top_k áp cho dense prefetch + fusion limit; bm25_top_k áp cho sparse prefetch.

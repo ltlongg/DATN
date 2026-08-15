@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from app.services.sse_collector import SseCollector
 
-
 def test_collects_tokens_citations_visualization_done() -> None:
     col = SseCollector()
     col.feed("status", {"node": "retrieve"})
@@ -25,7 +24,6 @@ def test_collects_tokens_citations_visualization_done() -> None:
     assert fields["content"] == "Trương Định chống Pháp."
     assert fields["clarification_needed"] is False
 
-
 def test_regenerating_clears_previous_tokens() -> None:
     col = SseCollector()
     col.feed("token", {"text": "câu trả lời cũ"})
@@ -33,7 +31,6 @@ def test_regenerating_clears_previous_tokens() -> None:
     col.feed("token", {"text": "câu trả lời mới"})
     col.feed("done", {"confidence": "vừa", "retrieval_mode": "hybrid", "warnings": []})
     assert col.content == "câu trả lời mới"
-
 
 def test_ttft_keeps_first_mark_and_survives_regenerating() -> None:
     """TTFT chốt ở chữ ĐẦU TIÊN người dùng thấy: mark sau không ghi đè, `regenerating` xoá
@@ -48,13 +45,11 @@ def test_ttft_keeps_first_mark_and_survives_regenerating() -> None:
     assert col.ttft_ms == 1200
     assert col.message_fields()["ttft_ms"] == 1200
 
-
 def test_ttft_none_when_no_token() -> None:
     col = SseCollector()
     col.feed("clarification", {"question": "Bạn hỏi giai đoạn nào?"})
     assert col.ttft_ms is None
     assert col.message_fields()["ttft_ms"] is None
-
 
 def test_clarification_persisted_as_content() -> None:
     col = SseCollector()
@@ -65,7 +60,6 @@ def test_clarification_persisted_as_content() -> None:
     assert fields["clarification_needed"] is True
     assert fields["content"] == "Bạn hỏi giai đoạn nào?"
 
-
 def test_error_not_persisted() -> None:
     col = SseCollector()
     col.feed("token", {"text": "partial"})
@@ -73,13 +67,11 @@ def test_error_not_persisted() -> None:
     assert not col.should_persist()
     assert col.error == {"code": "qdrant_unavailable", "message": "x"}
 
-
 def test_blocked_without_content_not_persisted() -> None:
     col = SseCollector()
     col.feed("blocked", {"stage": "input", "categories": ["prompt_injection"]})
     assert col.blocked
     assert not col.should_persist()
-
 
 def test_blocked_with_safe_message_persisted() -> None:
     # Guardrails chặn: agent stream safe message qua token TRƯỚC blocked -> lưu như assistant
@@ -94,15 +86,12 @@ def test_blocked_with_safe_message_persisted() -> None:
     assert fields["content"] == "Xin lỗi, mình không hỗ trợ yêu cầu này."
     assert fields["clarification_needed"] is False
 
-
 def test_empty_answer_not_persisted() -> None:
     col = SseCollector()
     col.feed("done", {"confidence": None, "retrieval_mode": "none", "warnings": []})
     assert not col.should_persist()
 
-
 # --- panel tiến trình (B3) ---
-
 
 def _run_steps(col: SseCollector) -> None:
     col.feed(
@@ -119,12 +108,10 @@ def _run_steps(col: SseCollector) -> None:
     col.feed("step", {"id": "todo:1", "state": "running"})
     col.feed("step", {"id": "todo:1", "state": "done", "detail": "Dense + BM25 + graph · 8 đoạn"})
 
-
 def test_steps_declares_rows_as_pending_until_a_step_update_arrives() -> None:
     col = SseCollector()
     col.feed("steps", {"steps": [{"id": "plan", "label": "L", "kind": "system"}]})
     assert col.steps == [{"id": "plan", "label": "L", "kind": "system", "state": "pending"}]
-
 
 def test_step_updates_merge_into_the_declared_row() -> None:
     col = SseCollector()
@@ -135,14 +122,12 @@ def test_step_updates_merge_into_the_declared_row() -> None:
     assert by_id["todo:1"]["detail"] == "Dense + BM25 + graph · 8 đoạn"
     assert by_id["synthesize:1"]["state"] == "pending"  # chưa chạy tới
 
-
 def test_step_for_unknown_id_is_ignored() -> None:
     """Cùng luật với frontend: không mọc dòng ma từ id không khai báo."""
     col = SseCollector()
     col.feed("steps", {"steps": [{"id": "plan", "label": "L", "kind": "system"}]})
     col.feed("step", {"id": "todo:9", "state": "done"})
     assert [r["id"] for r in col.steps] == ["plan"]
-
 
 def test_running_row_is_closed_out_to_partial_when_persisting() -> None:
     """Stream đóng mà dòng còn `running` = không bao giờ có kết -> lưu `partial`, nếu không
@@ -154,7 +139,6 @@ def test_running_row_is_closed_out_to_partial_when_persisting() -> None:
     col.feed("done", {"confidence": "cao", "retrieval_mode": "hybrid", "warnings": []})
     saved = {r["id"]: r["state"] for r in col.message_fields()["steps"]}
     assert saved == {"plan": "done", "todo:1": "done", "synthesize:1": "partial"}
-
 
 def test_skipped_row_survives_persistence_unchanged() -> None:
     """`skipped` (todo list dừng sớm — B4) KHÔNG bị hạ như `running`: nó đã là trạng thái
@@ -177,7 +161,6 @@ def test_skipped_row_survives_persistence_unchanged() -> None:
     saved = {r["id"]: r["state"] for r in col.message_fields()["steps"]}
     assert saved == {"todo:1": "partial", "todo:2": "skipped"}
 
-
 def test_close_out_does_not_mutate_collector_state() -> None:
     col = SseCollector()
     col.feed("steps", {"steps": [{"id": "plan", "label": "L", "kind": "system"}]})
@@ -187,7 +170,6 @@ def test_close_out_does_not_mutate_collector_state() -> None:
     assert col.message_fields()["steps"] == col.message_fields()["steps"]
     assert col.steps[0]["state"] == "running"  # nguồn gốc giữ nguyên
 
-
 def test_clarification_message_still_persists_its_steps() -> None:
     col = SseCollector()
     col.feed("steps", {"steps": [{"id": "plan", "label": "Phân tích câu hỏi", "kind": "system"}]})
@@ -196,7 +178,6 @@ def test_clarification_message_still_persists_its_steps() -> None:
     fields = col.message_fields()
     assert fields["clarification_needed"] is True
     assert fields["steps"][0]["detail"] == "Câu hỏi chưa rõ · cần hỏi lại"
-
 
 def test_retry_declaration_keeps_states_of_rows_already_finished() -> None:
     """Lượt soạn lại (B5) phát lại `steps` với danh sách DÀI HƠN. Thay thế thay vì merge thì
@@ -225,9 +206,7 @@ def test_retry_declaration_keeps_states_of_rows_already_finished() -> None:
     assert by_id["synthesize:2"]["state"] == "pending"  # dòng mới, chưa chạy
     assert "detail" not in by_id["synthesize:2"]
 
-
 # --- internals (tầng 2 panel tiến trình) ---
-
 
 def test_step_internals_are_kept_for_persistence() -> None:
     """Collector nhận internals của MỌI lượt, kể cả người dùng thường: bản lưu phải đủ để
@@ -246,7 +225,6 @@ def test_step_internals_are_kept_for_persistence() -> None:
     assert col.message_fields()["steps"][0]["internals"] == [
         {"label": "Định tuyến", "value": "needs_retrieval"}
     ]
-
 
 def test_retry_declaration_does_not_wipe_internals_of_finished_rows() -> None:
     """Cùng lý do với `detail`: bản `steps` phát lại chỉ mang id/label/kind, không chép sang

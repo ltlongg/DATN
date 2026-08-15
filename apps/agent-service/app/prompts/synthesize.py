@@ -44,7 +44,6 @@ from app.schemas.retrieval import GraphContextItem, RetrievedChunk
 
 SYNTHESIZE_PROMPT_VERSION = "synthesize-v7"
 
-
 SYSTEM_PROMPT = """
 <role>
 Bạn là trợ lý hỏi đáp về lịch sử Việt Nam (giai đoạn Pháp thuộc đến thống nhất đất nước),
@@ -189,7 +188,6 @@ Diễn biến chính của chiến dịch Điện Biên Phủ diễn ra thế n�
 </examples>
 """.strip()
 
-
 # Chỉ dẫn thêm vào cuối user prompt khi đây là lượt synthesize thứ 2+ (retry). LLM với cùng
 # prompt thường lặp lại cùng lỗi; thêm lý do thất bại giúp model điều chỉnh.
 RETRY_INSTRUCTION = """
@@ -197,7 +195,6 @@ LƯU Ý: Lượt tạo trước bị từ chối vì câu trả lời không có
 hãy đảm bảo mỗi ý chính đều kèm chunk_id lấy từ danh sách [ĐOẠN TÀI LIỆU] ở trên. Không được
 dùng chunk_id không có trong danh sách đó.
 """.strip()
-
 
 def render_chunks(chunks: list[RetrievedChunk]) -> str:
     if not chunks:
@@ -209,7 +206,6 @@ def render_chunks(chunks: list[RetrievedChunk]) -> str:
             f"chunk_id: {chunk.chunk_id}\nheading: {heading}\n---\n{chunk.text}"
         )
     return "\n\n".join(blocks)
-
 
 def render_graph_context(items: list[GraphContextItem]) -> str:
     if not items:
@@ -228,7 +224,6 @@ def render_graph_context(items: list[GraphContextItem]) -> str:
             lines.append(f"  (nguồn: {', '.join(item.source_chunk_ids)})")
     return "\n".join(lines)
 
-
 def _render_facts(facts: list[ResolvedFact]) -> str:
     """Mắt xích multi-hop: nêu kèm ĐỘ TIN CẬY + NGUỒN, không phải sự thật hiển nhiên.
 
@@ -242,7 +237,6 @@ def _render_facts(facts: list[ResolvedFact]) -> str:
         + ")"
         for fact in facts
     )
-
 
 def build_user_prompt(
     question: str,

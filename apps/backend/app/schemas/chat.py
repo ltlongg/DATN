@@ -13,23 +13,19 @@ from pydantic import BaseModel, Field
 
 from app.core.config import get_settings
 
-
 class ConversationCreate(BaseModel):
     # title optional: rỗng/None -> backend đặt title tạm, suy từ câu hỏi đầu tiên ở /ask.
     title: str | None = Field(default=None, max_length=200)
 
-
 class ConversationUpdate(BaseModel):
     # Đổi tên conversation; title bắt buộc, không rỗng sau khi trim (kiểm ở endpoint).
     title: str = Field(min_length=1, max_length=200)
-
 
 class ConversationOut(BaseModel):
     id: str
     title: str
     created_at: datetime
     updated_at: datetime
-
 
 class MessageOut(BaseModel):
     id: str
@@ -49,10 +45,8 @@ class MessageOut(BaseModel):
     ttft_ms: int | None
     created_at: datetime
 
-
 class ConversationDetail(ConversationOut):
     messages: list[MessageOut]
-
 
 class AskRequest(BaseModel):
     # Backend luôn streaming. Mặc định "auto" = agent tự chọn mode; frontend gửi giá trị cụ
@@ -60,7 +54,6 @@ class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=get_settings().ask_max_question_chars)
     mode: Literal["auto", "traditional", "hybrid"] = "auto"
     debug: bool = False
-
 
 class SourceDetail(BaseModel):
     """Toàn văn 1 chunk cho modal "xem nguồn" khi user nhấn citation.

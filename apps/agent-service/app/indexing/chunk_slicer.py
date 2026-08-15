@@ -18,7 +18,6 @@ from typing import Any
 
 from app.indexing.token_counter import count_tokens
 
-
 @dataclass
 class ChunkSpan:
     """Một khoảng văn bản sẽ trở thành 1 chunk.
@@ -30,7 +29,6 @@ class ChunkSpan:
     abs_start: int
     abs_end: int
     headings: dict[str, str] = field(default_factory=dict)
-
 
 def build_line_starts(text: str) -> list[int]:
     """Precompute offset ký tự bắt đầu của mỗi dòng (để map index -> số dòng).
@@ -45,18 +43,15 @@ def build_line_starts(text: str) -> list[int]:
         idx = text.find("\n", idx + 1)
     return starts
 
-
 def _line_number(line_starts: list[int], index: int) -> int:
     """Số dòng (1-based) chứa ký tự tại `index`."""
     return bisect.bisect_right(line_starts, index)
-
 
 def _build_embedding_text(headings: dict[str, str], document_title: str, text: str) -> str:
     header = [f"Tiêu đề tài liệu: {document_title}"]
     for key in sorted(headings, key=lambda k: int(k[1:])):
         header.append(f"{key.upper()}: {headings[key]}")
     return "\n".join(header) + "\n\n" + text
-
 
 def build_chunk(
     span: ChunkSpan,

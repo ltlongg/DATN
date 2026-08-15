@@ -27,7 +27,6 @@ _CONSTRAINTS = [
     "CREATE INDEX entity_type_idx IF NOT EXISTS FOR (e:Entity) ON (e.type)",
 ]
 
-
 @lru_cache(maxsize=1)
 def get_neo4j_driver() -> Driver:
     s = get_settings()
@@ -39,7 +38,6 @@ def get_neo4j_driver() -> Driver:
         # Bỏ qua notification mức INFO (vd "constraint IF NOT EXISTS đã tồn tại") cho đỡ nhiễu log.
         notifications_min_severity="WARNING",
     )
-
 
 def ensure_graph_constraints(driver: Driver | None = None) -> None:
     """Tạo uniqueness constraint trên (:Entity).name + index trên .type (idempotent)."""

@@ -18,7 +18,6 @@ from app.schemas.logs import (
     TokenSummary,
 )
 
-
 def compute_token_summary(rows: list[dict[str, Any]]) -> TokenSummary:
     """rows = usage ĐÃ gắn conversation_id (cột: conversation_id, prompt/completion/total_tokens).
     `overall` = tổng toàn bộ rows; `by_conversation` = cộng dồn theo conversation_id."""
@@ -49,7 +48,6 @@ def compute_token_summary(rows: list[dict[str, Any]]) -> TokenSummary:
         ),
         by_conversation=by_conversation,
     )
-
 
 def build_message_tokens(rows: list[dict[str, Any]]) -> list[MessageTokens]:
     """rows = usage 1 hội thoại đã gộp theo (message_id, task, model). Gom lại theo message_id

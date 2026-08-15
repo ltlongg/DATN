@@ -29,7 +29,6 @@ from app.core.internal_auth import internal_headers
 
 logger = logging.getLogger("agent.runtime_config")
 
-
 class RuntimeConfig(BaseModel):
     """13 tham số tinh chỉnh áp dụng LIVE. Default = Y HỆT hằng trong core/config.py::Settings
     (12 retrieval) + temperature synthesize 0.0. Bỏ qua field thừa (vd `updated_at` trong
@@ -53,7 +52,6 @@ class RuntimeConfig(BaseModel):
     # --- synthesize ---
     llm_temperature: float = 0.0
 
-
 _CACHE_TTL_SECONDS = 60.0
 _HTTP_TIMEOUT_SECONDS = 5.0
 _cache: tuple[float, RuntimeConfig] | None = None
@@ -61,12 +59,10 @@ _cache: tuple[float, RuntimeConfig] | None = None
 # dùng lại kết quả (get_runtime_config chạy qua asyncio.to_thread -> có thể song song).
 _lock = threading.Lock()
 
-
 def clear_cache() -> None:
     """Xoá cache (dùng cho test)."""
     global _cache
     _cache = None
-
 
 def _fetch() -> RuntimeConfig:
     """GET /internal/config từ backend. Lỗi mạng/status != 200/parse lỗi -> RuntimeConfig()
@@ -88,7 +84,6 @@ def _fetch() -> RuntimeConfig:
     except Exception as exc:  # noqa: BLE001 — lỗi đọc config KHÔNG được làm fail answer
         logger.warning("get_runtime_config dùng mặc định (backend lỗi): %s", type(exc).__name__)
         return RuntimeConfig()
-
 
 def get_runtime_config() -> RuntimeConfig:
     """RuntimeConfig đang hiệu lực: từ cache nếu còn hạn, hết hạn thì gọi lại backend. Kể cả

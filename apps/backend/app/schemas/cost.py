@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-
 class CostOverview(BaseModel):
     total_calls: int
     total_tokens: int
@@ -17,12 +16,10 @@ class CostOverview(BaseModel):
     total_completion_tokens: int
     avg_tokens_per_call: float
 
-
 class DailyCost(BaseModel):
     day: str  # YYYY-MM-DD
     calls: int
     total_tokens: int
-
 
 class TaskCost(BaseModel):
     # 'plan' | 'synthesize' | 'guardrail_input' | 'resolve' (chỉ câu nhiều chặng)
@@ -30,7 +27,6 @@ class TaskCost(BaseModel):
     task: str
     calls: int
     total_tokens: int
-
 
 class TopUserCost(BaseModel):
     user_id: str

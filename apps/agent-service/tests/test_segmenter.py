@@ -9,7 +9,6 @@ import pytest
 
 from app.indexing.timeline.segmenter import Unit, build_units, unit_from_dict, unit_to_dict
 
-
 def _chunk(idx: int, text: str, **headings: str) -> dict:
     return {
         "chunk_id": f"c-{idx:03d}",
@@ -17,15 +16,12 @@ def _chunk(idx: int, text: str, **headings: str) -> dict:
         "metadata": {"headings": headings, "chunk_index": idx},
     }
 
-
 def _all_ids(chunks: list[dict]) -> set[str]:
     return {c["chunk_id"] for c in chunks}
-
 
 def _usage(units: list[Unit]) -> Counter[str]:
     """Số unit mà mỗi chunk xuất hiện — invariant: mọi giá trị phải = 1."""
     return Counter(cid for u in units for cid in u.chunk_ids)
-
 
 def test_small_section_gom_tron_thanh_mot_unit() -> None:
     chunks = [
@@ -42,7 +38,6 @@ def test_small_section_gom_tron_thanh_mot_unit() -> None:
     # Unit giữ NGUYÊN từng chunk (không nối phẳng) -> quy được event về đúng chunk.
     assert [c.text for c in u.chunks] == ["Đoạn một.", "Đoạn hai.", "Đoạn ba."]
 
-
 def test_lcp_dung_o_cap_chung_cuoi_cung() -> None:
     # 2 chunk khác h3 -> heading_path chỉ tới h2 (LCP).
     chunks = [
@@ -52,7 +47,6 @@ def test_lcp_dung_o_cap_chung_cuoi_cung() -> None:
     units = build_units(chunks, cap=10_000)
     assert len(units) == 1
     assert units[0].heading_path == ["A", "B"]
-
 
 def test_section_qua_cap_chia_theo_heading_con() -> None:
     # h2=B vượt cap nhưng mỗi h3 (C, D) vừa cap -> tách 2 unit theo h3.
@@ -71,7 +65,6 @@ def test_section_qua_cap_chia_theo_heading_con() -> None:
     assert set(_usage(units)) == _all_ids(chunks)
     assert all(k == 1 for k in _usage(units).values())
 
-
 def test_section_quai_vat_cat_theo_chunk_KHONG_overlap() -> None:
     # Cùng path (A,B), không h3, tổng > cap -> cắt theo chunk. Mỗi chunk vào ĐÚNG 1 unit.
     t = "x" * 40
@@ -85,7 +78,6 @@ def test_section_quai_vat_cat_theo_chunk_KHONG_overlap() -> None:
     # tổng slot = đúng số chunk (không lặp lại chunk nào ở ranh giới)
     assert sum(len(u.chunk_ids) for u in units) == len(chunks)
     assert len({u.unit_id for u in units}) == len(units)  # unit_id duy nhất
-
 
 def test_chunk_don_le_vuot_cap_thanh_unit_rieng_va_canh_bao(
     caplog: pytest.LogCaptureFixture,
@@ -105,7 +97,6 @@ def test_chunk_don_le_vuot_cap_thanh_unit_rieng_va_canh_bao(
     assert all(k == 1 for k in _usage(units).values())
     assert "c-001" in caplog.text and "vượt cap" in caplog.text
 
-
 def test_idempotent_va_phu_du() -> None:
     chunks = [
         _chunk(0, "y" * 30, h1="A", h2="B", h3="C"),
@@ -121,7 +112,6 @@ def test_idempotent_va_phu_du() -> None:
     assert set(_usage(u1)) == _all_ids(chunks)
     assert all(u.char_len <= 80 for u in u1)
 
-
 def _doc_chunk(src: str, idx: int, text: str, **headings: str) -> dict:
     """Chunk có `source_file` — file chunks dùng chung cho nhiều tài liệu."""
     return {
@@ -129,7 +119,6 @@ def _doc_chunk(src: str, idx: int, text: str, **headings: str) -> dict:
         "text": text,
         "metadata": {"headings": headings, "chunk_index": idx, "source_file": src},
     }
-
 
 def test_khong_tron_hai_tai_lieu_vao_mot_unit() -> None:
     """Hai tài liệu nhỏ gộp lại vẫn dưới cap, nhưng KHÔNG được thành một unit."""
@@ -146,7 +135,6 @@ def test_khong_tron_hai_tai_lieu_vao_mot_unit() -> None:
     for u in units:
         assert len({cid.split("-")[0] for cid in u.chunk_ids}) == 1
 
-
 def test_chunk_index_lap_lai_khong_lam_xen_ke_tai_lieu() -> None:
     """`chunk_index` đếm lại từ 0 mỗi tài liệu -> sort toàn cục sẽ xen kẽ, phải tránh."""
     chunks = [
@@ -158,7 +146,6 @@ def test_chunk_index_lap_lai_khong_lam_xen_ke_tai_lieu() -> None:
     ids = [cid for u in build_units(chunks, cap=100) for cid in u.chunk_ids]
     assert ids == ["docA-000", "docA-001", "docB-000", "docB-001"]
 
-
 def test_thu_tu_tai_lieu_theo_vi_tri_trong_file() -> None:
     """Tài liệu xuất hiện sau trong file thì unit của nó cũng đứng sau."""
     chunks = [
@@ -167,7 +154,6 @@ def test_thu_tu_tai_lieu_theo_vi_tri_trong_file() -> None:
     ]
     units = build_units(chunks, cap=10_000)
     assert [u.chunk_ids[0] for u in units] == ["docB-000", "docA-000"]
-
 
 def test_chunk_thieu_text_bi_bo_qua() -> None:
     chunks = [
@@ -178,7 +164,6 @@ def test_chunk_thieu_text_bi_bo_qua() -> None:
     units = build_units(chunks, cap=10_000)
     assert len(units) == 1
     assert units[0].chunk_ids == ["c-000"]
-
 
 def test_serialize_round_trip_giu_nguyen_chunk() -> None:
     """Artifact units là cầu nối bước 1 -> bước 2: encode/decode phải không mất gì."""

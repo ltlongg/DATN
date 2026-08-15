@@ -10,7 +10,6 @@ from app.services.agent_client import format_sse
 
 _DONE = format_sse("done", {"confidence": "cao", "retrieval_mode": "hybrid", "warnings": []})
 
-
 def _create_user(client: TestClient, admin_h, email, *, role="user", password="secret123"):  # type: ignore[no-untyped-def]
     return client.post(
         "/api/admin/users",
@@ -18,9 +17,7 @@ def _create_user(client: TestClient, admin_h, email, *, role="user", password="s
         headers=admin_h,
     )
 
-
 # --- CRUD -------------------------------------------------------------------
-
 
 def test_create_user_defaults(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     r = _create_user(client, auth("admin"), "new-zz@example.com")
@@ -29,7 +26,6 @@ def test_create_user_defaults(client, auth, db_conn) -> None:  # type: ignore[no
     assert body["is_active"] is True
     assert body["question_quota"] is None  # mặc định không giới hạn
 
-
 def test_create_user_duplicate_email_409(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     admin = auth("admin")
     _create_user(client, admin, "dup-zz@example.com")
@@ -37,20 +33,17 @@ def test_create_user_duplicate_email_409(client, auth, db_conn) -> None:  # type
     assert r.status_code == 409
     assert r.json()["code"] == "conflict"
 
-
 def test_create_user_password_over_72_bytes_422(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     # Cửa admin phải chặn y như /register: 72 ký tự tiếng Việt có dấu = 144 byte, bcrypt
     # chỉ dùng 72 byte đầu -> nới max_length ở UserCreate là lỗ hổng cắt im lặng quay lại.
     r = _create_user(client, auth("admin"), "dai-zz@example.com", password="á" * 72)
     assert r.status_code == 422
 
-
 def test_list_users_contains_created(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     _create_user(client, auth("admin"), "listed-zz@example.com")
     r = client.get("/api/admin/users", headers=auth("admin"))
     assert r.status_code == 200
     assert "listed-zz@example.com" in [u["email"] for u in r.json()]
-
 
 def test_patch_user_role_and_quota(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     uid = _create_user(client, auth("admin"), "patch-zz@example.com").json()["id"]
@@ -63,7 +56,6 @@ def test_patch_user_role_and_quota(client, auth, db_conn) -> None:  # type: igno
     assert r.json()["role"] == "admin"
     assert r.json()["question_quota"] == 5
 
-
 def test_patch_user_404(client, auth) -> None:  # type: ignore[no-untyped-def]
     r = client.patch(
         "/api/admin/users/00000000-0000-0000-0000-000000000000",
@@ -72,13 +64,10 @@ def test_patch_user_404(client, auth) -> None:  # type: ignore[no-untyped-def]
     )
     assert r.status_code == 404
 
-
 # --- guards -----------------------------------------------------------------
-
 
 def test_users_require_admin(client, auth) -> None:  # type: ignore[no-untyped-def]
     assert client.get("/api/admin/users", headers=auth("user")).status_code == 403
-
 
 def test_admin_cannot_self_lock(client, auth, db_conn, users) -> None:  # type: ignore[no-untyped-def]
     admin_id = users["admin"].id
@@ -88,7 +77,6 @@ def test_admin_cannot_self_lock(client, auth, db_conn, users) -> None:  # type: 
     assert r.status_code == 400
     assert r.json()["code"] == "self_lock_forbidden"
 
-
 def test_admin_cannot_self_demote(client, auth, db_conn, users) -> None:  # type: ignore[no-untyped-def]
     admin_id = users["admin"].id
     r = client.patch(
@@ -96,7 +84,6 @@ def test_admin_cannot_self_demote(client, auth, db_conn, users) -> None:  # type
     )
     assert r.status_code == 400
     assert r.json()["code"] == "self_demote_forbidden"
-
 
 def test_admin_can_demote_another_admin(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     # Hạ quyền admin KHÁC vẫn cho phép (chỉ chặn tự hạ quyền chính mình).
@@ -109,9 +96,7 @@ def test_admin_can_demote_another_admin(client, auth, db_conn) -> None:  # type:
     assert r.status_code == 200
     assert r.json()["role"] == "user"
 
-
 # --- account lock -----------------------------------------------------------
-
 
 def test_locked_account_cannot_login_or_use_old_token(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     admin = auth("admin")
@@ -132,9 +117,7 @@ def test_locked_account_cannot_login_or_use_old_token(client, auth, db_conn) -> 
     assert me.status_code == 403
     assert me.json()["code"] == "account_locked"
 
-
 # --- quota ------------------------------------------------------------------
-
 
 def test_quota_first_question_ok_second_blocked(client, auth, mock_agent, db_conn) -> None:  # type: ignore[no-untyped-def]
     admin = auth("admin")

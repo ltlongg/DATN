@@ -32,13 +32,11 @@ _ALTERS = (
     "ALTER TABLE llm_usage ADD COLUMN IF NOT EXISTS message_id TEXT;",
 )
 
-
 def _ensure_table(conn: psycopg.Connection) -> None:  # type: ignore[type-arg]
     with conn.cursor() as cur:
         cur.execute(_DDL)
         for sql in _ALTERS:
             cur.execute(sql)
-
 
 def _insert(conn, task, tokens, *, created_at, conversation_id=None, message_id=None,  # type: ignore[no-untyped-def]
             prompt=0, completion=0, model="m") -> None:
@@ -51,9 +49,7 @@ def _insert(conn, task, tokens, *, created_at, conversation_id=None, message_id=
              conversation_id, message_id),
         )
 
-
 # --- compute_token_summary --------------------------------------------------
-
 
 def test_token_summary_empty() -> None:
     s = compute_token_summary([])
@@ -61,7 +57,6 @@ def test_token_summary_empty() -> None:
     assert s.overall.total_tokens == 0
     assert s.overall.avg_tokens_per_call == 0.0
     assert s.by_conversation == []
-
 
 def test_token_summary_aggregates_overall_and_by_conversation() -> None:
     rows = [
@@ -82,9 +77,7 @@ def test_token_summary_aggregates_overall_and_by_conversation() -> None:
     assert by_id["c2"].call_count == 1
     assert by_id["c2"].total_tokens == 2
 
-
 # --- build_message_tokens ---------------------------------------------------
-
 
 def test_build_message_tokens_groups_by_message_and_sums() -> None:
     rows = [
@@ -106,13 +99,10 @@ def test_build_message_tokens_groups_by_message_and_sums() -> None:
     assert tasks["guardrail_input"].model == "gpt-guard"
     assert tasks["synthesize"].total_tokens == 50
 
-
 def test_build_message_tokens_empty() -> None:
     assert build_message_tokens([]) == []
 
-
 # --- endpoints (DB thật) ----------------------------------------------------
-
 
 def test_token_summary_endpoint_excludes_null_conversation(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     _ensure_table(db_conn)
@@ -136,7 +126,6 @@ def test_token_summary_endpoint_excludes_null_conversation(client, auth, db_conn
     assert by_conv["conv-A"]["call_count"] == 2
     assert by_conv["conv-A"]["total_tokens"] == 55
 
-
 def test_conversation_tokens_endpoint_breakdown_by_task(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     _ensure_table(db_conn)
     _insert(db_conn, "guardrail_input", 6, created_at="2020-01-01 10:00",
@@ -156,7 +145,6 @@ def test_conversation_tokens_endpoint_breakdown_by_task(client, auth, db_conn) -
     tasks = {row["task"]: row for row in msg["rows"]}
     assert set(tasks) == {"guardrail_input", "build_query", "synthesize"}
     assert tasks["guardrail_input"]["model"] == "gpt-guard"  # model ở TỪNG task
-
 
 def test_token_summary_requires_admin(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     r = client.get("/api/admin/logs/token-summary", headers=auth("user"))

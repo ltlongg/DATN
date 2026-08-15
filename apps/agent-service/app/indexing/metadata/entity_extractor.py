@@ -25,7 +25,6 @@ __all__ = ["PROMPT_VERSION", "extract_entities"]
 
 _EMPTY = EntityExtraction(times=[], actors=[], locations=[], events=[])
 
-
 def extract_entities(
     text: str,
     headings: dict[str, str] | None = None,

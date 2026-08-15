@@ -51,7 +51,6 @@ RETURN e.name AS name, e.norm_name AS norm_name,
 """
 _COUNT_ENTITIES = "MATCH (e:Entity) RETURN count(e) AS n"
 
-
 @dataclass(frozen=True)
 class EntityInfo:
     """Một node `:Entity` rút gọn cho grounding."""
@@ -59,7 +58,6 @@ class EntityInfo:
     name: str
     norm_name: str
     source_count: int
-
 
 class EntityIndex:
     """Inverted-index `norm_name -> EntityInfo` + version stamp."""
@@ -114,10 +112,8 @@ class EntityIndex:
             ],
         }
 
-
 def entity_index_path() -> Path:
     return _DEFAULT_CACHE
-
 
 def _alias_map_version() -> str:
     """Dấu hiệu alias_map đổi: mtime_ns + size của alias_map.json (rẻ, đủ phân biệt)."""
@@ -126,7 +122,6 @@ def _alias_map_version() -> str:
         return "none"
     st = path.stat()
     return f"{st.st_mtime_ns}:{st.st_size}"
-
 
 def _kg_version(driver: Driver | None = None) -> str:
     """Dấu hiệu KG đổi: số node :Entity."""
@@ -137,13 +132,11 @@ def _kg_version(driver: Driver | None = None) -> str:
         record = session.run(_COUNT_ENTITIES).single()
     return str(record["n"]) if record else "0"
 
-
 def _current_versions(driver: Driver | None = None) -> dict[str, str]:
     return {
         "alias_map_version": _alias_map_version(),
         "kg_version": _kg_version(driver),
     }
-
 
 def build_entity_index(driver: Driver | None = None) -> EntityIndex:
     """Nạp toàn bộ entity từ Neo4j -> EntityIndex (kèm version hiện tại)."""
@@ -163,7 +156,6 @@ def build_entity_index(driver: Driver | None = None) -> EntityIndex:
         kg_version=versions["kg_version"],
     )
 
-
 def _write_cache(cache_path: Path, index: EntityIndex) -> None:
     """Ghi cache atomic (os.replace) để không để lại file dở nếu lỗi giữa chừng."""
     cache_path.parent.mkdir(parents=True, exist_ok=True)
@@ -172,7 +164,6 @@ def _write_cache(cache_path: Path, index: EntityIndex) -> None:
         json.dumps(index.to_cache_dict(), ensure_ascii=False), encoding="utf-8"
     )
     os.replace(tmp, cache_path)
-
 
 def load_entity_index(
     *,
@@ -207,12 +198,10 @@ def load_entity_index(
     _write_cache(cache_path, index)
     return index
 
-
 @lru_cache(maxsize=1)
 def get_entity_index() -> EntityIndex:
     """Index dùng chung trong process (graph retriever gọi mỗi câu hỏi)."""
     return load_entity_index()
-
 
 def reset_entity_index_cache() -> None:
     """Xoá cache process (gọi sau khi re-index KG / rebuild alias trong cùng process)."""

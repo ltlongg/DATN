@@ -37,7 +37,6 @@ DEFAULT_STEP_LABEL = "Tìm trong tài liệu"
 
 _PLACEHOLDER_RE = re.compile(r"<(\d+)>")
 
-
 def _fold(text: str) -> str:
     """Chuẩn hoá để so khớp literal: NFC + lower + gộp khoảng trắng.
 
@@ -46,7 +45,6 @@ def _fold(text: str) -> str:
     """
     return " ".join(unicodedata.normalize("NFC", text).lower().split())
 
-
 def _placeholder_ids(step: PlanStep) -> set[int]:
     """Mọi id bước được tham chiếu trong bước này (cả `query` lẫn `entities`)."""
     found: set[int] = set()
@@ -54,7 +52,6 @@ def _placeholder_ids(step: PlanStep) -> set[int]:
         for text in (item.query, *item.entities):
             found.update(int(m) for m in _PLACEHOLDER_RE.findall(text))
     return found
-
 
 def _keep_grounded_entities(entities: list[str], *, folded_standalone: str) -> list[str]:
     """Giữ entity có nguyên văn trong câu ĐÃ VIẾT LẠI (hoặc placeholder); bỏ phần còn lại."""
@@ -70,7 +67,6 @@ def _keep_grounded_entities(entities: list[str], *, folded_standalone: str) -> l
         seen.add(folded)
         kept.append(name)
     return kept
-
 
 def _clean_queries(
     queries: list[StepQuery],
@@ -95,7 +91,6 @@ def _clean_queries(
         merged = list(dict.fromkeys([*grounded, *global_entities]))
         cleaned.append(StepQuery(query=text, entities=merged))
     return cleaned[:max_queries], dropped
-
 
 def _renumber(steps: list[PlanStep]) -> tuple[list[PlanStep], int]:
     """Đánh số lại id liền mạch từ 1, REMAP mọi tham chiếu tới id cũ, dọn `depends_on` sai.
@@ -139,7 +134,6 @@ def _renumber(steps: list[PlanStep]) -> tuple[list[PlanStep], int]:
         )
     return out, cleared
 
-
 def _strip_unused_resolve(steps: list[PlanStep]) -> tuple[list[PlanStep], bool]:
     """Xoá `resolve` của bước không ai tham chiếu tới. Trả (steps, đã_xoá_gì_không).
 
@@ -159,7 +153,6 @@ def _strip_unused_resolve(steps: list[PlanStep]) -> tuple[list[PlanStep], bool]:
         out.append(step)
     return out, stripped
 
-
 def _orphan_placeholder(steps: list[PlanStep]) -> str | None:
     """Lý do todo list KHÔNG chạy được, hoặc None nếu hợp lệ.
 
@@ -175,7 +168,6 @@ def _orphan_placeholder(steps: list[PlanStep]) -> str | None:
             ids = ", ".join(f"<{i}>" for i in sorted(orphan))
             return f"placeholder {ids} không trỏ tới bước trước có trích mắt xích"
     return None
-
 
 def normalize_plan(
     parsed: PlanOutput,
@@ -247,7 +239,6 @@ def normalize_plan(
             f"loại {dropped} entity không có nguyên văn trong câu hỏi đã viết lại."
         )
     return standalone, steps, warnings
-
 
 def fill_placeholders(step: PlanStep, resolved: dict[int, str]) -> PlanStep:
     """Điền `<N>` bằng mắt xích đã trích (execute-time, trong node `retrieve`).

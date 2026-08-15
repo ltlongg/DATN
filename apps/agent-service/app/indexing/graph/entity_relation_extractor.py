@@ -29,7 +29,6 @@ log = logging.getLogger(__name__)
 
 _EMPTY = GraphExtraction(entities=[], relations=[])
 
-
 def _drop_orphan_relations(
     extraction: GraphExtraction, chunk_id: str | None = None
 ) -> GraphExtraction:
@@ -60,7 +59,6 @@ def _drop_orphan_relations(
             "%sBỏ %d relation mồ côi: %s", prefix, len(dropped), " ;; ".join(items)
         )
     return GraphExtraction(entities=extraction.entities, relations=kept)
-
 
 def extract_graph(
     text: str,

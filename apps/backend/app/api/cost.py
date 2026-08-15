@@ -20,7 +20,6 @@ from app.services.cost_service import (
 
 router = APIRouter(dependencies=[Depends(require_admin)])
 
-
 @router.get("/overview", response_model=CostOverview)
 async def overview(
     from_date: str | None = Query(default=None),
@@ -28,7 +27,6 @@ async def overview(
 ) -> CostOverview:
     rows = await anyio.to_thread.run_sync(repo.list_usage_rows, from_date, to_date)
     return compute_cost_overview(rows)
-
 
 @router.get("/by-day", response_model=list[DailyCost])
 async def by_day(
@@ -38,7 +36,6 @@ async def by_day(
     rows = await anyio.to_thread.run_sync(repo.list_usage_rows, from_date, to_date)
     return compute_cost_by_day(rows)
 
-
 @router.get("/by-task", response_model=list[TaskCost])
 async def by_task(
     from_date: str | None = Query(default=None),
@@ -46,7 +43,6 @@ async def by_task(
 ) -> list[TaskCost]:
     rows = await anyio.to_thread.run_sync(repo.list_usage_rows, from_date, to_date)
     return compute_cost_by_task(rows)
-
 
 @router.get("/top-users", response_model=list[TopUserCost])
 async def top_users(

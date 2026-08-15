@@ -85,7 +85,6 @@ _USER_TEMPLATE = """\
 {text}
 </text>"""
 
-
 def build_user_prompt(text: str, headings: dict[str, str] | None = None) -> str:
     """Ghép prompt người dùng: phần ngữ cảnh heading + đoạn văn."""
     if headings:

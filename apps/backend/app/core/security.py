@@ -18,7 +18,6 @@ from app.core.config import get_settings
 # tốn 2-3 byte/ký tự).
 _BCRYPT_MAX_BYTES = 72
 
-
 def validate_bcrypt_password(password: str) -> str:
     """Từ chối mật khẩu vượt giới hạn bcrypt thay vì cắt im lặng.
 
@@ -31,11 +30,9 @@ def validate_bcrypt_password(password: str) -> str:
         raise ValueError(f"Mật khẩu quá dài, tối đa {_BCRYPT_MAX_BYTES} byte.")
     return password
 
-
 def hash_password(password: str) -> str:
     validate_bcrypt_password(password)
     return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
-
 
 def verify_password(password: str, password_hash: str | None) -> bool:
     # None = tài khoản Google-only (không có mật khẩu) -> không khớp gì cả.
@@ -52,10 +49,8 @@ def verify_password(password: str, password_hash: str | None) -> bool:
         # password_hash rỗng / sai format -> coi như không khớp, không raise.
         return False
 
-
 class TokenError(Exception):
     """Token thiếu/hết hạn/sai chữ ký — api layer map về 401."""
-
 
 def create_access_token(user_id: str, role: str) -> str:
     settings = get_settings()
@@ -67,7 +62,6 @@ def create_access_token(user_id: str, role: str) -> str:
         "exp": now + timedelta(minutes=settings.jwt_access_token_expire_minutes),
     }
     return jwt.encode(payload, settings.backend_secret_key, algorithm=settings.jwt_algorithm)
-
 
 def decode_access_token(token: str) -> dict[str, object]:
     """Giải mã + kiểm hạn token. Ném TokenError nếu hết hạn / sai chữ ký / thiếu sub."""

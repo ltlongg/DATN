@@ -194,7 +194,6 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
     "INSERT INTO system_config (id) VALUES (1) ON CONFLICT (id) DO NOTHING;",
 )
 
-
 def init_schema(conn: DictConnection) -> None:
     """Chạy toàn bộ DDL (idempotent). Dùng bởi scripts/init_db.py và test fixture."""
     with conn.cursor() as cur:
@@ -202,18 +201,15 @@ def init_schema(conn: DictConnection) -> None:
             cur.execute(statement)
     conn.commit()
 
-
 def _database_url(database_url: str | None = None) -> str:
     url = database_url or get_settings().database_url
     if not url:
         raise RuntimeError("Thiếu DATABASE_URL trong .env để kết nối Postgres.")
     return url.replace("postgresql+psycopg://", "postgresql://", 1)
 
-
 # Pool singleton mức module. Mở lazy để import db.py không cần DB sống (test patch
 # `connection` nên không bao giờ chạm pool; CLI script mở lazy rồi atexit đóng).
 _pool: ConnectionPool[DictConnection] | None = None
-
 
 def get_pool() -> ConnectionPool[DictConnection]:
     """Trả pool đang mở, tạo lần đầu nếu chưa có. `open()` không blocking — nếu DB tạm
@@ -234,14 +230,12 @@ def get_pool() -> ConnectionPool[DictConnection]:
         atexit.register(close_pool)
     return _pool
 
-
 def close_pool() -> None:
     """Đóng pool (idempotent). Gọi lúc shutdown server (lifespan) và atexit cho CLI."""
     global _pool
     if _pool is not None:
         _pool.close()
         _pool = None
-
 
 @contextmanager
 def connection(database_url: str | None = None) -> Iterator[DictConnection]:
@@ -256,7 +250,6 @@ def connection(database_url: str | None = None) -> Iterator[DictConnection]:
         return
     with get_pool().connection() as conn:
         yield conn
-
 
 def check_connection(database_url: str | None = None) -> bool:
     """Ping Postgres bằng `SELECT 1` cho endpoint /ready. Trả False nếu không kết nối được."""

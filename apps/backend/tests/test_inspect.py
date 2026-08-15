@@ -13,7 +13,6 @@ from psycopg.types.json import Jsonb
 _CM = "ZZINSPECTCHUNK"
 _EM = "ZZINSPECTEVENT"
 
-
 def _insert_chunk(
     conn: psycopg.Connection,
     chunk_id: str,
@@ -28,7 +27,6 @@ def _insert_chunk(
             "VALUES (%s, %s, %s, %s, %s::text[])",
             (chunk_id, text, text, Jsonb(metadata or {}), heading_path or []),
         )
-
 
 def _insert_event(
     conn: psycopg.Connection,
@@ -59,9 +57,7 @@ def _insert_event(
             ),
         )
 
-
 # --- chunks -----------------------------------------------------------------
-
 
 def test_list_chunks_search_and_paginate(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     _insert_chunk(db_conn, "zz-c-1", f"{_CM} nội dung một", metadata={"chunk_index": 1})
@@ -75,7 +71,6 @@ def test_list_chunks_search_and_paginate(client, auth, db_conn) -> None:  # type
     assert len(body["items"]) == 1  # limit=1
     assert body["items"][0]["chunk_id"] == "zz-c-1"  # sort theo chunk_index
 
-
 def test_list_chunks_filter_heading(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     _insert_chunk(
         db_conn, "zz-c-h", f"{_CM} có heading", heading_path=["ZZHEAD", "con"]
@@ -87,7 +82,6 @@ def test_list_chunks_filter_heading(client, auth, db_conn) -> None:  # type: ign
     )
     assert r.status_code == 200
     assert [i["chunk_id"] for i in r.json()["items"]] == ["zz-c-h"]
-
 
 def test_chunk_detail_with_referencing_events(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     _insert_chunk(
@@ -108,15 +102,12 @@ def test_chunk_detail_with_referencing_events(client, auth, db_conn) -> None:  #
     # chỉ event tham chiếu đúng chunk (source_chunk_ids @> [chunk_id]).
     assert [e["event_id"] for e in body["referencing_events"]] == ["zz-e-ref"]
 
-
 def test_chunk_detail_404(client, auth) -> None:  # type: ignore[no-untyped-def]
     r = client.get("/api/admin/kb/chunks/khong-co", headers=auth("admin"))
     assert r.status_code == 404
     assert r.json()["code"] == "not_found"
 
-
 # --- events -----------------------------------------------------------------
-
 
 def test_list_events_search_and_filter_confidence(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     _insert_event(db_conn, "zz-e-1", f"{_EM} cao", confidence="cao", time_start="1858")
@@ -130,7 +121,6 @@ def test_list_events_search_and_filter_confidence(client, auth, db_conn) -> None
     body = r.json()
     assert body["total"] == 1
     assert body["items"][0]["event_id"] == "zz-e-1"
-
 
 def test_event_detail(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     _insert_event(
@@ -148,14 +138,11 @@ def test_event_detail(client, auth, db_conn) -> None:  # type: ignore[no-untyped
     assert body["locations"] == ["Đà Nẵng"]
     assert body["source_chunk_ids"] == ["zz-c-a", "zz-c-b"]
 
-
 def test_event_detail_404(client, auth) -> None:  # type: ignore[no-untyped-def]
     r = client.get("/api/admin/kb/events/khong-co", headers=auth("admin"))
     assert r.status_code == 404
 
-
 # --- entities (proxy) -------------------------------------------------------
-
 
 def test_entities_proxy_forwards_chunk_id(client, auth, monkeypatch) -> None:  # type: ignore[no-untyped-def]
     captured: dict[str, Any] = {}
@@ -173,7 +160,6 @@ def test_entities_proxy_forwards_chunk_id(client, auth, monkeypatch) -> None:  #
     assert captured["path"] == "/kb/entities"
     assert captured["params"]["chunk_id"] == "zz-c-1"
 
-
 def test_entity_detail_proxy(client, auth, monkeypatch) -> None:  # type: ignore[no-untyped-def]
     async def fake_agent_get(path, params=None):  # type: ignore[no-untyped-def]
         return {"name": "Trương Định", "norm_name": "trương định", "edges": []}
@@ -183,9 +169,7 @@ def test_entity_detail_proxy(client, auth, monkeypatch) -> None:  # type: ignore
     assert r.status_code == 200
     assert r.json()["norm_name"] == "trương định"
 
-
 # --- gác admin --------------------------------------------------------------
-
 
 def test_kb_requires_admin(client, auth) -> None:  # type: ignore[no-untyped-def]
     for path in ("/api/admin/kb/chunks", "/api/admin/kb/events", "/api/admin/kb/entities"):

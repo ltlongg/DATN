@@ -24,7 +24,6 @@ from app.schemas.retrieval import RetrievedChunk
 
 logger = logging.getLogger("agent_service.startup")
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Warm-up model nặng (dense embedding + BM25 sparse + cross-encoder rerank) TRƯỚC khi
@@ -58,7 +57,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     yield
     close_pool()
 
-
 def create_app() -> FastAPI:
     app = FastAPI(title="Agent Service", version="0.1.0", lifespan=lifespan)
     # Gác `X-Internal-Key` ở CẤP ROUTER (không phải cấp app) để `health_router` ở dưới còn
@@ -68,6 +66,5 @@ def create_app() -> FastAPI:
     app.include_router(kb_router, dependencies=guarded)
     app.include_router(health_router)
     return app
-
 
 app = create_app()

@@ -25,12 +25,10 @@ from app.schemas.prompt import (
 
 router = APIRouter(dependencies=[Depends(require_admin)])
 
-
 @router.get("", response_model=list[PromptListItem])
 async def list_prompts() -> list[PromptListItem]:
     rows = await anyio.to_thread.run_sync(repo.list_prompts)
     return [PromptListItem(**r) for r in rows]
-
 
 @router.get("/{key}", response_model=PromptDetail)
 async def get_prompt(key: str) -> PromptDetail:
@@ -39,14 +37,12 @@ async def get_prompt(key: str) -> PromptDetail:
         raise AppError(404, "not_found", "Không tìm thấy prompt.")
     return PromptDetail(**row)
 
-
 @router.get("/{key}/versions/{version_no}", response_model=PromptVersionContent)
 async def get_version(key: str, version_no: int) -> PromptVersionContent:
     row = await anyio.to_thread.run_sync(repo.get_version, key, version_no)
     if row is None:
         raise AppError(404, "not_found", "Không tìm thấy phiên bản prompt.")
     return PromptVersionContent(**row)
-
 
 @router.post("/{key}/versions", response_model=PromptVersionMeta)
 async def create_version(
@@ -60,7 +56,6 @@ async def create_version(
     if row is None:
         raise AppError(404, "not_found", "Không tìm thấy prompt để tạo phiên bản.")
     return PromptVersionMeta(**row)
-
 
 @router.post("/{key}/versions/{version_no}/promote", response_model=PromptDetail)
 async def promote_version(

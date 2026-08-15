@@ -44,17 +44,14 @@ router = APIRouter()
 # CacheControl (đọc header Cache-Control của Google) mới hết round-trip mỗi lần đăng nhập.
 _GA_REQUEST = ga_requests.Request(session=cachecontrol.CacheControl(requests.Session()))
 
-
 def _to_public(user: User) -> UserPublic:
     return UserPublic(id=user.id, email=user.email, name=user.name, role=user.role)
-
 
 def _issue_token(user: User) -> LoginResponse:
     return LoginResponse(
         access_token=create_access_token(user_id=user.id, role=user.role),
         user=_to_public(user),
     )
-
 
 @router.post("/register", response_model=LoginResponse, status_code=201)
 async def register(body: RegisterRequest) -> LoginResponse:
@@ -70,7 +67,6 @@ async def register(body: RegisterRequest) -> LoginResponse:
         raise AppError(409, "email_taken", "Email này đã được đăng ký.")
     return _issue_token(user)
 
-
 @router.post("/login", response_model=LoginResponse)
 async def login(body: LoginRequest) -> LoginResponse:
     user = await anyio.to_thread.run_sync(get_user_by_email, str(body.email))
@@ -83,12 +79,10 @@ async def login(body: LoginRequest) -> LoginResponse:
         raise AppError(403, "account_locked", "Tài khoản đã bị khóa.")
     return _issue_token(user)
 
-
 def _verify_google_credential(credential: str, client_id: str) -> dict[str, Any]:
     """Verify ID token. `verify_oauth2_token` tự kiểm chữ ký, `aud`, `exp`, `iss`.
     Blocking (phát HTTP lấy cert) -> luôn gọi qua anyio.to_thread."""
     return id_token.verify_oauth2_token(credential, _GA_REQUEST, client_id)
-
 
 def _create_google_user(google_sub: str, email: str, idinfo: dict[str, Any]) -> User:
     """Tạo tài khoản Google-only. KHÔNG tự ghép vào tài khoản mật khẩu cùng email.
@@ -115,7 +109,6 @@ def _create_google_user(google_sub: str, email: str, idinfo: dict[str, Any]) -> 
         if existing is None:
             raise
         return existing
-
 
 @router.post("/google", response_model=LoginResponse)
 async def google_login(body: GoogleLoginRequest) -> LoginResponse:
@@ -155,11 +148,9 @@ async def google_login(body: GoogleLoginRequest) -> LoginResponse:
         raise AppError(403, "account_locked", "Tài khoản đã bị khóa.")
     return _issue_token(user)
 
-
 @router.get("/me", response_model=UserPublic)
 async def me(user: User = Depends(get_current_user)) -> UserPublic:
     return _to_public(user)
-
 
 @router.post("/logout", response_model=OkResponse)
 async def logout(_: User = Depends(get_current_user)) -> OkResponse:
