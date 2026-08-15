@@ -460,7 +460,7 @@ Thời Bắc thuộc kéo dài hơn một nghìn năm, trải qua các triều �
 
 Chính sách đô hộ của chính quyền ngoại bang biểu hiện từng thời kì có khác nhau, lúc rắn, lúc mềm, nhưng mục đích nói trên thì không thay đổi.
 
-##### 1. Tổ chức cai trị
+#### 1. Tổ chức cai trị
 
 Sau khi chiếm được Âu Lạc, Triệu Đà chia Âu Lạc thành hai quận: Giao Chỉ (bao gồm vùng Bắc Bộ ngày nay) và Cửu Chân (gồm vùng đất Thanh Hoá và Nghệ An, Hà Tĩnh), sáp nhập vào nước Nam Việt.
 
@@ -586,7 +586,7 @@ Biện pháp di dân hàng loạt người phương Bắc vào nước ta là m�
 
 ### II. NHỮNG BIẾN CHUYỂN VỀ KINH TẾ, XÃ HỘI, VĂN HOÁ
 
-##### 1. Về kinh tế
+#### 1. Về kinh tế
 
 – *Nông nghiệp*: Công cụ bằng sắt ngày càng phổ biến thay thế công cụ sản xuất bằng đồng. Từ thời Âu Lạc, người Việt cổ đã nắm được kĩ thuật luyện sắt để chế tạo công cụ sản xuất, song đồ sắt thuở ấy còn ít, chưa được sử dụng rộng rãi trong sản xuất và đời sống xã hội.
 
@@ -664,7 +664,7 @@ Nhà Hán vào buổi đầu Công nguyên thông qua chính quyền đô hộ �
 
 Do nhu cầu của công cuộc đô hộ và đồng hoá dân tộc ta ngày càng thôi thúc bọn đô hộ đẩy mạnh việc phổ biến chữ Hán và đạo Nho trên đất nước ta. Tuy vậy, đạo Nho và chữ Hán chỉ được truyền bá và phát triển trong bộ phận quan lại đô hộ và tầng lớp trên của xã hội. Trong một chừng mực nào đó, Nho giáo ít nhiều cũng đã thâm nhập vào xã hội nước ta. Nhưng đại bộ phận nhân dân sống trong các làng xã cổ truyền ít có điều kiện để tiếp thu chữ Hán và đạo Nho. Bởi vậy, nhìn chung về cơ bản những phong tục, tập quán cổ truyền của dân tộc vốn được hình thành từ buổi đầu dựng nước và giữ nước vẫn được giữ gìn lâu dài suốt thời kì bị đô hộ.
 
-###### – Sự truyền bá Đạo giáo và Phật giáo
+##### – Sự truyền bá Đạo giáo và Phật giáo
 
 Đạo giáo là một tôn giáo, tín ngưỡng ở Trung Quốc, là một hỗn hợp nhiều thứ mê tín dị đoan và phương thuật (dân gian và cung đình, như đoán mộng, xem sao, đồng cốt, chữa bệnh bằng phù phép, bói toán,...) được hệ thống hoá
 
@@ -684,7 +684,7 @@ Nhưng, đâu chỉ có Bắc thuộc, hơn một thiên niên kỉ, nhân dân 
 
 Trong thời Bắc thuộc, nhân dân ba quận đã không cam tâm chịu làm nô lệ cho nước ngoài. Họ đã không ngừng vùng dậy đấu tranh vũ trang để giành lại độc lập tự chủ.
 
-##### 1. Tính liên tục và quần chúng của phong trào
+#### 1. Tính liên tục và quần chúng của phong trào
 
 Năm 40, Hai Bà Trưng đã nổi dậy khởi nghĩa ở Mê Linh, nhân dân 3 quận đã hưởng ứng nhiệt liệt, cuộc khởi nghĩa đã thắng lợi, giành được quyền độc lập tự chủ trong 3 năm (40 – 43).
 
@@ -952,7 +952,7 @@ Thời đại phong kiến dân tộc diễn ra trong gần 10 thế kỉ, có t
 
 ### I. XÂY DỰNG VÀ BẢO VỆ NỀN TỰ CHỦ
 
-##### 1. Những năm đầu độc lập dưới thời họ Khúc
+#### 1. Những năm đầu độc lập dưới thời họ Khúc
 
 Năm 905, cuộc khởi nghĩa của Khúc Thừa Dụ hoàn toàn thắng lợi, chính quyền thống trị của nhà Đường bị lật đổ. Nhà Đường buộc phải phong Khúc Thừa Dụ làm Tĩnh Hải quân Tiết độ sứ, rồi tiếp đó ban thêm chức Đồng bình chương sự với mong muốn xem họ Khúc cũng là một quan chức của mình. Nhưng Khúc Thừa Dụ đã không chấp nhận ý tưởng đó, quyết định củng cố những thành quả mà cuộc khởi nghĩa đã giành được.
 
@@ -1051,7 +1051,7 @@ Nhà Ngô đổ. Tình hình đất nước rối loạn. Đinh Bộ Lĩnh quy�
 
 ### II. ĐẠI CỔ VIỆT THỜI ĐINH – TIỀN LÊ (968 – 1009)
 
-##### 1. Tình hình chính trị
+#### 1. Tình hình chính trị
 
 Đất nước trở lại thống nhất, yên bình. Năm 968, Vạn Thắng vương Đinh Bộ Lĩnh lên ngôi Hoàng đế (tức Đinh Tiên Hoàng) đặt quốc hiệu là Đại Cổ Việt, đóng đô ở Hoa Lư. Mùa xuân năm 970, tiến thêm một bước, Đinh Bộ Lĩnh bỏ không dùng niên hiệu của nhà Tống, tự đặt niên hiệu là Thái Bình và sai sứ sang giao hảo với nhà Tống. Một quốc gia độc lập có quốc hiệu, có nhà nước riêng do hoàng đế đứng đầu đã được xác lập.
 
@@ -1201,7 +1201,7 @@ Lý Công Uẩn lên ngôi, xuống lệnh đại xá cho thiên hạ, quyết �
 
 ### I. DIỄN BIẾN CHÍNH TRỊ VÀ TÌNH HÌNH KINH TẾ – XÃ HỘI
 
-##### 1. Định đô Thăng Long
+#### 1. Định đô Thăng Long
 
 Ngày 2 tháng 11 năm Kỉ Dậu tức là ngày 21 tháng 11 năm 1009, được thế lực Phật giáo đứng đầu là sư Vạn Hạnh cùng các triều thần ủng hộ, Lý Công Uẩn lên ngôi Hoàng đế. Ông thấy Hoa Lư chật hẹp, kinh tế nông công thương còn thấp kém, giao thông vận tải gặp rất nhiều khó khăn, vị trí giao thông của sông Đáy đã giảm sút “không đủ làm chỗ ở của đế vương, muốn dời đô đi nơi khác”. Bởi vậy công việc lớn đầu tiên là dời đô ra Đại La. Đầu năm 1010, nhà vua viết *Chiếu dời đô*. Bài chiếu có đoạn viết: “Chỉ vì muốn đóng đô ở một trung tâm mưu toan nghiệp lớn, tính kế muôn đời cho con cháu, trên vâng mệnh trời, dưới theo ý dân, nếu thấy thuận tiện thì thay đổi. Cho nên vận nước lâu dài, phong tục phồn thịnh... được cái thế rộng cuộn hổ ngồi. Đã đúng ngôi Nam, Bắc, Đông, Tây, lại tiện hướng nhìn sông, tựa núi. Địa thế rộng mà bằng, đất đai cao mà thoáng. Dân cư khỏi chịu cảnh khốn khổ, ngập lụt, muôn vật rất mực phong phú, tốt tươi. Xem khắp đất Việt ta chỉ nơi này là thắng địa. Thật là chốn hội tụ trọng yếu của bốn phương đất nước. Cũng là nơi kinh đô bậc nhất của đế vương muôn đời”.
 
@@ -1431,9 +1431,9 @@ Kết thúc chiến tranh, vua Chăm Rudravarman III phải cắt 3 châu Bố C
 
 ### II. KINH TẾ ĐẠI VIỆT THỜI LÝ
 
-##### 1. Nông nghiệp
+#### 1. Nông nghiệp
 
-###### Các hình thái sử hữu ruộng đất
+##### Các hình thái sử hữu ruộng đất
 
 – Ruộng đất thuộc nhà nước
 
@@ -1592,7 +1592,7 @@ Giữa các dân tộc ít người vùng biên giới cũng có buôn bán vớ
 
 ### III. KHÁNG CHIẾN CHỐNG TỐNG (1075 – 1077)
 
-##### 1. Triều Tống tiếp tục mưu đồ bành trướng
+#### 1. Triều Tống tiếp tục mưu đồ bành trướng
 
 Cuối thế kỉ X, năm 981, Lê Hoàn đã đánh tan hai đạo quân xâm lược Tống, bảo vệ vững chắc nền độc lập của Đại Cồ Việt và buộc nhà Tống giữ hoà hiếu trong một thời gian dài, nhưng trong thâm tâm các vua Tống vẫn chưa từ bỏ ý đồ đánh chiếm nước ta.
 
@@ -1942,7 +1942,7 @@ Họ Trần tuy đã nắm giữ các chức vụ chủ chốt trong triều đ�
 
 mặt phỏng theo mô hình nhà Tống. Những năm đầu, nhà Trần duy trì bộ máy chính quyền cũ. Nhiều quan chức nhà Lý vẫn được giữ làm trọng thần như Phùng Tá Chu, Phạm Kính Ân. Năm 1230, nhà Trần ra bộ *Quốc triều thông chế* “xét các lệ của triều trước, định làm *thông chế* của quốc triều”  quy định bộ máy nhà nước có kỉ cương hơn, hoàn chỉnh hơn, phù hợp với tình hình mới.
 
-###### a) Triều đình
+##### a) Triều đình
 
 – *Bộ phận trung khu*: Tại triều đình có bộ phận trung khu gồm các tể tướng, á tướng, tri mật viện sự và hành khiển ở môn hạ sảnh  có nhiệm vụ chỉ đạo các quan văn võ (gần giống như hai ngạch quan hành chính và quân sự). Đứng đầu trung khu là quan chức mang danh hiệu tam thái (thái sư, thái phó, thái bảo); tam thiếu (thiếu sư, thiếu phó, thiếu bảo) và tam tư (tư đồ, tư mã, tư không). Các danh hiệu tam thái, tam thiếu như là một hàm bậc thường kết hợp với chức danh kèm theo (có chức năng cụ thể) như thống quốc, tá thánh, phụ quốc. Thủ Độ là Thống quốc Thái sư, Quang Khải sau chống Mông – Nguyên lần thứ hai làm Thượng tướng Thái sư, Văn Bích làm Phụ quốc Thái bảo, Nguyên Trác làm Tả Tướng quốc, Nguyễn Đán làm Bình chương sự quốc thượng hầu Tư đồ. Khiêm Ngô làm Nhập nội kiểm hiệu Tư mã. Chức vụ tể tướng thời Trần phải là thân vương với chức danh là tả, hữu tướng quốc hay nhập nội kiểm hiệu, đặc tiến khai phủ nghi đồng tam ti bình chương sự. Chức vụ á tướng thường là tham tri chính sự hay là tri mật viện sự và nhiều khi mang chức danh là tả, hữu bộc xạ kèm thêm hai chữ “nhập nội”.
 
@@ -2116,7 +2116,7 @@ Rất tiếc bộ *Hình luật* và các văn bản pháp luật khác của nh
 
 #### 1. Các hình thức sở hữu ruộng đất
 
-###### *a) Ruộng đất thuộc sở hữu nhà nước*
+##### *a) Ruộng đất thuộc sở hữu nhà nước*
 
 Sự thống trị của chính quyền nhà Trần trong phạm vi cả nước và uy quyền chuyên chế của hoàng đế đã tạo thành một quan niệm “đất của vua, chùa của bụt”, một quan niệm đã xác nhận sự tồn tại tự nhiên: chế độ sở hữu nhà nước về ruộng đất rất phổ biến.
 
@@ -2310,7 +2310,7 @@ Sản xuất tiểu nông đã cộng sinh với các loại hình quan hệ s�
 
 #### 2. Công cuộc trị thủy
 
-###### *Đê đỉnh nhĩ và dòng kênh tiêu úng*
+##### *Đê đỉnh nhĩ và dòng kênh tiêu úng*
 
 Ở thời Lý, công việc trị thủy vẫn do các địa phương tự lo liệu, tự góp tiền của, nhà nước chỉ đóng vai trò chỉ đạo và quản lí một số đê, chủ yếu là xung quanh Thăng Long. Mấy chục năm đầu thế kỉ XIII thì hầu như việc trị thủy bị bỏ bê trễ, không được lưu tâm thích đáng.
 
@@ -2350,7 +2350,7 @@ Trên đây là những công trình trị thủy và thủy nông do nhà nư�
 
 #### **3. Mấy nét về kinh tế thủ công nghiệp và thương nghiệp**
 
-###### ***a) Thủ công nghiệp***
+##### ***a) Thủ công nghiệp***
 
 ###### ***– Thủ công nghiệp nhà nước***
 
@@ -3492,7 +3492,7 @@ Từ giữa năm 1407, tiếp ngay theo cuộc kháng chiến thất bại của
 
 Tháng 11, nội quan Miêu Thanh tâu về triều đình nhà Minh rằng: “Tại các phủ Tân An (miền Quảng Ninh, Hải Phòng, Hải Dương), Kiến Bình (Nam Định), Lạng Giang (Bắc Giang), các châu Đông Hồ (Quảng Ninh), Thái Nguyên và sông Sinh Quyết, dân Man không phục, họp nhau làm loạn”. Trên thực tế, quân Minh lúc bấy giờ chỉ mới chiếm được các thành luỹ, kiểm soát được các trục giao thông thủy, bộ chủ yếu. Phần lớn vùng nông thôn và núi rừng vẫn thuộc phạm vi hoạt động của các lực lượng yêu nước.
 
-###### *Khởi nghĩa Trần Ngỗi và Trần Quý Khoáng*
+##### *Khởi nghĩa Trần Ngỗi và Trần Quý Khoáng*
 
 Trần Ngỗi (còn gọi là Trần Quỹ) là con thứ vua Trần Nghệ Tông (1370 – 1372). Tháng 10 – 1407, một số người yêu nước lập Trần Ngỗi lên làm vua, tôn xưng là Giản Định Đế, chấm dứt một cuộc khởi nghĩa ở Yên Mô (Ninh Bình). Cuộc khởi nghĩa được đông đảo nhân dân hưởng ứng và tập hợp được nhiều quý tộc, quan lại cũ của triều Trần, triều Hồ, trong đó có Đặng Tất và Nguyễn Cảnh Chân. Đến giữa năm 1408, nghĩa quân giải phóng được một khu vực rộng lớn từ Thanh Hoá vào đến Hoá Châu (Trị Thiên). Từ đó nghĩa quân tiến ra vùng đồng bằng sông Hồng, mở nhiều cuộc tiến công vào những căn cứ quân sự quan trọng của địch như đồn Bình Than, cửa Hàm Tử; chặn đường qua lại của địch ở Tam Giang (Vĩnh Phúc) và uy hiếp cả vùng ngoại vi thành Đông Quan.
 
@@ -3708,7 +3708,7 @@ Quân Minh hết sức bất ngờ và vội vàng đối phó một cách bị 
 
 Nhưng nghĩa quân đã mưu trí bố trí một trận mai phục ở Bồ Đằng (hay Bồ Lạp, thuộc Quỳ Châu, Nghệ An) đánh bại cánh quân của Trần Trí. Trong trận này, nghĩa quân giết chết tướng giặc là Đô ti Trần Trung, diệt trên 2.000 quân địch và thu được hơn 100 con ngựa. Trần Trí bị thua đau không dám bám sát theo sau nghĩa quân nữa. Cánh quân Sư Hựu cũng phải lui về lập đồn trại ở Trịnh Sơn để bảo vệ thành Trà Lân.
 
-###### – Hạ thành Trà Lân
+##### – Hạ thành Trà Lân
 
 Châu Trà Lân (còn gọi là Trà Long) thời Lê là một châu quan trọng của miền núi Nghệ An, tương đương với huyện Con Cuông, Tương Dương, tỉnh Nghệ An ngày nay. Thành Trà Lân, nơi Cẩm Bành lập “son trại” chống lại nghĩa quân Lam Sơn, xây dựng trên một ngọn núi ở bờ Bắc sông Lam, gần ngã ba sông Con (nay thuộc xã Bồng Khê, huyện Con Cuông). Thành đắp theo thế núi, chu vi chừng 2 km, phía ngoài có hào và rào tre trúc dày. Cẩm Bành và hơn 1.000 thổ binh rút lên “son trại” cố thủ, chờ quân cứu viện.
 
@@ -4258,7 +4258,7 @@ Trong những năm 40 của thế kỉ XV, một số nước láng giềng như
 
 Chế độ đô hộ của nhà Minh và cuộc chiến tranh giải phóng Tổ quốc đã tàn phá nghiêm trọng nền kinh tế nước ta vốn đã suy yếu trong những thập kỉ cuối Trần. Đồng ruộng, làng xóm điêu tàn. Nhân dân phiêu tán. Thủ công, thương nghiệp suy sụp. Đất nước trở lại độc lập, nhà nước và nhân dân với ý thức tự hào dân tộc sâu sắc đang vươn cao, đã hợp sức cùng nhau nhanh chóng khôi phục sản xuất, hàn gắn các vết thương chiến tranh và sau đó đưa nền kinh tế phát triển lên một giai đoạn mới ở nửa sau thế kỉ XV.
 
-##### 1. Tình hình ruộng đất
+#### 1. Tình hình ruộng đất
 
 Đất nước được hoàn toàn giải phóng. Nhà Lê, một mặt cho 25 vạn quân về làm ruộng, chiếm lại ruộng đất cũ của mình và khôi phục sản xuất, mặt khác kêu gọi nhân dân phiêu tán trở về quê cũ, cùng nhau xây dựng lại xóm làng, đồn điền, nghề nghiệp. Để đảm bảo an toàn cho sản xuất, Thái Tổ hạ lệnh cho các làng làm sổ ruộng đất và trên cơ sở đó, nhà nước chủ động phân phối. Ruộng đất được phân làm 3 bộ phận chính:
 
@@ -4326,7 +4326,7 @@ Nhìn chung, nền kinh tế công thương nghiệp nước ta thời Lê sơ p
 
 ### III. VĂN HOÁ – XÃ HỘI
 
-##### 1. Tình hình xã hội
+#### 1. Tình hình xã hội
 
 Những sự kiện lớn về chính trị, kinh tế của thế kỉ XV đã làm thay đổi ít nhiều cấu tạo giai cấp trong xã hội. Hai giai cấp chính: địa chủ phong kiến và nông dân ngày càng xác lập. Giai cấp địa chủ phong kiến được chia thành hai tầng lớp chính: quý tộc, quan chức trung, cao cấp và địa chủ thường. Bộ phận quý tộc dòng họ vua, tuy được ban cấp nhiều ruộng đất thế nghiệp vẫn không cấu thành một lực lượng có điển trang và thế lực chính trị ở địa phương. Một số lớn công thần khai quốc được ban họ vua (quốc tính) song không hình thành một lớp quý tộc. Sang thời Thánh Tông, họ dần dần trở lại với họ gốc của mình. Các quan lại trung, cao cấp do được ban nhiều ruộng lộc mà trở thành địa chủ, song không cách biệt với các địa chủ thường hoặc nhân dân và phần lớn xuất thân khoa cử. Trong lúc đó, tầng lớp địa chủ thường hầu như rải ra ở các làng, xã, dần dần trở thành những người chủ về mọi mặt.
 
@@ -4572,7 +4572,7 @@ Vũ khí, ngoài giáo mác, kiếm, cung, mộc, đao, nỏ bắn đá có sún
 
 kiếm, đấu võ lẫn làm văn sách về phương lược. Người đỗ Bác cử được gọi là Tạo sĩ, học vị ngang với Tiến sĩ bên văn.
 
-###### – *Tình hình đối ngoại:*
+##### – *Tình hình đối ngoại:*
 
 Nhà Lê – Trịnh duy trì chính sách hoà hợp với các dân tộc ít người, mở rộng việc khai thác khoáng sản và giao một bộ phận cho các tù trưởng địa phương. Bấy giờ nhà Minh suy rồi đổ. Nhà Thanh thống trị Trung Quốc, bắt đầu tăng cường ảnh hưởng ra các nước xung quanh. Bọn quan lại Hoa Nam nhân đó lấn dần vùng đất biên giới. Nhiều châu động Tây Bắc bị chúng chiếm, nhà Mạc thua ở đồng bằng, đã chạy lên đất Cao Bằng và nhờ vua Thanh can thiệp để chiếm giữ. Bấy giờ nhà Lê – Trịnh còn yếu lại đang lo việc đánh nhau với chúa Nguyễn, không dám chống cự. Triều đình Lê – Trịnh tiếp tục thần phục nhà Thanh, giữ quan hệ hoà hiếu. Nhà Thanh lại phong vua Lê làm An Nam Quốc vương.
 
@@ -4658,7 +4658,7 @@ Năm 1592, nhà Lê – Trịnh chiếm được Thăng Long. Các thế lực t
 
 Các xứ Đàng Ngoài, đặc biệt là vùng đồng bằng, là nơi chịu đựng nhiều nhất những tai họa do chiến tranh phong kiến đưa lại.
 
-##### 1. Tình hình ruộng đất
+#### 1. Tình hình ruộng đất
 
 Từ đầu thế kỉ XVI, ruộng công làng xã đã dần dần bị bọn cường hào địa phương lũng đoạn. Chiến tranh, sự bất lực của nhà nước càng ảnh hưởng quan trọng đến cuộc sống nông thôn. Ở nhiều nơi, ruộng thõ các triều, các công thần triều đại trước, ruộng công thần nhà Lê bị chấp chiếm và phân tán. Ruộng công làng xã ngày càng thu hẹp lại. Tình hình đó buộc nhà Lê – Trịnh phải bỏ chế độ lộc điền, thu bớt ruộng ban thưởng cho các công thần nhà Lê để có ruộng đất phong thưởng cho các tướng có công trong chiến tranh Trịnh – Mạc, Trịnh – Nguyễn, cấp cho các quan lại được cử đi sứ, cấp cho quan chức về hưu,... Một bộ phận ruộng đất công được dùng để cấp cho quân sĩ. Để chống lại những chủ trương đó, nhiều nơi làng xã tìm cách ẩn giấu ruộng đất công, khai giảm diện tích ở nông thôn, hình thành một lớp cường hào nông thôn mà phủ chúa thường gọi là “quyền cai thủ dịch”, “cường phiên” độc quyền chi phối ruộng đất công, nhà nước không đủ sức trấn áp. Để đảm bảo thu nhập, trừ các loại ruộng công thần, ruộng sứ thần, ruộng binh lính, nhà Lê – Trịnh bắt tất cả các loại ruộng khác, từ ruộng cấp tứ, ruộng thế nghiệp, ruộng công đều phải nộp thuế. Năm 1664, Nhà nước ban hành phép “Bình lệ”, giao cho các địa phương thống kê số đinh, số điền các xã rồi tính toán tổng số tiền thuế phải nộp cho nhà nước của từng xã. Số liệu đó được xác định một lần và hằng năm. Nhà nước theo thế mà thu không cần biết đến sự thay đổi về dân đinh hay diện tích ruộng đất chịu thuế. Kết quả là cuộc sống của nhân dân càng khó khăn, ruộng công làng xã càng bị lũng đoạn. Năm 1694, phủ chúa buộc phải ra lệnh cho các xã thôn trong nước phải làm lại sổ ruộng đất, ghi rõ biên giới, núi sông, ao hồ, ruộng đất gọi chung là “tu tri bạ”, nhằm ngăn chặn tệ “chiếm công vi tư”. Trên cơ sở đó năm 1711, phủ chúa ban hành lại phép quân điền. Theo chính sách quân điền mới, những người đã được cấp dân lộc hay ruộng lộc, những người có ruộng tư (của vợ hay chồng) đã đủ mức đều không được chia ruộng công làng xã, dân đinh đến 18 tuổi thì được chia nhưng quá 60 tuổi thì phải trả lại cho xã, khẩu phần và cách chia theo quy chế của nhà nước (có thêm bớt trên cơ sở quy chế thời Lê sơ). Điều đặc biệt là trong trường hợp “quan dịch nặng nề, bức bách”, xã dân
 
@@ -5366,7 +5366,7 @@ Rõ ràng là cuộc chiến đấu quyết liệt của nông dân, “được
 
 #### I. CUỘC KHỦNG HOẢNG CỦA CHẾ ĐỘ PHONG KIẾN TRÊN PHẠM VI CẢ NƯỚC
 
-###### 1. Ở Đàng Ngoài, cuộc khủng hoảng tiếp tục
+##### 1. Ở Đàng Ngoài, cuộc khủng hoảng tiếp tục
 
 Vào đầu những năm 50 thế kỉ XVIII, cuộc đấu tranh của nông dân tạm thời lắng xuống ở vùng đồng bằng. Trước tình trạng điêu tàn của đất nước, chúa Trịnh hết sức lo lắng, đã ban hành nhiều chính sách nhằm khôi phục nền sản xuất nông nghiệp, đưa nông dân lưu tán về với ruộng đồng. Binh lính đóng ở các địa phương được lệnh thành lập sở đồn điền, chia thành đơn vị đi khai hoang, phục hoá. Sau khi ruộng đồng đã thành thục trở lại, dân lưu tán đã trở về, chúa Trịnh ban lệnh bãi bỏ các sở đồn điền, trả đất cho dân. Nhà nước cũng tăng cường khuyến khích nhân dân phục hoá ruộng đất, "xã nào số đinh hao hụt... ruộng bỏ hoang nhiều không ai nhận cày thì cho phép chiêu mộ người cày... đợi 3 năm thành ruộng sẽ ghi vào sổ thuế... Nếu xã nào nhiều ruộng quá, cày không hết mà có người tình nguyện bỏ vốn ra khai khẩn thì cũng cho phép". Theo chủ trương này, "các chức sắc trong làng nếu bỏ vốn ra để mộ người khẩn hoang thì cứ 100 mẫu thưởng tước một tư, 50 mẫu trở lên được phong một người nhà làm phó sở sứ, 20 mẫu trở lên thì được miễn sưu dịch cho một người trong họ" hoặc "người trong họ nội, họ ngoại được phép nhận mỗi đinh 10 mẫu, lão nhiêu, cô phụ: 5 mẫu. Số ruộng thừa ra cho được tùy tiện chia nhau cày cấy nộp thuế hoặc cho những người ở xã gần đấy và dân ngụ cư lính canh, nộp thuế cho nhà nước theo mức thuế ruộng tư hạng 3 (1 tiền /mẫu), không được mua bán". Nhờ những chính sách trên cùng với sự nỗ lực của nhân dân, nhiều làng xóm nhanh chóng được phục hồi. Nhân dân phân chia nhau ruộng đất đã được thành thục, xây dựng lại nhà cửa, làm đình, dựng bia ghi công. Tuy nhiên, ở một số làng có tình hình ngược lại. Như báo cáo của Diệu quận công Trần Cảnh: "nguyên mấy năm binh lửa, dân sự phiêu lưu, sổ ruộng, văn tự thất lạc nên những kẻ hào cường chiếm ruộng của người bình dân, khó xét lắm" hoặc theo báo cáo của Ngự sử Ngô Thời Sĩ: "xét từ khi dân được yên ổn trở về làm ăn mà
 
@@ -5751,7 +5751,7 @@ Ba mươi năm không phải là một thời gian dài, nhưng phong trào nôn
 
 Năm 1802, sau khi đánh bại triều Tây Sơn, làm chủ toàn bộ lãnh thổ Đàng Trong và Đàng Ngoài cũ, Nguyễn Ánh tự đặt niên hiệu là Gia Long, lập ra nhà Nguyễn. Các vua nhà Nguyễn từ Gia Long (1802 – 1819), Minh Mạng (1820 – 1840) đến Thiệu Trị (1841 – 1847), Tự Đức (1848 – 1883) kế tiếp nhau xây dựng và củng cố nền thống trị, bảo vệ chế độ phong kiến trong bối cảnh khủng hoảng, suy vong. Tuy nhiên, trong hơn nửa thế kỉ tồn tại dưới triều Nguyễn, xã hội Việt Nam hầu như không phát triển lên được theo chiều hướng tiến bộ của thời đại, mâu thuẫn xã hội sâu sắc làm bùng lên hàng loạt cuộc khởi nghĩa lớn của nông dân, của các dân tộc ít người và cuối cùng trở thành đối tượng xâm lược của chủ nghĩa thực dân phương Tây.
 
-#### I. TÌNH HÌNH CHÍNH TRỊ
+### I. TÌNH HÌNH CHÍNH TRỊ
 
 Thành lập và thống trị trong thế kỉ XIX, nhà Nguyễn thừa hưởng được thành quả to lớn của phong trào nông dân Tây Sơn trong sự nghiệp thống nhất đất nước, làm chủ một lãnh thổ trải dài từ ải Nam Quan đến mũi Cà Mau, bao gồm cả Đàng Trong và Đàng Ngoài cũ. Do mặc cảm với vị trí của mình, năm 1803, Gia Long cử sứ bộ do Lê Quang Định đứng đầu, sang nhà Thanh xin quốc hiệu và đầu năm 1804 chính thức công bố tên nước là Việt Nam. Do phản ứng của nhân dân năm, 1813 Gia Long cho trở lại tên Đại Việt. Năm 1838, Minh Mạng bất bình đã khẳng định lại quốc hiệu là Đại Nam và cấm nhân dân “không được nói lại hai chữ Đại Việt”. Kinh đô đóng ở Phú Xuân (Huế).
 
@@ -5759,7 +5759,7 @@ Nhà Nguyễn ra đời và tồn tại không những trong một bối cảnh 
 
 và của sự giao lưu buôn bán quốc tế. Hàng loạt nước châu Á lần lượt rơi vào ách đô hộ thực dân và Việt Nam cũng không tránh khỏi mối đe doạ đó.
 
-##### 1. Tổ chức chính quyền
+#### 1. Tổ chức chính quyền
 
 Từ sớm, Nguyễn Ánh đã đặt quan, phong tướng cho những người phò tá. Sau khi lấy được toàn bộ Bắc Hà, Nguyễn Ánh xưng vương, kiểm lại hệ thống các đơn vị hành chính cũ, đặt quan chức cai quản. Đương thời, Gia Long giữ nguyên cách tổ chức cũ. Ở Đàng Ngoài vẫn là trấn, phủ, huyện, xã; ở Đàng Trong thì là trấn, dinh, huyện, xã. Sau đó ít lâu, nhà Nguyễn nâng tổng thành một cấp hành chính trung gian giữa huyện và xã. Ngoài ra, 11 trấn Bắc Thành (tương ứng với Bắc Bộ ngày nay) được hợp thành một tổng trấn, 5 trấn cực Nam hợp thành một tổng trấn gọi là Gia Định thành. Để nhất thể hoá các đơn vị hành chính trong nước, năm 1831 – 1832, Minh Mạng bỏ hai tổng trấn, chia cả nước thành 30 tỉnh và phủ Thừa Thiên (trực thuộc trung ương). Dưới tỉnh có phủ, huyện, châu rồi đến tổng, xã. Theo thống kê năm 1840, cả nước có 90 phủ, 20 phân phủ, 379 huyện, 1742 tổng, 18.265 xã, thôn, phường, ấp. Cách chia đơn vị hành chính này được giữ nguyên cho đến cuối thời Nguyễn.
 
@@ -6106,9 +6106,7 @@ Trong lúc đó, nhân tình hình biến động liên tục của xã hội, n
 
 ##### 2. Giáo dục và văn học
 
-– Từ giữa thế kỉ XVIII, giáo dục ngày càng sa sút ở Đàng Ngoài, năm 1750 theo đề nghị của Thự phủ sự Đỗ Thế Giai, chúa Trịnh cho các thí sinh kì thi Hương
-
-được nộp 3 quan, gọi là tiền thông kinh, để miễn khảo hạch. Kết quả là, như nhận định của Phan Huy Chú, người làm ruộng, người đi buôn cho chí người hàng thịt, người bán vật đều làm đơn nộp tiền xin thi. Ngày vào thi đông đến nỗi giày xéo lên nhau, có người chết ở cửa trường. Trong trường thi, nào mang sách, nào hỏi chữ, nào mượn người thi thay... những người thực tài mười phần không đậu một. Xuất hiện cái danh hiệu “sinh đồ 3 quan” và “trường thi thành ra chỗ buôn bán”. Tuy nhiên, chúa vẫn mở đều các khoa thi và chỉ cần lấy đỗ mỗi khoa 5 người, 8 người hay có khoa lấy 2 người... chất lượng thấp nhưng cũng xuất hiện những người giỏi như Lê Quý Đôn, Ngô Thời Sĩ, Bùi Huy Bích, Hồ Sĩ Đống, Phan Huy Ích, Ngô Thời Nhậm,...
+– Từ giữa thế kỉ XVIII, giáo dục ngày càng sa sút ở Đàng Ngoài, năm 1750 theo đề nghị của Thự phủ sự Đỗ Thế Giai, chúa Trịnh cho các thí sinh kì thi Hương được nộp 3 quan, gọi là tiền thông kinh, để miễn khảo hạch. Kết quả là, như nhận định của Phan Huy Chú, người làm ruộng, người đi buôn cho chí người hàng thịt, người bán vật đều làm đơn nộp tiền xin thi. Ngày vào thi đông đến nỗi giày xéo lên nhau, có người chết ở cửa trường. Trong trường thi, nào mang sách, nào hỏi chữ, nào mượn người thi thay... những người thực tài mười phần không đậu một. Xuất hiện cái danh hiệu “sinh đồ 3 quan” và “trường thi thành ra chỗ buôn bán”. Tuy nhiên, chúa vẫn mở đều các khoa thi và chỉ cần lấy đỗ mỗi khoa 5 người, 8 người hay có khoa lấy 2 người... chất lượng thấp nhưng cũng xuất hiện những người giỏi như Lê Quý Đôn, Ngô Thời Sĩ, Bùi Huy Bích, Hồ Sĩ Đống, Phan Huy Ích, Ngô Thời Nhậm,...
 
 Bên cạnh đó, năm 1721, chúa Trịnh cho mở trường võ học, dùng các quan tướng thông thạo võ nghệ để dạy cho con cháu các quan. Năm 1724, chuẩn định phép thi võ gồm hai cấp: Sở cử (như thi Hương) và Bác cử (như thi Hội). Người đỗ kì Bác cử được gọi là Tạo sĩ, được ban mũ áo, xướng danh ngang hàng với Tiến sĩ bên văn.
 
