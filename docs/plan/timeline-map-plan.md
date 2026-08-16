@@ -1,5 +1,126 @@
 # Plan: Lớp dữ liệu Timeline + Map cho câu trả lời
 
+> **⚠️ CẬP NHẬT 2026-08-09 — GEOCODE CÓ NGỮ CẢNH (v4) + MAP PHÂN BIỆT `sites`/`area`.**
+> Hai lỗ hổng còn lại sau v9, cả hai đều là "dữ liệu đã có nhưng chưa ai nối dây".
+>
+> **1. Geocoder trước đây nhận đúng một cái tên trần trụi.** `geocode-v3` còn nói thẳng
+> với model: "Bạn CHỈ nhận được mỗi cái tên". Nên "đồi A1", "C1", "bãi đáp X-Ray" là bài
+> toán không có lời giải — Google trả bừa (bị name-gate chặn), LLM buộc phải trả 0.0/0.0.
+> Nhưng ngữ cảnh nằm sẵn trong `timeline_events`. `geocode-v4` + module mới
+> [app/indexing/geocoding/context.py](../../apps/agent-service/app/indexing/geocoding/context.py)
+> chuyển 4 manh mối sang: `anchors` (vùng bao), `neighbors` (địa danh cùng event),
+> `events` (nhãn event), `period` (khoảng năm). Đo trên 2.439 địa danh của corpus:
+> **100% có ít nhất một manh mối**, 42% có vùng bao, 84% có địa danh đi kèm.
+> Vùng bao còn ghép luôn vào `address` gửi Google (`"đồi A1, Điện Biên Phủ"`).
+>
+> **Hai bộ lọc bắt buộc, vì manh mối YẾU hại hơn không có manh mối** (`anchors[0]` đi
+> thẳng vào truy vấn Google): (a) `ANCHOR_MIN_SHARE = 0.5` — anchor phải được đa số event
+> của địa danh đó ủng hộ. Bản đầu không lọc đã sinh ra `Sài Gòn → "Sầm Nưa"` (1/179 lượt),
+> `Huế → "Sơn phòng Tân Sở"` (1/103), `Hải Phòng → "Hà Nội"` (1/71): anchor là thuộc tính
+> của EVENT, không phải của địa danh. Ngưỡng 0.5 chỉ bỏ 152/2.439 tên mà bỏ đúng toàn bộ
+> nhóm nhiễu, giữ nguyên nhóm cần nó nhất (`đồi A1 → Điện Biên Phủ` 31/31). (b)
+> `MAX_PERIOD_SPAN = 25` — "Hà Nội: 1880-1982" đúng mà vô dụng.
+>
+> **Cache `gazetteer.json` nay đóng dấu `prompt_version`**: đổi prompt/cách dựng truy vấn
+> → bump hằng là lần chạy sau tự trích lại, không phải nhớ `--overwrite`.
+>
+> **2. Map vẽ event `area` y hệt event `sites`.** `builder.py` chưa từng đọc
+> `location_scope`: 440 event `area` (1.397 lượt địa danh) đang ra pin đặc như một trận
+> đánh. `MapMarker.scope` mang scope sang UI; `EventMarker` vẽ **vòng tròn rỗng/mờ** cho
+> `area`, pin đặc cho `sites`; `CameraController` chọn event nhiều nơi → **fitBounds cả
+> cụm** thay vì `panTo` một điểm bốc tuỳ tiện vì nó đứng đầu mảng.
+>
+> **KHÔNG polygon, và không định có.** Ranh giới hành chính lịch sử không tra được, còn
+> bao lồi của các điểm thì vô nghĩa — event "Đông Kinh nghĩa thục mở rộng hoạt động"
+> (26 nơi) trải từ Hà Nội tới Phan Thiết, bao lồi phủ gần trọn Việt Nam. Bounding box chỉ
+> dùng làm KHUNG NHÌN, do UI tự tính từ chính các marker cùng `event_id` → **không cần cột
+> hình học nào, không cần dữ liệu mới**.
+>
+> *Dọn kèm*: `select_location_counts` + `select_anchor_counts` (viết ra chưa ai gọi) →
+> thay bằng `select_located_events`; bỏ index `timeline_events_anchor_idx` (mô tả một
+> consumer không tồn tại). Verify: 417 pytest + 110 vitest + tsc + ruff sạch.
+
+> **⚠️ CẬP NHẬT 2026-08-08 (chiều) — v9: GỘP LUẬT ĐỊA ĐIỂM VỀ MỘT.** Chạy thử v8 trên 126
+> chunk / 506 event cho thấy thế "hai vai" (`locations` cấm vùng, `location_anchor` nhận
+> vùng) **không dạy được cho model**: 69/543 lượt (12,7%) `locations` vẫn chứa tên bị cấm,
+> và 62 event nhét CÙNG một tên vào cả hai trường (`locations:['Nam Kì']` +
+> `anchor:'Nam Kì'`). Model hiểu đúng đâu là nơi của sự kiện, chỉ không hiểu "đưa vào
+> anchor" nghĩa là "KHÔNG để lại trong locations". Riêng `Nhật Bản` (17 lượt, cao nhất) là
+> do model coi danh sách quốc gia ví dụ là danh sách ĐẦY ĐỦ.
+>
+> **v9: `locations` và `location_anchor` dùng CHUNG một tập hợp lệ** — cấp tỉnh/thành trở
+> xuống. Vùng trên cấp tỉnh, khu quân sự, quốc gia, tuyến dài, biển/vịnh lớn → **BỎ HẲN,
+> không vào trường nào**. Cả lớp lỗi "tên này thuộc trường nào" biến mất vì không còn hai
+> luật khác nhau cho hai trường cùng nhận địa danh.
+>
+> **Không mất pin nào.** Đo trên chính bản chạy v8: 252/506 event (50%) có anchor vĩ mô,
+> trong đó 176 mất sạch thông tin địa điểm → `scope='none'`. Nhưng cả 176 đều đang là
+> `area` với `locations` rỗng hoặc chỉ chứa tên vùng, tức **vốn đã không sinh marker**.
+> Thông tin vùng vẫn còn nguyên trong `label`/`summary` dạng văn xuôi.
+>
+> **Anchor vĩ mô còn vô dụng cho geocoding**: `"Tân Phước, Nam Kì"` thì Google cũng chịu —
+> anchor chỉ có ích khi là tỉnh/thành có thật. Nên cấm vùng khỏi anchor **cải thiện**
+> geocoding. Đổi lại `anchor = ""` thành giá trị hợp lệ và phổ biến (khi các nơi vắt qua
+> nhiều tỉnh), và nó vẫn ổn định cho `event_id` vì rỗng là hằng.
+>
+> Hệ quả cho **§9 gazetteer**: không còn phải curate tâm + zoom cho `macro`/`zone`/
+> `country`. Gazetteer chỉ geocode thứ point-able → `kind` rút còn `point` · `landform` ·
+> `facility` · `maritime` · `unknown`.
+>
+> Kèm hai sửa nhỏ: `scope='area'` nay ĐÒI `locations` khác rỗng (trước đó thành thùng rác —
+> 49 event `area`+`Việt Nam`, gồm cả sự kiện điểm như "Ban hành bộ luật Gia Long"), và thêm
+> luật phân biệt **nơi diễn ra** với **phạm vi hiệu lực** cho lệnh/chỉ dụ/đạo luật.
+>
+> Kết quả tốt của v8 được giữ: **anchor lệch 0/505 nhóm** — rủi ro tách đôi sự kiện đã hết.
+
+> **⚠️ CẬP NHẬT 2026-08-08 — TẦNG ĐỊA ĐIỂM LÀM LẠI (prompt v8).** Audit toàn bộ 3.346 địa
+> danh / 8.692 lượt của bản v7 phát hiện ba lỗi THIẾT KẾ (không phải lỗi model):
+> 1. `locations[0]` vừa là "marker chính" vừa là khoá `event_id`, trong khi luật lại bắt
+>    xếp theo thứ tự XUẤT HIỆN trong văn bản — mâu thuẫn. `Thành lập bốn đạo quan binh ở
+>    Bắc Kì` ra `locations[0] = 'Phả Lại'` → marker chấm sai chỗ.
+> 2. Không phân biệt "nhiều nơi CÙNG một mốc" (4 pháo đài trong 1 ngày → 4 marker đúng)
+>    với "vùng hoạt động TRẢI RỘNG" (Trương Định suốt 1861 trên 6 tỉnh → KHÔNG phải 6
+>    marker). Cùng hình dạng dữ liệu, hai cách vẽ trái ngược.
+> 3. Trộn thang độ: 9,5% số lượt là vùng trên cấp tỉnh (`Việt Nam` 158, `Đông Dương` 98,
+>    `miền Bắc` 46, `Nam Kì` 45…) — chấm một điểm cho "Đói lớn ở Trung và Bắc Kì" thì điểm
+>    đó nằm đâu cũng sai.
+>
+> **Chốt thiết kế mới — hai vai rạch ròi:**
+> - `locations` CHỈ nhận thứ **chấm được một điểm** (cấp tỉnh/thành trở xuống). Loại hẳn:
+>   vùng trên cấp tỉnh, khu quân sự (`Liên khu IV`, `Khu V`), quốc gia, và **sông/đường/
+>   biên giới/vĩ tuyến**. Bất biến này làm map thành **nhị phân có-pin/không-pin**, xoá
+>   hẳn lớp render "gần đúng" — không phải dựng polyline/polygon (không có nguồn ranh giới
+>   lịch sử nào cho `Nam Kì` hay `Đường 9` năm 1971).
+> - `location_anchor` hứng mọi thứ quá to để chấm, và gánh thêm hai việc: **ngữ cảnh
+>   geocode** (`A1` + `Điện Biên Phủ` mới tra được — 183 tên địa hình vi mô và 2.309 tên
+>   chỉ xuất hiện 1 lần phụ thuộc vào đây, đồng thời gỡ điểm yếu trùng-tên ở §9), và
+>   **thay `locations[0]` làm khoá `event_id`** (anchor ổn định hơn giữa các chunk).
+> - `location_scope` (`sites`/`area`/`none`) quyết định có chấm marker không. Bỏ
+>   `point`/`multi` vì suy được từ `len(locations)` — ít giá trị để chọn thì LLM sai ít hơn.
+> - **NGOẠI LỆ có chủ ý của luật "không suy địa điểm từ kiến thức ngoài đoạn"**: anchor
+>   ĐƯỢC dùng kiến thức bao hàm địa lý (Gò Công ⊂ Nam Kì) dù đoạn không viết chữ đó, vì
+>   anchor không sinh marker nên không phải lời khẳng định "sự kiện xảy ra ở đây". Không
+>   có ngoại lệ này thì anchor phụ thuộc vào chunk nào tình cờ nhắc tên tỉnh → cùng một sự
+>   kiện ra hai anchor → **tách đôi trên timeline** (anchor nằm trong `event_id`). Ngoại lệ
+>   CHỈ áp cho anchor; `locations` giữ nguyên luật cũ.
+> - `location_source` (`text`/`context`) cho phép lấy địa điểm từ ngữ cảnh đoạn:
+>   **1.568/1.603** event trắng địa điểm ở v7 nằm trong unit mà event khác ĐÃ có địa điểm.
+>
+> **Tác động đã đo:** 901 event mất sạch `locations` do cấm vùng vĩ mô (đều đang sinh pin
+> sai), +112 event do cấm sông/đường (63% event có nhắc tuyến vẫn còn tên chấm được khác).
+> Tổng event không pin: 24% → **39,2%**, đổi lại mọi pin còn lại đều là nơi chấm được thật.
+>
+> **`gazetteer` chia hai nhóm dùng khác nhau** (chi tiết §9, chưa code): tên trong
+> `locations` (`point`/`landform`/`facility`/`maritime`) → lat/lon để **chấm pin**; tên ở
+> `location_anchor` (`macro`/`zone`/`country`) → tâm + zoom để **căn khung nhìn**, không
+> marker. `kind` (hình dạng) tách khỏi `precision` (`exact`/`anchor_fallback`, kết quả
+> geocode) — hai trục độc lập. **KHÔNG** geocode chính xác 183 tên địa hình vi mô: cho rơi
+> về toạ độ anchor.
+>
+> Đã code: `schemas/timeline.py`, `prompts/timeline_extract.py` (v8),
+> `indexing/timeline/reconcile.py`, `tools/visualization/event_store.py` (+3 cột), test.
+> **CHƯA chạy** extract lại corpus và **CHƯA** làm gazetteer.
+
 > **⚠️ CẬP NHẬT 2026-08-02 — tầng EXTRACT đã bị thay, đọc kèm
 > [timeline-extraction-by-unit-plan.md](timeline-extraction-by-unit-plan.md).** File này vẫn là
 > source-of-truth cho schema DB, geocoding và builder online, nhưng những điểm sau **ĐÃ LỖI
@@ -98,12 +219,15 @@ Mirror đúng pattern `rag_chunks` trong
 
 | Cột | Kiểu | Ý nghĩa |
 |---|---|---|
-| `event_id` | `TEXT PRIMARY KEY` | Khoá ổn định = `uuid5(NS, norm_parent + '\|' + norm_time + '\|' + norm_location0 + '\|' + norm_label)`. Có `parent` trong khoá để tránh va chạm 2 sự kiện khác chiến dịch trùng time+nơi+label. Cùng nội dung → cùng id (idempotent, **không ngẫu nhiên**). Link map ↔ timeline. |
+| `event_id` | `TEXT PRIMARY KEY` | Khoá ổn định = `uuid5(NS, norm_parent + '\|' + norm_time + '\|' + norm_anchor + '\|' + norm_label)`. Có `parent` trong khoá để tránh va chạm 2 sự kiện khác chiến dịch trùng time+nơi+label. Cùng nội dung → cùng id (idempotent, **không ngẫu nhiên**). Link map ↔ timeline. **v8 đổi thành phần thứ ba từ `norm_location0` sang `norm_anchor`** — `locations[0]` là "tên xuất hiện đầu câu" nên đổi theo cách diễn đạt từng chunk và làm tách đôi sự kiện; anchor là "vùng bao trùm" nên ổn định hơn. |
 | `label` | `TEXT NOT NULL` | Tên sự kiện ngắn (vd "Ký Hiệp ước Nhâm Tuất"). |
 | `summary` | `TEXT NOT NULL` | 1–2 câu mô tả, làm tooltip. |
 | `time_start` | `TEXT` | ISO rút gọn: `YYYY` \| `YYYY-MM` \| `YYYY-MM-DD`. NULL nếu không xác định. (Độ chính xác suy ra từ format này, không lưu riêng.) |
 | `time_end` | `TEXT` | Mốc kết thúc nếu là khoảng (chiến dịch); NULL nếu là điểm. |
-| `locations` | `TEXT[] NOT NULL DEFAULT '{}'` | Địa danh (surface form); **`locations[0]` là địa điểm chính** để chấm marker. Builder `normalize_name` từng phần tử trước khi tra `gazetteer`. |
+| `locations` | `TEXT[] NOT NULL DEFAULT '{}'` | Địa danh (surface form) **chấm được một điểm**, cấp tỉnh/thành trở xuống. Thứ tự KHÔNG còn ý nghĩa (v8 bỏ quy ước `locations[0]` là chính). Builder `normalize_name` từng phần tử trước khi tra `gazetteer`. |
+| `location_anchor` | `TEXT` | **v8.** MỘT địa danh bao trùm: căn khung bản đồ + ngữ cảnh geocode cho `locations` + khoá `event_id`. Chỗ hợp pháp của vùng vĩ mô, khu quân sự, quốc gia, sông/đường. NULL nếu đoạn không cho biết khu vực. |
+| `location_scope` | `TEXT NOT NULL DEFAULT 'none'` | **v8.** `sites` (xảy ra đúng tại `locations` → **pin đặc**) \| `area` (trải rộng, `locations` chỉ là nơi tiêu biểu → **vòng tròn rỗng**; chọn event thì khớp khung nhìn cả cụm) \| `none` (không có nơi nào chấm được → chỉ lên timeline). Chảy vào `MapMarker.scope` cho UI. |
+| `location_source` | `TEXT NOT NULL DEFAULT 'none'` | **v8.** `text` (nêu ngay trong câu kể) \| `context` (suy từ ngữ cảnh đoạn/heading → render nhạt hơn) \| `none`. KHÔNG ảnh hưởng `confidence` — trường đó chỉ đo thời gian + diễn biến. |
 | `confidence` | `TEXT NOT NULL` | `cao` \| `vừa` \| `thấp` (đồng bộ `AliasVerdict`). Đã **gộp explicit/inferred**: suy từ ngữ cảnh → thấp hơn. Render đậm/nhạt theo trường này. |
 | `parent_event_norm` | `TEXT` | `norm_name` của sự kiện vĩ mô (vd "khởi nghĩa trương định"); NULL nếu rời. Gom các dòng atomic cùng một sự kiện lớn + link sang Sự kiện node Neo4j. Tái dùng `resolve()`. |
 | `source_chunk_ids` | `TEXT[] NOT NULL` | Provenance + **khoá join online**. |
@@ -116,6 +240,9 @@ CREATE INDEX timeline_events_locations_gin ON timeline_events USING GIN (locatio
 CREATE INDEX timeline_events_time_idx      ON timeline_events (time_start);
 CREATE INDEX timeline_events_parent_idx    ON timeline_events (parent_event_norm);
 ```
+*(2026-08-09: bỏ `timeline_events_anchor_idx`. Nó được tạo cho một consumer chưa bao giờ
+tồn tại — "builder join anchor sang gazetteer để lấy khung nhìn". Khung nhìn nay UI tự
+tính từ marker, còn `select_located_events` là full scan nên index này không phục vụ ai.)*
 Query online cốt lõi: `SELECT * FROM timeline_events WHERE source_chunk_ids && %s::text[]`
 (toán tử `&&` = mảng giao nhau, chạy GIN index). `ORDER BY time_start NULLS LAST`.
 
@@ -312,7 +439,9 @@ người chỉnh. → Đây chính là lý do user muốn curate tay. Script ch�
 > đúng như §9 dự liệu. Logic hybrid/name-gate/bbox giữ nguyên. Tài liệu API:
 > [docs/reference/google-maps-api.md](../reference/google-maps-api.md).
 - [app/indexing/geocoding/geocoder.py](../../apps/agent-service/app/indexing/geocoding/geocoder.py)
-  — `geocode_location(name) -> GeocodeOutcome` **hybrid: Google trước, LLM fallback**.
+  — `geocode_location(name, context=...) -> GeocodeOutcome` **hybrid: Google trước, LLM
+  fallback**; `context` (2026-08-09) đi vào CẢ HAI nhánh — Google nhận vùng bao ghép vào
+  `address`, LLM nhận đủ 4 khối.
   Google Geocoding (`region=vn` chỉ BIAS, **KHÔNG ép country** — địa danh nước ngoài như
   Paris/Genève/Trung Quốc vẫn geocode được) cho địa danh còn tên; **name-gate** (so token
   tên bỏ dấu + i/y với `formatted_address`) loại fuzzy-match (Google trả "đại khái" 1 kết
@@ -326,9 +455,10 @@ người chỉnh. → Đây chính là lý do user muốn curate tay. Script ch�
   `GeocodeOutcome` (hợp nhất Google/LLM, `resolved_by ∈ {google,llm,none}`).
   `config.google_maps_api_key`.
 - [scripts/build_gazetteer.py](../../apps/agent-service/scripts/build_gazetteer.py) —
-  đọc địa danh từ `timeline_events.locations` (qua `select_location_counts`), geocode
-  (cache `dataset/gazetteer.json`, resume), upsert `gazetteer`, sinh `gazetteer_review.md`.
-  Flags `--limit --workers --min-count --overwrite --skip-db`.
+  đọc event có địa danh (`select_located_events`) → `collect_locations()` gom theo
+  `location_norm` **kèm ngữ cảnh**, geocode (cache `dataset/gazetteer.json`, resume theo
+  `prompt_version`), upsert `gazetteer`, sinh `gazetteer_review.md` (có cột `vùng bao` để
+  soi model đã được cho biết gì). Flags `--limit --workers --min-count --overwrite --skip-db`.
 - *Verify thật (trước khi đổi, 31 địa danh từ 2 unit)*: **18 Mapbox + 12 LLM + 1 honest
   "none"**. Name-gate sửa được các fuzzy-match (Chợ Lớn→Q5, Sơn Trà→Đà Nẵng, Rạch Tra→Củ
   Chi, Bình Cách→Tiền Giang). Join end-to-end OK: event→locations→gazetteer→markers; event
@@ -346,6 +476,13 @@ người chỉnh. → Đây chính là lý do user muốn curate tay. Script ch�
   tách markers (có toạ độ) + timeline items (có time), link `event_id`, honest fallback
   (thiếu nơi→chỉ timeline; thiếu time→chỉ map; thiếu cả→`unplaced_count`). Marker
   confidence = YẾU NHẤT giữa event và toạ độ (đậm/nhạt). KHÔNG trích mới.
+  **2026-08-09**: marker mang thêm `scope` = `location_scope` của event. Builder KHÔNG lọc
+  theo scope — event `area` vẫn ra đủ marker, chỉ khác cách vẽ; lọc là giấu mất địa bàn của
+  phong trào khỏi bản đồ.
+- [apps/frontend/src/features/map/](../../apps/frontend/src/features/map/) — `EventMarker`
+  vẽ pin đặc (`sites`) vs vòng tròn rỗng/mờ (`area`); `CameraController` chọn event nhiều
+  nơi → `fitBounds` cả cụm (không ép `TOUR_FOCUS_ZOOM` ở nhánh này vì sẽ phá khung vừa
+  khớp), một nơi → `panTo` như cũ. 6 test trong `EventMap.test.tsx`.
 - *Verify thật* (chunk Trương Định): 15 event → 23 marker + 15 timeline; 12 event có cả
   hai (link 2 chiều), 3 chỉ-timeline (không toạ độ); confidence lan đúng. 8/8 test pass.
 - *Deferred*: bộ LỌC LLM "event nào answer thực sự nhắc tới" (plan đề tuỳ chọn) — dành
