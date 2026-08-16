@@ -60,7 +60,6 @@ from app.schemas.alias import AliasVerdict  # noqa: E402
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 log = logging.getLogger("build_alias_map")
 
-
 def _load_verdicts() -> dict:
     """Đọc cache verdict, chịu lỗi: file thiếu/rỗng/hỏng -> {} (không nổ, chạy lại từ đầu)."""
     if not _VERDICTS.exists():
@@ -74,13 +73,11 @@ def _load_verdicts() -> dict:
         log.warning("%s hỏng, bỏ qua cache cũ và trích lại.", _VERDICTS.name)
         return {}
 
-
 def _save_verdicts(verdicts: dict) -> None:
     """Ghi atomic (tmp + replace) để bị ngắt giữa chừng không làm rỗng/hỏng file cache."""
     tmp = _VERDICTS.with_suffix(_VERDICTS.suffix + ".tmp")
     tmp.write_text(json.dumps(verdicts, ensure_ascii=False, indent=2), encoding="utf-8")
     tmp.replace(_VERDICTS)
-
 
 def _load_seed() -> dict:
     """Đọc seed thủ công, chịu lỗi như verdict: thiếu/rỗng/hỏng -> {} (chạy tiếp, không seed).
@@ -101,14 +98,12 @@ def _load_seed() -> dict:
         log.warning("%s HỎNG (%s) -> bỏ qua seed thủ công.", _SEED.name, exc)
         return {}
 
-
 def _strip_strong(s: str) -> str:
     """Dạng rút gọn CHỈ để tìm ứng viên: bỏ dấu + gạch nối + khoảng trắng. KHÔNG làm khóa."""
     s = unicodedata.normalize("NFD", s.lower())
     s = "".join(c for c in s if unicodedata.category(c) != "Mn")
     s = s.replace("đ", "d")
     return re.sub(r"[\s\-]", "", s)
-
 
 def _build_records(limit: int) -> dict[str, dict]:
     cache = json.loads(_CACHE.read_text(encoding="utf-8"))
@@ -129,7 +124,6 @@ def _build_records(limit: int) -> dict[str, dict]:
     if limit:
         rec = dict(list(rec.items())[:limit])
     return rec
-
 
 def _candidate_pairs(rec: dict[str, dict], ratio: float) -> list[tuple[str, str]]:
     """Cặp norm (sorted) cùng type: cùng dạng-rút-gọn hoặc fuzzy ratio cao."""
@@ -162,7 +156,6 @@ def _candidate_pairs(rec: dict[str, dict], ratio: float) -> list[tuple[str, str]
                 if SequenceMatcher(None, a["strip"], b["strip"]).ratio() >= ratio:
                     pairs.add(tuple(sorted((a["norm"], b["norm"]))))
     return sorted(pairs)
-
 
 def _judge(pairs, rec, verdicts, workers, model):
     from app.core.llm import get_openai_client
@@ -202,7 +195,6 @@ def _judge(pairs, rec, verdicts, workers, model):
                 log.info("  ...đã hỏi %d/%d", done, len(todo))
     _save_verdicts(verdicts)
 
-
 class _UF:
     def __init__(self):
         self.p: dict[str, str] = {}
@@ -217,11 +209,51 @@ class _UF:
     def union(self, a, b):
         self.p[self.find(a)] = self.find(b)
 
-
 def _pick_canonical(norms: list[str], rec: dict[str, dict]) -> str:
     """Canonical = nhắc nhiều nhất; hòa -> tên dài hơn; rồi alphabet."""
     return sorted(norms, key=lambda n: (-rec[n]["count"], -len(rec[n]["name"]), rec[n]["name"]))[0]
 
+def _resolve_alias(norm: str, alias_map: dict[str, dict]) -> str:
+    """Resolve đến canonical cuối, chịu được cả alias chain và map lỗi có vòng lặp."""
+    current = norm
+    seen: set[str] = set()
+    while current in alias_map and current not in seen:
+        seen.add(current)
+        target = normalize_name(str(alias_map[current].get("canonical_norm", "")))
+        if not target or target == current:
+            break
+        current = target
+    return current
+
+def _flatten_alias_map(alias_map: dict[str, dict]) -> dict[str, dict]:
+    """Đưa mọi alias về canonical cuối trong đúng một lookup.
+
+    Production ``resolve()`` chỉ tra map một lần, vì vậy artifact không được chứa
+    chain ``A -> B -> C``. Self-map sau normalize là dư thừa; cycle nhiều node là
+    lỗi cấu hình seed và phải dừng build thay vì âm thầm ghi map không ổn định.
+    """
+    flattened: dict[str, dict] = {}
+    for alias in alias_map:
+        current = alias
+        seen: set[str] = set()
+        canonical_name = str(alias_map[alias].get("canonical_name", alias))
+        while current in alias_map:
+            if current in seen:
+                cycle = " -> ".join([*seen, current])
+                raise ValueError(f"Alias map có vòng lặp: {cycle}")
+            seen.add(current)
+            entry = alias_map[current]
+            target = normalize_name(str(entry.get("canonical_norm", "")))
+            canonical_name = str(entry.get("canonical_name") or canonical_name)
+            if not target or target == current:
+                break
+            current = target
+        if alias != current:
+            flattened[alias] = {
+                "canonical_norm": current,
+                "canonical_name": canonical_name,
+            }
+    return flattened
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Dựng alias_map.json bằng LLM trọng tài.")
@@ -278,11 +310,24 @@ def main() -> None:
             continue
         can_name = cluster[0]
         can_norm = normalize_name(can_name)
+        # Canonical thủ công phải là node cuối, không được giữ cạnh auto cũ khiến
+        # canonical lại trỏ sang alias khác và tạo A <-> B.
+        alias_map.pop(can_norm, None)
         for alias_name in cluster[1:]:
             alias_map[normalize_name(alias_name)] = {
                 "canonical_norm": can_norm, "canonical_name": can_name,
             }
             n_seed += 1
+
+    alias_map = _flatten_alias_map(alias_map)
+
+    # Verdict confidence vừa đã được người duyệt chấp nhận qua seed thì không còn là
+    # việc chờ duyệt. Lọc sau khi merge seed để alias_review.md phản ánh trạng thái thật.
+    review = [
+        (a, b, verdict)
+        for a, b, verdict in review
+        if _resolve_alias(a, alias_map) != _resolve_alias(b, alias_map)
+    ]
 
     _OUT_MAP.write_text(
         json.dumps({"version": 1, "judge_version": ALIAS_JUDGE_VERSION, "map": alias_map},
@@ -307,7 +352,6 @@ def main() -> None:
     log.info("Cặp same+cao: %d -> %d cụm | seed: %d | cần duyệt (vừa): %d",
              n_cao, len(clusters), n_seed, len(review))
     log.info("Ghi: %s (%d biến thể) + %s", _OUT_MAP, len(alias_map), _OUT_REVIEW)
-
 
 if __name__ == "__main__":
     main()
