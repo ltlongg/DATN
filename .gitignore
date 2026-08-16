@@ -14,3 +14,7 @@ rag_storage/
 .ruff_cache/
 node_modules/
 .playwright-cli/
+.codex/
+.codex
+_templates/
+_templates

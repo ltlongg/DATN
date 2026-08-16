@@ -8,10 +8,10 @@
 > (2) **Gộp entity extraction vào `build_query`** — call LLM rewrite trả structured output
 > `{standalone_query, mentioned_entities, route}`, zero latency thêm; `seed_mentions` là
 > field mới trong `AgentState`, truyền xuống `retrieve_hybrid(..., seed_mentions=...)`.
-> (3) **`has_context` (tên cũ `check_sufficiency`)** — chỉ check `len(chunks) > 0`;
-> phán đoán "đủ để trả lời" delegate xuống LLM: khi `SynthesizedAnswer.confidence ==
-> "không đủ dữ liệu"` thì coi là insufficient → `honest_answer`, không phụ thuộc threshold
-> numeric không cùng thang đo.
+> (3) **`has_context` (tên cũ `check_sufficiency`)** — chỉ check `len(chunks) > 0`.
+> `SynthesizedAnswer.confidence` là metadata tự đánh giá của LLM; từ 2026-08-03,
+> `"không đủ dữ liệu"` không tự thu hồi answer có citation hợp lệ. Model trả lời phần có
+> căn cứ và tự kết bằng lời lưu ý phù hợp với thông tin còn thiếu.
 > (4) **`graph_context` phải vào `synthesize`** — prompt render 2 khối riêng: chunk text
 > (đường provenance) và graph_context (quan hệ đã chưng cất); đây là contribution chính
 > của đồ án, không render thì công sức GraphRAG bị bỏ phí.
@@ -147,11 +147,9 @@ from pydantic import BaseModel, Field
 # Single source of truth — dùng lại ở BuildQueryOutput.route và AgentState.route.
 RouteDecision = Literal["needs_retrieval", "ambiguous", "out_of_scope", "smalltalk"]
 
-
 class ChatMessage(BaseModel):
     role: Literal["user", "assistant"]
     content: str = Field(min_length=1, max_length=4000)
-
 
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=4000)
@@ -175,7 +173,6 @@ class Citation(BaseModel):
     end_line: int | None = None
     heading_path: list[str] = Field(default_factory=list)
     quote: str | None = None
-
 
 class AskResponse(BaseModel):
     # Nếu clarification_needed=True thì answer=None, các field còn lại rỗng.
@@ -403,8 +400,9 @@ def has_context(state) -> str:
 - không chunk → thẳng `honest_answer` (skip synthesize).
 
 Phán đoán "chunks này có thực sự trả lời được câu hỏi không?" giao cho LLM trong
-`synthesize` — LLM có full context (câu hỏi + chunks) để đánh giá tốt hơn threshold số.
-Nếu LLM trả `confidence = "không đủ dữ liệu"`, `validate_citations` → `honest_answer`.
+`synthesize` — LLM có full context (câu hỏi + chunks) để tự đánh giá confidence. Confidence
+không phải kiểm chứng độc lập: answer có citation hợp lệ vẫn được giữ; nếu thiếu thông tin,
+model tự nói rõ phần giới hạn ở cuối answer.
 
 ### 5. `synthesize`
 
@@ -482,7 +480,6 @@ LLM used_chunk_ids
   -> filter id in retrieved_chunk_ids (gồm cả citation chunk từ rule-B)
   -> dedupe
   -> build Citation from metadata
-  -> nếu confidence == "không đủ dữ liệu" -> honest_answer
   -> nếu answer có nội dung nhưng citations rỗng:
        synthesize_attempt_count < synthesize_max_attempts -> retry synthesize
        synthesize_attempt_count >= synthesize_max_attempts -> honest_answer
@@ -508,7 +505,6 @@ Dùng khi:
 
 - route `out_of_scope`
 - retrieval trả về chunk rỗng
-- `confidence == "không đủ dữ liệu"`
 - citation validation fail sau retry
 
 Ví dụ:
@@ -707,7 +703,7 @@ Nếu `debug=false`, response không trả debug chi tiết.
 - retrieve empty -> honest answer, no hallucinated citation.
 - retrieval dependency error -> API 503.
 - synthesize invalid `used_chunk_ids` -> filtered/dropped.
-- synthesize `confidence == "không đủ dữ liệu"` -> honest_answer.
+- synthesize `confidence == "không đủ dữ liệu"` + citation hợp lệ -> giữ answer và lời lưu ý.
 - synthesize claims answer but no valid citations -> retry once -> honest fallback.
 - `synthesize_attempt_count` guard: đúng 1 retry rồi dừng (tổng 2 lần synthesize).
 - retry synthesize append chỉ dẫn lỗi vào prompt khi `attempt_count > 0`.
@@ -782,7 +778,7 @@ Expected:
 - `/ask` trả answer tiếng Việt grounded bằng retrieved chunks.
 - Citations luôn là subset của retrieved chunks (kể cả citation chunk từ rule-B).
 - Câu mơ hồ (đại từ không rõ) → trả `clarification_question`, không retrieve, không bịa.
-- `confidence == "không đủ dữ liệu"` → honest_answer, không hallucinate.
+- `confidence == "không đủ dữ liệu"` + citation hợp lệ → giữ phần có căn cứ và lời lưu ý.
 - `graph_context` (quan hệ KG) được render vào synthesize prompt — graph-as-content.
 - `seed_mentions` từ `build_query` truyền xuống retrieval — zero LLM call thêm.
 - Retry synthesize tối đa 1 lần; `synthesize_attempt_count` (`< 2`) guard chống loop.
