@@ -29,6 +29,9 @@ CREATE TABLE IF NOT EXISTS timeline_events (
     time_start TEXT,
     time_end TEXT,
     locations TEXT[] NOT NULL DEFAULT '{}',
+    location_anchor TEXT,
+    location_scope TEXT NOT NULL DEFAULT 'none',
+    location_source TEXT NOT NULL DEFAULT 'none',
     confidence TEXT NOT NULL,
     parent_event_norm TEXT,
     source_chunk_ids TEXT[] NOT NULL,
@@ -36,6 +39,16 @@ CREATE TABLE IF NOT EXISTS timeline_events (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 """
+
+# Bảng đã tồn tại từ trước v8 -> `CREATE TABLE IF NOT EXISTS` không thêm cột. Thêm rời
+# bằng `ADD COLUMN IF NOT EXISTS` để chạy được trên cả DB cũ lẫn DB mới.
+ALTER_TIMELINE_EVENTS_SQLS = [
+    "ALTER TABLE timeline_events ADD COLUMN IF NOT EXISTS location_anchor TEXT;",
+    "ALTER TABLE timeline_events ADD COLUMN IF NOT EXISTS location_scope TEXT "
+    "NOT NULL DEFAULT 'none';",
+    "ALTER TABLE timeline_events ADD COLUMN IF NOT EXISTS location_source TEXT "
+    "NOT NULL DEFAULT 'none';",
+]
 
 CREATE_INDEX_SQLS = [
     # Query online chính: lọc event theo chunk đã retrieve (mảng giao nhau).
@@ -57,11 +70,14 @@ INSERT INTO timeline_events (
     time_start,
     time_end,
     locations,
+    location_anchor,
+    location_scope,
+    location_source,
     confidence,
     parent_event_norm,
     source_chunk_ids
 ) VALUES (
-    %s, %s, %s, %s, %s, %s::text[], %s, %s, %s::text[]
+    %s, %s, %s, %s, %s, %s::text[], %s, %s, %s, %s, %s, %s::text[]
 )
 ON CONFLICT (event_id) DO UPDATE SET
     label = EXCLUDED.label,
@@ -69,12 +85,14 @@ ON CONFLICT (event_id) DO UPDATE SET
     time_start = EXCLUDED.time_start,
     time_end = EXCLUDED.time_end,
     locations = EXCLUDED.locations,
+    location_anchor = EXCLUDED.location_anchor,
+    location_scope = EXCLUDED.location_scope,
+    location_source = EXCLUDED.location_source,
     confidence = EXCLUDED.confidence,
     parent_event_norm = EXCLUDED.parent_event_norm,
     source_chunk_ids = EXCLUDED.source_chunk_ids,
     updated_at = now();
 """
-
 
 def _database_url(database_url: str | None = None) -> str:
     url = database_url or get_settings().database_url
@@ -82,13 +100,11 @@ def _database_url(database_url: str | None = None) -> str:
         raise RuntimeError("Thiếu DATABASE_URL trong .env để ghi timeline_events.")
     return url.replace("postgresql+psycopg://", "postgresql://", 1)
 
-
 def _empty_to_none(value: Any) -> Any:
     """Chuỗi rỗng -> NULL (schema strict dùng '' cho 'không có')."""
     if isinstance(value, str) and not value.strip():
         return None
     return value
-
 
 def _record_params(record: dict[str, Any]) -> tuple[Any, ...]:
     return (
@@ -98,18 +114,21 @@ def _record_params(record: dict[str, Any]) -> tuple[Any, ...]:
         _empty_to_none(record.get("time_start")),
         _empty_to_none(record.get("time_end")),
         record.get("locations") or [],
+        _empty_to_none(record.get("location_anchor")),
+        record.get("location_scope") or "none",
+        record.get("location_source") or "none",
         record["confidence"],
         _empty_to_none(record.get("parent_event_norm")),
         record.get("source_chunk_ids") or [],
     )
 
-
 def ensure_timeline_table(conn: psycopg.Connection[Any]) -> None:
     with conn.cursor() as cur:
         cur.execute(CREATE_TIMELINE_EVENTS_SQL)
+        for sql in ALTER_TIMELINE_EVENTS_SQLS:
+            cur.execute(sql)
         for sql in CREATE_INDEX_SQLS:
             cur.execute(sql)
-
 
 def replace_timeline_events(
     records: Iterable[dict[str, Any]], database_url: str | None = None
@@ -131,7 +150,6 @@ def replace_timeline_events(
                 )
         conn.commit()
     return len(rows)
-
 
 def select_events_by_chunks(
     chunk_ids: list[str], database_url: str | None = None
@@ -156,20 +174,24 @@ def select_events_by_chunks(
             )
             return list(cur.fetchall())
 
+def select_located_events(database_url: str | None = None) -> list[dict[str, Any]]:
+    """Mọi event CÓ địa danh, kèm 4 trường `build_gazetteer` cần để dựng ngữ cảnh.
 
-def select_location_counts(database_url: str | None = None) -> dict[str, int]:
-    """Đếm số event tham chiếu mỗi địa danh (surface form) trong `timeline_events`.
+    Không gộp nhóm bằng SQL: `collect_locations()` cần thấy từng event nguyên vẹn mới
+    biết địa danh nào đi cùng địa danh nào. Bảng cỡ vài nghìn dòng nên kéo hết về gom
+    trong Python vừa rẻ vừa test được mà không cần Postgres.
 
-    Nguồn để build gazetteer: chỉ geocode các địa danh THỰC SỰ xuất hiện trong event
-    (đúng thứ marker cần). Trả {surface_form: số_event}.
+    `ORDER BY event_id` để thứ tự đọc tất định -> `collect_locations()` phá hoà (tie)
+    luôn cho cùng một kết quả giữa các lần chạy.
     """
-    with psycopg.connect(_database_url(database_url)) as conn:
+    with connection(database_url) as conn:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT location, count(*) AS n
-                FROM (SELECT unnest(locations) AS location FROM timeline_events) t
-                GROUP BY location
+                SELECT label, time_start, locations, location_anchor
+                FROM timeline_events
+                WHERE cardinality(locations) > 0
+                ORDER BY event_id
                 """
             )
-            return {row[0]: int(row[1]) for row in cur.fetchall()}
+            return list(cur.fetchall())

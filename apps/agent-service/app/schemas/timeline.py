@@ -13,6 +13,11 @@ nhiều mốc rời -> nhiều AtomicEvent cùng `parent_event` (gom ở reconci
 Kết quả trả về theo TỪNG CHUNK (`chunk_results`), không phải một danh sách phẳng cho
 cả unit: LLM đọc trọn unit để có ngữ cảnh nhưng phải quy mỗi event về đúng chunk chứa
 bằng chứng -> provenance ở cấp chunk, UI chỉ hiện timeline của chunk thực sự được dùng.
+
+ĐỊA ĐIỂM tách làm hai vai (v8, xem `prompts/timeline_extract.py`): `locations` chỉ chứa
+thứ chấm được MỘT ĐIỂM lên bản đồ, còn mọi thứ "quá to để chấm" (vùng trên cấp tỉnh,
+quốc gia, sông, đường, biên giới) dồn vào `location_anchor` — nơi căn khung nhìn và làm
+ngữ cảnh geocode. `location_scope` quyết định có chấm marker hay không.
 """
 
 from __future__ import annotations
@@ -24,11 +29,19 @@ from pydantic import BaseModel, Field
 # Thang độ chắc chắn dùng chung cho timeline/map (đồng bộ với AliasVerdict).
 Confidence = Literal["cao", "vừa", "thấp"]
 
+# Sự kiện xảy ra TẠI các địa danh liệt kê ('sites'), hay TRẢI RỘNG trên vùng
+# `location_anchor` ('area'), hay không rõ ở đâu ('none'). Quyết định builder có chấm
+# marker hay không: chỉ 'sites' mới sinh marker.
+LocationScope = Literal["sites", "area", "none"]
+
+# Địa điểm lấy từ chính câu kể diễn biến ('text') hay suy từ ngữ cảnh đoạn/heading
+# ('context'). 'context' vẫn render nhưng nhạt hơn — người đọc biết đó là suy ra.
+LocationSource = Literal["text", "context", "none"]
+
 # Thứ hạng confidence (cao > vừa > thấp). Một nguồn DUY NHẤT cho mọi nơi cần so sánh:
 # reconcile (chọn bản chắc hơn khi gộp), builder (mắt xích yếu nhất khi render marker),
 # build_gazetteer (sắp review). Đừng định nghĩa lại tại chỗ.
 CONFIDENCE_RANK: dict[str, int] = {"cao": 3, "vừa": 2, "thấp": 1}
-
 
 class AtomicEvent(BaseModel):
     """Một diễn biến cụ thể (when–where–what), đủ để chấm 1 điểm timeline và (nếu có
@@ -64,10 +77,41 @@ class AtomicEvent(BaseModel):
     )
     locations: list[str] = Field(
         description=(
-            "Địa danh gắn với mốc này (surface form, giữ nguyên như văn bản), theo "
-            "đúng THỨ TỰ XUẤT HIỆN trong văn bản. Phần tử ĐẦU là marker chính + khóa "
-            "định danh event -> chỉ đảo lên đầu khi văn bản nói rõ nơi sự kiện diễn ra "
-            "chủ yếu. Nhiều nơi cùng lúc -> liệt kê hết. [] nếu đoạn không nêu địa điểm."
+            "Các địa danh CHẤM ĐƯỢC MỘT ĐIỂM nơi diễn biến xảy ra (surface form, giữ "
+            "nguyên như văn bản), theo thứ tự xuất hiện. CHỈ nhận cấp tỉnh/thành trở "
+            "xuống (tỉnh, thành phố, huyện, xã, đảo, đồi/cứ điểm, công trình, thành "
+            "phố nước ngoài). BỎ HẲN — không đưa vào đây mà cũng KHÔNG đưa sang "
+            "`location_anchor`: vùng trên cấp tỉnh ('Nam Kì', 'miền Bắc', 'Tây "
+            "Nguyên'), khu quân sự ('Liên khu IV'), quốc gia ('Pháp', 'Nhật Bản'), "
+            "sông/đường/biên giới/vĩ tuyến, biển và vịnh lớn. Mỗi phần tử đúng MỘT địa "
+            "danh, không gộp danh sách, không kèm ngoặc đơn. [] nếu không có nơi nào "
+            "hợp lệ."
+        )
+    )
+    location_anchor: str = Field(
+        description=(
+            "MỘT địa danh bao trùm, CÙNG tập hợp lệ với `locations` (cấp tỉnh/thành "
+            "trở xuống). Dùng làm ngữ cảnh tra toạ độ cho tên vi mô (vd 'A1' + anchor "
+            "'Điện Biên Phủ') và căn khung bản đồ. Chọn đơn vị nhỏ nhất bao được toàn "
+            "bộ `locations`; nếu phải leo lên trên cấp tỉnh mới bao được thì để '' — "
+            "anchor rỗng hợp lệ và tốt hơn một anchor không tra được. KHÔNG cần nằm "
+            "trong `locations`."
+        )
+    )
+    location_scope: LocationScope = Field(
+        description=(
+            "'sites': diễn biến xảy ra ĐÚNG TẠI các nơi trong `locations` -> được chấm "
+            "marker. 'area': diễn biến TRẢI RỘNG, các tên trong `locations` chỉ là nơi "
+            "tiêu biểu được nhắc -> KHÔNG chấm marker. Cả hai đều ĐÒI `locations` khác "
+            "rỗng. 'none': không còn nơi nào hợp lệ sau khi lọc (gồm cả khi đoạn chỉ "
+            "nêu vùng quá to)."
+        )
+    )
+    location_source: LocationSource = Field(
+        description=(
+            "'text': địa điểm nêu ngay trong câu kể diễn biến này. 'context': suy từ "
+            "ngữ cảnh đoạn hoặc heading (vd cả mục đang nói về một chiến dịch ở Điện "
+            "Biên Phủ). 'none': khi `location_scope` = 'none'."
         )
     )
     parent_event: str = Field(
@@ -85,7 +129,6 @@ class AtomicEvent(BaseModel):
         )
     )
 
-
 class ChunkEvents(BaseModel):
     """Sự kiện trích được TỪ MỘT chunk trong unit (khớp marker `ref` của prompt)."""
 
@@ -101,7 +144,6 @@ class ChunkEvents(BaseModel):
             "biến nào đáng lên timeline (hợp lệ, không phải lỗi)."
         )
     )
-
 
 class TimelineExtraction(BaseModel):
     """Kết quả trích cho một unit: mỗi chunk đầu vào ĐÚNG MỘT phần tử `chunk_results`.

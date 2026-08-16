@@ -15,27 +15,27 @@ from app.indexing.timeline.atomic_event_extractor import (
 from app.prompts.timeline_extract import build_user_prompt
 from app.schemas.timeline import AtomicEvent, ChunkEvents, TimelineExtraction
 
-
 def _ev(label: str, time_start: str = "", locations: list[str] | None = None) -> AtomicEvent:
+    locations = locations or []
     return AtomicEvent(
         label=label,
         summary="s",
         time_start=time_start,
         time_end="",
-        locations=locations or [],
+        locations=locations,
+        location_anchor=locations[0] if locations else "",
+        location_scope="sites" if locations else "none",
+        location_source="text" if locations else "none",
         parent_event="",
         confidence="cao",
     )
-
 
 def _parsed(*pairs: tuple[str, list[AtomicEvent]]) -> TimelineExtraction:
     return TimelineExtraction(
         chunk_results=[ChunkEvents(chunk_ref=ref, events=evs) for ref, evs in pairs]
     )
 
-
 # --- build_user_prompt: marker phải rõ ràng và không vỡ vì nội dung ---------------
-
 
 def test_build_user_prompt_gan_marker_ref_cho_tung_chunk() -> None:
     out = build_user_prompt([("1", "Đoạn A."), ("2", "Đoạn B.")], ["Phần I", "Mục X"])
@@ -44,21 +44,17 @@ def test_build_user_prompt_gan_marker_ref_cho_tung_chunk() -> None:
     assert "<heading_context>Phần I > Mục X</heading_context>" in out
     assert out.index('ref="1"') < out.index('ref="2"')  # giữ thứ tự văn bản
 
-
 def test_build_user_prompt_an_toan_voi_dau_ngoac_nhon() -> None:
     # Regression: text chứa '{' '}' KHÔNG được làm vỡ prompt (trước đây str.format ném lỗi).
     text = "Mật mã {A} và tập {1, 2, 3} xuất hiện trong tài liệu."
     out = build_user_prompt([("1", text)], ["Thời kì thuộc địa", "Mục X"])
     assert text in out
 
-
 def test_build_user_prompt_khong_heading() -> None:
     out = build_user_prompt([("1", "Đoạn văn.")], None)
     assert "(không có)" in out and "Đoạn văn." in out
 
-
 # --- _map_to_chunks: ánh xạ ref -> chunk_id thật + validate hợp đồng ---------------
-
 
 def test_map_ref_ve_dung_chunk_id_that() -> None:
     refs = {"1": "c-000", "2": "c-001"}
@@ -67,12 +63,10 @@ def test_map_ref_ve_dung_chunk_id_that() -> None:
     assert [e.label for e in out["c-000"]] == ["E1"]
     assert [e.label for e in out["c-001"]] == ["E2"]
 
-
 def test_chunk_khong_co_event_van_duoc_giu_voi_list_rong() -> None:
     refs = {"1": "c-000", "2": "c-001"}
     out = _map_to_chunks(_parsed(("1", [_ev("E1")]), ("2", [])), refs)
     assert out["c-001"] == []  # rỗng là kết quả HỢP LỆ, phải vào cache
-
 
 def test_ref_tra_ve_khong_theo_thu_tu_van_map_dung() -> None:
     refs = {"1": "c-000", "2": "c-001"}
@@ -80,27 +74,22 @@ def test_ref_tra_ve_khong_theo_thu_tu_van_map_dung() -> None:
     assert [e.label for e in out["c-000"]] == ["E1"]
     assert list(out) == ["c-000", "c-001"]  # output vẫn theo thứ tự unit
 
-
 def test_thieu_ref_lam_fail_toan_unit() -> None:
     refs = {"1": "c-000", "2": "c-001", "3": "c-002"}
     with pytest.raises(TimelineExtractionError, match="thiếu kết quả"):
         _map_to_chunks(_parsed(("1", [_ev("E1")]), ("2", [])), refs)
-
 
 def test_trung_ref_lam_fail_toan_unit() -> None:
     refs = {"1": "c-000", "2": "c-001"}
     with pytest.raises(TimelineExtractionError, match="trùng"):
         _map_to_chunks(_parsed(("1", [_ev("E1")]), ("1", [_ev("E2")]), ("2", [])), refs)
 
-
 def test_ref_la_lam_fail_toan_unit() -> None:
     refs = {"1": "c-000"}
     with pytest.raises(TimelineExtractionError, match="lạ"):
         _map_to_chunks(_parsed(("1", []), ("9", [_ev("E9")])), refs)
 
-
 # --- extract_unit_events: khớp ref giữa prompt gửi đi và bảng ánh xạ ngược ---------
-
 
 def _stub_client(
     parsed: TimelineExtraction | None = None, refusal: str | None = None
@@ -117,7 +106,6 @@ def _stub_client(
         chat=SimpleNamespace(completions=SimpleNamespace(parse=parse))
     )
     return client, captured
-
 
 def test_ref_trong_prompt_khop_bang_anh_xa_nguoc() -> None:
     """Bug im lặng nguy hiểm nhất: prompt đánh ref kiểu này, map ngược lại kiểu khác."""
@@ -138,13 +126,11 @@ def test_ref_trong_prompt_khop_bang_anh_xa_nguoc() -> None:
     assert "c-aaa" not in user_msg  # chunk_id thật KHÔNG lộ vào prompt, chỉ ref
     assert captured["model"] == "m" and captured["temperature"] == 0.0
 
-
 def test_refusal_lam_fail_ca_unit_thay_vi_cache_rong() -> None:
     # Cache "mọi chunk rỗng" khi bị refusal = mất event VĨNH VIỄN (resume coi là xong).
     client, _ = _stub_client(refusal="không thể trả lời")
     with pytest.raises(TimelineExtractionError, match="từ chối"):
         extract_unit_events([("c-aaa", "x")], None, client=client, model="m")
-
 
 def test_khong_parse_duoc_lam_fail_ca_unit() -> None:
     client, _ = _stub_client(parsed=None)
