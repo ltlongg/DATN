@@ -31,7 +31,7 @@ from app.prompts.geocode import (
     SYSTEM_PROMPT,
     build_user_prompt,
 )
-from app.schemas.gazetteer import GeocodeOutcome, GeocodeResult
+from app.schemas.gazetteer import GeocodeContext, GeocodeOutcome, GeocodeResult
 
 __all__ = ["geocode_location", "GEOCODE_PROMPT_VERSION", "VN_BBOX", "in_vietnam"]
 
@@ -46,15 +46,12 @@ VN_BBOX = (VN_LAT_MIN, VN_LAT_MAX, VN_LON_MIN, VN_LON_MAX)
 
 _GOOGLE_GEOCODE_URL = "https://maps.googleapis.com/maps/api/geocode/json"
 
-
 def in_vietnam(lat: float, lon: float) -> bool:
     return VN_LAT_MIN <= lat <= VN_LAT_MAX and VN_LON_MIN <= lon <= VN_LON_MAX
-
 
 # y->i hợp nhất chính tả cũ/mới (Mĩ/Mỹ, kĩ/kỹ) NHƯNG GIỮ dấu thanh: ánh xạ từng biến
 # thể có dấu của 'y' sang 'i' cùng dấu (ý->í, ỳ->ì, ỷ->ỉ, ỹ->ĩ, ỵ->ị, y->i).
 _Y_TO_I = str.maketrans("yýỳỷỹỵ", "iíìỉĩị")
-
 
 def _fold(text: str) -> str:
     """Chuẩn hoá tên để so khớp: hạ thường + NFC + y->i. **GIỮ DẤU.**
@@ -68,7 +65,6 @@ def _fold(text: str) -> str:
     text = unicodedata.normalize("NFC", text.lower()).translate(_Y_TO_I)
     return re.sub(r"[^\w\s]", " ", text)
 
-
 def _name_matches(query: str, candidate: str) -> bool:
     """True nếu MỌI token tên truy vấn đều có trong tên Google trả về (so khớp giữ dấu).
 
@@ -80,7 +76,6 @@ def _name_matches(query: str, candidate: str) -> bool:
     q_tokens = _fold(query).split()
     c_tokens = set(_fold(candidate).split())
     return bool(q_tokens) and all(tok in c_tokens for tok in q_tokens)
-
 
 def _confidence_from_types(types: list[str]) -> Literal["cao", "vừa", "thấp"]:
     """Suy confidence từ mảng `types` của kết quả Google Geocoding.
@@ -95,9 +90,29 @@ def _confidence_from_types(types: list[str]) -> Literal["cao", "vừa", "thấp"
         return "vừa"
     return "cao"
 
+def _google_address(name: str, context: GeocodeContext | None) -> str:
+    """Ghép `address` gửi Google: tên + vùng bao đầu tiên (nếu có).
+
+    Chỉ lấy MỘT anchor: Google xử lý "tên, địa phương" rất tốt nhưng nhồi thêm địa danh
+    lân cận/nhãn sự kiện chỉ làm truy vấn nhiễu. Anchor trùng chính tên -> bỏ (thừa).
+
+    Không có đường lùi "thử lại bằng tên trần": truy vấn kèm anchor là truy vấn ĐƯỢC
+    THÔNG TIN HƠN, nên nếu nó không ra thì tên trần cũng khó ra hơn — mà có ra thì
+    `_name_matches` cũng chặn vì đó là khớp mờ. Ca đó để LLM (nay đã có ngữ cảnh) lo.
+    """
+    if context is None or not context.anchors:
+        return name
+    anchor = context.anchors[0]
+    if _fold(anchor) == _fold(name):
+        return name
+    return f"{name}, {anchor}"
 
 def _google_geocode(
-    name: str, api_key: str, *, http_client: httpx.Client
+    name: str,
+    api_key: str,
+    *,
+    http_client: httpx.Client,
+    context: GeocodeContext | None = None,
 ) -> GeocodeOutcome | None:
     """Gọi Google Geocoding (region=vn chỉ BIAS, cho phép cả địa danh nước ngoài).
 
@@ -108,7 +123,7 @@ def _google_geocode(
         resp = http_client.get(
             _GOOGLE_GEOCODE_URL,
             params={
-                "address": name,
+                "address": _google_address(name, context),
                 "key": api_key,
                 "language": "vi",
                 "region": "vn",  # chỉ bias ưu tiên VN khi trùng tên, KHÔNG lọc cứng
@@ -158,14 +173,15 @@ def _google_geocode(
         admin_level=types[0] if types else "",
     )
 
-
-def _llm_geocode(name: str, *, client: OpenAI, model: str) -> GeocodeOutcome:
+def _llm_geocode(
+    name: str, *, client: OpenAI, model: str, context: GeocodeContext | None = None
+) -> GeocodeOutcome:
     """LLM suy toạ độ (fallback). 0.0/0.0 -> coi như không định vị được."""
     completion = client.chat.completions.parse(
         model=model,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": build_user_prompt(name)},
+            {"role": "user", "content": build_user_prompt(name, context)},
         ],
         response_format=GeocodeResult,
         timeout=60,
@@ -196,16 +212,20 @@ def _llm_geocode(name: str, *, client: OpenAI, model: str) -> GeocodeOutcome:
         note=result.note,
     )
 
-
 def geocode_location(
     name: str,
     *,
+    context: GeocodeContext | None = None,
     google_api_key: str | None = None,
     http_client: httpx.Client | None = None,
     client: OpenAI | None = None,
     model: str | None = None,
 ) -> GeocodeOutcome:
     """Geocode một địa danh: Google trước, LLM fallback. Luôn trả GeocodeOutcome.
+
+    `context` (rút từ `timeline_events` — xem `geocoding/context.py`) đi vào CẢ HAI nhánh:
+    Google nhận vùng bao ghép vào `address`, LLM nhận đủ 4 khối. Không có ngữ cảnh ->
+    hành vi y như trước (tên trần).
 
     `google_api_key` None -> lấy từ settings (rỗng -> bỏ Google, chỉ LLM). Truyền
     `http_client`/`client` dùng chung khi gọi hàng loạt (build_gazetteer) để tái dùng
@@ -222,11 +242,11 @@ def geocode_location(
     if api_key:
         ctx = nullcontext(http_client) if http_client is not None else httpx.Client()
         with ctx as hc:
-            out = _google_geocode(name, api_key, http_client=hc)
+            out = _google_geocode(name, api_key, http_client=hc, context=context)
         if out is not None:
             return out
 
     # 2) LLM fallback.
     client = client or get_openai_client()
     model = model or settings.llm_model
-    return _llm_geocode(name, client=client, model=model)
+    return _llm_geocode(name, client=client, model=model, context=context)

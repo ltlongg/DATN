@@ -1,16 +1,22 @@
 """CLI: geocode địa danh trong `timeline_events` -> bảng `gazetteer` (+ review).
 
 Pipeline:
-  1. Đọc địa danh (surface form) + tần suất từ `timeline_events.locations`.
-  2. Chuẩn hoá (normalize_name) -> gom nhóm theo location_norm, chọn surface phổ biến
-     nhất làm display.
-  3. Geocode mỗi địa danh: Google trước, LLM fallback (cache `dataset/gazetteer.json`).
+  1. Đọc mọi event CÓ địa danh (`select_located_events`).
+  2. `collect_locations()` gom theo `location_norm` + rút NGỮ CẢNH cho từng địa danh
+     (vùng bao, địa danh đi kèm, nhãn sự kiện, khoảng năm).
+  3. Geocode mỗi địa danh KÈM ngữ cảnh: Google trước, LLM fallback (cache
+     `dataset/gazetteer.json`).
   4. Upsert vào `gazetteer` (lat/lon None -> NULL: địa danh đó chỉ lên timeline).
   5. Sinh `dataset/gazetteer_review.md` để soát tay (ưu tiên confidence thấp / LLM).
 
 `--min-count` chỉ geocode địa danh xuất hiện trong >= N event (bỏ nhiễu tần suất thấp).
-Resume: location_norm đã có trong cache -> bỏ qua (trừ --overwrite). Gazetteer dùng
-UPSERT (không TRUNCATE) nên chạy nhiều lần build dần, không sợ xoá trắng.
+Resume: location_norm đã có trong cache VỚI ĐÚNG `GEOCODE_PROMPT_VERSION` -> bỏ qua. Đổi
+prompt/cách dựng truy vấn -> bump hằng đó là lần chạy sau tự trích lại, không cần nhớ
+truyền --overwrite. Gazetteer dùng UPSERT (không TRUNCATE) nên chạy nhiều lần build dần,
+không sợ xoá trắng.
+
+Ngữ cảnh KHÔNG nằm trong điều kiện resume: nó đổi mỗi lần re-index timeline, mà bám theo
+thì lần nào cũng geocode lại từ đầu. Muốn geocode lại theo ngữ cảnh mới -> `--overwrite`.
 
 Ví dụ:
     python scripts/build_gazetteer.py --limit 5 --skip-db        # geocode thử 5 địa danh
@@ -49,16 +55,15 @@ if str(_APP_ROOT) not in sys.path:
 
 from app.core.config import get_settings  # noqa: E402
 from app.core.llm import get_openai_client  # noqa: E402
+from app.indexing.geocoding.context import collect_locations  # noqa: E402
 from app.indexing.geocoding.geocoder import GEOCODE_PROMPT_VERSION, geocode_location  # noqa: E402
-from app.indexing.graph.normalize import normalize_name  # noqa: E402
-from app.schemas.gazetteer import GeocodeOutcome  # noqa: E402
+from app.schemas.gazetteer import GeocodeOutcome, LocationToGeocode  # noqa: E402
 from app.schemas.timeline import CONFIDENCE_RANK  # noqa: E402
-from app.tools.visualization.event_store import select_location_counts  # noqa: E402
+from app.tools.visualization.event_store import select_located_events  # noqa: E402
 from app.tools.visualization.gazetteer_store import upsert_gazetteer  # noqa: E402
 
 _CACHE = _REPO_ROOT / "dataset" / "gazetteer.json"
 _REVIEW = _REPO_ROOT / "dataset" / "gazetteer_review.md"
-
 
 def _load_cache(path: Path) -> dict[str, Any]:
     if not path.exists():
@@ -72,36 +77,22 @@ def _load_cache(path: Path) -> dict[str, Any]:
         return {}
     return data if isinstance(data, dict) else {}
 
-
 def _write_json(path: Path, data: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
     tmp.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     os.replace(tmp, path)
 
-
-def _collect_locations(min_count: int) -> dict[str, dict[str, Any]]:
-    """Đọc + gom địa danh theo location_norm. Trả {norm: {display, count}}."""
-    counts = select_location_counts()
-    groups: dict[str, dict[str, Any]] = {}
-    for surface, n in counts.items():
-        norm = normalize_name(surface)
-        if not norm:
-            continue
-        g = groups.setdefault(norm, {"surfaces": Counter(), "count": 0})
-        g["surfaces"][surface] += n
-        g["count"] += n
-    out: dict[str, dict[str, Any]] = {}
-    for norm, g in groups.items():
-        if g["count"] < min_count:
-            continue
-        display = g["surfaces"].most_common(1)[0][0]
-        out[norm] = {"display": display, "count": g["count"]}
-    return out
-
+def _cell(value: Any) -> str:
+    """Ép một giá trị vào ô bảng markdown: escape `|`, gộp xuống dòng."""
+    return " ".join(str(value or "").split()).replace("|", "\\|")
 
 def _write_review(path: Path, cache: dict[str, Any]) -> None:
-    """Sinh review.md: sắp confidence thấp + tần suất cao lên đầu để soát trước."""
+    """Sinh review.md: sắp confidence thấp + tần suất cao lên đầu để soát trước.
+
+    Cột `vùng bao` in lại ngữ cảnh đã gửi cho geocoder — soi toạ độ sai mà không biết
+    model được cho biết những gì thì không phán được là lỗi ngữ cảnh hay lỗi suy luận.
+    """
     rows = sorted(
         cache.items(),
         key=lambda kv: (CONFIDENCE_RANK.get(kv[1].get("confidence"), 0), -kv[1].get("count", 0)),
@@ -113,20 +104,22 @@ def _write_review(path: Path, cache: dict[str, Any]) -> None:
         "(soát mấy dòng đầu trước). Sửa toạ độ sai trực tiếp trong `gazetteer.json` rồi "
         "chạy lại `build_gazetteer.py` (không cần --overwrite).",
         "",
-        "| location_norm | display | lat | lon | conf | nguồn | #event | modern_name | note | provider |",
-        "|---|---|---|---|---|---|---|---|---|---|",
+        "| location_norm | display | vùng bao | lat | lon | conf | nguồn | #event "
+        "| modern_name | note | provider |",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for norm, v in rows:
         lat = "" if v.get("lat") is None else f"{v['lat']:.4f}"
         lon = "" if v.get("lon") is None else f"{v['lon']:.4f}"
+        anchors = ", ".join((v.get("context") or {}).get("anchors") or [])
         lines.append(
-            f"| {norm} | {v.get('display','')} | {lat} | {lon} | {v.get('confidence','')} "
-            f"| {v.get('resolved_by','')} | {v.get('count',0)} | {v.get('modern_name','')} "
-            f"| {v.get('note','')} | {v.get('provider_name','')} |"
+            f"| {_cell(norm)} | {_cell(v.get('display'))} | {_cell(anchors)} | {lat} | {lon} "
+            f"| {_cell(v.get('confidence'))} | {_cell(v.get('resolved_by'))} "
+            f"| {v.get('count', 0)} | {_cell(v.get('modern_name'))} | {_cell(v.get('note'))} "
+            f"| {_cell(v.get('provider_name'))} |"
         )
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -142,24 +135,30 @@ def main() -> int:
     cache_path = Path(args.cache)
     cache = _load_cache(cache_path)
 
-    locations = _collect_locations(args.min_count)
+    locations = collect_locations(select_located_events(), min_count=args.min_count)
     if not locations:
         print("Không có địa danh nào trong timeline_events (đã chạy run_timeline_index chưa?).", flush=True)
         return 0
 
+    def _is_fresh(norm: str) -> bool:
+        entry = cache.get(norm)
+        return bool(entry) and entry.get("prompt_version") == GEOCODE_PROMPT_VERSION
+
     if args.overwrite:
         todo = dict(locations)
     else:
-        todo = {norm: meta for norm, meta in locations.items() if norm not in cache}
-    todo_items = list(todo.items())
+        todo = {norm: loc for norm, loc in locations.items() if not _is_fresh(norm)}
+    todo_items = list(todo.values())
     if args.limit > 0:
         todo_items = todo_items[: args.limit]
 
     settings = get_settings()
     has_google = bool(settings.google_maps_api_key)
+    with_context = sum(1 for loc in todo_items if not loc.context.is_empty())
     print(
         f"Địa danh: {len(locations)} (min-count={args.min_count}) | "
-        f"{len(locations) - len(todo)} đã cache, {len(todo_items)} sẽ geocode | "
+        f"{len(locations) - len(todo)} đã cache đúng bản prompt, {len(todo_items)} sẽ geocode "
+        f"({with_context} có ngữ cảnh) | "
         f"Google={'có' if has_google else 'KHÔNG (chỉ LLM)'} | "
         f"model={settings.llm_model} | prompt={GEOCODE_PROMPT_VERSION} | {args.workers} luồng",
         flush=True,
@@ -170,26 +169,28 @@ def main() -> int:
         llm_client = get_openai_client()
         t0 = time.perf_counter()
         with httpx.Client() as http_client:
-            def _process(item: tuple[str, dict[str, Any]]) -> tuple[str, GeocodeOutcome, dict[str, Any]]:
-                norm, meta = item
+            def _process(loc: LocationToGeocode) -> tuple[LocationToGeocode, GeocodeOutcome]:
                 outcome = geocode_location(
-                    meta["display"],
+                    loc.display,
+                    context=loc.context,
                     http_client=http_client,
                     client=llm_client,
                     model=settings.llm_model,
                 )
-                return norm, outcome, meta
+                return loc, outcome
 
             with ThreadPoolExecutor(max_workers=args.workers) as pool:
-                futures = {pool.submit(_process, it): it[0] for it in todo_items}
+                futures = {pool.submit(_process, loc): loc.norm for loc in todo_items}
                 done_n = 0
                 for fut in as_completed(futures):
                     norm = futures[fut]
                     try:
-                        rnorm, outcome, meta = fut.result()
-                        cache[rnorm] = {
-                            "display": meta["display"],
-                            "count": meta["count"],
+                        loc, outcome = fut.result()
+                        cache[loc.norm] = {
+                            "display": loc.display,
+                            "count": loc.count,
+                            "prompt_version": GEOCODE_PROMPT_VERSION,
+                            "context": loc.context.model_dump(),
                             **outcome.model_dump(),
                         }
                     except Exception as exc:  # noqa: BLE001
@@ -233,7 +234,6 @@ def main() -> int:
         print(f"[LỖI] {len(errors)} địa danh geocode thất bại (chạy lại sẽ thử tiếp).")
     print(f"Cache -> {args.cache}")
     return 1 if errors else 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

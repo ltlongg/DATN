@@ -7,6 +7,9 @@ Strict mode KHÔNG cho default => mọi field bắt buộc; dùng giá trị "r�
 LƯU Ý phạm vi: `GeocodeResult` GIÀU hơn cột bảng `gazetteer` (đã cắt admin_level/
 modern_name/note). Các field phụ trợ ở đây chảy vào `dataset/gazetteer_review.md`
 để review tay, KHÔNG vào DB.
+
+`GeocodeContext` + `LocationToGeocode` là ĐẦU VÀO của pipeline (rút từ
+`timeline_events`), không phải output của LLM — xem `app/indexing/geocoding/context.py`.
 """
 
 from __future__ import annotations
@@ -15,6 +18,43 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+class GeocodeContext(BaseModel):
+    """Ngữ cảnh của MỘT địa danh, rút từ các event đã trích chứa nó.
+
+    Lý do tồn tại: geocode một cái tên trần trụi là bài toán thiếu dữ kiện — "làng Thanh
+    Thuỷ" có ở nhiều tỉnh, "A1" tự nó vô nghĩa. Bốn trường dưới đây là toàn bộ manh mối
+    lấy được từ `timeline_events` mà KHÔNG phải join sang kho chunk.
+
+    Mọi trường có thể rỗng (địa danh chỉ xuất hiện một lần, đứng một mình, không mốc).
+    """
+
+    anchors: list[str] = Field(
+        default_factory=list,
+        description="`location_anchor` của các event chứa địa danh này — vùng bao, mạnh nhất.",
+    )
+    neighbors: list[str] = Field(
+        default_factory=list,
+        description="Địa danh khác xuất hiện CÙNG event -> nhiều khả năng lân cận.",
+    )
+    events: list[str] = Field(
+        default_factory=list,
+        description="Nhãn event tiêu biểu, cho biết bối cảnh lịch sử của địa danh.",
+    )
+    period: str = Field(
+        default="",
+        description="Khoảng năm các event diễn ra ('1954' hoặc '1859-1885'). '' nếu không mốc.",
+    )
+
+    def is_empty(self) -> bool:
+        return not (self.anchors or self.neighbors or self.events or self.period)
+
+class LocationToGeocode(BaseModel):
+    """Một địa danh cần geocode: khoá chuẩn hoá + surface hiển thị + tần suất + ngữ cảnh."""
+
+    norm: str  # normalize_name(display) — khoá của bảng `gazetteer` và của cache
+    display: str  # surface form phổ biến nhất, dùng làm truy vấn geocode
+    count: int  # số event tham chiếu (để lọc --min-count và sắp review)
+    context: GeocodeContext
 
 class GeocodeResult(BaseModel):
     """Toạ độ + thông tin phụ trợ cho một địa danh."""
@@ -54,7 +94,6 @@ class GeocodeResult(BaseModel):
     note: str = Field(
         description="Ghi chú ngắn lý do/độ mơ hồ. '' nếu không cần. (Chỉ vào review.)"
     )
-
 
 class GeocodeOutcome(BaseModel):
     """Kết quả geocode đã HỢP NHẤT từ mọi nguồn (Google/LLM), đủ cho cả DB lẫn review.
