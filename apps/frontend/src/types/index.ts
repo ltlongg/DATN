@@ -50,6 +50,13 @@ export interface SourceDetail {
   end_line: number | null;
 }
 
+/**
+ * Sự kiện xảy ra ĐÚNG TẠI điểm này ("sites") hay điểm này chỉ là một nơi tiêu biểu của
+ * một diễn biến TRẢI RỘNG ("area" — phong trào, địa bàn hoạt động). Hai thứ khác hẳn
+ * nhau nên vẽ khác nhau: pin đặc vs vòng tròn rỗng (xem EventMarker).
+ */
+export type LocationScope = "sites" | "area";
+
 export interface MapMarker {
   event_id: string;
   label: string;
@@ -59,6 +66,7 @@ export interface MapMarker {
   lon: number;
   confidence: string;
   time_start?: string | null;
+  scope: LocationScope;
 }
 
 export interface TimelineItem {

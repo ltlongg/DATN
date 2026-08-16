@@ -7,6 +7,10 @@ KHÔNG trích mới. Luồng (xem plan §2):
    -> tách markers (có lat/lon) + timeline items (có time_start), link bằng event_id
    -> honest fallback (thiếu nơi -> chỉ timeline; thiếu time -> chỉ map; thiếu cả -> bỏ)
 
+Marker mang theo `location_scope` của event ('sites' vs 'area') để UI vẽ đúng loại — xem
+`app/schemas/visualization.py`. Builder KHÔNG lọc theo scope: event 'area' vẫn ra đủ
+marker, chỉ khác cách vẽ. Lọc ở đây là giấu mất địa bàn của phong trào khỏi bản đồ.
+
 Ghi chú: bộ LỌC LLM "event nào câu trả lời thực sự nhắc tới" (plan đề là tuỳ chọn) để
 DÀNH cho lúc tích hợp answer flow của agent — chưa có answer_text ở giai đoạn này nên
 chưa thêm (tránh phụ thuộc LLM trong online path khi chưa cần).
@@ -22,11 +26,9 @@ from app.tools.visualization.gazetteer_store import lookup_coords
 
 __all__ = ["build_visualization"]
 
-
 def _weakest(a: str, b: str) -> str:
     """Trả confidence YẾU hơn (mắt xích yếu nhất): event chắc nhưng toạ độ đoán -> nhạt."""
     return a if CONFIDENCE_RANK.get(a, 0) <= CONFIDENCE_RANK.get(b, 0) else b
-
 
 def build_visualization(
     retrieved_chunk_ids: list[str], database_url: str | None = None
@@ -52,6 +54,9 @@ def build_visualization(
         event_id = event["event_id"]
         time_start = event.get("time_start")  # None nếu cột NULL
         locations = event.get("locations") or []
+        # Cột NOT NULL DEFAULT 'none' và query là SELECT * -> luôn có mặt. Truy cập
+        # thẳng để lỗi lộ ra nếu schema lệch, thay vì âm thầm vẽ nhầm loại marker.
+        scope = event["location_scope"]
 
         event_markers: list[MapMarker] = []
         seen_points: set[tuple[float, float]] = set()
@@ -74,6 +79,7 @@ def build_visualization(
                     lon=lon,
                     confidence=_weakest(event["confidence"], row.get("confidence") or "thấp"),
                     time_start=time_start,
+                    scope=scope,
                 )
             )
 
