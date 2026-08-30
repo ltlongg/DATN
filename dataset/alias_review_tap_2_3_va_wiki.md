@@ -1,0 +1,125 @@
+# Alias review — 0 cặp 'vừa' cần xác nhận
+
+Nếu đồng ý gộp: thêm cụm `["<canonical>", "<alias>"]` vào `dataset/alias_seed.json` (mục `clusters`) rồi chạy lại script.
+
+---
+## Đã gộp tự động (confidence cao): 118 cụm
+
+- **Tổng tiến công và nổi dậy mùa xuân 1975** ← Tổng tiến công và nổi dậy mùa xuân năm 1975, Tổng tiến công và nổi dậy Xuân 1975, Tổng tấn công và nổi dậy Mùa xuân 1975, Tổng tấn công và nổi dậy mùa Xuân năm 1975
+- **Phongxalì** ← Phongsaly, Phong Xa Lỳ, Phông Xa Lỳ
+- **Tổng tiến công và nổi dậy Tết Mậu Thân** ← Tổng tiến công và nổi dậy Mậu Thân 1968, Tổng tiến công và nổi dậy Tết Mậu Thân 1968, Tổng tấn công và nổi dậy xuân Mậu Thân 1968
+- **Chiến dịch Plei Me** ← Chiến dịch Pleime, Chiến dịch Plây Me
+- **Hiệp định Giơnevơ** ← Hiệp nghị Giơnevơ, Hiệp nghị Gionevo
+- **Hòa ước 5-6-1862** ← Hòa ước 1862, Hòa ước năm 1862
+- **Hội đồng An ninh Quốc gia** ← Hội đồng an ninh quốc gia Mĩ, Hội đồng An ninh Quốc gia Mỹ
+- **Liên đoàn biệt kích dù số 81** ← Liên đoàn biệt kích dù 81, Liên đoàn 81 Biệt kích dù
+- **Quân lực Việt Nam Cộng hòa** ← Quân Việt Nam Cộng hòa, Quân đội Việt Nam Cộng hòa
+- **Quân đội Nhật** ← Quân đội Nhật Bản, Quân Nhật Bản
+- **Robert McNamara** ← Robert MacNamara, Robert S. McNamara
+- **Sê Pôn** ← Sepone, Sêpôn
+- **Sư đoàn Không Kỵ số 1** ← Sư đoàn 1 Không kỵ Mỹ, Sư đoàn 1 Không Kỵ
+- **Sư đoàn 23** ← Sư đoàn 23 BB, Sư đoàn 23BB
+- **Tổng tuyển cử ngày 6-1-1946** ← Tổng tuyển cử năm 1946, Tổng tuyển cử 1946
+- **Ben Het** ← Bến Hét
+- **Brière de l'Isle** ← Briere de l'Isle
+- **Buôn Ma Thuột** ← Buôn Mê Thuột
+- **Bản Tuyên bố cuối cùng tại Hội nghị Genève** ← Bản tuyên bố cuối cùng của Hội nghị Genève
+- **Bắc Bình Vương 7/2** ← Bắc Bình Vương 72
+- **Bộ Tư lệnh Hải quân Vùng 1 Duyên hải** ← Bộ Tư lệnh Hải quân Vùng I Duyên hải
+- **Bộ Tư lệnh Quân khu 5** ← Bộ Tư lệnh Quân khu V
+- **Bộ Tư lệnh Quân đoàn II-VNCH** ← Bộ tư lệnh Quân đoàn II QLVNCH
+- **Bộ Tổng tham mưu QLVNCH** ← Bộ Tổng tham mưu VNCH
+- **Cao nguyên Bolaven** ← Cao nguyên Bôlôven
+- **Cao điểm 881-Bắc** ← Cao điểm 881
+- **Chiến cục đông-xuân 1953-1954** ← Chiến cuộc Đông - Xuân 1953 - 1954
+- **Chiến dịch Linebacker** ← Chiến dịch Linebacker I
+- **Chiến dịch Phượng Hoàng** ← Chiến dịch Phụng Hoàng
+- **Chiến dịch Đăk Tô** ← Chiến dịch Đắc Tô
+- **Chu Prông** ← Chư Prông
+- **Chính quyền Việt Nam Cộng hòa** ← Chính phủ Việt Nam Cộng hòa
+- **Chính quyền Sài Gòn** ← Chính quyền Sài Gòn cũ
+- **Chính quyền thực dân Pháp** ← Chính quyền thuộc địa Pháp
+- **Creighton Abrams** ← Creighton W. Abrams
+- **Cuộc hành quân Mouette** ← Cuộc hành quân Moutte
+- **Cuộc Tổng tấn công và nổi dậy mùa Xuân năm 1975** ← Cuộc Tổng tấn công và nổi dậy mùa Xuân 1975
+- **Cách mạng tháng Mười Nga** ← Cách mạng tháng Mười
+- **Đăk Tô** ← Dakto
+- **Dwight Eisenhower** ← Dwight D. Eisenhower
+- **Dân quân tự vệ** ← Dân quân, tự vệ
+- **Harold G. Moore** ← Harold Moore
+- **Harry Truman** ← Harry S. Truman
+- **Hiệp định Elysée** ← Hiệp định Élysée
+- **Hiệp định Genève** ← Hiệp định Geneva
+- **Hiệp định Geneva 1954** ← Hiệp định Genève 1954
+- **Hiệp định Paris** ← Hiệp định Pari
+- **Học thuyết Níchxơn** ← Học thuyết Nixon
+- **Hội nghị Fontainebleau** ← Hội nghị Fontainebleu
+- **Hội nghị Genève** ← Hội nghị Geneve
+- **Hội đồng Tham mưu Liên quân Mỹ** ← Hội đồng Tham mưu liên quân
+- **Hội đồng Tham mưu trưởng liên quân Mỹ** ← Hội đồng Tham mưu trưởng Liên quân
+- **Ia Drang** ← Ia Drăng
+- **Không lực Việt Nam Cộng hòa** ← Không quân Việt Nam Cộng hòa
+- **Kon Tum** ← Kontum
+- **Kế hoạch Navarre** ← Kế hoạch Nava
+- **Kế hoạch Revers** ← Kế hoạch Reve
+- **Luang Prabang** ← Luangprabang
+- **Lyndon B. Johnson** ← Lyndon Johnson
+- **Lê Nguyên Vĩ** ← Lê Nguyên Vỹ
+- **Lữ đoàn 173** ← Lữ đoàn dù 173
+- **Lữ đoàn dù 2** ← Lữ đoàn Dù số 2
+- **Maxwell D. Taylor** ← Maxwell Taylor
+- **Melvin Laird** ← Melvin R. Laird
+- **Mặt trận Nhân dân Pháp** ← Mặt trận Bình dân Pháp
+- **Neo Lào Hak Sat** ← Neo Lào Hak Xat
+- **Nguyễn Hữu Huân** ← Nguyễn Huân
+- **Nguyễn Khắc Nhu** ← Nguyễn Khác Nhu
+- **Nguyễn Thành Hiến** ← Nguyễn Thần Hiến
+- **Nhân dân Mĩ** ← Nhân dân Mỹ
+- **Nhật-Pháp bắn nhau và hành động của chúng ta** ← Nhật, Pháp bắn nhau và hành động của chúng ta
+- **Paris** ← Pari
+- **Paul Ely** ← Paul Ély
+- **Phai Khắt** ← Phay Khắt
+- **Phnôm Pênh** ← Phnompenh
+- **Plei Me** ← Pleime
+- **Quân đội Hoàng gia Lào** ← Quân Hoàng gia Lào
+- **Quân khu I** ← Quân khu 1
+- **Quân đội Liên hiệp Pháp** ← Quân Liên hiệp Pháp
+- **Quân đội Sài Gòn** ← Quân Sài Gòn
+- **Quân đội Trung Hoa Dân quốc** ← Quân Trung Hoa Dân quốc
+- **Quân Trung Quốc** ← Quân đội Trung Quốc
+- **Quân đội Viễn chinh Pháp** ← Quân viễn chinh Pháp
+- **Quân đội Vân Nam** ← Quân Vân Nam
+- **Quân đoàn II-QLVNCH** ← Quân đoàn 2 QLVNCH
+- **Quân đoàn II VNCH** ← Quân đoàn 2 VNCH
+- **Sư đoàn 1 Kỵ binh bay** ← Sư đoàn 1 Kỵ binh Mỹ
+- **Sư đoàn 22** ← Sư đoàn 22 BB
+- **Sư đoàn không quân số 3** ← Sư đoàn 3 Không quân
+- **Sư đoàn 4 Bộ binh** ← Sư đoàn bộ binh 4
+- **Sư đoàn 5 Không quân** ← Sư đoàn không quân số 5
+- **Terauchi** ← Térauchi
+- **Thành Hà Nội** ← Thành cổ Hà Nội
+- **Thủy quân lục chiến Mỹ** ← Thủy quân lục chiến Hoa Kỳ
+- **Tiểu đoàn 3/187 Mỹ** ← Tiểu đoàn 3/187
+- **Tiểu đoàn Lê dương Dù số 2** ← Tiểu đoàn Lê dương Dù 2
+- **Triều đình nhà Nguyễn** ← Triều đình Nguyễn
+- **Trung Quốc Quốc dân Đảng** ← Trung Hoa Quốc dân Đảng
+- **Trung và Hạ Lào** ← Trung-Hạ Lào
+- **Tránh chỗ mạnh, đánh chỗ yếu** ← Tránh chỗ mạnh đánh chỗ yếu
+- **Trận Ia Đrăng** ← Trận Ia Drang
+- **Tu Lệ** ← Tú Lệ
+- **Tân Việt Cách mạng Đảng** ← Tân Việt Cách mệnh đảng
+- **Tư lệnh mặt trận Kon Tum** ← Tư lệnh mặt trận Kontum
+- **Tư lệnh Quân đoàn I** ← Tư lệnh Quân đoàn 1
+- **Tổng tuyển cử năm 1976** ← Tổng tuyển cử 1976
+- **U-Tapao** ← Utapao
+- **Việt Nam Cách mệnh Đồng minh Hội** ← Việt Nam Cách mạng Đồng minh hội
+- **Vụ án phố Ôn Như Hầu** ← Vụ án Ôn Như Hầu
+- **Washington** ← Washington DC
+- **William Westmoreland** ← William C. Westmoreland
+- **Đắc Tô - Tân Cảnh** ← Đăk Tô - Tân Cảnh
+- **Đường 18** ← Đường số 18
+- **Đường 22** ← Đường số 22
+- **Đường mòn Hồ Chí Minh** ← Đường Hồ Chí Minh
+- **Đường Trường Sơn** ← Đường mòn Trường Sơn
+- **Đại hội lần thứ VII Quốc tế Cộng sản** ← Đại hội lần thứ VII của Quốc tế Cộng sản
+- **Đế quốc Nhật Bản** ← Đế quốc Nhật

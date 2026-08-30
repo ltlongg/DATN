@@ -689,7 +689,6 @@ Về tổ chức lực lượng, nghĩa quân Hương Khê được chia thành 
 - Lai thứ (tổng Lai Thạch, Can Lộc, Hà Tĩnh), chỉ huy: Phan Đình Nghinh.
 - Bình thứ (tỉnh Quảng Bình), chỉ huy: Nguyễn Thụ.
 - Cẩm thứ (huyện Cẩm Xuyên, Hà Tĩnh), chỉ huy: Hoàng Bá Xuyên.
-
 - Chạch thứ (huyện Thạch Hà, Hà Tĩnh), chỉ huy: Nguyễn Huy Thuận.
 - Kì thứ (huyện Kì Anh, Hà Tĩnh), chỉ huy: Võ Phát.
 - Diệm thứ (làng Tình Diệm, Hương Sơn, Hà Tĩnh), chỉ huy: Cao Đạt.
@@ -3847,12 +3846,12 @@ Bức thư nêu 12 yêu cầu được coi như là nội dung chương trình h
 - 4. Cải tổ Hội đồng kinh tế lí tài Đông Dương, cải tổ các viện dân biểu.
 - 5. Luật lao động, ngày làm 8 giờ, tuần lễ làm 40 giờ...
 - 6. Định lương tối thiểu cho mỗi hạng lao động và cứu tế cho những người thất nghiệp.
-  - 7. Bình đẳng giữa người Pháp và người bản xứ trong công việc và hưởng thụ.
-  - 8. Bỏ thuế thân và các thứ thuế khác. Bỏ chế độ làm công ích.
-  - 9. Bãi bỏ các thứ độc quyền rượu, muối,... cấm bán thuốc phiện.
-  - 10. Trục hồi các công chức Pháp và bản xứ tham nhũng, hối lộ.
-  - 11. Truyền bá giáo dục, cưỡng bức học tiếng mẹ đẻ trong các lớp dự bị.
-  - 12. Giải phóng phụ nữ. Nam nữ bình quyền.
+- 7. Bình đẳng giữa người Pháp và người bản xứ trong công việc và hưởng thụ.
+- 8. Bỏ thuế thân và các thứ thuế khác. Bỏ chế độ làm công ích.
+- 9. Bãi bỏ các thứ độc quyền rượu, muối,... cấm bán thuốc phiện.
+- 10. Trục hồi các công chức Pháp và bản xứ tham nhũng, hối lộ.
+- 11. Truyền bá giáo dục, cưỡng bức học tiếng mẹ đẻ trong các lớp dự bị.
+- 12. Giải phóng phụ nữ. Nam nữ bình quyền.
 
 Đảng Cộng sản Đông Dương kêu gọi thành lập các uỷ ban hành động ở khắp nơi để tập hợp lực lượng quần chúng thu thập dân nguyện, chuẩn bị cho Đông Dương Đại hội.
 
@@ -3934,8 +3933,6 @@ Trong thời gian này, nhiều sách chính trị, lí luận được xuất b
 
 Cuối năm 1937, Đảng Cộng sản Đông Dương phát động phong trào truyền bá chữ Quốc ngữ, nhằm giúp quần chúng lao động đọc sách báo, nâng cao hiểu biết về chính trị và cách mạng.
 
-\* \*
-
 Cuộc vận động dân chủ thời kì 1936 - 1939 đề ra mục tiêu đấu tranh đòi dân sinh, dân chủ, tự do, com áo và hoà bình. Mặc dù khẩu hiệu đấu tranh chứa đựng nội dung cải cách dân chủ trong khuôn khổ chính sách cai trị của chính quyền thực dân, nhưng phong trào đấu tranh do Đảng Công sản Đông Dương lãnh đạo hoàn toàn không có tính chất cải lương. Đây là phong trào rông lớn có tổ chức. Nó hoàn toàn khác với phong trào cải lương do một nhóm nhỏ tư sản, địa chủ khởi xướng với mục đích xin chính quyền thực dân ban cho một số quyền lợi hằng ngày và coi đó là mục đích cuối cùng. Phong trào dân chủ 1936 - 1939 bằng sức mạnh đoàn kết của quần chúng buộc chính quyền thực dân phải chấp nhận những yêu sách cụ thể trước mắt. Trên cơ sở đó, trong điều kiện thuận lợi mới, sẽ tiếp tục đẩy phong trào lên cao hơn, triệt để hơn, tiến tới giành thắng lợi cuối cùng. Không nhất thiết khẩu hiệu kinh tế là cải lương, khẩu hiệu chính tri là cách mạng. Và cũng không cứ hoat đông bí mật, bất hợp pháp mới là cách mạng, còn hoạt đông công khai, hợp pháp là cải lương. Phong trào dân chủ 1936 - 1939 là cách mang. Trong điều kiện nước ta lúc này, dưới ách thống tri của chính quyền thực dân không có tư do, dân chủ, những cuộc đấu tranh của quần chúng đòi tự do, dân chủ, cơm áo, hoà bình là một hình thức đấu tranh cách mạng trong một giai đoạn cụ thể để thực hiện nhiệm vụ chiến lược của cuộc cách mạng dân tộc dân chủ nhân dân ở nước ta.
 
 Đây là một phong trào quần chúng rộng rãi, diễn ra trên nhiều lĩnh vực kinh tế, chính trị, văn hoá, tư tưởng. Nó thu hút đông đảo các tầng lớp nhân dân tham gia. Phong trào lan rộng cả thành thị và nông thôn trong phạm vi cả nước. Hình thức đấu tranh phong phú, bao gồm hoạt động hợp pháp, bất hợp pháp, với những cuộc bãi công, biểu tình, đưa kiến nghị, đấu tranh trên lĩnh vực báo chí, nghị trường,... với các tổ chức linh hoạt là các hội quần chúng, hội thể thao, hội học chữ, hội cấy, hội gặt,...
@@ -4004,9 +4001,7 @@ Nhờ làm tốt công tác chuẩn bị, thông cáo của Đảng đã đượ
 
 Ngày 6 - 11 - 1939, Hội nghị Ban Chấp hành Trung ương Đảng được triệu tập tại Bà Điểm (Hóc Môn, Gia Định). Hội nghị do Tổng Bí thư Nguyễn Văn Cừ chủ trì. Hội nghị phân tích tính chất của cuôc Chiến tranh thế giới thứ hai; vi trí của Đông Dương trong cuộc chiến tranh đó: những chính sách của đế quốc Pháp: thái đô của các giai cấp xã hội và vạch ra đường lối chính tri của cách mang Đông Dương trước tình hình mới.
 
-Về tình hình thế giới, Hội nghị nhận định cuộc Chiến tranh thế giới thứ hai là sự bùng nổ tất yếu của mâu thuẫn sâu sắc
-
-Nguyễn Văn Cừ (Tổng Bí thư Đảng từ năm 1938 đến năm 1940) giữa các tập đoàn đế quốc. Chiến tranh sẽ gây nhiều tai họa cho nhân loại, nhưng cuối cùng sự nghiệp cách mạng của nhân dân thế giới sẽ chiến thắng chủ nghĩa phát xít.
+Về tình hình thế giới, Hội nghị nhận định cuộc Chiến tranh thế giới thứ hai là sự bùng nổ tất yếu của mâu thuẫn sâu sắc giữa các tập đoàn đế quốc. Chiến tranh sẽ gây nhiều tai họa cho nhân loại, nhưng cuối cùng sự nghiệp cách mạng của nhân dân thế giới sẽ chiến thắng chủ nghĩa phát xít.
 
 Về tình hình Đông Dương, Hội nghị nhận định Đông Dương sẽ bị lôi kéo vào guồng máy chiến tranh; Nhật xâm chiếm Đông Dương và Pháp sẽ đầu hàng Nhật; chế độ cai trị ở Đông Dương đã trở thành chế độ phát xít tàn bạo.
 
@@ -4280,9 +4275,9 @@ Trên cơ sở phân tích tình hình, Hội nghị quyết định Đảng ph�
 
 Hôi nghi toàn quốc của Đảng vừa kết thúc, Đai hôi Quốc dân do Tổng bô Việt Minh triệu tâp đã khai mac tai Tân Trào (Tuyên Quang) vào ngày 16 - 8 - 1945. Hon 60 đại biểu thay mặt cho ba miền Bắc, Trung, Nam, kiều bào ở nước ngoài, các đảng phái, đoàn thể, dân tôc, tôn giáo, tiêu biểu cho ý chí thống nhất của toàn dân tộc về dự Đại hội.
 
-Đại hội đã ủng hộ chủ trương Tổng khởi nghĩa của
+Đại hội đã ủng hộ chủ trương Tổng khởi nghĩa của Đảng;
 
-Đảng; thông qua 10 Hồ Chí Minh trong những ngày Cách mạng tháng Tám 1945 chính sách của Mặt trận Việt Minh; quyết định thành lập Uỷ ban Giải phóng dân tộc Việt Nam do Hồ Chí Minh làm Chủ tịch.
+Thông qua 10 Hồ Chí Minh trong những ngày Cách mạng tháng Tám 1945 chính sách của Mặt trận Việt Minh; quyết định thành lập Uỷ ban Giải phóng dân tộc Việt Nam do Hồ Chí Minh làm Chủ tịch.
 
 Khắp nơi, quần chúng hưởng ứng lệnh Tổng khởi nghĩa đã đồng loạt nổi dậy. Ở những vùng xa xôi, dù chưa nhận được lệnh Tổng khởi nghĩa, nhưng căn cứ vào tình hình cụ thể ở địa phương và vận dụng chỉ thị *Nhật - Pháp bắn nhau và hành động của chúng ta* đã lãnh đạo nhân dân khởi nghĩa.
 
