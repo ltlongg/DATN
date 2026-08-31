@@ -18,3 +18,10 @@ node_modules/
 .codex
 _templates/
 _templates
+.claude
+.claude/
+docs/diagrams
+docs/_shared
+docs/system
+tmp/
+.tmp/
