@@ -50,6 +50,7 @@ def extract_entities(
             {"role": "user", "content": build_user_prompt(text, headings)},
         ],
         response_format=EntityExtraction,
+        reasoning_effort="low",
     )
     message = completion.choices[0].message
     if getattr(message, "refusal", None):

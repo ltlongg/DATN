@@ -7,7 +7,7 @@ trùng. Sau seed, admin sửa/version/promote qua UI; agent đọc version produ
 Nhóm:
   - ONLINE    : plan, resolve, synthesize (orchestrator dùng mỗi câu trả lời — ĐÃ wiring runtime)
   - GUARDRAIL : guardrails_input (ĐÃ wiring runtime)
-  - INDEXING  : graph/metadata/timeline/geocode/alias (đăng ký + version được, nhưng CHƯA nối
+  - INDEXING  : graph/metadata/timeline/alias (đăng ký + version được, nhưng CHƯA nối
                 runtime vào script indexing — chỉ hiệu lực khi re-index, wiring HOÃN)
 
 ⚠️ Seed CHỈ tạo key mới. Sửa hằng prompt trong code rồi chạy lại script trần thì KHÔNG có tác
@@ -36,7 +36,7 @@ _AGENT_SERVICE = Path(__file__).resolve().parents[1]
 if str(_AGENT_SERVICE) not in sys.path:
     sys.path.insert(0, str(_AGENT_SERVICE))
 
-from app.prompts import alias_judge, geocode, graph_extract, plan, resolve  # noqa: E402
+from app.prompts import alias_judge, graph_extract, plan, resolve  # noqa: E402
 from app.prompts import guardrails_input, metadata_extract, synthesize, timeline_extract  # noqa: E402
 from app.tools.prompts.prompt_store import publish_prompt_version, seed_prompt  # noqa: E402
 
@@ -64,9 +64,6 @@ _REGISTRY: list[tuple[str, str, str, str, str]] = [
     ("timeline_extract", "INDEXING", "Trích sự kiện timeline",
      "Offline: trích atomic event (when–where–what) cho timeline/map (chưa nối runtime).",
      timeline_extract.SYSTEM_PROMPT),
-    ("geocode", "INDEXING", "Geocode địa danh",
-     "Offline: suy toạ độ địa danh khi Google không có (chưa nối runtime).",
-     geocode.SYSTEM_PROMPT),
     ("alias_judge", "INDEXING", "Phân giải alias",
      "Offline: phán định hai tên có cùng một thực thể không (chưa nối runtime).",
      alias_judge.SYSTEM_PROMPT),

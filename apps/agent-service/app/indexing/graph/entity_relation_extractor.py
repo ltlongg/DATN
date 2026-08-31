@@ -62,7 +62,6 @@ def _drop_orphan_relations(
 
 def extract_graph(
     text: str,
-    headings: dict[str, str] | None = None,
     *,
     client: OpenAI | None = None,
     model: str | None = None,
@@ -84,11 +83,12 @@ def extract_graph(
         model=model,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": build_user_prompt(text, headings)},
+            {"role": "user", "content": build_user_prompt(text)},
         ],
         response_format=GraphExtraction,
         timeout = 60,
-        temperature=0.0,  # ưu tiên độ chính xác, LLM có thể bỏ qua prompt hơn là bịa ra entity/rel không có thật
+        # temperature=0.0,  # ưu tiên độ chính xác, LLM có thể bỏ qua prompt hơn là bịa ra entity/rel không có thật
+        reasoning_effort="low"
     )
     message = completion.choices[0].message
     if getattr(message, "refusal", None):

@@ -98,7 +98,12 @@ def _run_graph(records: list[dict], args: argparse.Namespace) -> None:
         if args.overwrite
         or cache.get(r["chunk_id"], {}).get("prompt_version") != GRAPH_PROMPT_VERSION
     ]
-    log.info("Trích graph: %d cần trích, %d dùng cache", len(to_extract), len(records) - len(to_extract))
+    log.info(
+        "Trích graph prompt=%s: %d cần trích, %d dùng cache",
+        GRAPH_PROMPT_VERSION,
+        len(to_extract),
+        len(records) - len(to_extract),
+    )
 
     newly: list[str] = []
     errors = 0
@@ -108,7 +113,6 @@ def _run_graph(records: list[dict], args: argparse.Namespace) -> None:
                 pool.submit(
                     extract_graph,
                     r["text"],
-                    r["metadata"].get("headings"),
                     chunk_id=r["chunk_id"],
                 ): r
                 for r in to_extract
