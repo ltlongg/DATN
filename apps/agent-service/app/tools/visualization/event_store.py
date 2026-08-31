@@ -160,7 +160,7 @@ def select_events_by_chunks(
 def select_location_counts(database_url: str | None = None) -> dict[str, int]:
     """Đếm số event tham chiếu mỗi địa danh (surface form) trong `timeline_events`.
 
-    Nguồn để build gazetteer: chỉ geocode các địa danh THỰC SỰ xuất hiện trong event
+    Nguồn để build gazetteer: chỉ gom các địa danh THỰC SỰ xuất hiện trong event
     (đúng thứ marker cần). Trả {surface_form: số_event}.
     """
     with psycopg.connect(_database_url(database_url)) as conn:

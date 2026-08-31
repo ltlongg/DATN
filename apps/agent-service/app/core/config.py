@@ -60,11 +60,6 @@ class Settings(BaseSettings):
     # Structured Outputs như graph -> tách riêng để cấu hình độc lập. ---
     timeline_llm_model: str | None = None
 
-    # --- Geocoding: Google Maps API key cho geocode địa danh -> lat/lon (Geocoding API).
-    # Rỗng -> geocoder bỏ qua Google, chỉ dùng LLM fallback.
-    # LƯU Ý ToS: Google chỉ cho cache lat/lon <= 30 ngày — xem docs/reference/google-maps-api.md. ---
-    google_maps_api_key: str = ""
-
     # --- Tham số chunking ---
     chunk_size: int = 700
     min_characters_per_chunk: int = 80
@@ -100,16 +95,6 @@ class Settings(BaseSettings):
     graph_max_path_hops: int = 3
     graph_path_hit_weight: float = 1.5
 
-    # --- Orchestrator / Ask API (answer flow online). synthesize_max_attempts là tổng số lần
-    # synthesize (=2 -> 1 lần thử + 1 retry; =1 tắt retry). stream_batch_chars: ngưỡng gom
-    # token thành batch trước khi qua guardrails hook + emit (cũng cắt ở dấu kết câu). ---
-    # 3 bước online gọi LLM, mỗi bước MỘT model riêng, BẮT BUỘC set trong .env — KHÔNG fallback
-    # qua nhau hay về `llm_model` nữa (quyết định user: chuỗi fallback che mất việc đổi model
-    # có ăn hay không). Thiếu biến nào -> Settings() vỡ ngay lúc khởi động (pydantic required
-    # field), không âm thầm chạy với model không định trước. Cả 3 đều đi qua Structured Outputs
-    # strict (`.parse()` / `.stream()` + response_format) nên model đặt vào BẮT BUỘC hỗ trợ —
-    # không có nhánh degrade êm. plan/resolve còn truyền temperature=0.0.
-    # (Guardrails có knob riêng `guardrails_llm_model`, tách biệt hoàn toàn với 3 field này.)
     plan_llm_model: str
     resolve_llm_model: str
     synthesize_llm_model: str

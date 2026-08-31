@@ -204,9 +204,7 @@ def validate_state(valid: int) -> StepState:
 def visualization_detail(
     *, event_count: int, marker_count: int, timeline_count: int, unplaced: int
 ) -> str:
-    """Đặt số MỐC trước số MARKER có chủ đích: gazetteer đang hoãn (xem CLAUDE.md) nên
-    marker gần như luôn 0. Dẫn bằng con số 0 đó thì dòng phụ đọc như hệ thống hỏng, trong
-    khi timeline vẫn dựng đủ."""
+    """Đặt số mốc trước marker vì timeline vẫn hữu ích khi tọa độ chưa được duyệt."""
     if event_count == 0:
         return "Không có sự kiện nào gắn với nguồn đã dùng"
     parts = [f"{timeline_count} mốc thời gian"]

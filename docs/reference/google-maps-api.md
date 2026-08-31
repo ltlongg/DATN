@@ -1,5 +1,12 @@
 # Google Maps API — Reference (geocoding + map render)
 
+> **LƯU TRỮ LỊCH SỬ — không còn là kiến trúc đang dùng (2026-08-30).** Luồng Google/LLM
+> geocoding và các script POC đã bị xóa; KHÔNG còn gọi Geocoding API forward
+> (tên → toạ độ). Toạ độ nay do người dùng tự tra và điền tay vào
+> `dataset/gazetteer.json`; `scripts/latlon_check.html` chỉ dùng Maps JavaScript API để
+> hiển thị một toạ độ đã nhập và reverse geocode (toạ độ → tên) cho dễ kiểm chứng.
+> Mục 1 bên dưới giữ lại để tham khảo quyết định cũ.
+
 > Tài liệu tổng hợp Google Maps Platform dùng trong dự án, để khỏi tra lại docs mỗi
 > lần. Nguồn chính thức ở cuối file. Trong repo, Google **thay Mapbox** ở khâu geocode
 > địa danh (`apps/agent-service/app/indexing/geocoding/geocoder.py`) và render bản đồ

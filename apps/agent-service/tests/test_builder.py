@@ -72,11 +72,11 @@ def test_nhieu_dia_diem_nhieu_marker_chung_event_id(monkeypatch) -> None:
     assert len(p.timeline) == 1 and p.timeline[0].located is True
 
 
-def test_confidence_la_yeu_nhat_giua_event_va_toa_do(monkeypatch) -> None:
-    # Event "cao" nhưng toạ độ "thấp" -> marker nhạt ("thấp").
+def test_marker_giu_confidence_cua_event(monkeypatch) -> None:
+    # Tọa độ đã được duyệt thủ công nên marker dùng confidence của event.
     _patch(monkeypatch, [_event("e1", time_start="1862", locations=["X"], confidence="cao")], {"X": _coord(10.0, 106.0, "thấp")})
     p = B.build_visualization(["c-0"])
-    assert p.markers[0].confidence == "thấp"
+    assert p.markers[0].confidence == "cao"
     assert p.timeline[0].confidence == "cao"  # timeline giữ confidence của sự kiện
 
 

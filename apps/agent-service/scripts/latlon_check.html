@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tra lat/lon</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #0b1017; color: #e8edf4; }
+    * { box-sizing: border-box; }
+    body { margin: 0; height: 100vh; display: grid; grid-template-columns: 360px minmax(0, 1fr); }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .side { border-right: 1px solid #263140; background: #101721; display: flex; flex-direction: column; min-height: 0; }
+    .block { padding: 18px 20px; border-bottom: 1px solid #222d3b; }
+    h1 { font-size: 19px; margin: 0 0 5px; }
+    .muted { color: #94a2b5; font-size: 13px; }
+    label { display: grid; gap: 6px; font-size: 13px; color: #aeb9c8; }
+    input { width: 100%; color: #e8edf4; background: #0b1119; border: 1px solid #324154; border-radius: 8px; padding: 10px 11px; outline: none; }
+    input:focus { border-color: #4c8dff; box-shadow: 0 0 0 3px #2463c62e; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 12px; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn { border: 1px solid #34445a; border-radius: 8px; padding: 9px 13px; color: #e7edf5; background: #1b2634; }
+    .btn:hover { filter: brightness(1.15); }
+    .btn.primary { background: #2869d8; border-color: #397be7; }
+    .btn.small { padding: 6px 10px; font-size: 12px; }
+    .msg { min-height: 18px; font-size: 13px; margin-top: 10px; }
+    .msg.error { color: #ff9ba5; }
+    .msg.ok { color: #7ee2a8; }
+    .place { font-size: 15px; line-height: 1.5; margin: 0 0 8px; }
+    .parts { display: grid; gap: 4px; font-size: 12.5px; color: #9fadc0; }
+    .parts b { color: #d5dfec; font-weight: 500; }
+    a { color: #79aaff; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .saved { flex: 1; overflow: auto; min-height: 0; }
+    .saved-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 14px 20px 8px; }
+    .item { padding: 10px 20px; border-bottom: 1px solid #1c2634; display: grid; gap: 3px; }
+    .item-row { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .item code { font: 12px ui-monospace, Consolas, monospace; color: #8fa2ba; }
+    .link { border: 0; background: none; color: #7f8fa4; padding: 0; font-size: 12px; }
+    .link:hover { color: #ff9ba5; }
+    #map { height: 100vh; background: #0a0f15; }
+    .cover { position: fixed; inset: 0; display: grid; place-items: center; background: #0b1017e8; padding: 24px; }
+    .card { background: #111923; border: 1px solid #2a3447; border-radius: 14px; padding: 26px; max-width: 460px; width: 100%; }
+    .card code { font: 12px ui-monospace, Consolas, monospace; color: #cfd9e6; }
+    @media (max-width: 860px) { body { grid-template-columns: 1fr; height: auto; } #map { height: 60vh; } .side { border-right: 0; } }
+  </style>
+</head>
+<body>
+  <aside class="side">
+    <div class="block">
+      <h1>Tra lat/lon</h1>
+      <div class="muted">Nhập toạ độ để xem rơi vào đâu. Bấm thẳng lên bản đồ cũng được.</div>
+      <div class="pair">
+        <label>Vĩ độ (lat)<input id="lat" inputmode="decimal" placeholder="21.0285" autocomplete="off"></label>
+        <label>Kinh độ (lon)<input id="lon" inputmode="decimal" placeholder="105.8542" autocomplete="off"></label>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="go">Tra</button>
+        <button class="btn" id="copy">Chép toạ độ</button>
+        <button class="btn small" id="reset-key" title="Đổi Google Maps API key">Đổi key</button>
+      </div>
+      <div class="msg" id="msg"></div>
+    </div>
+    <div class="block" id="result" hidden>
+      <p class="place" id="address"></p>
+      <div class="parts" id="parts"></div>
+      <div class="row" style="margin-top:12px">
+        <a id="open-gmap" href="#" target="_blank" rel="noreferrer">Mở trên Google Maps ↗</a>
+      </div>
+      <div class="pair" style="grid-template-columns:1fr auto; margin-bottom:0">
+        <label>Tên địa danh (để lưu)<input id="name" placeholder="vd: Điện Biên Phủ" autocomplete="off"></label>
+        <button class="btn" id="save" style="align-self:end">Lưu</button>
+      </div>
+    </div>
+    <div class="saved">
+      <div class="saved-head">
+        <span class="muted" id="saved-count">Chưa lưu địa danh nào</span>
+        <button class="btn small" id="copy-json">Chép JSON</button>
+      </div>
+      <div id="saved-list"></div>
+    </div>
+  </aside>
+  <div id="map"></div>
+
+  <div class="cover" id="key-cover" hidden>
+    <form class="card" id="key-form">
+      <h1>Google Maps API key</h1>
+      <p class="muted">Key lưu trong localStorage của trình duyệt này, không gửi đi đâu khác. Cần bật <b>Maps JavaScript API</b> và <b>Geocoding API</b>; nếu key giới hạn referrer thì thêm <code>file://</code> hoặc dùng key không giới hạn.</p>
+      <label style="margin:16px 0 14px">Key<input id="key-input" placeholder="AIza…" autocomplete="off" required></label>
+      <button class="btn primary" type="submit">Dùng key này</button>
+    </form>
+  </div>
+
+  <script>
+    const KEY_STORE = "latlon-check.key";
+    const SAVED_STORE = "latlon-check.saved";
+    const $ = id => document.getElementById(id);
+    const store = {
+      get(key, fallback) { try { const v = localStorage.getItem(key); return v === null ? fallback : JSON.parse(v); } catch { return fallback; } },
+      set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* private mode */ } },
+    };
+
+    let map = null, marker = null, geocoder = null, current = null;
+    let saved = store.get(SAVED_STORE, []);
+    if (!Array.isArray(saved)) saved = [];
+
+    function say(text, kind = "") { $("msg").textContent = text; $("msg").className = `msg ${kind}`; }
+
+    /** Tách "21.03, 105.85", "21.03 105.85" hoặc URL Google Maps thành cặp số. */
+    function parsePair(text) {
+      const url = text.match(/@(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/) || text.match(/[?&]q=(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)/);
+      const pair = url || text.match(/^\s*(-?\d+(?:\.\d+)?)\s*[,;\s]\s*(-?\d+(?:\.\d+)?)\s*$/);
+      return pair ? { lat: Number(pair[1]), lon: Number(pair[2]) } : null;
+    }
+
+    function readInputs() {
+      const lat = Number($("lat").value.trim().replace(",", "."));
+      const lon = Number($("lon").value.trim().replace(",", "."));
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) throw new Error("Chưa nhập đủ lat/lon.");
+      if (lat < -90 || lat > 90) throw new Error("Vĩ độ phải trong khoảng -90..90.");
+      if (lon < -180 || lon > 180) throw new Error("Kinh độ phải trong khoảng -180..180.");
+      return { lat, lon };
+    }
+
+    function loadMaps(apiKey) {
+      return new Promise((resolve, reject) => {
+        window.__mapsReady = resolve;
+        window.gm_authFailure = () => reject(new Error("Google từ chối API key. Kiểm tra key, referrer và Maps JavaScript API."));
+        const params = new URLSearchParams({ key: apiKey, callback: "__mapsReady", v: "weekly", language: "vi", region: "VN" });
+        const script = document.createElement("script");
+        script.src = `https://maps.googleapis.com/maps/api/js?${params}`;
+        script.async = true;
+        script.onerror = () => reject(new Error("Không tải được Google Maps JavaScript API (kiểm tra mạng)."));
+        document.head.appendChild(script);
+      });
+    }
+
+    async function initMap(apiKey) {
+      await loadMaps(apiKey);
+      const { Map } = await google.maps.importLibrary("maps");
+      geocoder = new (await google.maps.importLibrary("geocoding")).Geocoder();
+      map = new Map($("map"), { center: { lat: 16.0, lng: 107.5 }, zoom: 5, mapTypeControl: true, streetViewControl: false });
+      marker = new google.maps.Marker({ map, draggable: true });
+      marker.setVisible(false);
+      map.addListener("click", event => show(event.latLng.lat(), event.latLng.lng(), { keepZoom: true }));
+      marker.addListener("dragend", event => show(event.latLng.lat(), event.latLng.lng(), { keepZoom: true }));
+    }
+
+    /** Đặt marker tại toạ độ, đồng bộ ô nhập rồi hỏi Google xem chỗ đó tên gì. */
+    async function show(lat, lon, { keepZoom = false } = {}) {
+      const position = { lat, lng: lon };
+      current = { lat, lon };
+      $("lat").value = lat.toFixed(6).replace(/\.?0+$/, "");
+      $("lon").value = lon.toFixed(6).replace(/\.?0+$/, "");
+      marker.setPosition(position);
+      marker.setVisible(true);
+      map.panTo(position);
+      if (!keepZoom && map.getZoom() < 12) map.setZoom(13);
+      $("open-gmap").href = `https://www.google.com/maps?q=${lat},${lon}`;
+      $("result").hidden = false;
+      $("address").textContent = "Đang tra tên…";
+      $("parts").innerHTML = "";
+      say("");
+      await describe(position);
+    }
+
+    const PART_LABELS = {
+      country: "Quốc gia",
+      administrative_area_level_1: "Tỉnh/Thành",
+      administrative_area_level_2: "Quận/Huyện",
+      locality: "Thành phố",
+      sublocality: "Phường/Xã",
+      natural_feature: "Địa hình",
+    };
+
+    async function describe(position) {
+      if (!geocoder) return;
+      try {
+        const { results } = await geocoder.geocode({ location: position, language: "vi" });
+        if (!results.length) {
+          $("address").textContent = "Google không có địa chỉ cho điểm này (thường là giữa biển hoặc vùng hoang).";
+          return;
+        }
+        $("address").textContent = results[0].formatted_address;
+        const parts = new Map();
+        for (const result of results) {
+          for (const component of result.address_components) {
+            for (const type of component.types) {
+              if (PART_LABELS[type] && !parts.has(type)) parts.set(type, component.long_name);
+            }
+          }
+        }
+        $("parts").innerHTML = [...parts]
+          .map(([type, value]) => `<div><b>${PART_LABELS[type]}:</b> ${escapeHtml(value)}</div>`)
+          .join("");
+        if (!$("name").value.trim()) $("name").placeholder = results[0].address_components[0]?.long_name || "vd: Điện Biên Phủ";
+      } catch (error) {
+        const denied = String(error?.message || error).includes("REQUEST_DENIED");
+        $("address").textContent = denied
+          ? "Chưa bật Geocoding API cho key này nên không tra được tên. Marker vẫn đúng vị trí."
+          : `Không tra được tên: ${error.message || error}`;
+      }
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>'"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[c]);
+    }
+
+    function renderSaved() {
+      $("saved-count").textContent = saved.length ? `${saved.length} địa danh đã lưu` : "Chưa lưu địa danh nào";
+      $("saved-list").innerHTML = saved
+        .map((item, index) => `<div class="item"><div class="item-row"><strong>${escapeHtml(item.name)}</strong><button class="link" data-drop="${index}">xoá</button></div><code data-show="${index}">${item.lat}, ${item.lon}</code></div>`)
+        .join("");
+      $("saved-list").querySelectorAll("[data-drop]").forEach(button =>
+        button.addEventListener("click", () => {
+          saved.splice(Number(button.dataset.drop), 1);
+          store.set(SAVED_STORE, saved);
+          renderSaved();
+        })
+      );
+      $("saved-list").querySelectorAll("[data-show]").forEach(code =>
+        code.addEventListener("click", () => {
+          const item = saved[Number(code.dataset.show)];
+          show(item.lat, item.lon);
+        })
+      );
+    }
+
+    async function copy(text, done) {
+      try {
+        await navigator.clipboard.writeText(text);
+        say(done, "ok");
+      } catch {
+        say("Trình duyệt chặn clipboard. Bôi đen và Ctrl+C thủ công.", "error");
+      }
+    }
+
+    $("go").addEventListener("click", () => {
+      try { const { lat, lon } = readInputs(); show(lat, lon); }
+      catch (error) { say(error.message, "error"); }
+    });
+
+    for (const id of ["lat", "lon"]) {
+      $(id).addEventListener("keydown", event => { if (event.key === "Enter") $("go").click(); });
+      $(id).addEventListener("input", () => {
+        const pair = parsePair($(id).value);
+        if (!pair) return;
+        $("lat").value = pair.lat;
+        $("lon").value = pair.lon;
+        $("go").click();
+      });
+    }
+
+    $("copy").addEventListener("click", () => {
+      if (!current) return say("Chưa có toạ độ nào.", "error");
+      copy(`${current.lat}, ${current.lon}`, "Đã chép toạ độ.");
+    });
+
+    $("save").addEventListener("click", () => {
+      if (!current) return say("Chưa có toạ độ nào.", "error");
+      const name = $("name").value.trim() || $("name").placeholder;
+      if (!name || name.startsWith("vd:")) return say("Nhập tên địa danh trước khi lưu.", "error");
+      const existing = saved.findIndex(item => item.name === name);
+      const entry = { name, lat: current.lat, lon: current.lon };
+      existing >= 0 ? (saved[existing] = entry) : saved.unshift(entry);
+      store.set(SAVED_STORE, saved);
+      renderSaved();
+      $("name").value = "";
+      say(`Đã lưu "${name}".`, "ok");
+    });
+
+    $("copy-json").addEventListener("click", () => {
+      if (!saved.length) return say("Danh sách còn rỗng.", "error");
+      const body = saved
+        .map(item => `  ${JSON.stringify(item.name.toLocaleLowerCase("vi"))}: { "lat": ${item.lat}, "lon": ${item.lon} }`)
+        .join(",\n");
+      copy(`{\n${body}\n}`, "Đã chép JSON để dán vào gazetteer.json.");
+    });
+
+    $("reset-key").addEventListener("click", () => {
+      localStorage.removeItem(KEY_STORE);
+      location.reload();
+    });
+
+    $("key-form").addEventListener("submit", event => {
+      event.preventDefault();
+      const apiKey = $("key-input").value.trim();
+      if (!apiKey) return;
+      store.set(KEY_STORE, apiKey);
+      $("key-cover").hidden = true;
+      start(apiKey);
+    });
+
+    async function start(apiKey) {
+      try {
+        await initMap(apiKey);
+        say("");
+      } catch (error) {
+        say(error.message, "error");
+        $("key-cover").hidden = false;
+        $("key-input").value = apiKey;
+      }
+    }
+
+    renderSaved();
+    const storedKey = store.get(KEY_STORE, "");
+    storedKey ? start(storedKey) : ($("key-cover").hidden = false);
+  </script>
+</body>
+</html>

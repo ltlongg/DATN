@@ -23,7 +23,7 @@ class MapMarker(BaseModel):
     location: str  # surface form của địa điểm marker này
     lat: float
     lon: float
-    confidence: str  # cao/vừa/thấp — YẾU NHẤT giữa event và toạ độ (render đậm/nhạt)
+    confidence: str  # cao/vừa/thấp của event; tọa độ chỉ xuất hiện sau khi duyệt
     time_start: str | None = None  # để hiển thị/lọc theo thời gian trên map
 
 

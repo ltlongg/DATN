@@ -15,17 +15,11 @@ chưa thêm (tránh phụ thuộc LLM trong online path khi chưa cần).
 from __future__ import annotations
 
 from app.indexing.graph.normalize import normalize_name
-from app.schemas.timeline import CONFIDENCE_RANK
 from app.schemas.visualization import MapMarker, TimelineItem, VisualizationPayload
 from app.tools.visualization.event_store import select_events_by_chunks
 from app.tools.visualization.gazetteer_store import lookup_coords
 
 __all__ = ["build_visualization"]
-
-
-def _weakest(a: str, b: str) -> str:
-    """Trả confidence YẾU hơn (mắt xích yếu nhất): event chắc nhưng toạ độ đoán -> nhạt."""
-    return a if CONFIDENCE_RANK.get(a, 0) <= CONFIDENCE_RANK.get(b, 0) else b
 
 
 def build_visualization(
@@ -72,7 +66,7 @@ def build_visualization(
                     location=loc,
                     lat=lat,
                     lon=lon,
-                    confidence=_weakest(event["confidence"], row.get("confidence") or "thấp"),
+                    confidence=event["confidence"],
                     time_start=time_start,
                 )
             )

@@ -1,5 +1,12 @@
 # Plan: Lớp dữ liệu Timeline + Map cho câu trả lời
 
+> **⚠️ CẬP NHẬT 2026-08-30 — geocoding tự động đã bị thay.** Google/LLM không còn sinh
+> toạ độ. `build_gazetteer.py` chỉ gom địa danh + đếm tần suất vào
+> `dataset/gazetteer.json`; người dùng tự tra toạ độ (kiểm chứng bằng
+> `scripts/latlon_check.html`) rồi điền `lat`/`lon` vào file đó. Bản ghi có đủ lat/lon
+> mới tạo marker — không còn cột `status`/`confidence`. Các phần geocoding bên dưới là
+> bản ghi lịch sử, không dùng để triển khai.
+
 > **⚠️ CẬP NHẬT 2026-08-02 — tầng EXTRACT đã bị thay, đọc kèm
 > [timeline-extraction-by-unit-plan.md](timeline-extraction-by-unit-plan.md).** File này vẫn là
 > source-of-truth cho schema DB, geocoding và builder online, nhưng những điểm sau **ĐÃ LỖI
