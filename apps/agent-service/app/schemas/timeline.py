@@ -24,9 +24,7 @@ from pydantic import BaseModel, Field
 # Thang độ chắc chắn dùng chung cho timeline/map (đồng bộ với AliasVerdict).
 Confidence = Literal["cao", "vừa", "thấp"]
 
-# Thứ hạng confidence (cao > vừa > thấp). Một nguồn DUY NHẤT cho mọi nơi cần so sánh:
-# reconcile (chọn bản chắc hơn khi gộp), builder (mắt xích yếu nhất khi render marker),
-# build_gazetteer (sắp review). Đừng định nghĩa lại tại chỗ.
+# Thứ hạng confidence (cao > vừa > thấp), dùng khi reconcile chọn bản chắc hơn.
 CONFIDENCE_RANK: dict[str, int] = {"cao": 3, "vừa": 2, "thấp": 1}
 
 
@@ -48,18 +46,16 @@ class AtomicEvent(BaseModel):
     )
     time_start: str = Field(
         description=(
-            "Mốc bắt đầu, ISO rút gọn: 'YYYY' | 'YYYY-MM' | 'YYYY-MM-DD' "
-            "(vd '1862', '1862-03', '1862-06-05'). Suy năm từ ngữ cảnh nếu câu chỉ "
-            "ghi tháng/ngày nhưng năm đã rõ trước đó (anchor inheritance) — khi suy "
-            "như vậy hãy hạ `confidence`. Mốc mơ hồ ('đầu năm 1945', 'mùa thu') -> chỉ "
-            "ghi mức chắc chắn ('1945'), KHÔNG bịa tháng/ngày. Để '' nếu đoạn không cho "
-            "biết thời gian, hoặc chỉ có quan hệ trình tự ('sau đó', 'sau hiệp ước')."
+            "Mốc bắt đầu lịch sử: năm/tháng/ngày SCN dùng '40' | '1010-07' | "
+            "'1954-05-07'; TCN dùng '179 TCN' | '179-03 TCN'; chỉ biết thế kỷ "
+            "dùng số La Mã như 'XII' hoặc 'III TCN'. Giữ đúng độ chi tiết nguồn, "
+            "không đổi thế kỷ thành năm đại diện. Để '' nếu không có mốc độc lập."
         )
     )
     time_end: str = Field(
         description=(
-            "Mốc kết thúc nếu sự kiện là KHOẢNG kéo dài (vd chiến dịch), cùng định "
-            "dạng ISO rút gọn. Để '' nếu là một thời điểm."
+            "Mốc kết thúc nếu sự kiện là khoảng kéo dài, dùng cùng quy ước với "
+            "time_start. Để '' nếu sự kiện là một thời điểm."
         )
     )
     locations: list[str] = Field(

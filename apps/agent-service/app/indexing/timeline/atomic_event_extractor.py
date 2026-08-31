@@ -76,7 +76,8 @@ def extract_unit_events(
         ],
         response_format=TimelineExtraction,
         timeout=180,
-        temperature=0.0,  # ưu tiên độ chính xác; thà bỏ sót còn hơn bịa mốc/nơi
+        # temperature=0.0,  # ưu tiên độ chính xác; thà bỏ sót còn hơn bịa mốc/nơi
+        reasoning_effort="low"
     )
     message = completion.choices[0].message
     if getattr(message, "refusal", None):

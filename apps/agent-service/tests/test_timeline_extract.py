@@ -12,7 +12,11 @@ from app.indexing.timeline.atomic_event_extractor import (
     _map_to_chunks,
     extract_unit_events,
 )
-from app.prompts.timeline_extract import build_user_prompt
+from app.prompts.timeline_extract import (
+    SYSTEM_PROMPT,
+    TIMELINE_PROMPT_VERSION,
+    build_user_prompt,
+)
 from app.schemas.timeline import AtomicEvent, ChunkEvents, TimelineExtraction
 
 
@@ -35,6 +39,23 @@ def _parsed(*pairs: tuple[str, list[AtomicEvent]]) -> TimelineExtraction:
 
 
 # --- build_user_prompt: marker phải rõ ràng và không vỡ vì nội dung ---------------
+
+
+def test_timeline_prompt_dung_chung_cho_moi_giai_doan() -> None:
+    assert TIMELINE_PROMPT_VERSION == "timeline-extract-unified-v4"
+    assert len(SYSTEM_PROMPT) <= 13_000
+    assert '"time_start": "179 TCN"' in SYSTEM_PROMPT
+    assert '"time_start": "XII"' in SYSTEM_PROMPT
+    assert '"time_start": "1954-03-13"' in SYSTEM_PROMPT
+    assert "không quy thành năm 1150" in SYSTEM_PROMPT
+    assert "cách ngày nay" in SYSTEM_PROMPT
+
+
+def test_timeline_prompt_giu_su_kien_phat_hien_khao_co_co_moc_ro() -> None:
+    assert '"label": "Phát hiện di vật khảo cổ tại Núi Đọ"' in SYSTEM_PROMPT
+    assert '"time_start": "1960"' in SYSTEM_PROMPT
+    assert '"locations": ["Núi Đọ"]' in SYSTEM_PROMPT
+    assert "heading chỉ cung cấp ngữ cảnh, không phải bộ lọc thời đại" in SYSTEM_PROMPT
 
 
 def test_build_user_prompt_gan_marker_ref_cho_tung_chunk() -> None:
