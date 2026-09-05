@@ -6,8 +6,10 @@ Cache vào reconcile khoá theo **chunk_id** (một entry = một chunk), nên
 
 from __future__ import annotations
 
+import pytest
+
 from app.indexing.graph.normalize import normalize_name
-from app.indexing.timeline.reconcile import reconcile_events
+from app.indexing.timeline.reconcile import reconcile_events, time_sort_key
 
 
 def _ev(label, time_start="", locations=None, parent="", confidence="cao", time_end="", summary="s"):
@@ -79,6 +81,38 @@ def test_chunk_khong_cite_thi_khong_keo_theo_event_cua_chunk_khac() -> None:
     assert "c-001" not in [cid for ids in by_label.values() for cid in ids]
 
 
+def test_seq_giu_thu_tu_ke_trong_chunk() -> None:
+    """`seq` = vị trí trong mảng `events` -> khoá duy nhất còn giữ được mạch kể của sách
+    cho các event CÙNG chunk (chúng hoà nhau ở mọi khoá sort khác)."""
+    cache = {
+        "c-000": _entry([
+            _ev("Ngô Quyền giết Kiều Công Tiễn", "938"),
+            _ev("Ngô Quyền bố trí bãi cọc", "938"),
+            _ev("Ngô Quyền đánh bại quân Nam Hán", "938"),
+        ]),
+    }
+    by_label = {r["label"]: r["seq"] for r in reconcile_events(cache)}
+    assert by_label == {
+        "Ngô Quyền giết Kiều Công Tiễn": 0,
+        "Ngô Quyền bố trí bãi cọc": 1,
+        "Ngô Quyền đánh bại quân Nam Hán": 2,
+    }
+
+
+def test_seq_giu_ban_cua_chunk_gap_dau_tien_khi_gop_trung() -> None:
+    """Gộp trùng KHÔNG ghi đè `seq`: nó phải luôn thuộc cùng cái chunk mà
+    `source_chunk_ids[0]` trỏ tới, nếu không thì sort theo (chunk, seq) sẽ so hai chunk
+    khác nhau với nhau."""
+    e = _ev("Quân Pháp tấn công Đà Nẵng", "1858-09-01", ["Đà Nẵng"])
+    cache = {
+        "c-000": _entry([_ev("Sự kiện khác", "1858"), e]),  # e ở vị trí 1
+        "c-001": _entry([e]),  # cùng event, nhưng ở vị trí 0
+    }
+    rec = next(r for r in reconcile_events(cache) if r["label"] == e["label"])
+    assert rec["source_chunk_ids"] == ["c-000", "c-001"]
+    assert rec["seq"] == 1  # theo c-000 (gặp trước), KHÔNG phải 0 của c-001
+
+
 def test_parent_khac_nhau_khong_gop() -> None:
     # Trùng time+loc+label nhưng KHÁC chiến dịch -> 2 event riêng (parent trong khoá).
     e1 = _ev("Trận đánh", "1950", ["Đông Khê"], parent="Chiến dịch Biên giới")
@@ -121,3 +155,77 @@ def test_sap_xep_theo_thoi_gian_rong_cuoi() -> None:
     recs = reconcile_events(cache)
     times = [r["time_start"] for r in recs]
     assert times == ["1859", "1862", ""]
+
+
+# --- khoá sắp xếp thời gian (time_sort) --------------------------------------
+# Quy ước: "năm thập phân", CHỈ để sắp xếp, không bao giờ hiển thị. Xem
+# docs/plan/timeline-explorer-plan.md §3.1.
+
+
+def test_time_sort_ngay_thang_nam() -> None:
+    assert time_sort_key("1954-05-07") == pytest.approx(1954 + 4 / 12 + 6 / 365)
+    assert time_sort_key("1856-09") == pytest.approx(1856 + 8 / 12)
+    assert time_sort_key("1945") == 1945
+
+
+def test_time_sort_nam_it_chu_so_khong_bi_loai() -> None:
+    """`40` (năm 40 SCN) và `938` phải ra đúng số, không rơi vào NULL."""
+    assert time_sort_key("40") == 40
+    assert time_sort_key("938") == 938
+
+
+def test_time_sort_the_ky_lay_nam_dau() -> None:
+    assert time_sort_key("XII") == 1101
+    assert time_sort_key("I") == 1
+    assert time_sort_key("XX") == 1901
+
+
+def test_time_sort_tcn_thanh_so_am() -> None:
+    assert time_sort_key("179 TCN") == -179
+    assert time_sort_key("III TCN") == -300
+    # 179 TCN đứng TRƯỚC 111 TCN, và cả hai trước năm 40 SCN.
+    assert time_sort_key("179 TCN") < time_sort_key("111 TCN") < time_sort_key("40")
+
+
+def test_time_sort_tcn_co_thang_van_dung_thu_tu() -> None:
+    """Schema cho phép '179-03 TCN': trong năm 179 TCN, tháng 3 muộn hơn đầu năm."""
+    assert time_sort_key("179 TCN") < time_sort_key("179-03 TCN") < time_sort_key("178 TCN")
+
+
+def test_time_sort_khong_parse_duoc_thi_none() -> None:
+    """Mốc rác ('9 tháng' — LLM lấy độ dài làm mốc) và mốc rỗng -> NULL, không lên trang."""
+    assert time_sort_key("9 tháng") is None
+    assert time_sort_key("") is None
+    assert time_sort_key(None) is None
+
+
+def test_reconcile_gan_time_sort_cho_moi_record() -> None:
+    cache = {
+        "c-000": _entry(
+            [
+                _ev("Chiến thắng Bạch Đằng", "938"),
+                _ev("Triệu Đà xâm lược", "179 TCN"),
+                _ev("Đông Kinh nghĩa thục", "9 tháng"),
+            ]
+        )
+    }
+    by_label = {r["label"]: r["time_sort"] for r in reconcile_events(cache)}
+    assert by_label["Triệu Đà xâm lược"] == -179
+    assert by_label["Chiến thắng Bạch Đằng"] == 938
+    assert by_label["Đông Kinh nghĩa thục"] is None
+
+
+def test_reconcile_sap_xep_theo_khoa_chu_khong_theo_chuoi() -> None:
+    """Sort chuỗi sẽ xếp '179 TCN' cạnh 1786 và đẩy 'XII' xuống cuối — phải theo khoá."""
+    cache = {
+        "c-000": _entry(
+            [
+                _ev("D", "1786"),
+                _ev("A", "179 TCN"),
+                _ev("C", "1945"),
+                _ev("B", "XII"),
+                _ev("E", "9 tháng"),  # không parse được -> cuối
+            ]
+        )
+    }
+    assert [r["label"] for r in reconcile_events(cache)] == ["A", "B", "D", "C", "E"]

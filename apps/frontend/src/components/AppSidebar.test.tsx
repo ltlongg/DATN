@@ -37,10 +37,21 @@ describe("AppSidebar", () => {
     }
   });
 
-  it("non-admin chỉ thấy Hỏi đáp, không có nhóm/mục quản trị", () => {
+  it("non-admin thấy đúng 2 mục khu user, không có nhóm/mục quản trị", () => {
     renderSidebar("user");
     expect(screen.getByRole("link", { name: "Hỏi đáp" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Dòng lịch sử" })).toHaveAttribute(
+      "href",
+      "/timeline",
+    );
+    expect(screen.getAllByRole("link")).toHaveLength(2);
     expect(screen.queryByText("QUẢN TRỊ")).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Chi phí" })).not.toBeInTheDocument();
+  });
+
+  it("mục user KHÔNG trùng tên với mục admin (admin sẽ thấy cả hai cùng lúc)", () => {
+    renderSidebar("admin");
+    expect(screen.getByRole("link", { name: "Dòng lịch sử" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Dòng thời gian" })).toBeInTheDocument();
   });
 });

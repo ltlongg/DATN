@@ -32,6 +32,7 @@ from app.api import (
     internal,
     logs,
     prompts,
+    timeline,
     users,
 )
 from app.core.config import get_settings
@@ -147,6 +148,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
     app.include_router(chat.router, prefix="/api/chat", tags=["chat"])
+    app.include_router(timeline.router, prefix="/api/timeline", tags=["timeline"])
     app.include_router(documents.router, prefix="/api/admin/documents", tags=["documents"])
     app.include_router(inspect.router, prefix="/api/admin/kb", tags=["kb-inspect"])
     app.include_router(logs.router, prefix="/api/admin/logs", tags=["admin-logs"])

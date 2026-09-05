@@ -86,15 +86,18 @@ def test_rong_khi_khong_co_event(monkeypatch) -> None:
     assert p.markers == [] and p.timeline == [] and p.event_count == 0
 
 
-def test_timeline_sap_theo_thoi_gian(monkeypatch) -> None:
+def test_timeline_giu_nguyen_thu_tu_cua_store(monkeypatch) -> None:
+    """Thứ tự do `select_events_by_chunks` quyết (SQL ORDER BY time_sort) — builder chỉ
+    giữ nguyên. Trước đây builder sort lại theo CHUỖI `time_start`, việc đó xếp sai
+    '179 TCN' (cạnh năm 179 SCN) và 'XII' (rớt sau mọi chữ số) nên đã bỏ."""
     _patch(
         monkeypatch,
         [
-            _event("e1", label="B", time_start="1862"),
-            _event("e2", label="A", time_start="1859"),
+            _event("e1", label="A", time_start="179 TCN"),
+            _event("e2", label="B", time_start="XII"),
             _event("e3", label="C", time_start="1862-03"),
         ],
         {},
     )
     p = B.build_visualization(["c-0"])
-    assert [t.time_start for t in p.timeline] == ["1859", "1862", "1862-03"]
+    assert [t.time_start for t in p.timeline] == ["179 TCN", "XII", "1862-03"]

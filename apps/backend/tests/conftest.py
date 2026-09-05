@@ -31,6 +31,7 @@ _DB_MODULES = (
     "app.models.conversation",
     "app.models.document",
     "app.models.inspect",
+    "app.models.timeline",
     "app.models.logs",
     "app.models.cost",
     "app.models.prompt",

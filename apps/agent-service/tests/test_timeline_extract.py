@@ -157,7 +157,9 @@ def test_ref_trong_prompt_khop_bang_anh_xa_nguoc() -> None:
     assert '<chunk ref="1">Đoạn A.</chunk>' in user_msg
     assert '<chunk ref="2">Đoạn B.</chunk>' in user_msg
     assert "c-aaa" not in user_msg  # chunk_id thật KHÔNG lộ vào prompt, chỉ ref
-    assert captured["model"] == "m" and captured["temperature"] == 0.0
+    # `reasoning_effort` chứ KHÔNG phải `temperature`: model trích hiện tại là model
+    # reasoning (xem TIMELINE_LLM_MODEL trong .env), nó từ chối `temperature` (fd1cb70).
+    assert captured["model"] == "m" and captured["reasoning_effort"] == "low"
 
 
 def test_refusal_lam_fail_ca_unit_thay_vi_cache_rong() -> None:

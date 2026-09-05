@@ -11,6 +11,7 @@ import {
   LogOut,
   MessagesSquare,
   MessageSquare,
+  Milestone,
   PanelLeft,
   Share2,
   SlidersHorizontal,
@@ -32,6 +33,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { to: "/", label: "Hỏi đáp", icon: MessageSquare, end: true, adminOnly: false },
+  { to: "/timeline", label: "Dòng lịch sử", icon: Milestone, end: false, adminOnly: false },
   { to: "/admin/documents", label: "Tài liệu", icon: FileText, end: false, adminOnly: true, group: "NỘI DUNG" },
   { to: "/admin/kb/chunks", label: "Đoạn tài liệu", icon: FileStack, end: false, adminOnly: true, group: "KHO TRI THỨC" },
   { to: "/admin/kb/graph", label: "Đồ thị tri thức", icon: Share2, end: false, adminOnly: true, group: "KHO TRI THỨC" },

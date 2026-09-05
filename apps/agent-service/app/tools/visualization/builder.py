@@ -90,7 +90,6 @@ def build_visualization(
         elif not has_marker:
             unplaced += 1  # không time + không toạ độ -> không render (honest)
 
-    timeline.sort(key=lambda item: (item.time_start, item.label))
     return VisualizationPayload(
         markers=markers,
         timeline=timeline,

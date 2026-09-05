@@ -27,11 +27,13 @@ CREATE TABLE IF NOT EXISTS timeline_events (
     label TEXT NOT NULL,
     summary TEXT NOT NULL,
     time_start TEXT,
+    time_sort DOUBLE PRECISION,
     time_end TEXT,
     locations TEXT[] NOT NULL DEFAULT '{}',
     confidence TEXT NOT NULL,
     parent_event_norm TEXT,
     source_chunk_ids TEXT[] NOT NULL,
+    seq INTEGER,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -45,6 +47,8 @@ CREATE_INDEX_SQLS = [
     "ON timeline_events USING GIN (locations);",
     "CREATE INDEX IF NOT EXISTS timeline_events_time_idx "
     "ON timeline_events (time_start);",
+    "CREATE INDEX IF NOT EXISTS timeline_events_time_sort_idx "
+    "ON timeline_events (time_sort);",
     "CREATE INDEX IF NOT EXISTS timeline_events_parent_idx "
     "ON timeline_events (parent_event_norm);",
 ]
@@ -55,23 +59,27 @@ INSERT INTO timeline_events (
     label,
     summary,
     time_start,
+    time_sort,
     time_end,
     locations,
     confidence,
     parent_event_norm,
-    source_chunk_ids
+    source_chunk_ids,
+    seq
 ) VALUES (
-    %s, %s, %s, %s, %s, %s::text[], %s, %s, %s::text[]
+    %s, %s, %s, %s, %s, %s, %s::text[], %s, %s, %s::text[], %s
 )
 ON CONFLICT (event_id) DO UPDATE SET
     label = EXCLUDED.label,
     summary = EXCLUDED.summary,
     time_start = EXCLUDED.time_start,
+    time_sort = EXCLUDED.time_sort,
     time_end = EXCLUDED.time_end,
     locations = EXCLUDED.locations,
     confidence = EXCLUDED.confidence,
     parent_event_norm = EXCLUDED.parent_event_norm,
     source_chunk_ids = EXCLUDED.source_chunk_ids,
+    seq = EXCLUDED.seq,
     updated_at = now();
 """
 
@@ -96,17 +104,23 @@ def _record_params(record: dict[str, Any]) -> tuple[Any, ...]:
         record["label"],
         record["summary"],
         _empty_to_none(record.get("time_start")),
+        record.get("time_sort"),
         _empty_to_none(record.get("time_end")),
         record.get("locations") or [],
         record["confidence"],
         _empty_to_none(record.get("parent_event_norm")),
         record.get("source_chunk_ids") or [],
+        record.get("seq"),
     )
 
 
 def ensure_timeline_table(conn: psycopg.Connection[Any]) -> None:
     with conn.cursor() as cur:
         cur.execute(CREATE_TIMELINE_EVENTS_SQL)
+        cur.execute(
+            "ALTER TABLE timeline_events ADD COLUMN IF NOT EXISTS time_sort DOUBLE PRECISION;"
+        )
+        cur.execute("ALTER TABLE timeline_events ADD COLUMN IF NOT EXISTS seq INTEGER;")
         for sql in CREATE_INDEX_SQLS:
             cur.execute(sql)
 
@@ -138,7 +152,8 @@ def select_events_by_chunks(
 ) -> list[dict[str, Any]]:
     """Lấy event có `source_chunk_ids` giao với `chunk_ids` (khoá join online).
 
-    Sắp theo thời gian (NULL cuối) để timeline dựng sẵn thứ tự.
+    Sắp theo KHOÁ thời gian `time_sort` (NULL cuối) để timeline dựng sẵn thứ tự đúng
+    cả với mốc TCN/thế kỷ La Mã — `time_start` là TEXT nên ORDER BY nó sẽ sai.
     """
     if not chunk_ids:
         return []
@@ -150,7 +165,7 @@ def select_events_by_chunks(
                 SELECT *
                 FROM timeline_events
                 WHERE source_chunk_ids && %s::text[]
-                ORDER BY time_start ASC NULLS LAST, label ASC
+                ORDER BY time_sort ASC NULLS LAST, label ASC
                 """,
                 (chunk_ids,),
             )

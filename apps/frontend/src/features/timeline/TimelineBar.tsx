@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Play, Square } from "lucide-react";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
+import {
+  parseYearFrac,
+  rangeLabel,
+  shortTime,
+  yearLabel,
+} from "@/features/timeline/timeFormat";
 import { useEventTour } from "@/features/timeline/useEventTour";
 import { useChatUiStore } from "@/store/chatUiStore";
 import type { TimelineItem } from "@/types";
@@ -15,38 +21,6 @@ import type { TimelineItem } from "@/types";
  * `variant`: `docked` = dải full-width dưới khung chat (layout split);
  * `overlay` = thẻ bo góc nổi trên map (layout float).
  */
-
-// --- time helpers (time_start dạng "YYYY" | "YYYY-MM" | "YYYY-MM-DD") ---
-
-function parseYearFrac(t: string | null | undefined): number | null {
-  if (!t) return null;
-  const m = /^(\d{3,4})(?:-(\d{1,2}))?(?:-(\d{1,2}))?/.exec(t.trim());
-  if (!m) return null;
-  const year = Number(m[1]);
-  const month = m[2] ? Number(m[2]) : 1;
-  const day = m[3] ? Number(m[3]) : 1;
-  return year + (month - 1) / 12 + (day - 1) / 365;
-}
-
-/** "1954-05-07" -> "07/05/1954", "1954-05" -> "05/1954", "1954" -> "1954". */
-function shortTime(t: string): string {
-  const m = /^(\d{3,4})(?:-(\d{1,2}))?(?:-(\d{1,2}))?/.exec(t.trim());
-  if (!m) return t;
-  if (m[3]) return `${m[3].padStart(2, "0")}/${m[2]!.padStart(2, "0")}/${m[1]}`;
-  if (m[2]) return `${m[2].padStart(2, "0")}/${m[1]}`;
-  return m[1];
-}
-
-function rangeLabel(item: TimelineItem): string {
-  if (item.time_end && item.time_end !== item.time_start) {
-    return `${shortTime(item.time_start)} – ${shortTime(item.time_end)}`;
-  }
-  return shortTime(item.time_start);
-}
-
-function yearOf(t: string): string {
-  return /^(\d{3,4})/.exec(t.trim())?.[1] ?? t;
-}
 
 // --- scale + cluster ---
 
@@ -75,9 +49,12 @@ function tickStep(span: number): number {
   return 1000;
 }
 
-/** Nhãn tick: bước < 1 năm -> "MM/YYYY", còn lại -> năm. */
+/** Nhãn tick: bước < 1 năm -> "MM/YYYY", còn lại -> năm (năm âm là TCN). */
 function tickLabel(y: number, step: number): string {
-  if (step >= 1) return String(Math.round(y));
+  if (step >= 1) {
+    const year = Math.round(y);
+    return year < 0 ? `${-year} TCN` : String(year);
+  }
   const year = Math.floor(y + 1e-6);
   const month = Math.round((y - year) * 12) + 1;
   return `${String(month).padStart(2, "0")}/${year}`;
@@ -138,8 +115,8 @@ function layout(placed: Placed[], domain: Domain) {
 /** Nhãn thời gian ngắn hiện trên icon: 1 sự kiện -> thời điểm; cluster -> khoảng năm. */
 function clusterTimeLabel(c: Cluster): string {
   if (c.placed.length === 1) return shortTime(c.placed[0].item.time_start);
-  const first = yearOf(c.placed[0].item.time_start);
-  const last = yearOf(c.placed[c.placed.length - 1].item.time_start);
+  const first = yearLabel(c.placed[0].item.time_start);
+  const last = yearLabel(c.placed[c.placed.length - 1].item.time_start);
   return first === last ? first : `${first}–${last}`;
 }
 
@@ -450,7 +427,7 @@ export function TimelineBar({
                       className="w-full rounded-md px-2 py-1 text-left text-xs hover:bg-brand/10"
                     >
                       <span className="font-medium tabular-nums text-brand">
-                        {rangeLabel(p.item)}
+                        {rangeLabel(p.item.time_start, p.item.time_end)}
                       </span>{" "}
                       <span className="text-ink">{p.item.label}</span>
                     </button>
@@ -468,7 +445,10 @@ export function TimelineBar({
             >
               <div className="flex items-start justify-between gap-2">
                 <span className="text-xs font-semibold tabular-nums text-brand">
-                  {rangeLabel(selectedPlaced.placed.item)}
+                  {rangeLabel(
+                    selectedPlaced.placed.item.time_start,
+                    selectedPlaced.placed.item.time_end,
+                  )}
                 </span>
                 <button
                   onClick={() => setSelected(null)}

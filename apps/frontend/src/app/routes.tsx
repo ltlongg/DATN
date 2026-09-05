@@ -6,6 +6,7 @@ import { RoleGuard } from "@/features/auth/RoleGuard";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import AskPage from "@/pages/AskPage";
+import TimelinePage from "@/pages/TimelinePage";
 import AdminLayout from "@/pages/AdminLayout";
 import AdminDocumentsPage from "@/pages/AdminDocumentsPage";
 import AdminKbChunksPage from "@/pages/AdminKbChunksPage";
@@ -38,6 +39,7 @@ export const routes: RouteObject[] = [
         element: <AppShell />,
         children: [
           { index: true, element: <AskPage /> },
+          { path: "timeline", element: <TimelinePage /> },
           {
             path: "admin",
             element: <RoleGuard />,
