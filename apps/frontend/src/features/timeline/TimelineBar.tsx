@@ -468,11 +468,6 @@ export function TimelineBar({
                 <ConfidenceBadge confidence={selectedPlaced.placed.item.confidence} />
                 {selectedPlaced.placed.item.locations.length > 0 && (
                   <span className="text-xs text-ink-soft">
-                    {selectedPlaced.placed.item.located && (
-                      <span className="text-brand" title="Có toạ độ trên bản đồ">
-                        ●{" "}
-                      </span>
-                    )}
                     {selectedPlaced.placed.item.locations.join(" · ")}
                   </span>
                 )}

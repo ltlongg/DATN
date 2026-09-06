@@ -18,8 +18,9 @@ import type { Message } from "@/types";
  * Abort stream chỉ khi unmount hoặc CHUYỂN PHIÊN tường minh (`selectConversation`/
  * `resetConversation`) — KHÔNG abort khi id null→mới do lazy-create.
  *
- * Debug chỉ bật cho admin (BE cũng ép false cho user). Hook KHÔNG đụng tới panel bản đồ:
- * AskPage tự mở panel theo DỮ LIỆU (viz mới, dù từ SSE hay từ phiên nạp lại từ DB).
+ * Debug chỉ bật cho admin (BE cũng ép false cho user). Hook KHÔNG đụng tới phần hiển thị
+ * sự kiện: AskPage tự dựng thanh thời gian theo DỮ LIỆU (viz mới, dù từ SSE hay từ phiên
+ * nạp lại từ DB).
  */
 export function useChat() {
   const [items, dispatch] = useReducer(chatReducer, []);

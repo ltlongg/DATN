@@ -436,10 +436,10 @@ async def test_visualization_empty_still_valid(monkeypatch) -> None:
     _patch_plan(monkeypatch, route="needs_retrieval")
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
     _patch_synthesize(monkeypatch, used=("c-1",))
-    _patch_viz(monkeypatch, VisualizationPayload())  # gazetteer rỗng -> no marker
+    _patch_viz(monkeypatch, VisualizationPayload())  # không event nào khớp nguồn
     resp = await run_ask(AskRequest(question="hỏi", stream=False))
     assert resp.visualization is not None
-    assert resp.visualization.markers == []
+    assert resp.visualization.timeline == []
 
 # --- plan fallback ---
 

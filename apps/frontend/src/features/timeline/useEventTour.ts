@@ -61,7 +61,7 @@ export function useEventTour(events: TimelineItem[]): EventTour {
     const isLast = index === events.length - 1;
     const timer = window.setTimeout(() => {
       if (isLast) {
-        // Kể xong -> bỏ chọn: popover đóng, camera trả về toàn cảnh (EventMap).
+        // Kể xong -> bỏ chọn: popover đóng, thanh thời gian về trạng thái không chọn.
         selfSetRef.current = null;
         setSelectedEvent(null);
         setTourPlaying(false);

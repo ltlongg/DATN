@@ -1,55 +1,25 @@
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
-import { resolveStorage } from "@/store/storage";
-
-/** `float` = map nền toàn màn hình + chat nổi (mặc định); `split` = chat 1 bên, map 1 bên. */
-export type LayoutMode = "float" | "split";
 
 /**
- * UI state khung chat. `selectedEventId` là NGUỒN SỰ THẬT liên kết map <-> timeline:
- * click marker, click timeline row, hay bước trình chiếu đều set nó — cả hai bên
- * highlight theo. `tourPlaying` để bản đồ biết đang trình chiếu mà dí camera vào
- * điểm đang kể (thay vì chỉ pan hiền như lúc user tự click).
+ * UI state khung chat. `selectedEventId` là NGUỒN SỰ THẬT của việc chọn sự kiện: click
+ * một mốc trên thanh thời gian hay một bước trình chiếu đều set nó — thanh thời gian
+ * highlight theo. `tourPlaying` cho biết đang trình chiếu (tour tự dừng khi user chọn tay).
  *
  * (`debugOpen`/`toggleDebug` đã bỏ cùng DebugPanel 2026-08-01 — trạng thái gập/mở của tầng
- * 2 nay là state cục bộ trong `StepRow`, không đáng đưa lên store toàn cục.)
- *
- * CHỈ `layoutMode` persist (lựa chọn bố cục là preference của user, phải sống qua
- * reload); phần còn lại thuộc về một lượt hỏi đáp -> ephemeral.
+ * 2 nay là state cục bộ trong `StepRow`. `layoutMode`/`vizPanelOpen` bỏ cùng bản đồ
+ * 2026-09-06 — chỉ còn một bố cục nên không còn preference nào cần nhớ qua reload, store
+ * này thành thuần ephemeral, không persist.)
  */
 interface ChatUiState {
-  layoutMode: LayoutMode;
-  convDrawerOpen: boolean;
-  vizPanelOpen: boolean;
   selectedEventId: string | null;
   tourPlaying: boolean;
-  setLayoutMode: (mode: LayoutMode) => void;
-  setConvDrawerOpen: (open: boolean) => void;
-  openViz: () => void;
-  closeViz: () => void;
   setSelectedEvent: (eventId: string | null) => void;
   setTourPlaying: (playing: boolean) => void;
 }
 
-export const useChatUiStore = create<ChatUiState>()(
-  persist(
-    (set) => ({
-      layoutMode: "float",
-      convDrawerOpen: false,
-      vizPanelOpen: false,
-      selectedEventId: null,
-      tourPlaying: false,
-      setLayoutMode: (layoutMode) => set({ layoutMode }),
-      setConvDrawerOpen: (convDrawerOpen) => set({ convDrawerOpen }),
-      openViz: () => set({ vizPanelOpen: true }),
-      closeViz: () => set({ vizPanelOpen: false }),
-      setSelectedEvent: (selectedEventId) => set({ selectedEventId }),
-      setTourPlaying: (tourPlaying) => set({ tourPlaying }),
-    }),
-    {
-      name: "vfs-chat-ui",
-      storage: createJSONStorage(resolveStorage),
-      partialize: (s) => ({ layoutMode: s.layoutMode }),
-    },
-  ),
-);
+export const useChatUiStore = create<ChatUiState>()((set) => ({
+  selectedEventId: null,
+  tourPlaying: false,
+  setSelectedEvent: (selectedEventId) => set({ selectedEventId }),
+  setTourPlaying: (tourPlaying) => set({ tourPlaying }),
+}));

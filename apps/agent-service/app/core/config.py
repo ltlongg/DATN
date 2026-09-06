@@ -148,7 +148,7 @@ class Settings(BaseSettings):
     redis_url: str = ""
     database_url: str = ""
     # Connection pool Postgres (psycopg_pool): giữ sẵn connection cho hot path online
-    # (hydrate chunk, timeline events, gazetteer, ghi llm_usage) thay vì mở/đóng mỗi lần.
+    # (hydrate chunk, timeline events, ghi llm_usage) thay vì mở/đóng mỗi lần.
     # Xem app/core/postgres.py::get_pool.
     pg_pool_min_size: int = 1
     pg_pool_max_size: int = 10

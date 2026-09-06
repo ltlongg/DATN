@@ -50,17 +50,6 @@ export interface SourceDetail {
   end_line: number | null;
 }
 
-export interface MapMarker {
-  event_id: string;
-  label: string;
-  summary: string;
-  location: string;
-  lat: number;
-  lon: number;
-  confidence: string;
-  time_start?: string | null;
-}
-
 export interface TimelineItem {
   event_id: string;
   label: string;
@@ -69,11 +58,9 @@ export interface TimelineItem {
   time_end?: string | null;
   confidence: string;
   locations: string[];
-  located: boolean;
 }
 
 export interface VisualizationPayload {
-  markers: MapMarker[];
   timeline: TimelineItem[];
   event_count: number;
   unplaced_count: number;

@@ -875,8 +875,8 @@ async def build_visualization(state: AgentState, config: RunnableConfig) -> dict
         "visualization", {"visualization": viz.model_dump() if viz else None}
     )
     # Viz hỏng -> `partial` kèm tên lỗi, KHÔNG im lặng: đây đúng ca đã cắn một lần rồi
-    # (gazetteer chưa có bảng -> UndefinedTable nuốt sạch timeline, xem CLAUDE.md). Lần sau
-    # hỏng kiểu đó thì nó hiện ngay trên panel thay vì phải đi đọc log.
+    # (bảng thiếu -> UndefinedTable nuốt sạch timeline). Lần sau hỏng kiểu đó thì nó hiện
+    # ngay trên panel thay vì phải đi đọc log.
     if failure is not None:
         await _emit_step(
             emitter,
@@ -888,7 +888,6 @@ async def build_visualization(state: AgentState, config: RunnableConfig) -> dict
     else:
         counts = {
             "event_count": viz.event_count if viz else 0,
-            "marker_count": len(viz.markers) if viz else 0,
             "timeline_count": len(viz.timeline) if viz else 0,
             "unplaced": viz.unplaced_count if viz else 0,
         }

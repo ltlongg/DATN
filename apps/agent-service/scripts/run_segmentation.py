@@ -1,10 +1,9 @@
-"""CLI BƯỚC 1/3 (offline): gom chunk -> unit (segmenter), ghi artifact + report để VERIFY.
+"""CLI BƯỚC 1/2 (offline): gom chunk -> unit (segmenter), ghi artifact + report để VERIFY.
 
 Tách khỏi run_timeline_index.py (bước 2 - LLM) để SOI KỸ ranh giới phân đoạn TRƯỚC khi
-tốn token LLM. Luồng offline 3 bước rời, chạy & verify độc lập:
+tốn token LLM. Luồng offline 2 bước rời, chạy & verify độc lập:
   1. (đây) run_segmentation.py : chunks_llm.json -> dataset/timeline_units.json   [VERIFY ở đây]
   2. run_timeline_index.py     : đọc timeline_units.json -> LLM trích -> timeline_events
-  3. build_gazetteer.py        : gom location -> gazetteer để duyệt tọa độ thủ công
 
 THUẦN, không LLM, tất định: cùng chunks + cùng cap -> cùng units (idempotent).
 

@@ -1,9 +1,8 @@
-"""CLI BƯỚC 2/3: đọc units (đã verify ở bước 1) -> trích atomic event -> bảng `timeline_events`.
+"""CLI BƯỚC 2/2: đọc units (đã verify ở bước 1) -> trích atomic event -> bảng `timeline_events`.
 
 Tách khỏi bước 1 (phân đoạn) để chỉ trích trên units ĐÃ verify, không tự gom lại:
   BƯỚC 1  run_segmentation.py     : chunks -> dataset/timeline_units.json  (verify phân đoạn)
   BƯỚC 2  (đây)                   : timeline_units.json -> LLM trích -> reconcile -> Postgres
-  BƯỚC 3  build_gazetteer.py      : gom location -> gazetteer để duyệt tọa độ thủ công
 
 Pipeline bước này (giống run_graph_extraction.py, "vừa làm vừa check"):
   1. đọc units từ dataset/timeline_units.json (KHÔNG tự build — chạy run_segmentation.py trước)

@@ -236,28 +236,23 @@ def test_validate_state_partial_when_nothing_valid() -> None:
 
 # --- visualization ---
 
-def test_visualization_detail_leads_with_timeline_not_markers() -> None:
-    """Gazetteer đang hoãn -> marker gần như luôn 0. Dẫn bằng con số đó thì dòng phụ đọc như
-    hệ thống hỏng, trong khi timeline vẫn dựng đủ (CLAUDE.md, honest fallback)."""
-    detail = progress.visualization_detail(
-        event_count=7, marker_count=0, timeline_count=5, unplaced=2
-    )
+def test_visualization_detail_says_how_many_events_lack_a_date() -> None:
+    """Sự kiện thiếu mốc thời gian thì không dựng được — nói thẳng số đó thay vì để dòng
+    phụ trông như đã dựng đủ 7 (honest fallback)."""
+    detail = progress.visualization_detail(event_count=7, timeline_count=5, unplaced=2)
     assert detail.startswith("5 mốc thời gian")
-    assert "điểm trên bản đồ" not in detail
     assert "2 thiếu dữ liệu hiển thị" in detail
 
-def test_visualization_detail_mentions_markers_when_there_are_any() -> None:
+def test_visualization_detail_khong_nhac_unplaced_khi_dung_het() -> None:
     assert (
-        progress.visualization_detail(
-            event_count=3, marker_count=3, timeline_count=3, unplaced=0
-        )
-        == "3 mốc thời gian · 3 điểm trên bản đồ"
+        progress.visualization_detail(event_count=3, timeline_count=3, unplaced=0)
+        == "3 mốc thời gian"
     )
 
 def test_no_matching_event_is_partial_and_says_so() -> None:
     assert progress.visualization_state(0) == "partial"
     assert progress.visualization_detail(
-        event_count=0, marker_count=0, timeline_count=0, unplaced=0
+        event_count=0, timeline_count=0, unplaced=0
     ) == "Không có sự kiện nào gắn với nguồn đã dùng"
 
 def test_visualization_state_done_when_events_matched() -> None:

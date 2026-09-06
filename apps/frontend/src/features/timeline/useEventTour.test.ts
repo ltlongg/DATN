@@ -14,7 +14,6 @@ function event(id: string, time: string): TimelineItem {
     time_end: null,
     confidence: "cao",
     locations: [],
-    located: false,
   };
 }
 

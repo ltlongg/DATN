@@ -201,15 +201,11 @@ def validate_state(valid: int) -> StepState:
 
 # --- visualization ---
 
-def visualization_detail(
-    *, event_count: int, marker_count: int, timeline_count: int, unplaced: int
-) -> str:
-    """Đặt số mốc trước marker vì timeline vẫn hữu ích khi tọa độ chưa được duyệt."""
+def visualization_detail(*, event_count: int, timeline_count: int, unplaced: int) -> str:
+    """Số mốc dựng được; phần sự kiện thiếu mốc thời gian nói rõ chứ không giấu."""
     if event_count == 0:
         return "Không có sự kiện nào gắn với nguồn đã dùng"
     parts = [f"{timeline_count} mốc thời gian"]
-    if marker_count > 0:
-        parts.append(f"{marker_count} điểm trên bản đồ")
     if unplaced > 0:
         parts.append(f"{unplaced} thiếu dữ liệu hiển thị")
     return " · ".join(parts)
@@ -307,11 +303,10 @@ def validate_internals(
     return rows
 
 def visualization_internals(
-    *, event_count: int, marker_count: int, timeline_count: int, unplaced: int
+    *, event_count: int, timeline_count: int, unplaced: int
 ) -> list[InternalRow]:
     return [
         _row("Sự kiện khớp nguồn", event_count),
         _row("Mốc thời gian", timeline_count),
-        _row("Marker bản đồ", marker_count),
         _row("Thiếu dữ liệu hiển thị", unplaced),
     ]

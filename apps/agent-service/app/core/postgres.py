@@ -1,8 +1,8 @@
 """Connection pool Postgres dùng chung cho hot path ONLINE của agent-service.
 
-Trước đây mỗi store (`chunk_store`, `event_store`, `gazetteer_store`, `usage_log`) tự
+Trước đây mỗi store (`chunk_store`, `event_store`, `usage_log`) tự
 `psycopg.connect()` mỗi lần gọi. Một câu `/ask` chạm Postgres nhiều lần (hydrate chunk +
-timeline events + gazetteer + 3 lần ghi `llm_usage`) -> mở/đóng nhiều connection tới DB
+timeline events + 3 lần ghi `llm_usage`) -> mở/đóng nhiều connection tới DB
 REMOTE, mỗi lần cõng round-trip TCP+auth. Pool giữ sẵn connection để tái dùng.
 
 `connection()` giữ nguyên hợp đồng cũ của các store: context manager, `row_factory=dict_row`,

@@ -370,7 +370,7 @@ async def test_smalltalk_has_no_placeholder_steps_left_hanging(monkeypatch) -> N
 async def test_visualization_failure_names_the_error_instead_of_going_quiet(
     monkeypatch,
 ) -> None:
-    """Đã cắn một lần: gazetteer chưa có bảng -> UndefinedTable nuốt sạch timeline mà panel
+    """Đã cắn một lần: bảng chưa tồn tại -> UndefinedTable nuốt sạch timeline mà panel
     không hé nửa lời (xem CLAUDE.md)."""
     _patch_plan(monkeypatch)
     _patch_retrieve(monkeypatch, _retrieval(["c-1"]))

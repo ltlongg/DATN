@@ -2,7 +2,7 @@
  *
  * Tên `TimelineCardItem` (không phải `TimelineCard`) để khỏi đụng component cùng tên ở
  * `features/explore/TimelineCard.tsx`. Khác `TimelineItem` trong `types/index.ts` — cái
- * đó là thanh timeline bên hỏi đáp (có `located` cho map).
+ * đó là thanh timeline bên hỏi đáp.
  */
 
 export interface TimelineCardItem {
