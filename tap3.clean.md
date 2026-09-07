@@ -2265,7 +2265,7 @@ Tại Sài Gòn, quân giải phóng đã tiến công vào tận các sào huy�
 
 6, 7 để trừng trị bọn ác ôn ngoan cố, bọn mật vụ. Nhân dân các vùng ven nổi dây, phá ách kìm kep, giành quyền làm chủ.
 
-Tại Huế, sau 4 ngày tiến công (kể từ 2 giờ 33 phút ngày 31-1-1968), quân dân ta đã chiếm hầu hết các mục tiêu quan trọng của địch, như dinh Tỉnh trưởng, đồn cảnh sát, đài phát thanh, khách sạn Thuận Hoá và Hương Giang, sân bay... đã làm chủ thành phố trong 26 ngày liền (từ 31-1 đến 25-2-1968) và cũng đã tổ chức đánh hàng trăm trận phản kích của địch.
+Tại Huế, sau 4 ngày tiến công (kể từ 2 giờ 33 phút ngày 31-1-1968), quân dân ta đã chiếm hầu hết các mục tiêu quan trọng của địch, như dinh Tỉnh trưởng, đồn cảnh sát, đài phát thanh, khách sạn Thuận Hoá và Hương Giang, sân bay... đã làm chủ thành phố trong 25 ngày liền (từ 31-1 đến 24-2-1968) và cũng đã tổ chức đánh hàng trăm trận phản kích của địch.
 
 Được các mũi tiến công quân sự hỗ trợ, quần chúng trong thành phố đã nổi dậy dẫn đường cho bộ đội, đào hằm, xây chiến luỹ, tiếp tế, cáng thương binh. Gia Hội là nơi quần chúng nổi dậy mạnh mẽ nhất. Nhiều tổ chức quần chúng, như Mặt trận thanh niên Huế, Hội binh sĩ yêu nước li khai ra đời. Chính quyền cách mạng được thành lập ở nhiều khu vực trong thành phố. Hàng nghìn thanh niên đã tình nguyện tham gia các đội du kích, tự vệ, các đội công tác.
 
@@ -2273,7 +2273,7 @@ Tại Huế, sau 4 ngày tiến công (kể từ 2 giờ 33 phút ngày 31-1-196
 
 Trên nhiều vùng nông thôn, dù có hay không có lực lượng vũ trang hỗ trợ, quần chúng vẫn nổi dậy với khí thế mạnh mẽ, đập tan bộ máy chính quyền và sự kìm kẹp của địch; phá vỡ hàng loạt "ấp chiến lược"; đập tan, bức rút nhiều hệ thống đồn bốt; giải phóng và giành quyền làm chủ, tổ chức chính quyền mới...
 
-Chỉ trong vòng không đầy một tháng của đợt 1 của cuộc Tổng tiến công và nổi dậy, quân dân ta đã loại khỏi vòng chiến đấu 150.000 địch, trong đó có 45.000 lính Mĩ, phá huỷ một khối lượng lớn vật chất và phương tiện chiến tranh của chúng, bắn rơi 2.370 máy bay các loại, bắn chìm 233 tàu xuồng chiến đấu, bắn cháy 3.500 xe quân sự, trong đó có 1.750 xe bọc thép.
+Chỉ trong vòng không đầy một tháng của đợt 1 của cuộc Tổng tiến công và nổi dậy, quân dân ta đã loại khỏi vòng chiến đấu 147.000 địch, trong đó có 45.000 lính Mĩ, phá huỷ một khối lượng lớn vật chất và phương tiện chiến tranh của chúng, bắn rơi 2.370 máy bay các loại, bắn chìm 233 tàu xuồng chiến đấu, bắn cháy 3.500 xe quân sự, trong đó có 1.750 xe bọc thép.
 
 Từ trong cuộc Tổng tiến công và nổi dậy, nhiều lực lượng mới chống Mĩ - nguy xuất hiện, Mặt trận đoàn kết dân tộc chống Mĩ cứu nước được mở rộng. Tổ chức "Liên minh các lực lượng dân tộc, dân chủ và hoà bình" ở Sài Gòn, Huế và toàn miền Nam - đại diện cho tầng lớp trí thức, tư sản dân tộc tiến bộ ở các thành thị, được thành lập. Xu hướng chính trị hoà bình, trung lập càng thu hút đông đảo các tầng lớp trung gian, thúc đẩy thêm sự phân hoá trong hàng ngũ nguy quyền, nguy quân.
 
@@ -2493,7 +2493,7 @@ Trước âm mưu mới đó của địch, chủ trương của ta là: tập t
 
 Campuchia, đập tan hành động phiêu lưu quân sự của đế quốc Mĩ và các lực lượng thân Mĩ, tiến lên giành toàn thắng cho chiến dịch.
 
-Phán đoán đúng kế hoạch hành quân của địch, chúng ta đã vạch ra được kế hoạch tác chiến chính xác, chuẩn bị chu đáo cho chiến dịch phản công. Nhờ đó, các lực lượng vũ trang cách mạng giành được thắng lợi ngay từ đầu. Kết quả là sau 43 ngày đem chiến đấu kiên cường (từ 8-2 đến 23-3-1971), quân dân hai nước Việt Nam - Lào đã đập tan cuộc hành quân của địch, loại khỏi vòng chiến đấu 23.000 tên, bắn rơi và phá huỷ hơn 500 máy bay các loại, phá huỷ và thu hồi gần 600 xe quân sự và 150 khẩu pháo, bắn chìm, bắn cháy 43 tàu, xà lan.
+Phán đoán đúng kế hoạch hành quân của địch, chúng ta đã vạch ra được kế hoạch tác chiến chính xác, chuẩn bị chu đáo cho chiến dịch phản công. Nhờ đó, các lực lượng vũ trang cách mạng giành được thắng lợi ngay từ đầu. Kết quả là sau 43 ngày đem chiến đấu kiên cường (từ 8-2 đến 23-3-1971), quân dân hai nước Việt Nam - Lào đã đập tan cuộc hành quân của địch, loại khỏi vòng chiến đấu trên 20.000 tên, bắn rơi và phá huỷ hơn 500 máy bay các loại, phá huỷ và thu hồi 1138 xe quân sự và 112 khẩu pháo, bắn chìm, bắn cháy 43 tàu, xà lan.
 
 Thắng lợi ở Đường 9 - Nam Lào đã đánh bại một bước quan trọng, mở ra khả năng hiện thực để đánh bại hoàn toàn chiến lược "Việt Nam hoá" chiến tranh của Mĩ, làm sa sút nghiêm trọng tinh thần quân đội Sài Gòn và quân viễn chinh Mĩ. Thắng lợi đó của ta cũng đã bảo vệ được "con đường mòn Hồ Chí Minh" cùng với toàn bộ hành lang chiến lược của ta.
 
@@ -2830,7 +2830,7 @@ Cuối năm 1974 đầu năm 1975, trong tình hình so sánh lực lượng ở
 
 Hội nghị Bộ Chính trị mở rộng đang tiến hành thì nhận được tin quân dân ta giải phóng đường 14 và toàn tỉnh Phước Long (6-1-1975).
 
-Trong hơn 20 ngày đêm chiến đấu (từ 12-12-1974 đến 6-1-1975), quân dân ta ở Phước Long đã tiêu diệt và bắt sống 3.000 địch, thu 3.000 súng các loại, giải phóng đường 14, thị xã và toàn tỉnh Phước Long (6-1-1975). Đây là tỉnh đầu tiên ở miền Nam được giải phóng hoàn toàn.
+Trong hơn 20 ngày đêm chiến đấu (từ 12-12-1974 đến 6-1-1975), quân dân ta ở Phước Long đã tiêu diệt và bắt sống 3.000 địch, thu 5.000 súng các loại, giải phóng đường 14, thị xã và toàn tỉnh Phước Long (6-1-1975). Đây là tỉnh đầu tiên ở miền Nam được giải phóng hoàn toàn.
 
 Chiến thắng Phước Long và tình hình chiến sự sau Phước Long giúp Bộ Chính trị củng cố thêm quyết tâm chiến lược, bổ sung và hoàn chỉnh kế hoạch 2 năm (1975 - 1976) hoàn thành giải phóng miền Nam, được đề ra từ Hội nghị Bộ Chính trị (30-9 đến 7-10-1974). Cụ thể là năm 1975 tranh thủ thời cơ, bất ngờ tiến công địch trên quy mô lớn, rộng khắp, tạo điều kiện đến năm 1976 tiến hành tổng công kích - tổng khởi nghĩa giải phóng hoàn toàn miền Nam.
 
