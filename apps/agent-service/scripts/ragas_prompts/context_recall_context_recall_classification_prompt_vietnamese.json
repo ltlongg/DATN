@@ -1,7 +1,7 @@
 {
   "ragas_version": "0.4.3",
   "language": "vietnamese",
-  "instruction": "Cho một ngữ cảnh và một câu trả lời, hãy phân tích từng câu trong câu trả lời và phân loại xem câu đó có quy về được ngữ cảnh đã cho hay không. Chỉ dùng phân loại nhị phân 'Có' (1) hoặc 'Không' (0). Trả JSON kèm lý do.",
+  "instruction": "Bạn nhận được một câu hỏi, đáp án mẫu và các đoạn tài liệu hệ thống đã tìm được. Hãy xét từng ý trong đáp án mẫu, rồi kiểm tra xem các đoạn tài liệu có xác nhận ý đó hay không. Đánh dấu `attributed: 1` khi tài liệu nói rõ hoặc diễn đạt tương đương ý đó. Đánh dấu `attributed: 0` khi tài liệu không nhắc tới, chỉ nói một phần không đủ để kết luận, hoặc mâu thuẫn với ý đó. Trả JSON gồm từng ý, nhãn `attributed` và lý do ngắn. Không dùng kiến thức bên ngoài để bổ sung thông tin.",
   "examples": [
     {
       "input": {

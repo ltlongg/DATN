@@ -1,7 +1,7 @@
 {
   "ragas_version": "0.4.3",
   "language": "vietnamese",
-  "instruction": "Hãy sinh một câu hỏi ứng với câu trả lời được cho, và xác định câu trả lời có né tránh hay không. Trả noncommittal là 1 nếu câu trả lời né tránh và 0 nếu câu trả lời dứt khoát. Câu trả lời né tránh là câu lảng tránh, mơ hồ hoặc nước đôi. Ví dụ, \"tôi không biết\" hoặc \"tôi không chắc\" là những câu trả lời né tránh.",
+  "instruction": "Bạn nhận được một câu trả lời do hệ thống tạo ra. Hãy sinh một câu hỏi mà câu trả lời này đang trực tiếp cố trả lời. Câu hỏi phải phản ánh ý chính của câu trả lời và không được thêm thực thể, thời điểm hay chi tiết không có trong câu trả lời. Đặt `noncommittal: 1` nếu câu trả lời né tránh, từ chối trả lời, nói không biết/không đủ thông tin, hoặc chỉ nói chung chung mà không đưa ra nội dung trả lời. Đặt `noncommittal: 0` nếu câu trả lời đưa ra một thông tin hay lập trường cụ thể. Trả JSON gồm `question` và `noncommittal`.",
   "examples": [
     {
       "input": {

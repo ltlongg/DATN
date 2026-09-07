@@ -1,7 +1,7 @@
 {
   "ragas_version": "0.4.3",
   "language": "vietnamese",
-  "instruction": "Cho câu hỏi, câu trả lời và ngữ cảnh, hãy xác minh xem ngữ cảnh có hữu ích để đi tới câu trả lời đã cho hay không. Trả verdict là \"1\" nếu hữu ích và \"0\" nếu không, ở định dạng JSON.",
+  "instruction": "Bạn nhận được một câu hỏi, đáp án mẫu và một đoạn tài liệu hệ thống đã tìm được. Hãy xác định đoạn tài liệu này có thực sự hữu ích để đi tới đáp án mẫu hay không. Trả `verdict: 1` nếu đoạn tài liệu cung cấp bằng chứng cho ít nhất một ý quan trọng trong đáp án, hoặc giúp làm rõ/sửa một tiền đề sai của câu hỏi để đi tới đáp án. Trả `verdict: 0` nếu đoạn chỉ cùng chủ đề, chứa thông tin bên lề, không đủ để hỗ trợ đáp án, hoặc không liên quan. Chỉ dựa vào đoạn tài liệu được cho và trả JSON gồm verdict cùng lý do ngắn.",
   "examples": [
     {
       "input": {

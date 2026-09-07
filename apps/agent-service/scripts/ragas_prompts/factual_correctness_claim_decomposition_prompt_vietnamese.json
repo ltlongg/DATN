@@ -1,7 +1,7 @@
 {
   "ragas_version": "0.4.3",
   "language": "vietnamese",
-  "instruction": "Hãy tách mỗi câu đầu vào thành một hoặc nhiều mệnh đề độc lập. Mỗi mệnh đề phải là một khẳng định đứng riêng được và có thể kiểm chứng độc lập. Giữ đúng mức độ nguyên tử (atomicity) và mức độ bao phủ (coverage) như trong các ví dụ.",
+  "instruction": "Bạn nhận được một văn bản, có thể là câu trả lời của hệ thống hoặc đáp án mẫu. Hãy tách văn bản thành các mệnh đề độc lập để đối chiếu với văn bản còn lại ở bước sau. Mỗi mệnh đề phải là một khẳng định đứng riêng được và có thể kiểm chứng độc lập. Giữ toàn bộ thông tin có thể kiểm chứng: không bỏ, làm mềm hoặc gộp chi tiết về chủ thể, thuộc tính, quan hệ, số lượng, thời điểm, địa điểm, phủ định hay mức độ chắc chắn. Không tự kiểm tra hoặc sửa tính đúng sai; cả thông tin có thể sai cũng phải được giữ thành mệnh đề. Trả JSON chứa danh sách `claims`.",
   "examples": [
     {
       "input": {
@@ -9,7 +9,10 @@
       },
       "output": {
         "claims": [
-          "Charles Babbage là một nhà toán học và nhà triết học."
+          "Charles Babbage là một nhà toán học.",
+          "Charles Babbage là một nhà triết học.",
+          "Charles Babbage là người Pháp.",
+          "Charles Babbage là một nhà phê bình ẩm thực."
         ]
       }
     },
@@ -19,8 +22,10 @@
       },
       "output": {
         "claims": [
-          "Albert Einstein là một nhà vật lý người Đức.",
-          "Albert Einstein phát triển thuyết tương đối và đóng góp vào cơ học lượng tử."
+          "Albert Einstein là một nhà vật lý lý thuyết.",
+          "Albert Einstein là người Đức.",
+          "Albert Einstein phát triển thuyết tương đối.",
+          "Albert Einstein đóng góp vào sự phát triển của cơ học lượng tử."
         ]
       }
     }

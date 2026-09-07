@@ -1,7 +1,7 @@
 {
   "ragas_version": "0.4.3",
   "language": "vietnamese",
-  "instruction": "Cho một câu hỏi và một câu trả lời, hãy phân tích độ phức tạp của từng câu trong câu trả lời. Tách mỗi câu thành một hoặc nhiều mệnh đề độc lập, đọc riêng vẫn hiểu được đầy đủ. Bảo đảm không mệnh đề nào còn dùng đại từ hay từ thay thế (ông, bà, họ, nơi đó, sự kiện này...) — phải thay bằng tên riêng hoặc cụm danh từ đầy đủ. Trả kết quả ở định dạng JSON.",
+  "instruction": "Bạn nhận được câu hỏi và câu trả lời do hệ thống tạo ra. Hãy tách câu trả lời thành các mệnh đề độc lập để bước sau kiểm tra với tài liệu đã tìm được. Mỗi mệnh đề phải đọc riêng vẫn hiểu đủ nghĩa; thay mọi đại từ hoặc từ thay thế (ông, bà, họ, nơi đó, sự kiện này...) bằng tên riêng hoặc cụm danh từ đầy đủ. Giữ mọi thông tin có thể kiểm chứng, gồm chủ thể, thuộc tính, quan hệ, số lượng, thời điểm, địa điểm, phủ định và mức độ chắc chắn. Không tự đánh giá đúng sai hoặc dùng kiến thức bên ngoài. Trả JSON chứa danh sách `statements`.",
   "examples": [
     {
       "input": {
