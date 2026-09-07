@@ -157,7 +157,10 @@ async def search_dense_sparse(
         raise RetrievalBackendError("embedding_failed") from exc
     if len(vectors) == 0:
         return []
-    sparse_indices, sparse_values = await asyncio.to_thread(encode_query, query)
+    try:
+        sparse_indices, sparse_values = await asyncio.to_thread(encode_query, query)
+    except Exception as exc:  # encoder lỗi/không nạp được model
+        raise RetrievalBackendError("sparse_encoding_failed") from exc
 
     try:
         client = client or get_qdrant_client()
@@ -194,7 +197,10 @@ async def search_bm25(
     """
     settings = get_settings()
     k = top_k if top_k is not None else settings.bm25_top_k
-    sparse_indices, sparse_values = await asyncio.to_thread(encode_query, query)
+    try:
+        sparse_indices, sparse_values = await asyncio.to_thread(encode_query, query)
+    except Exception as exc:  # hybrid có thể tiếp tục bằng dense/graph
+        raise RetrievalBackendError("sparse_encoding_failed") from exc
 
     try:
         client = client or get_qdrant_client()

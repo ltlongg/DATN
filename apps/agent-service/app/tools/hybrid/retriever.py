@@ -128,9 +128,9 @@ async def retrieve_hybrid(
         ),
     )
 
-    # Vector + sparse cùng dựa Qdrant nên thường sống/chết cùng nhau; điều kiện "chết hẳn"
-    # vẫn là vector (dense) + graph cùng lỗi. Sparse lỗi riêng -> chỉ degrade + warning.
-    if vec_err is not None and graph_err is not None:
+    # Dense có thể lỗi riêng ở embedding trong khi BM25 vẫn truy vấn Qdrant được.
+    # Chỉ dừng khi CẢ BA nguồn lỗi; tìm thành công nhưng rỗng không phải backend lỗi.
+    if vec_err is not None and bm25_err is not None and graph_err is not None:
         raise RetrievalBackendError("all_backends_failed")
 
     warnings: list[str] = []

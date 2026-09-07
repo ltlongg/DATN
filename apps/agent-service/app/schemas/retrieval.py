@@ -23,7 +23,7 @@ CandidateSource = Literal["vector", "graph", "sparse"]
 class RetrievalBackendError(RuntimeError):
     """Lỗi backend retrieval (Qdrant/Neo4j/embedding). `code` để phân loại + test.
 
-    Dùng cho các nhánh không thể tiếp tục (vd thiếu client, embedding fail, cả hai
+    Dùng cho các nhánh không thể tiếp tục (vd thiếu client, embedding fail, cả ba
     backend chết). KHÔNG dùng cho "không match seed" / "empty result" — những case đó
     trả result rỗng, không raise (xem plan §Error handling).
     """

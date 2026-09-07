@@ -1,6 +1,6 @@
 """Test retrieve_hybrid: RRF dedupe/fuse, hydrate MỘT lần theo thứ tự fused, graph_context
 đi thẳng (không qua RRF), rule B kéo chunk nguồn của graph_context để giữ citation,
-partial khi một backend lỗi, raise khi cả hai chết.
+partial khi một backend lỗi, raise khi cả ba nguồn lỗi.
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ from app.schemas.retrieval import (
     RetrievalCandidate,
 )
 from app.tools.hybrid import retriever as H
+from app.tools.graph_rag import vector_store as V
 
 def _vc(chunk_id, rank, score=0.5):
     return RetrievalCandidate(chunk_id=chunk_id, source="vector", rank=rank, score=score)
@@ -161,11 +162,51 @@ async def test_hybrid_raises_when_all_backends_fail(monkeypatch) -> None:
     _patch(
         monkeypatch,
         vector_err=RetrievalBackendError("qdrant_unavailable"),
+        bm25_err=RetrievalBackendError("qdrant_unavailable"),
         graph_err=ConnectionError("neo4j down"),
     )
     with pytest.raises(RetrievalBackendError) as exc:
         await H.retrieve_hybrid("q")
     assert exc.value.code == "all_backends_failed"
+
+
+@pytest.mark.parametrize("has_result", [True, False])
+async def test_hybrid_uses_sparse_when_dense_and_graph_fail(monkeypatch, has_result) -> None:
+    calls = _patch(
+        monkeypatch,
+        vector_err=RetrievalBackendError("embedding_failed"),
+        graph_err=ConnectionError("neo4j down"),
+        bm25=[_sc("c-1", 1)] if has_result else [],
+        rows=[_row("c-1")],
+    )
+    result = await H.retrieve_hybrid("q")
+    assert [c.chunk_id for c in result.chunks] == (["c-1"] if has_result else [])
+    assert calls["hydrate"] == int(has_result)
+    if has_result:
+        assert result.chunks[0].sources == ["sparse"]
+    assert len(result.warnings) == 2
+    assert any("embedding_failed" in w for w in result.warnings)
+    assert any("neo4j_unavailable" in w for w in result.warnings)
+
+
+async def test_hybrid_continues_after_real_sparse_encoder_failure(monkeypatch) -> None:
+    _patch(
+        monkeypatch,
+        vector=[_vc("c-1", 1)],
+        graph=([_gc("c-2", 1)], []),
+        rows=[_row("c-1"), _row("c-2")],
+    )
+    # Giữ search_bm25 thật để đi qua ranh giới encoder -> backend error -> hybrid.
+    monkeypatch.setattr(H, "search_bm25", V.search_bm25)
+
+    def fail_encode(query):
+        raise RuntimeError("sparse model unavailable")
+
+    monkeypatch.setattr(V, "encode_query", fail_encode)
+    result = await H.retrieve_hybrid("q")
+    assert {c.chunk_id for c in result.chunks} == {"c-1", "c-2"}
+    assert len(result.warnings) == 1
+    assert "sparse_encoding_failed" in result.warnings[0]
 
 async def test_hybrid_skips_missing_hydrated_chunk_with_warning(monkeypatch) -> None:
     _patch(

@@ -89,3 +89,19 @@ async def test_search_dense_sparse_prefetch_limits_use_top_k_and_bm25_top_k(monk
     assert call["prefetch"][0].limit == 7  # dense prefetch dùng top_k (không còn hardcode)
     assert call["prefetch"][1].limit == 9  # sparse prefetch dùng bm25_top_k
     assert call["limit"] == 7  # limit fusion cuối
+
+
+@pytest.mark.parametrize("search", [V.search_bm25, V.search_dense_sparse])
+async def test_sparse_encoder_failure_is_backend_error(monkeypatch, search) -> None:
+    error = RuntimeError("sparse model unavailable")
+
+    def fail_encode(query):
+        raise error
+
+    monkeypatch.setattr(V, "encode_query", fail_encode)
+    client = _FakeQdrant([])
+    with pytest.raises(RetrievalBackendError) as exc:
+        await search("q", client=client)
+    assert exc.value.code == "sparse_encoding_failed"
+    assert exc.value.__cause__ is error
+    assert client.calls == []
