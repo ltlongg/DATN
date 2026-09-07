@@ -1,6 +1,6 @@
-"""Chấm bộ eval bằng năm metric RAGAS — bước 2.
+"""Chấm retrieval_qa_v2.json bằng năm metric RAGAS — bước 2.
 
-Đọc `dataset/eval/<dataset>.json` (nhãn) và file runs do `collect_eval_runs.py` sinh ra
+Đọc `dataset/eval/retrieval_qa_v2.json` mặc định và runs do `collect_eval_runs.py` sinh ra
 (output thật của hệ), ghép thành `ragas.EvaluationDataset` rồi gọi `ragas.evaluate()`.
 Cả hai đều là JSON mảng in dọc.
 
@@ -23,33 +23,29 @@ Hai metric recall hỏi hai câu khác hẳn: `LLMContextRecall` chấm khâu TR
 (gold_answer có nằm trong đống chunk tra về không), `FactualCorrectness` chấm
 khâu TRẢ LỜI (câu hệ viết ra có khớp dữ kiện của gold không).
 
-`FactualCorrectness` chạy ở `mode="recall"`, KHÔNG phải `"f1"` mặc định: `gold_answer`
-của bộ nhãn viết ở mức tối thiểu nên mọi dữ kiện đúng mà hệ nêu thêm đều bị `precision`
-đếm là false positive.
-
-HẠN CHẾ ĐÃ BIẾT của `mode="recall"` (ragas 0.4.3, đã đối chiếu source): `tp` đếm trên
-claim của RESPONSE còn `fn` đếm trên claim của REFERENCE, hai quần thể khác nhau. Khi
-gold ngắn và response dài, mọi claim của response đều mang chi tiết ngoài gold → `tp=0`,
-`fn=0` → `0/1e-8` = 0.0 dù gold đã được phủ đủ. Trên bộ 100 câu hiện tại có 6 ca như vậy.
-Đọc cột điểm phải nhớ điều này; xem `docs/plan/evaluation-plan.md` §4.3.
+`FactualCorrectness` dùng mode="recall" để đo độ phủ dữ kiện trong gold_answer;
+điểm này không phải factual F1. `sources` của v2 dùng để kiểm tra nhãn;
+retrieved_contexts khi chấm luôn lấy từ lần chạy hệ thống, không lấy nguồn mẫu.
 
 Prompt nội bộ của cả năm metric được nạp từ bản dịch tiếng Việt cố định trong
 `scripts/ragas_prompts/` — xem `use_vietnamese_prompts()`.
 
 Dùng (chạy trong venv agent-service, từ apps/agent-service):
 
-    python -m scripts.run_ragas_eval --runs ../../dataset/eval/runs/auto.json
+    python -m scripts.run_ragas_eval --runs ../../dataset/eval/runs/auto_v2.json
 
 Chấm lại riêng một metric (không nạp embedding model):
 
-    python -m scripts.run_ragas_eval --runs ../../dataset/eval/runs/auto.json \
+    python -m scripts.run_ragas_eval --runs ../../dataset/eval/runs/auto_v2.json \
         --metrics factual_correctness
 
 Chấm lại riêng vài câu — câu vừa chạy lại, hoặc câu judge trả NaN — rồi vá vào bảng đầy đủ:
 
-    python -m scripts.run_ragas_eval --runs ../../dataset/eval/runs/auto.json \
+    python -m scripts.run_ragas_eval --runs ../../dataset/eval/runs/auto_v2.json \
         --ids qa-046 qa-083
-    python -m scripts.merge_ragas_csv --patch ../../dataset/eval/runs/auto.ids2.csv
+    python -m scripts.merge_ragas_csv --dataset retrieval_qa_v2.json \
+        --base ../../dataset/eval/runs/auto_v2.ragas.csv \
+        --patch ../../dataset/eval/runs/auto_v2.ids2.csv
 
 Chi phí: cả năm metric đều gọi LLM cho từng câu khi chấm. `FactualCorrectness` ở
 `mode="recall"` decompose + verify theo cả hai chiều — ~4 call/câu, đắt nhất trong năm.
@@ -130,12 +126,17 @@ def build_samples(labels: list[dict], runs: dict[str, dict]) -> tuple[list, list
         if run is None or run.get("error"):
             skipped.append(item["id"])
             continue
+        if run.get("question") != item["question"]:
+            raise SystemExit(
+                f"{item['id']}: câu hỏi trong runs không khớp dataset; "
+                "hãy thu thập lại kết quả cho dataset hiện tại."
+            )
         samples.append(
             SingleTurnSample(
                 user_input=item["question"],
                 response=run.get("response") or "",
                 retrieved_contexts=run.get("retrieved_contexts") or [],
-                reference=item.get("gold_answer") or "",
+                reference=item["gold_answer"],
             )
         )
         ids.append(item["id"])
@@ -181,10 +182,10 @@ def build_metrics(llm, embeddings=None, selected: t.Iterable[str] | None = None)
     `ResponseRelevancy` là metric duy nhất cần embeddings: nó sinh ngược N câu hỏi từ
     `response` rồi đo cosine với `user_input`, chứ không phải LLM chấm điểm trực tiếp.
 
-    `FactualCorrectness` để nguyên `atomicity`/`coverage` mặc định (`low`/`low`): hai tham
-    số đó chỉ chọn bộ example trong `__post_init__`, mà `set_prompts()` của
-    `use_vietnamese_prompts()` ghi đè lên sau — đổi chúng sẽ không có tác dụng trừ khi dịch
-    lại bộ example tương ứng.
+    `FactualCorrectness` dùng claim-decomposition prompt tiếng Việt có độ bao phủ cao: mọi
+    dữ kiện có thể kiểm chứng, kể cả dữ kiện sai, đều phải thành claim trước khi NLI kiểm
+    tra. `atomicity`/`coverage` của class chỉ chọn example trong `__post_init__`; prompt
+    trong repo được `use_vietnamese_prompts()` ghi đè sau đó.
     """
     selected_names = set(selected or METRIC_NAMES)
     unknown = selected_names - set(METRIC_NAMES)
@@ -221,7 +222,7 @@ def build_llm(model: str | None):
             model=model or settings.llm_model,
             api_key=settings.openai_api_key,
             base_url=settings.openai_base_url,
-            temperature=0,
+            reasoning_effort="low",
         )
     )
 
@@ -296,7 +297,7 @@ def resolve_output_path(
     """Tạo tên output an toàn; chạy subset không được đè file đủ metric.
 
     Subset theo metric hay theo id đều phải ra tên khác `<runs>.ragas.csv`, vì file đó
-    là kết quả đầy đủ 100 câu × 5 metric — đè nó bằng 5 dòng là mất cả lần chạy trước.
+    là bảng kết quả đầy đủ — không ghi đè bằng kết quả chỉ chấm một phần.
     """
     if out:
         return Path(out)
@@ -314,7 +315,7 @@ def resolve_output_path(
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", required=True, help="file JSON do collect_eval_runs.py sinh")
-    ap.add_argument("--dataset", default="retrieval_qa.json", help="tên file nhãn trong dataset/eval/")
+    ap.add_argument("--dataset", default="retrieval_qa_v2.json", help="tên file nhãn v2 trong dataset/eval/")
     ap.add_argument("--embeddings", default="local", choices=["local", "openai"])
     ap.add_argument("--judge-model", default=None, help="mặc định: settings.llm_model")
     ap.add_argument("--prompt-lang", default="vietnamese", choices=["vietnamese", "english"],
@@ -374,7 +375,11 @@ def main() -> int:
     )
     print(f"Chi tiết từng câu -> {out}")
     if args.ids:
-        print(f"Ghép vào bảng đầy đủ: python -m scripts.merge_ragas_csv --patch {out}")
+        base = Path(args.runs).with_suffix(".ragas.csv")
+        print(
+            f'Ghép vào bảng đầy đủ: python -m scripts.merge_ragas_csv '
+            f'--dataset "{args.dataset}" --base "{base}" --patch "{out}"'
+        )
     return 0
 
 if __name__ == "__main__":

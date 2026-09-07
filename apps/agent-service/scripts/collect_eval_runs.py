@@ -1,6 +1,6 @@
-"""Chạy hệ trên bộ eval và ghi lại output thô — bước 1 của quy trình đánh giá.
+"""Chạy hệ trên retrieval_qa_v2.json và ghi output thô — bước 1.
 
-Bốn metric RAGAS cần 2 thứ chỉ có được khi CHẠY THẬT: `response` (câu trả lời hệ sinh ra)
+Năm metric RAGAS cần 2 thứ chỉ có được khi CHẠY THẬT: `response` (câu trả lời hệ sinh ra)
 và `retrieved_contexts` (các đoạn hệ tra được). Script này sinh ra chúng, và chỉ chúng —
 bản ghi ra file đúng bốn field `id / question / response / retrieved_contexts` (thêm
 `error` hoặc `blocked` khi câu đó không chạy bình thường).
@@ -22,11 +22,11 @@ mảng in dọc riêng để `run_ragas_eval.py` chấm và so.
 Dùng (chạy trong venv của agent-service, từ thư mục apps/agent-service):
 
     python -m scripts.collect_eval_runs --mode hybrid \
-        --out ../../dataset/eval/runs/hybrid.json
+        --out ../../dataset/eval/runs/hybrid_v2.json
     python -m scripts.collect_eval_runs --pipeline rag --mode auto \
-        --out ../../dataset/eval/runs/auto_rag.json
+        --out ../../dataset/eval/runs/auto_rag_v2.json
     python -m scripts.collect_eval_runs --pipeline rag --mode auto --resume \
-        --out ../../dataset/eval/runs/auto_rag.json
+        --out ../../dataset/eval/runs/auto_rag_v2.json
 
 `--resume` đọc file output hiện có, giữ các câu đã chạy thành công và chỉ chạy lại câu
 thiếu, có `error` hoặc `blocked`. Kết quả được checkpoint sau mỗi câu hoàn tất nên lần chạy
@@ -53,7 +53,7 @@ from app.orchestrator.errors import GuardrailsBlocked
 from app.orchestrator.graph import get_graph
 from app.orchestrator.runner import prepare_state
 from app.orchestrator.state import AgentState
-from app.schemas.ask import AskRequest, ChatMessage
+from app.schemas.ask import AskRequest
 
 ROOT = Path(__file__).resolve().parents[3]
 EVAL_DIR = ROOT / "dataset" / "eval"
@@ -134,7 +134,6 @@ async def run_one(item: dict, mode: EvalMode, pipeline: EvalPipeline = "full") -
     một câu chết không được làm hỏng cả lần chạy, nhưng cũng không được biến mất."""
     request = AskRequest(
         question=item["question"],
-        history=[ChatMessage(**m) for m in item.get("history", [])],
         mode=mode,
         stream=False,
         debug=False,
@@ -174,11 +173,12 @@ async def main_async(args: argparse.Namespace) -> int:
 
     rows_by_id: dict[str, dict] = {}
     if args.resume and out_path.exists():
-        valid_ids = {item["id"] for item in all_items}
+        questions = {item["id"]: item["question"] for item in all_items}
         rows_by_id = {
             row["id"]: row
             for row in load_json(out_path)
-            if row.get("id") in valid_ids
+            if row.get("id") in questions
+            and row.get("question") == questions[row["id"]]
         }
 
     pending = [item for item in items if not can_resume(rows_by_id.get(item["id"]), item)]
@@ -217,7 +217,7 @@ async def main_async(args: argparse.Namespace) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dataset", default="retrieval_qa.json", help="tên file trong dataset/eval/")
+    ap.add_argument("--dataset", default="retrieval_qa_v2.json", help="tên file v2 trong dataset/eval/")
     ap.add_argument("--pipeline", default="full", choices=["full", "rag"],
                     help="full = graph production; rag = bỏ input guardrail")
     ap.add_argument("--mode", default="auto", choices=["auto", "traditional", "hybrid"])
@@ -230,4 +230,7 @@ def main() -> int:
     return asyncio.run(main_async(ap.parse_args()))
 
 if __name__ == "__main__":
+    if sys.platform == "win32":
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
     sys.exit(main())
