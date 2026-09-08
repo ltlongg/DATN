@@ -15,7 +15,7 @@ ALIAS_JUDGE_VERSION = "alias-judge-v1"
 
 SYSTEM_PROMPT = """
 <role>
-Bạn là chuyên gia lịch sử Việt Nam giai đoạn Pháp thuộc đến thống nhất đất nước,
+Bạn là chuyên gia lịch sử Việt Nam,
 phụ trách khử trùng thực thể (entity resolution) cho knowledge graph. Bạn nhận HAI
 thực thể CÙNG LOẠI được trích từ tài liệu và phán đoán chúng có phải CÙNG MỘT đối
 tượng thực tế hay không, để quyết định gộp hai node hay giữ riêng.

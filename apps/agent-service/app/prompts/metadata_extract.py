@@ -1,8 +1,9 @@
 """Prompt trích metadata nội dung (times/actors/locations/events) từ một chunk.
 
 Có version tag để tái index khi đổi prompt (xem README › versioning KG). Prompt
-bằng tiếng Việt, định hướng domain lịch sử Việt Nam (giai đoạn Pháp thuộc ->
-thống nhất). KHÔNG yêu cầu chuẩn hóa alias ở phase này — chỉ lấy surface form.
+bằng tiếng Việt, định hướng domain lịch sử Việt Nam — TOÀN BỘ tiến trình, từ thời
+nguyên thuỷ tới hiện đại, cùng phạm vi với `graph_extract`/`timeline_extract` và
+với corpus thật. KHÔNG yêu cầu chuẩn hóa alias ở phase này — chỉ lấy surface form.
 
 Dùng với OpenAI Structured Outputs (json_schema strict) qua `parse()`. System
 prompt vẫn mô tả rõ ý nghĩa từng khóa để tăng chất lượng trích (schema chỉ ép cấu
@@ -11,12 +12,12 @@ trúc, không ép nội dung).
 
 from __future__ import annotations
 
-PROMPT_VERSION = "metadata-extract-v5"
+PROMPT_VERSION = "metadata-extract-v6"
 
 SYSTEM_PROMPT = """
 <role>
-Bạn là chuyên gia trích xuất metadata cho hệ thống RAG về lịch sử Việt Nam, giai đoạn
-từ Pháp thuộc đến thống nhất đất nước. Bạn đọc một đoạn văn lịch sử và bóc tách các
+Bạn là chuyên gia trích xuất metadata cho hệ thống RAG về toàn bộ lịch sử Việt Nam, từ
+tiền sử đến hiện đại. Bạn đọc một đoạn văn lịch sử và bóc tách các
 thực thể CỐT LÕI phục vụ truy hồi và dựng knowledge graph.
 </role>
 

@@ -30,7 +30,6 @@ _COLUMNS = (
     "graph_max_context_items",
     "graph_max_path_hops",
     "graph_path_hit_weight",
-    "llm_temperature",
     "updated_at",
 )
 _SELECT_LIST = ", ".join(_COLUMNS)

@@ -35,6 +35,19 @@ lời mãi vẫn hỏng. Bỏ ví dụ là mất đúng mấy thứ đó. Cắt 
 LẪN câu trả lời mẫu cho khớp nhau: để câu trả lời nêu dữ kiện không có trong chunk mẫu là
 dạy model bịa. Gọn thêm 2 chỗ trùng lặp: luật đánh số trong `<format>` nói cùng một điều hai
 lần, và `<tone>` nhắc lại luật độ dài đã có ở `<format>`.
+
+v9 — chặn rò chunk_id vào `answer`. Model đang in id ra giữa câu trả lời, dạng
+"(tap2_clean-000137; tap2_clean-000139)", trong khi hệ thống đã dựng khối trích dẫn riêng từ
+`used_chunk_ids` -> người hỏi thấy nguồn hai lần, một lần dưới dạng id thô vô nghĩa với họ.
+Hai chỗ đẩy nó ra đều là mơ hồ chứ không phải model sai luật: luật "mỗi ý chính trong answer
+phải có ít nhất một chunk_id" đọc được thành "kèm id cạnh mỗi ý", và `RETRY_INSTRUCTION` còn
+nói thẳng "mỗi ý chính đều KÈM chunk_id" ở ngay cuối user prompt (vị trí trọng số cao nhất,
+nên retry là lượt hay rò nhất). Nay cả hai đều nói về TRƯỜNG `used_chunk_ids`, cộng một luật
+cấm viết id vào answer. Luật cũ ở `<rules>` chỉ cấm các CỤM TỪ ("chunk", "theo ngữ cảnh"...)
+nên in id trần không phạm luật nào — model tuân thủ đúng chữ mà vẫn ra kết quả sai.
+
+Không lọc hậu kỳ bằng regex ở `orchestrator/synthesis.py`: `answer` là field stream ra trước
+tiên, cắt id sau khi nó đã hiện trên màn hình còn khó coi hơn để nguyên.
 """
 
 from __future__ import annotations
@@ -42,11 +55,11 @@ from __future__ import annotations
 from app.schemas.ask import ResolvedFact
 from app.schemas.retrieval import GraphContextItem, RetrievedChunk
 
-SYNTHESIZE_PROMPT_VERSION = "synthesize-v7"
+SYNTHESIZE_PROMPT_VERSION = "synthesize-v9"
 
 SYSTEM_PROMPT = """
 <role>
-Bạn là trợ lý hỏi đáp về lịch sử Việt Nam (giai đoạn Pháp thuộc đến thống nhất đất nước),
+Bạn là trợ lý hỏi đáp về lịch sử Việt Nam,
 phục vụ mọi người dùng quan tâm tới lịch sử. Bạn trả lời tiếng Việt rõ ràng, chính xác,
 có căn cứ, với giọng thân thiện tự nhiên như đang trò chuyện.
 </role>
@@ -108,7 +121,12 @@ tương ứng, đừng khẳng định chắc nịch.
 
 <rules>
 - Chỉ dùng thông tin trong các khối ngữ cảnh trên. KHÔNG thêm kiến thức ngoài, KHÔNG suy đoán.
-- Mỗi ý chính trong answer phải có ít nhất một chunk_id tương ứng trong used_chunk_ids.
+- Mọi ý chính trong answer đều phải có căn cứ trong ngữ cảnh; id của các căn cứ đó liệt kê
+  vào TRƯỜNG used_chunk_ids, mỗi ý chính ứng với ít nhất một id.
+- TUYỆT ĐỐI KHÔNG viết chunk_id vào answer — kể cả id trần trong ngoặc, vd
+  "(lichsu_clean-000042)", hay đi kèm nhãn "nguồn:", "theo". Hệ thống đã dựng sẵn khối trích
+  dẫn cho người hỏi từ used_chunk_ids; id lọt vào answer là hiện nguồn hai lần, mà lần lộ ra
+  giữa câu chữ thì người hỏi không hiểu nổi.
 - [MẮT XÍCH ĐÃ XÁC ĐỊNH] là dữ kiện CÓ NGUỒN như đoạn tài liệu, KHÔNG phải sự thật hiển nhiên.
 - Có [PHẦN CHƯA TRA ĐƯỢC] -> nói thẳng vế đó chưa đủ dữ liệu, KHÔNG lấp liếm bằng suy đoán.
 - Nếu ngữ cảnh chỉ đủ trả lời MỘT PHẦN: vẫn trả lời đầy đủ mọi ý có căn cứ, đặt confidence =
@@ -160,7 +178,7 @@ Phong trào Cần Vương bùng nổ sau khi vua Hàm Nghi xuống chiếu kêu 
 
 [CÂU HỎI]
 Dân số Việt Nam năm 1900 là bao nhiêu?</user_prompt>
-<output>{"answer": "Mình chưa có số liệu về dân số Việt Nam năm 1900 nên không dám trả lời chắc chắn. Bạn thử hỏi mình về sự kiện hay nhân vật trong giai đoạn này xem sao.", "used_chunk_ids": [], "confidence": "không đủ dữ liệu"}</output>
+<output>{"answer": "Mình chưa có số liệu về dân số Việt Nam năm 1900 nên không dám trả lời chắc chắn. Bạn thử hỏi mình về một sự kiện hay nhân vật lịch sử cụ thể xem sao.", "used_chunk_ids": [], "confidence": "không đủ dữ liệu"}</output>
 </example>
 
 <example>
@@ -191,9 +209,9 @@ Diễn biến chính của chiến dịch Điện Biên Phủ diễn ra thế n�
 # Chỉ dẫn thêm vào cuối user prompt khi đây là lượt synthesize thứ 2+ (retry). LLM với cùng
 # prompt thường lặp lại cùng lỗi; thêm lý do thất bại giúp model điều chỉnh.
 RETRY_INSTRUCTION = """
-LƯU Ý: Lượt tạo trước bị từ chối vì câu trả lời không có trích dẫn chunk_id hợp lệ. Lần này
-hãy đảm bảo mỗi ý chính đều kèm chunk_id lấy từ danh sách [ĐOẠN TÀI LIỆU] ở trên. Không được
-dùng chunk_id không có trong danh sách đó.
+LƯU Ý: Lượt tạo trước bị từ chối vì TRƯỜNG used_chunk_ids không có chunk_id hợp lệ. Lần này
+hãy điền vào used_chunk_ids các chunk_id có thật trong [ĐOẠN TÀI LIỆU], trong khối quan hệ
+hoặc khối mắt xích ở trên; không dùng id nào khác. Vẫn TUYỆT ĐỐI KHÔNG viết id vào answer.
 """.strip()
 
 def render_chunks(chunks: list[RetrievedChunk]) -> str:

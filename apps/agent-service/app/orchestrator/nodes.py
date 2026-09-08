@@ -193,7 +193,7 @@ async def plan(state: AgentState, config: RunnableConfig) -> dict[str, Any]:
                 {"role": "user", "content": plan_prompt.build_user_prompt(question, history)},
             ],
             response_format=PlanOutput,
-            temperature=0.0,
+            reasoning_effort="low",
         )
         parsed = completion.choices[0].message.parsed
         if parsed is None:
@@ -449,7 +449,7 @@ async def resolve_step(state: AgentState, config: RunnableConfig) -> dict[str, A
                 },
             ],
             response_format=StepResolveOutput,
-            temperature=0.0,
+            reasoning_effort="low",
         )
         parsed = completion.choices[0].message.parsed
         if parsed is None:
@@ -609,7 +609,6 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
         )
     await _emit_step(emitter, step_id, "running")
     settings = get_settings()
-    cfg = RuntimeConfig.model_validate(state["runtime_config"])
     retrieval = state["retrieval"]
     assert retrieval is not None  # has_context đảm bảo có chunk trước khi vào đây
     # Document reordering (Phần F): xếp chunk điểm cao ra đầu/cuối prompt, chống "lost in the
@@ -660,7 +659,6 @@ async def synthesize(state: AgentState, config: RunnableConfig) -> dict[str, Any
         emitter=emitter,
         model=model,
         batch_chars=settings.stream_batch_chars,
-        temperature=cfg.llm_temperature,
         on_usage=_on_usage,
     )
     await _emit_step(

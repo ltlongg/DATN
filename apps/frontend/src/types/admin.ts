@@ -176,7 +176,7 @@ export interface ActivityLogResponse {
   offset: number;
 }
 
-// --- Cấu hình hệ thống — mirror apps/backend/app/schemas/config.py (13 field áp dụng LIVE) ---
+// --- Cấu hình hệ thống — mirror apps/backend/app/schemas/config.py (12 field áp dụng LIVE) ---
 export interface SystemConfig {
   rag_top_k: number;
   graph_top_k: number;
@@ -190,7 +190,6 @@ export interface SystemConfig {
   graph_max_context_items: number;
   graph_max_path_hops: number;
   graph_path_hit_weight: number;
-  llm_temperature: number;
   updated_at: string;
 }
 

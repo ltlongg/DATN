@@ -30,9 +30,9 @@ from app.core.internal_auth import internal_headers
 logger = logging.getLogger("agent.runtime_config")
 
 class RuntimeConfig(BaseModel):
-    """13 tham số tinh chỉnh áp dụng LIVE. Default = Y HỆT hằng trong core/config.py::Settings
-    (12 retrieval) + temperature synthesize 0.0. Bỏ qua field thừa (vd `updated_at` trong
-    response backend) nhờ extra='ignore'."""
+    """12 tham số retrieval tinh chỉnh áp dụng LIVE. Default = Y HỆT hằng trong
+    core/config.py::Settings. Bỏ qua field thừa (vd `updated_at` trong response backend) nhờ
+    extra='ignore'."""
 
     model_config = ConfigDict(extra="ignore")
 
@@ -49,8 +49,6 @@ class RuntimeConfig(BaseModel):
     graph_max_context_items: int = 12
     graph_max_path_hops: int = 3
     graph_path_hit_weight: float = 1.5
-    # --- synthesize ---
-    llm_temperature: float = 0.0
 
 _CACHE_TTL_SECONDS = 60.0
 _HTTP_TIMEOUT_SECONDS = 5.0

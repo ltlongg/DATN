@@ -2,11 +2,16 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
+import uuid
+from time import perf_counter
 
 from fastapi.testclient import TestClient
 
-from app.services.agent_client import format_sse
+from app.api.chat import _proxy_stream
+from app.services.agent_client import SseEvent, format_sse
+from app.services.sse_collector import SseCollector
 
 def _parse_stream(text: str) -> list[tuple[str, dict]]:
     """Tách text SSE thành [(event, data), ...]."""
@@ -449,3 +454,95 @@ def test_persisted_steps_close_out_unfinished_rows(client, auth, mock_agent) -> 
             "state": "partial",
         }
     ]
+
+class _FakeAgentStream:
+    """AgentStream tối giản để lái `_proxy_stream` tay — TestClient không mô phỏng được cảnh
+    trình duyệt bỏ đi giữa stream (nó luôn đọc tới hết body)."""
+
+    def __init__(self, events: list[SseEvent]) -> None:
+        self._events = events
+        self.closed = False
+
+    async def events(self):  # type: ignore[no-untyped-def]
+        for event in self._events:
+            yield event
+
+    async def aclose(self) -> None:
+        self.closed = True
+
+async def _drive(stream: _FakeAgentStream, cid: str, assistant_id: str, stop_after: int | None):
+    """Chạy `_proxy_stream` rồi đóng sau `stop_after` chunk (None = drain tới hết), đúng như
+    Starlette aclose() generator khi client ngắt."""
+    collector = SseCollector()
+    gen = _proxy_stream(stream, collector, cid, assistant_id, None, "u-test", perf_counter(), False)
+    chunks: list[str] = []
+    try:
+        async for chunk in gen:
+            chunks.append(chunk)
+            if stop_after is not None and len(chunks) >= stop_after:
+                break
+    finally:
+        await gen.aclose()
+    return chunks
+
+def test_ask_persists_partial_answer_when_client_disconnects(client, auth) -> None:  # type: ignore[no-untyped-def]
+    """Rời trang giữa lượt (frontend abort -> Starlette đóng generator trước `done`): phần đã
+    sinh vẫn vào DB. Trước đây câu trả lời dở mất hẳn, mở lại phiên chỉ còn câu hỏi cụt."""
+    user = auth("user")
+    cid = _new_conversation(client, user)
+    assistant_id = str(uuid.uuid4())
+    stream = _FakeAgentStream(
+        [
+            SseEvent(event="token", data={"text": "Trương Định "}),
+            SseEvent(event="token", data={"text": "chống Pháp."}),
+            SseEvent(
+                event="done",
+                data={"confidence": "cao", "retrieval_mode": "hybrid", "warnings": []},
+            ),
+        ]
+    )
+    chunks = asyncio.run(_drive(stream, cid, assistant_id, stop_after=2))
+
+    assert len(chunks) == 2  # ngắt trước done
+    assert stream.closed  # kết nối tới agent được đóng, không chờ GC
+    messages = client.get(f"/api/chat/conversations/{cid}", headers=user).json()["messages"]
+    assert [m["role"] for m in messages] == ["assistant"]
+    assert messages[0]["content"] == "Trương Định chống Pháp."
+    assert messages[0]["id"] == assistant_id
+
+def test_ask_disconnect_after_done_does_not_persist_twice(client, auth) -> None:  # type: ignore[no-untyped-def]
+    """Đường bình thường: `done` đã lưu -> `finally` phải im. Cùng `assistant_id`
+    pre-generate nên lưu lần hai sẽ vỡ khoá chính."""
+    user = auth("user")
+    cid = _new_conversation(client, user)
+    assistant_id = str(uuid.uuid4())
+    stream = _FakeAgentStream(
+        [
+            SseEvent(event="token", data={"text": "xong"}),
+            SseEvent(
+                event="done",
+                data={"confidence": "cao", "retrieval_mode": "hybrid", "warnings": []},
+            ),
+        ]
+    )
+    asyncio.run(_drive(stream, cid, assistant_id, stop_after=None))
+
+    messages = client.get(f"/api/chat/conversations/{cid}", headers=user).json()["messages"]
+    assert len(messages) == 1
+    assert messages[0]["content"] == "xong"
+
+def test_ask_disconnect_with_no_content_persists_nothing(client, auth) -> None:  # type: ignore[no-untyped-def]
+    """Ngắt trước khi có token nào -> không lưu message rỗng (assistant rỗng sẽ làm bẩn
+    history của lượt sau)."""
+    user = auth("user")
+    cid = _new_conversation(client, user)
+    stream = _FakeAgentStream(
+        [
+            SseEvent(event="steps", data={"steps": []}),
+            SseEvent(event="token", data={"text": "chưa tới"}),
+        ]
+    )
+    asyncio.run(_drive(stream, cid, str(uuid.uuid4()), stop_after=1))
+
+    messages = client.get(f"/api/chat/conversations/{cid}", headers=user).json()["messages"]
+    assert messages == []

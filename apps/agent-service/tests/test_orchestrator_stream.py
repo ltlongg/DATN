@@ -74,7 +74,8 @@ def _patch_retrieve(monkeypatch, result=None, *, error=None, results=None):
 
 def _patch_synthesize(monkeypatch, *, answer="Đáp án ngắn.", used=("c-1",), confidence="cao"):
     async def fake(
-        messages, *, emitter, model, batch_chars, temperature=0.0, client=None, on_usage=None
+        messages, *, emitter, model, batch_chars, reasoning_effort="low", client=None,
+        on_usage=None,
     ):
         from app.orchestrator.synthesis import emit_text_as_batches
 
@@ -476,7 +477,7 @@ async def test_retry_grows_the_panel_with_new_rows(monkeypatch) -> None:
     _patch_viz(monkeypatch)
     calls = {"n": 0}
 
-    async def fake(messages, *, emitter, model, batch_chars, temperature=0.0, **_kw):
+    async def fake(messages, *, emitter, model, batch_chars, reasoning_effort="low", **_kw):
         from app.orchestrator.synthesis import emit_text_as_batches
 
         calls["n"] += 1

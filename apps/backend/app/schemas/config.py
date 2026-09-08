@@ -1,6 +1,6 @@
-"""Schema cho nhóm Cấu hình hệ thống (retrieval + synthesize áp dụng LIVE).
+"""Schema cho nhóm Cấu hình hệ thống (retrieval áp dụng LIVE).
 
-`SystemConfigResponse` = 13 field cấu hình + `updated_at` (dùng cho cả GET /api/admin/config
+`SystemConfigResponse` = 12 field cấu hình + `updated_at` (dùng cho cả GET /api/admin/config
 và GET /internal/config — agent-service parse chính schema này). `SystemConfigUpdate` = PATCH
 một phần (exclude_unset ở API): mọi field optional, range khớp CHECK ở DB (db.py). Range sai
 bị chặn ở tầng Pydantic TRƯỚC khi chạm DB; ràng buộc chéo rerank_top_k <= hybrid_candidate_k
@@ -28,8 +28,6 @@ class SystemConfigResponse(BaseModel):
     graph_max_context_items: int
     graph_max_path_hops: int
     graph_path_hit_weight: float
-    # --- synthesize ---
-    llm_temperature: float
     updated_at: datetime
 
 class SystemConfigUpdate(BaseModel):
@@ -46,8 +44,6 @@ class SystemConfigUpdate(BaseModel):
     graph_max_context_items: int | None = Field(default=None, ge=1)
     graph_max_path_hops: int | None = Field(default=None, ge=1)
     graph_path_hit_weight: float | None = Field(default=None, ge=0)
-    # --- synthesize ---
-    llm_temperature: float | None = Field(default=None, ge=0, le=2)
 
     @model_validator(mode="after")
     def _reject_explicit_null(self) -> SystemConfigUpdate:

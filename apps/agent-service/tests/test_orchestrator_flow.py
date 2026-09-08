@@ -135,11 +135,11 @@ def _patch_retrieve(monkeypatch, result=None, *, error=None, capture=None, resul
 
 def _patch_synthesize(monkeypatch, *, answer="Đáp án.", used=("c-1",), confidence="cao", capture=None):
     async def fake(
-        messages, *, emitter, model, batch_chars, temperature=0.0, client=None, on_usage=None
+        messages, *, emitter, model, batch_chars, reasoning_effort="low", client=None,
+        on_usage=None,
     ):
         if capture is not None:
             capture.setdefault("calls", []).append(messages)
-            capture["temperature"] = temperature
         # stream vài token cho giống thật
         await emitter.emit("token", {"text": answer})
         return SynthesizedAnswer(
@@ -230,7 +230,7 @@ def _patch_synthesize_sequence(monkeypatch, rounds, *, capture=None):
     Cần cho B5 vì lượt soạn lại phải khác lượt đầu mới kiểm được là nó đã soạn lại thật."""
     calls = {"n": 0}
 
-    async def fake(messages, *, emitter, model, batch_chars, temperature=0.0, **_kw):
+    async def fake(messages, *, emitter, model, batch_chars, reasoning_effort="low", **_kw):
         answer, used, confidence = rounds[min(calls["n"], len(rounds) - 1)]
         calls["n"] += 1
         if capture is not None:
@@ -550,23 +550,6 @@ async def test_empty_retrieval_uses_generic_honest(monkeypatch, mode) -> None:
     assert resp.answer == nodes.HONEST_MESSAGE
 
 # --- Phần F: document reordering áp ở synthesize (chống lost-in-the-middle) ---
-
-# --- runtime_config: llm_temperature chảy vào synthesize ---
-
-async def test_llm_temperature_from_runtime_config_reaches_synthesize(monkeypatch) -> None:
-    from app.core.runtime_config import RuntimeConfig
-    from app.orchestrator import runner
-
-    # Override runtime_config (autouse fixture để mặc định 0.0) -> temperature admin đặt phải
-    # đi qua prepare_state -> state["runtime_config"] -> node synthesize -> stream_synthesis.
-    monkeypatch.setattr(runner, "get_runtime_config", lambda: RuntimeConfig(llm_temperature=0.7))
-    _patch_plan(monkeypatch, route="needs_retrieval")
-    _patch_retrieve(monkeypatch, _retrieval(["c-1"]))
-    capture: dict = {}
-    _patch_synthesize(monkeypatch, used=("c-1",), capture=capture)
-    _patch_viz(monkeypatch)
-    await run_ask(AskRequest(question="hỏi", stream=False))
-    assert capture["temperature"] == 0.7
 
 async def test_synthesize_reorders_chunks_in_prompt(monkeypatch) -> None:
     import re

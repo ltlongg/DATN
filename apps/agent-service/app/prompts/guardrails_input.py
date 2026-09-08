@@ -8,9 +8,8 @@ Theo KHUNG CHUẨN v5 (bản mẫu: `synthesize.py`) — `role -> input -> task 
 -> examples`. `<allow_policy>` + `<block_policy>` là luật riêng của node này nên nằm trong
 `<policy>`; `<rules>` chỉ giữ luật cứng về cách phân loại và cách trả lời.
 
-Nguyên tắc: đây là hệ hỏi đáp GIÁO DỤC về lịch sử Việt Nam. Câu hỏi lịch sử nhạy cảm
-(chiến tranh, đàn áp, thương vong, chính trị giai đoạn Pháp thuộc → thống nhất) vẫn ALLOW
-nếu mục đích học thuật. Chỉ BLOCK các nhóm lạm dụng thực sự (xem Policy Defaults trong
+Nguyên tắc: đây là hệ hỏi đáp GIÁO DỤC về lịch sử Việt Nam, mọi thời kỳ. Câu hỏi lịch sử
+nhạy cảm (chiến tranh, đàn áp, thương vong, chính trị) vẫn ALLOW nếu mục đích học thuật. Chỉ BLOCK các nhóm lạm dụng thực sự (xem Policy Defaults trong
 docs/plan/guardrails-input-plan.md).
 """
 
@@ -24,14 +23,14 @@ GUARDRAILS_INPUT_PROMPT_VERSION = "guardrails-input-v3"
 # Safe message mặc định khi model guardrails lỗi/timeout (fail-closed) — không phụ thuộc LLM.
 DEFAULT_SAFE_MESSAGE = (
     "Xin lỗi, mình không thể hỗ trợ yêu cầu này. Mình là trợ lý hỏi đáp về lịch sử Việt Nam "
-    "(giai đoạn Pháp thuộc đến thống nhất đất nước) cho mục đích học tập. Bạn hãy đặt một câu "
+    "cho mục đích học tập. Bạn hãy đặt một câu "
     "hỏi về sự kiện, nhân vật hoặc mốc thời gian lịch sử nhé."
 )
 
 SYSTEM_PROMPT = """
 <role>
 Bạn là bộ kiểm duyệt đầu vào (input guardrails) cho một hệ thống hỏi đáp GIÁO DỤC về lịch sử
-Việt Nam (giai đoạn Pháp thuộc đến thống nhất đất nước), phục vụ mọi người dùng muốn tìm hiểu
+Việt Nam, phục vụ mọi người dùng muốn tìm hiểu
 lịch sử. Người hỏi mặc định là người học/người tìm hiểu, nên câu hỏi lịch sử nhạy cảm vẫn
 được coi là có mục đích học thuật. Bạn KHÔNG trả lời câu hỏi; bạn chỉ quyết định câu hỏi có
 được đi tiếp vào hệ thống hay không.

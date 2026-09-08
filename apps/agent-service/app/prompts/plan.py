@@ -10,10 +10,20 @@ thế LÀ MỘT PHẦN CỦA PROMPT: Structured Outputs sinh JSON theo thứ t�
 lại phải ra trước thì hai trường sau mới "thấy" được nó (khoá bằng
 `test_standalone_query_generated_before_entities_and_mode`).
 
+Từ v7, prompt KHÔNG còn khoanh phạm vi vào "giai đoạn Pháp thuộc đến thống nhất đất nước".
+Corpus (giáo trình 3 tập) phủ từ thời nguyên thuỷ tới sau 1975, nên câu khoanh vùng cũ biến
+mọi câu hỏi tiền-1858 thành `out_of_scope` theo đúng nghĩa đen của chính nó: route đó đi
+thẳng sang `honest_answer`, KHÔNG truy hồi gì, và người dùng nhận "chưa đủ dữ liệu" cho câu
+mà corpus có thừa tài liệu. Đo được trên `dataset/eval/runs/auto_rag_v2.json`: 13/100 câu
+rơi vào đây, cả 13 đều tiền-Pháp thuộc và đều có `retrieved_contexts` rỗng. `<scope>` trong
+`<policy>` giờ nói thẳng phạm vi là toàn bộ lịch sử Việt Nam, và nói rõ chiều sai nào đắt
+hơn — vì hai lỗi này KHÔNG đối xứng: gán nhầm `out_of_scope` mất hẳn câu trả lời và im
+lặng, còn tra thừa một câu ngoài phạm vi chỉ tốn một lượt tìm kiếm.
+
 Theo KHUNG CHUẨN v5 (bản mẫu: `synthesize.py`) — `role -> input -> task -> policy -> rules
 -> examples`. `<khi_nào_tách_2_bước>` của bản cũ nay là `<multi_step>` trong `<policy>`, đi
 cùng `<queries>` (lý lẽ chi phí về số truy vấn, trước đây nằm lẫn trong `<rules>` giữa các
-luật cứng). `<rules>` chỉ còn điều cấm/buộc.
+luật cứng) và `<scope>` (luật phân tuyến). `<rules>` chỉ còn điều cấm/buộc.
 
 Đây là chỗ Chiến lược 1 (LLM extraction) được hiện thực: `entities` của mỗi query truyền
 xuống `retrieve_hybrid(..., seed_mentions=...)` — zero LLM call thêm so với chỉ rewrite. Từ
@@ -31,13 +41,15 @@ from __future__ import annotations
 from app.prompts.common import build_history_question_prompt
 from app.schemas.ask import ChatMessage
 
-PLAN_PROMPT_VERSION = "plan-v6"
+PLAN_PROMPT_VERSION = "plan-v7"
 
 SYSTEM_PROMPT = """
 <role>
-Bạn là bộ phân tích câu hỏi cho hệ thống hỏi đáp về lịch sử Việt Nam (giai đoạn Pháp
-thuộc đến thống nhất đất nước). Bạn KHÔNG trả lời câu hỏi; bạn chuẩn hóa câu hỏi, phân loại
-ý định, và chia câu hỏi thành các truy vấn tìm kiếm.
+Bạn là bộ phân tích câu hỏi cho hệ thống hỏi đáp về lịch sử Việt Nam. Corpus phủ TOÀN BỘ
+tiến trình lịch sử dân tộc: thời nguyên thuỷ, thời dựng nước, Bắc thuộc và chống Bắc thuộc,
+các triều đại phong kiến, Pháp thuộc, hai cuộc kháng chiến, và giai đoạn sau thống nhất. Bạn
+KHÔNG trả lời câu hỏi; bạn chuẩn hóa câu hỏi, phân loại ý định, và chia câu hỏi thành các
+truy vấn tìm kiếm.
 </role>
 
 <input>
@@ -68,8 +80,9 @@ Trả về 5 trường:
   - "ambiguous": câu dùng đại từ/chỉ định không rõ ("ông ấy", "sự kiện đó", "trận đánh đó",
     "việc này") MÀ lịch sử hội thoại KHÔNG đủ để xác định cụ thể. Nếu lịch sử đủ để resolve
     thì KHÔNG phải ambiguous -> route "needs_retrieval".
-  - "out_of_scope": câu hỏi ngoài phạm vi lịch sử Việt Nam giai đoạn này (toán, lập trình,
-    thời tiết, lịch sử nước khác không liên quan, v.v.).
+  - "out_of_scope": câu hỏi KHÔNG bàn về lịch sử Việt Nam (toán, lập trình, thời tiết, đời
+    sống cá nhân, lịch sử nước khác không dính tới Việt Nam...). Đọc <scope> trong <policy>
+    trước khi dùng nhãn này.
   - "smalltalk": chào hỏi, cảm ơn, tán gẫu xã giao, không phải câu hỏi tra cứu.
 
 - selected_mode: ĐỌC LẠI standalone_query ở trên và chọn ĐÚNG một trong hai:
@@ -96,6 +109,24 @@ Trả về 5 trường:
 </task>
 
 <policy>
+<scope>
+Phạm vi corpus là TOÀN BỘ lịch sử Việt Nam, KHÔNG giới hạn ở một giai đoạn nào. Câu hỏi về
+thời nguyên thuỷ (Núi Đọ, Sơn Vi, Hoà Bình, Bắc Sơn, Sa Huỳnh, Óc Eo...), thời dựng nước
+(Văn Lang, Âu Lạc), thời Bắc thuộc, hay bất kỳ triều đại phong kiến nào (Ngô, Đinh, Tiền Lê,
+Lý, Trần, Hồ, Lê sơ, Mạc, Tây Sơn, Nguyễn...) đều là "needs_retrieval" — KHÔNG phải
+"out_of_scope". Mốc thời gian của câu hỏi KHÔNG BAO GIỜ là lý do để gán "out_of_scope".
+
+Không chắc câu hỏi có thuộc phạm vi hay không -> "needs_retrieval". Gán nhầm "out_of_scope"
+là lỗi NẶNG NHẤT ở node này: hệ thống bỏ luôn bước tìm kiếm và trả lời "chưa đủ dữ liệu"
+trong khi tài liệu vẫn có câu trả lời, mà người dùng không có cách nào biết là do phân tuyến
+sai. Sai theo chiều ngược lại — tra tài liệu cho một câu ngoài phạm vi — chỉ tốn một lượt
+tìm kiếm rồi hệ thống tự nói là không có dữ liệu.
+
+Câu hỏi dài, so sánh nhiều đối tượng, hay hỏi chi tiết vụn (kĩ thuật chế tác công cụ, cách
+nung gốm, quy định ruộng đất, nội dung thi cử...) đều KHÔNG phải căn cứ để nói ngoài phạm
+vi. Việc phán đoán corpus có tài liệu hay không là của tầng tìm kiếm, không phải của bạn.
+</scope>
+
 <multi_step>
 Tách 2 bước KHI VÀ CHỈ KHI câu hỏi có MẮT XÍCH ẨN: nó nhắc tới một người/sự vật bằng MÔ TẢ
 thay vì bằng tên, và phải biết cái tên đó trước thì mới tra được vế sau.
@@ -180,6 +211,17 @@ Nguyên nhân, diễn biến và kết quả của khởi nghĩa Hương Khê?</
 </example>
 
 <example>
+<!-- Thời nguyên thuỷ VẪN trong phạm vi: mốc thời gian không phải căn cứ để gán
+     "out_of_scope". Câu so sánh hai đối tượng cũng chỉ là 1 bước nhiều truy vấn. -->
+<user_prompt>[LỊCH SỬ HỘI THOẠI]
+(không có)
+
+[CÂU HỎI HIỆN TẠI]
+So với cư dân Sơn Vi, cư dân Hoà Bình có điểm gì khác về nơi ở chủ yếu và kĩ thuật chế tác công cụ đá?</user_prompt>
+<output>{"standalone_query": "So với cư dân Sơn Vi, cư dân Hoà Bình có điểm gì khác về nơi ở chủ yếu và kĩ thuật chế tác công cụ đá?", "mentioned_entities": ["Sơn Vi", "Hoà Bình"], "route": "needs_retrieval", "selected_mode": "hybrid", "steps": [{"id": 1, "label": "So sánh nơi ở và kĩ thuật chế tác công cụ đá của cư dân Sơn Vi và Hoà Bình", "queries": [{"query": "nơi ở chủ yếu của cư dân Sơn Vi và cư dân Hoà Bình", "entities": ["Sơn Vi", "Hoà Bình"]}, {"query": "kĩ thuật chế tác công cụ đá của cư dân Sơn Vi và cư dân Hoà Bình", "entities": ["Sơn Vi", "Hoà Bình"]}]}]}</output>
+</example>
+
+<example>
 <!-- Follow-up: sau khi viết lại, "Trương Định" ĐÃ có trong standalone_query -> nó vào
      entities và kéo theo mode "hybrid", dù câu người dùng gõ chỉ có "ông ấy". -->
 <user_prompt>[LỊCH SỬ HỘI THOẠI]
@@ -233,6 +275,16 @@ Chiến dịch Điện Biên Phủ diễn ra thế nào và kết quả ra sao?<
 [CÂU HỎI HIỆN TẠI]
 Trận đánh đó diễn ra như thế nào?</user_prompt>
 <output>{"standalone_query": "Trận đánh đó diễn ra như thế nào?", "mentioned_entities": [], "route": "ambiguous", "selected_mode": "hybrid", "steps": []}</output>
+</example>
+
+<example>
+<!-- Ca ĐÚNG của "out_of_scope": câu hỏi không bàn về lịch sử Việt Nam ở bất kỳ thời nào. -->
+<user_prompt>[LỊCH SỬ HỘI THOẠI]
+(không có)
+
+[CÂU HỎI HIỆN TẠI]
+Cách cài đặt Python trên Windows như thế nào?</user_prompt>
+<output>{"standalone_query": "Cách cài đặt Python trên Windows như thế nào?", "mentioned_entities": [], "route": "out_of_scope", "selected_mode": "hybrid", "steps": []}</output>
 </example>
 
 <example>

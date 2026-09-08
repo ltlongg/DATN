@@ -2,7 +2,7 @@
   "version": 1,
   "judge_version": "alias-judge-v1",
   "map": {
-    "buôn mê thuật": {
+    "buôn mê thuột": {
       "canonical_norm": "buôn ma thuật",
       "canonical_name": "Buôn Ma Thuật"
     },
@@ -31,8 +31,8 @@
       "canonical_name": "Chính quyền thuộc địa Đông Dương"
     },
     "chính sách ngụ binh ư nông": {
-      "canonical_norm": "chính sách ngụ binh u nông",
-      "canonical_name": "Chính sách ngụ binh u nông"
+      "canonical_norm": "ngụ binh ư nông",
+      "canonical_name": "Ngụ binh ư nông"
     },
     "chùa thầy": {
       "canonical_norm": "chùa thấy",
@@ -98,6 +98,22 @@
       "canonical_norm": "hiến pháp năm 1959",
       "canonical_name": "Hiến pháp năm 1959"
     },
+    "hiệp nghị giovevo": {
+      "canonical_norm": "hiệp định gionevo",
+      "canonical_name": "Hiệp định Gionevo"
+    },
+    "hiệp nghị gionevo": {
+      "canonical_norm": "hiệp định gionevo",
+      "canonical_name": "Hiệp định Gionevo"
+    },
+    "hiệp định giơnevơ": {
+      "canonical_norm": "hiệp định gionevo",
+      "canonical_name": "Hiệp định Gionevo"
+    },
+    "hiệp định gionevơ": {
+      "canonical_norm": "hiệp định gionevo",
+      "canonical_name": "Hiệp định Gionevo"
+    },
     "hiệp định pari về chấm dứt chiến tranh lập lại hòa bình ở việt nam": {
       "canonical_norm": "hiệp định pari về chấm dứt chiến tranh, lập lại hòa bình ở việt nam",
       "canonical_name": "Hiệp định Pari về chấm dứt chiến tranh, lập lại hoà bình ở Việt Nam"
@@ -135,8 +151,8 @@
       "canonical_name": "Hội thề Lũng Nhai"
     },
     "kennodi": {
-      "canonical_norm": "kennođi",
-      "canonical_name": "Kennođi"
+      "canonical_norm": "g. kennođi",
+      "canonical_name": "G. Kennođi"
     },
     "khome hóa chiến tranh": {
       "canonical_norm": "khơme hóa chiến tranh",
@@ -274,13 +290,9 @@
       "canonical_norm": "trại như hồng",
       "canonical_name": "Trại Như Hồng"
     },
-    "tuyên ngôn độc lập": {
-      "canonical_norm": "tuyên ngôn dộc lập",
-      "canonical_name": "Tuyên ngôn Dộc lập"
-    },
     "tân việt cách mệnh đảng": {
       "canonical_norm": "tân việt cách mạng đảng",
-      "canonical_name": "Tân Việt Cách mạng Đảng"
+      "canonical_name": "Tân Việt Cách mạng đảng"
     },
     "tòa đại hình sài gòn": {
       "canonical_norm": "tòa án đại hình sài gòn",
@@ -307,8 +319,8 @@
       "canonical_name": "Văn hóa Đồng Đậu"
     },
     "vĩnh thuy": {
-      "canonical_norm": "vĩnh thụy",
-      "canonical_name": "Vĩnh Thụy"
+      "canonical_norm": "bảo đại",
+      "canonical_name": "Bảo Đại"
     },
     "xihanúc": {
       "canonical_norm": "xihanuc",
@@ -342,10 +354,6 @@
       "canonical_norm": "đại hội đồng kinh tế và tài chính đông dương",
       "canonical_name": "Đại hội đồng kinh tế và tài chính Đông Dương"
     },
-    "đại việt quan báo": {
-      "canonical_norm": "đại việt tân báo",
-      "canonical_name": "Đại Việt tân báo"
-    },
     "đại việt sử kí toàn thư": {
       "canonical_norm": "đại việt sử ký toàn thư",
       "canonical_name": "Đại Việt sử ký toàn thư"
@@ -357,6 +365,1302 @@
     "đỗ sơn": {
       "canonical_norm": "đồ sơn",
       "canonical_name": "Đồ Sơn"
+    },
+    "an nam độ hộ": {
+      "canonical_norm": "an nam đô hộ",
+      "canonical_name": "An Nam đô hộ"
+    },
+    "công ti rượu đông dương": {
+      "canonical_norm": "công ti nấu rượu đông dương",
+      "canonical_name": "Công ti nấu rượu Đông Dương"
+    },
+    "lại châu": {
+      "canonical_norm": "lai châu",
+      "canonical_name": "Lai Châu"
+    },
+    "sầm na": {
+      "canonical_norm": "sầm nưa",
+      "canonical_name": "Sầm Nưa"
+    },
+    "tinh cương": {
+      "canonical_norm": "tĩnh cương",
+      "canonical_name": "Tĩnh Cương"
+    },
+    "nguyễn thành hiến": {
+      "canonical_norm": "nguyễn thần hiến",
+      "canonical_name": "Nguyễn Thần Hiến"
+    },
+    "nguyễn điền": {
+      "canonical_norm": "nguyễn văn điền",
+      "canonical_name": "Nguyễn Văn Điền"
+    },
+    "phan thúc duyên": {
+      "canonical_norm": "phan thúc duyện",
+      "canonical_name": "Phan Thúc Duyện"
+    },
+    "trần hình": {
+      "canonical_norm": "trần hinh",
+      "canonical_name": "Trần Hinh"
+    },
+    "lực tỉnh tân văn": {
+      "canonical_norm": "lục tỉnh tân văn",
+      "canonical_name": "Lục tỉnh tân văn"
+    },
+    "nam trung nhật báo": {
+      "canonical_norm": "lục tỉnh tân văn",
+      "canonical_name": "Lục tỉnh tân văn"
+    },
+    "nguyễn ái quốc": {
+      "canonical_norm": "hồ chí minh",
+      "canonical_name": "Hồ Chí Minh"
+    },
+    "nguyễn tất thành": {
+      "canonical_norm": "hồ chí minh",
+      "canonical_name": "Hồ Chí Minh"
+    },
+    "bác hồ": {
+      "canonical_norm": "hồ chí minh",
+      "canonical_name": "Hồ Chí Minh"
+    },
+    "chủ tịch hồ chí minh": {
+      "canonical_norm": "hồ chí minh",
+      "canonical_name": "Hồ Chí Minh"
+    },
+    "nguyễn sinh cung": {
+      "canonical_norm": "hồ chí minh",
+      "canonical_name": "Hồ Chí Minh"
+    },
+    "xarô": {
+      "canonical_norm": "albert sarraut",
+      "canonical_name": "Albert Sarraut"
+    },
+    "nguyễn an hưởng": {
+      "canonical_norm": "nguyễn an khương",
+      "canonical_name": "Nguyễn An Khương"
+    },
+    "ba tu": {
+      "canonical_norm": "batu",
+      "canonical_name": "Batu"
+    },
+    "nguyên trác": {
+      "canonical_norm": "trần nguyên trác",
+      "canonical_name": "Trần Nguyên Trác"
+    },
+    "indravarman": {
+      "canonical_norm": "indravarman v",
+      "canonical_name": "Indravarman V"
+    },
+    "chiêu thống": {
+      "canonical_norm": "lê chiêu thống",
+      "canonical_name": "Lê Chiêu Thống"
+    },
+    "hiến tông": {
+      "canonical_norm": "lê hiến tông",
+      "canonical_name": "Lê Hiến Tông"
+    },
+    "minh tông": {
+      "canonical_norm": "trần minh tông",
+      "canonical_name": "Trần Minh Tông"
+    },
+    "chiêu tông": {
+      "canonical_norm": "lê chiêu tông",
+      "canonical_name": "Lê Chiêu Tông"
+    },
+    "tương dực": {
+      "canonical_norm": "lê tương dực",
+      "canonical_name": "Lê Tương Dực"
+    },
+    "lê oanh": {
+      "canonical_norm": "lê tương dực",
+      "canonical_name": "Lê Tương Dực"
+    },
+    "uy mục": {
+      "canonical_norm": "lê uy mục",
+      "canonical_name": "Lê Uy Mục"
+    },
+    "huệ tông": {
+      "canonical_norm": "lý huệ tông",
+      "canonical_name": "Lý Huệ Tông"
+    },
+    "thần tông": {
+      "canonical_norm": "lý thần tông",
+      "canonical_name": "Lý Thần Tông"
+    },
+    "hán thương": {
+      "canonical_norm": "hồ hán thương",
+      "canonical_name": "Hồ Hán Thương"
+    },
+    "lê quý ly": {
+      "canonical_norm": "hồ quý ly",
+      "canonical_name": "Hồ Quý Ly"
+    },
+    "quý ly": {
+      "canonical_norm": "hồ quý ly",
+      "canonical_name": "Hồ Quý Ly"
+    },
+    "quang khải": {
+      "canonical_norm": "trần quang khải",
+      "canonical_name": "Trần Quang Khải"
+    },
+    "quang toản": {
+      "canonical_norm": "nguyễn quang toản",
+      "canonical_name": "Nguyễn Quang Toản"
+    },
+    "trần thị đoan": {
+      "canonical_norm": "man thiện",
+      "canonical_name": "Man Thiện"
+    },
+    "gia long": {
+      "canonical_norm": "nguyễn ánh",
+      "canonical_name": "Nguyễn Ánh"
+    },
+    "adrăng": {
+      "canonical_norm": "bá đa lộc",
+      "canonical_name": "Bá Đa Lộc"
+    },
+    "thủ độ": {
+      "canonical_norm": "trần thủ độ",
+      "canonical_name": "Trần Thủ Độ"
+    },
+    "tự khánh": {
+      "canonical_norm": "trần tự khánh",
+      "canonical_name": "Trần Tự Khánh"
+    },
+    "chúa trịnh cương": {
+      "canonical_norm": "trịnh cương",
+      "canonical_name": "Trịnh Cương"
+    },
+    "phúc tần": {
+      "canonical_norm": "nguyễn phúc tần",
+      "canonical_name": "Nguyễn Phúc Tần"
+    },
+    "bỉnh di": {
+      "canonical_norm": "phạm bỉnh di",
+      "canonical_name": "Phạm Bỉnh Di"
+    },
+    "nguyễn hàm": {
+      "canonical_norm": "tiểu la nguyễn hàm",
+      "canonical_name": "Tiểu La Nguyễn Hàm"
+    },
+    "tích lệ cơ": {
+      "canonical_norm": "vương tích lệ cơ",
+      "canonical_name": "Vương Tích Lệ Cơ"
+    },
+    "buê": {
+      "canonical_norm": "buê (bouët)",
+      "canonical_name": "Buê (Bouët)"
+    },
+    "kennođi": {
+      "canonical_norm": "g. kennođi",
+      "canonical_name": "G. Kennođi"
+    },
+    "guyúc": {
+      "canonical_norm": "guyúc (quý do)",
+      "canonical_name": "Guyúc (Quý Do)"
+    },
+    "xtalin": {
+      "canonical_norm": "j. xtalin",
+      "canonical_name": "J. Xtalin"
+    },
+    "mông ke": {
+      "canonical_norm": "mông ke (mông kha)",
+      "canonical_name": "Mông Ke (Mông Kha)"
+    },
+    "mutê": {
+      "canonical_norm": "mutê (moutet)",
+      "canonical_name": "Mutê (Moutet)"
+    },
+    "nêgriê": {
+      "canonical_norm": "nêgriê (négrier)",
+      "canonical_name": "Nêgriê (Négrier)"
+    },
+    "vua pháp lui xvi": {
+      "canonical_norm": "lui xvi",
+      "canonical_name": "Lui XVI"
+    },
+    "đơ lat": {
+      "canonical_norm": "đơ lat đơ tátxinhi",
+      "canonical_name": "Đơ Lat đơ Tátxinhi"
+    },
+    "đờ vile": {
+      "canonical_norm": "lomia đờ vile",
+      "canonical_name": "Lomia Đờ Vile"
+    },
+    "nước việt nam": {
+      "canonical_norm": "việt nam",
+      "canonical_name": "Việt Nam"
+    },
+    "mĩ": {
+      "canonical_norm": "mỹ",
+      "canonical_name": "Mỹ"
+    },
+    "bò đê": {
+      "canonical_norm": "bồ đề",
+      "canonical_name": "Bồ Đề"
+    },
+    "đội sơn": {
+      "canonical_norm": "đọi sơn",
+      "canonical_name": "Đọi Sơn"
+    },
+    "căn cứ ba đình": {
+      "canonical_norm": "ba đình",
+      "canonical_name": "Ba Đình"
+    },
+    "sông bến nghé": {
+      "canonical_norm": "bến nghé",
+      "canonical_name": "Bến Nghé"
+    },
+    "làng bồ bát": {
+      "canonical_norm": "bồ bát",
+      "canonical_name": "Bồ Bát"
+    },
+    "thành cổ lộng": {
+      "canonical_norm": "cổ lộng",
+      "canonical_name": "Cổ Lộng"
+    },
+    "quận cửu chân": {
+      "canonical_norm": "cửu chân",
+      "canonical_name": "Cửu Chân"
+    },
+    "thành điêu diêu": {
+      "canonical_norm": "điêu diêu",
+      "canonical_name": "Điêu Diêu"
+    },
+    "làng đình bảng": {
+      "canonical_norm": "đình bảng",
+      "canonical_name": "Đình Bảng"
+    },
+    "thành đông quan": {
+      "canonical_norm": "đông quan",
+      "canonical_name": "Đông Quan"
+    },
+    "căn cứ hai sông": {
+      "canonical_norm": "hai sông",
+      "canonical_name": "Hai Sông"
+    },
+    "căn cứ mã cao": {
+      "canonical_norm": "mã cao",
+      "canonical_name": "Mã Cao"
+    },
+    "thành xương giang": {
+      "canonical_norm": "xương giang",
+      "canonical_name": "Xương Giang"
+    },
+    "căn cứ vụ quang": {
+      "canonical_norm": "vụ quang",
+      "canonical_name": "Vụ Quang"
+    },
+    "thành phố hồ chí minh": {
+      "canonical_norm": "sài gòn",
+      "canonical_name": "Sài Gòn"
+    },
+    "hồ dâm đàm": {
+      "canonical_norm": "hồ tây",
+      "canonical_name": "Hồ Tây"
+    },
+    "đại châu": {
+      "canonical_norm": "vijaya",
+      "canonical_name": "Vijaya"
+    },
+    "trà bàn": {
+      "canonical_norm": "vijaya",
+      "canonical_name": "Vijaya"
+    },
+    "đồ bàn": {
+      "canonical_norm": "vijaya",
+      "canonical_name": "Vijaya"
+    },
+    "thành hoàng đế": {
+      "canonical_norm": "vijaya",
+      "canonical_name": "Vijaya"
+    },
+    "quắc thị": {
+      "canonical_norm": "quắc hương",
+      "canonical_name": "Quắc Hương"
+    },
+    "thành thị": {
+      "canonical_norm": "quắc hương",
+      "canonical_name": "Quắc Hương"
+    },
+    "lam kinh": {
+      "canonical_norm": "tây kinh",
+      "canonical_name": "Tây Kinh"
+    },
+    "trà long": {
+      "canonical_norm": "châu trà lân",
+      "canonical_name": "Châu Trà Lân"
+    },
+    "tây đô": {
+      "canonical_norm": "thành nhà hồ",
+      "canonical_name": "Thành Nhà Hồ"
+    },
+    "thành tây đô": {
+      "canonical_norm": "thành nhà hồ",
+      "canonical_name": "Thành Nhà Hồ"
+    },
+    "thành an tôn": {
+      "canonical_norm": "thành nhà hồ",
+      "canonical_name": "Thành Nhà Hồ"
+    },
+    "mặt trận dân tộc giải phóng miền nam": {
+      "canonical_norm": "mặt trận dân tộc giải phóng miền nam việt nam",
+      "canonical_name": "Mặt trận Dân tộc Giải phóng miền Nam Việt Nam"
+    },
+    "mặt trận việt minh": {
+      "canonical_norm": "việt minh",
+      "canonical_name": "Việt Minh"
+    },
+    "việt cách": {
+      "canonical_norm": "việt nam cách mạng đồng minh hội",
+      "canonical_name": "Việt Nam Cách mạng Đồng minh hội"
+    },
+    "việt quốc": {
+      "canonical_norm": "việt nam quốc dân đảng",
+      "canonical_name": "Việt Nam Quốc dân đảng"
+    },
+    "quân đội pháp": {
+      "canonical_norm": "quân pháp",
+      "canonical_name": "Quân Pháp"
+    },
+    "quân giải phóng miền nam": {
+      "canonical_norm": "quân giải phóng miền nam việt nam",
+      "canonical_name": "Quân Giải phóng miền Nam Việt Nam"
+    },
+    "hvncmtn": {
+      "canonical_norm": "hội việt nam cách mạng thanh niên",
+      "canonical_name": "Hội Việt Nam Cách mạng Thanh niên"
+    },
+    "ancsđ": {
+      "canonical_norm": "an nam cộng sản đảng",
+      "canonical_name": "An Nam Cộng sản đảng"
+    },
+    "đdcsđ": {
+      "canonical_norm": "đông dương cộng sản đảng",
+      "canonical_name": "Đông Dương Cộng sản đảng"
+    },
+    "hội phục việt": {
+      "canonical_norm": "tân việt cách mạng đảng",
+      "canonical_name": "Tân Việt Cách mạng đảng"
+    },
+    "hung nam": {
+      "canonical_norm": "tân việt cách mạng đảng",
+      "canonical_name": "Tân Việt Cách mạng đảng"
+    },
+    "tvcmđ": {
+      "canonical_norm": "tân việt cách mạng đảng",
+      "canonical_name": "Tân Việt Cách mạng đảng"
+    },
+    "hội liên việt": {
+      "canonical_norm": "mặt trận liên việt",
+      "canonical_name": "Mặt trận Liên Việt"
+    },
+    "trường đại học đông dương": {
+      "canonical_norm": "đại học đông dương",
+      "canonical_name": "Đại học Đông Dương"
+    },
+    "lực lượng công an nhân dân": {
+      "canonical_norm": "công an nhân dân",
+      "canonical_name": "Công an nhân dân"
+    },
+    "trường kiêm hị cao đẳng y dược": {
+      "canonical_norm": "trường y học đông dương",
+      "canonical_name": "Trường Y học Đông Dương"
+    },
+    "hội liên hiệp lao động đông dương": {
+      "canonical_norm": "hội bênh vực lao động an nam",
+      "canonical_name": "Hội bênh vực lao động An Nam"
+    },
+    "mặt trận thống nhất dân chủ đông dương": {
+      "canonical_norm": "mặt trận thống nhất nhân dân phản đế đông dương",
+      "canonical_name": "Mặt trận Thống nhất nhân dân phản đế Đông Dương"
+    },
+    "quân đội quốc gia việt nam": {
+      "canonical_norm": "vệ quốc đoàn",
+      "canonical_name": "Vệ quốc đoàn"
+    },
+    "sở công an bắc bộ": {
+      "canonical_norm": "sở liêm phóng bắc bộ",
+      "canonical_name": "Sở liêm phóng Bắc Bộ"
+    },
+    "sở công an trung bộ": {
+      "canonical_norm": "sở trình sát ở trung bộ",
+      "canonical_name": "Sở trình sát ở Trung Bộ"
+    },
+    "sở công an nam bộ": {
+      "canonical_norm": "quốc gia tự vệ cục",
+      "canonical_name": "Quốc gia tự vệ cục"
+    },
+    "đoàn 559": {
+      "canonical_norm": "đoàn vận tải quân sự trường sơn",
+      "canonical_name": "Đoàn vận tải quân sự Trường Sơn"
+    },
+    "nước việt nam dân chủ cộng hòa": {
+      "canonical_norm": "việt nam dân chủ cộng hòa",
+      "canonical_name": "Việt Nam Dân chủ Cộng hòa"
+    },
+    "nhà nước việt nam dân chủ cộng hòa": {
+      "canonical_norm": "việt nam dân chủ cộng hòa",
+      "canonical_name": "Việt Nam Dân chủ Cộng hòa"
+    },
+    "nước việt nam dcch": {
+      "canonical_norm": "việt nam dân chủ cộng hòa",
+      "canonical_name": "Việt Nam Dân chủ Cộng hòa"
+    },
+    "nước cộng hòa xã hội chủ nghĩa việt nam": {
+      "canonical_norm": "cộng hòa xã hội chủ nghĩa việt nam",
+      "canonical_name": "Cộng hoà xã hội chủ nghĩa Việt Nam"
+    },
+    "triều minh": {
+      "canonical_norm": "nhà minh",
+      "canonical_name": "Nhà Minh"
+    },
+    "triều nguyên": {
+      "canonical_norm": "nhà nguyên",
+      "canonical_name": "Nhà Nguyên"
+    },
+    "triều tống": {
+      "canonical_norm": "nhà tống",
+      "canonical_name": "Nhà Tống"
+    },
+    "nhà nước văn lang": {
+      "canonical_norm": "văn lang",
+      "canonical_name": "Văn Lang"
+    },
+    "nhà lê sơ": {
+      "canonical_norm": "lê sơ",
+      "canonical_name": "Lê sơ"
+    },
+    "nhà tiền lê": {
+      "canonical_norm": "tiền lê",
+      "canonical_name": "Tiền Lê"
+    },
+    "nhà nam hán": {
+      "canonical_norm": "nam hán",
+      "canonical_name": "Nam Hán"
+    },
+    "nhà đông hán": {
+      "canonical_norm": "đông hán",
+      "canonical_name": "Đông Hán"
+    },
+    "nhà tây hán": {
+      "canonical_norm": "tây hán",
+      "canonical_name": "Tây Hán"
+    },
+    "đông du": {
+      "canonical_norm": "phong trào đông du",
+      "canonical_name": "Phong trào Đông du"
+    },
+    "đồng khởi": {
+      "canonical_norm": "phong trào đồng khởi",
+      "canonical_name": "Phong trào Đồng khởi"
+    },
+    "cuộc tổng tuyển cử": {
+      "canonical_norm": "tổng tuyển cử",
+      "canonical_name": "Tổng tuyển cử"
+    },
+    "tổng tiến công và nổi dậy": {
+      "canonical_norm": "tổng tiến công và nổi dậy tết mậu thân",
+      "canonical_name": "Tổng tiến công và nổi dậy Tết Mậu Thân"
+    },
+    "cuộc tổng tiến công và nổi dậy": {
+      "canonical_norm": "tổng tiến công và nổi dậy tết mậu thân",
+      "canonical_name": "Tổng tiến công và nổi dậy Tết Mậu Thân"
+    },
+    "cuộc tổng tiến công và nổi dậy năm 1968": {
+      "canonical_norm": "tổng tiến công và nổi dậy tết mậu thân",
+      "canonical_name": "Tổng tiến công và nổi dậy Tết Mậu Thân"
+    },
+    "tết mậu thân": {
+      "canonical_norm": "tổng tiến công và nổi dậy tết mậu thân",
+      "canonical_name": "Tổng tiến công và nổi dậy Tết Mậu Thân"
+    },
+    "phong trào đông dương đại hội": {
+      "canonical_norm": "đông dương đại hội",
+      "canonical_name": "Đông Dương Đại hội"
+    },
+    "cuộc vận động đông dương đại hội": {
+      "canonical_norm": "đông dương đại hội",
+      "canonical_name": "Đông Dương Đại hội"
+    },
+    "kháng chiến toàn quốc": {
+      "canonical_norm": "cuộc kháng chiến toàn quốc",
+      "canonical_name": "Cuộc kháng chiến toàn quốc"
+    },
+    "tiến công chiến lược năm 1972": {
+      "canonical_norm": "cuộc tiến công chiến lược năm 1972",
+      "canonical_name": "Cuộc tiến công chiến lược năm 1972"
+    },
+    "hội nghị lần thứ 8 ban chấp hành trung ương": {
+      "canonical_norm": "hội nghị lần thứ 8 ban chấp hành trung ương đảng",
+      "canonical_name": "Hội nghị lần thứ 8 Ban Chấp hành Trung ương Đảng"
+    },
+    "tĩnh hải tiết độ sứ": {
+      "canonical_norm": "tĩnh hải quân tiết độ sứ",
+      "canonical_name": "Tĩnh Hải quân Tiết độ sứ"
+    },
+    "đại việt tân báo": {
+      "canonical_norm": "đại việt quan báo",
+      "canonical_name": "Đại Việt quan báo"
+    },
+    "đại việt công báo": {
+      "canonical_norm": "đại việt quan báo",
+      "canonical_name": "Đại Việt quan báo"
+    },
+    "người cùng khổ": {
+      "canonical_norm": "le paria",
+      "canonical_name": "Le Paria"
+    },
+    "luật gia long": {
+      "canonical_norm": "hoàng triều luật lệ",
+      "canonical_name": "Hoàng triều luật lệ"
+    },
+    "hiệp định pari 1973 về việt nam": {
+      "canonical_norm": "hiệp định pari về việt nam",
+      "canonical_name": "Hiệp định Pari về Việt Nam"
+    },
+    "hiệp định gionevo 1954": {
+      "canonical_norm": "hiệp định gionevo",
+      "canonical_name": "Hiệp định Gionevo"
+    },
+    "kế hoạch khôi phục kinh tế": {
+      "canonical_norm": "kế hoạch 3 năm khôi phục kinh tế",
+      "canonical_name": "Kế hoạch 3 năm khôi phục kinh tế"
+    },
+    "chương trình khôi phục kinh tế": {
+      "canonical_norm": "kế hoạch 3 năm khôi phục kinh tế",
+      "canonical_name": "Kế hoạch 3 năm khôi phục kinh tế"
+    },
+    "chiến lược việt nam hóa chiến tranh": {
+      "canonical_norm": "việt nam hóa chiến tranh",
+      "canonical_name": "Việt Nam hoá chiến tranh"
+    },
+    "chiến lược việt nam hóa": {
+      "canonical_norm": "việt nam hóa chiến tranh",
+      "canonical_name": "Việt Nam hoá chiến tranh"
+    },
+    "việt nam hóa": {
+      "canonical_norm": "việt nam hóa chiến tranh",
+      "canonical_name": "Việt Nam hoá chiến tranh"
+    },
+    "chiến tranh việt nam hóa": {
+      "canonical_norm": "việt nam hóa chiến tranh",
+      "canonical_name": "Việt Nam hoá chiến tranh"
+    },
+    "chế độ ngụ binh ư nông": {
+      "canonical_norm": "ngụ binh ư nông",
+      "canonical_name": "Ngụ binh ư nông"
+    },
+    "chính sách ngụ binh u nông": {
+      "canonical_norm": "ngụ binh ư nông",
+      "canonical_name": "Ngụ binh ư nông"
+    },
+    "chính sách bế quan tỏa cảng": {
+      "canonical_norm": "bế quan tỏa cảng",
+      "canonical_name": "Bế quan toả cảng"
+    },
+    "chiến lược chiến tranh đơn phương": {
+      "canonical_norm": "chiến tranh đơn phương",
+      "canonical_name": "Chiến tranh đơn phương"
+    },
+    "chiến lược phản ứng linh hoạt": {
+      "canonical_norm": "phản ứng linh hoạt",
+      "canonical_name": "Phản ứng linh hoạt"
+    },
+    "chiến lược quân sự toàn cầu phản ứng linh hoạt": {
+      "canonical_norm": "phản ứng linh hoạt",
+      "canonical_name": "Phản ứng linh hoạt"
+    },
+    "chiến lược quét và giữ": {
+      "canonical_norm": "quét và giữ",
+      "canonical_name": "Quét và giữ"
+    },
+    "lạc việt": {
+      "canonical_norm": "người lạc việt",
+      "canonical_name": "Người Lạc Việt"
+    },
+    "người nhật": {
+      "canonical_norm": "người nhật bản",
+      "canonical_name": "Người Nhật Bản"
+    },
+    "người chiêm thành": {
+      "canonical_norm": "người chăm",
+      "canonical_name": "Người Chăm"
+    },
+    "dân mường": {
+      "canonical_norm": "người mường",
+      "canonical_name": "Người Mường"
+    },
+    "đồng bào mường": {
+      "canonical_norm": "người mường",
+      "canonical_name": "Người Mường"
+    },
+    "dân bồ bát": {
+      "canonical_norm": "dân làng bồ bát",
+      "canonical_name": "Dân làng Bồ Bát"
+    },
+    "phú nông": {
+      "canonical_norm": "tầng lớp phú nông",
+      "canonical_name": "Tầng lớp phú nông"
+    },
+    "tư sản việt nam": {
+      "canonical_norm": "giai cấp tư sản việt nam",
+      "canonical_name": "Giai cấp tư sản Việt Nam"
+    },
+    "tầng lớp tiểu tư sản": {
+      "canonical_norm": "giai cấp tiểu tư sản",
+      "canonical_name": "Giai cấp tiểu tư sản"
+    },
+    "công nhân việt nam": {
+      "canonical_norm": "giai cấp công nhân việt nam",
+      "canonical_name": "Giai cấp công nhân Việt Nam"
+    },
+    "chủ nghĩa các mác và lênin": {
+      "canonical_norm": "chủ nghĩa mác lênin",
+      "canonical_name": "Chủ nghĩa Mác - Lênin"
+    },
+    "học thuyết mác lênin": {
+      "canonical_norm": "chủ nghĩa mác lênin",
+      "canonical_name": "Chủ nghĩa Mác - Lênin"
+    },
+    "tư tưởng mác lênin": {
+      "canonical_norm": "chủ nghĩa mác lênin",
+      "canonical_name": "Chủ nghĩa Mác - Lênin"
+    },
+    "công giáo": {
+      "canonical_norm": "thiên chúa giáo",
+      "canonical_name": "Thiên Chúa giáo"
+    },
+    "đạo thiên chúa": {
+      "canonical_norm": "thiên chúa giáo",
+      "canonical_name": "Thiên Chúa giáo"
+    },
+    "đạo ki tô": {
+      "canonical_norm": "thiên chúa giáo",
+      "canonical_name": "Thiên Chúa giáo"
+    },
+    "đạo phật": {
+      "canonical_norm": "phật giáo",
+      "canonical_name": "Phật giáo"
+    },
+    "lão giáo": {
+      "canonical_norm": "đạo giáo",
+      "canonical_name": "Đạo giáo"
+    },
+    "đạo khổng nho": {
+      "canonical_norm": "nho giáo",
+      "canonical_name": "Nho giáo"
+    },
+    "tín ngưỡng phụng thờ tổ tiên": {
+      "canonical_norm": "tín ngưỡng thờ cúng tổ tiên",
+      "canonical_name": "Tín ngưỡng thờ cúng tổ tiên"
+    },
+    "phùng nguyên": {
+      "canonical_norm": "văn hóa phùng nguyên",
+      "canonical_name": "Văn hóa Phùng Nguyên"
+    },
+    "gò mun": {
+      "canonical_norm": "văn hóa gò mun",
+      "canonical_name": "Văn hóa Gò Mun"
+    },
+    "đồng đậu": {
+      "canonical_norm": "văn hóa đồng đậu",
+      "canonical_name": "Văn hóa Đồng Đậu"
+    },
+    "tiền đông sơn": {
+      "canonical_norm": "văn hóa tiền đông sơn",
+      "canonical_name": "Văn hóa tiền Đông Sơn"
+    },
+    "bắc kỳ": {
+      "canonical_norm": "bắc kì",
+      "canonical_name": "Bắc Kì"
+    },
+    "nam kỳ": {
+      "canonical_norm": "nam kì",
+      "canonical_name": "Nam Kì"
+    },
+    "trung kỳ": {
+      "canonical_norm": "trung kì",
+      "canonical_name": "Trung Kì"
+    },
+    "thục phán": {
+      "canonical_norm": "an dương vương",
+      "canonical_name": "An Dương Vương"
+    },
+    "lý bí": {
+      "canonical_norm": "lý nam đế",
+      "canonical_name": "Lý Nam Đế"
+    },
+    "lý bôn": {
+      "canonical_norm": "lý nam đế",
+      "canonical_name": "Lý Nam Đế"
+    },
+    "triệu quang phục": {
+      "canonical_norm": "triệu việt vương",
+      "canonical_name": "Triệu Việt Vương"
+    },
+    "dạ trạch vương": {
+      "canonical_norm": "triệu việt vương",
+      "canonical_name": "Triệu Việt Vương"
+    },
+    "mai thúc loan": {
+      "canonical_norm": "mai hắc đế",
+      "canonical_name": "Mai Hắc Đế"
+    },
+    "bố cái đại vương": {
+      "canonical_norm": "phùng hưng",
+      "canonical_name": "Phùng Hưng"
+    },
+    "đinh bộ lĩnh": {
+      "canonical_norm": "đinh tiên hoàng",
+      "canonical_name": "Đinh Tiên Hoàng"
+    },
+    "đại thắng minh hoàng đế": {
+      "canonical_norm": "đinh tiên hoàng",
+      "canonical_name": "Đinh Tiên Hoàng"
+    },
+    "lê hoàn": {
+      "canonical_norm": "lê đại hành",
+      "canonical_name": "Lê Đại Hành"
+    },
+    "lê long đĩnh": {
+      "canonical_norm": "lê ngọa triều",
+      "canonical_name": "Lê Ngọa Triều"
+    },
+    "lý công uẩn": {
+      "canonical_norm": "lý thái tổ",
+      "canonical_name": "Lý Thái Tổ"
+    },
+    "lý phật mã": {
+      "canonical_norm": "lý thái tông",
+      "canonical_name": "Lý Thái Tông"
+    },
+    "lý đức chính": {
+      "canonical_norm": "lý thái tông",
+      "canonical_name": "Lý Thái Tông"
+    },
+    "lý nhật tôn": {
+      "canonical_norm": "lý thánh tông",
+      "canonical_name": "Lý Thánh Tông"
+    },
+    "lý càn đức": {
+      "canonical_norm": "lý nhân tông",
+      "canonical_name": "Lý Nhân Tông"
+    },
+    "lý thiên tộ": {
+      "canonical_norm": "lý anh tông",
+      "canonical_name": "Lý Anh Tông"
+    },
+    "lý long trát": {
+      "canonical_norm": "lý cao tông",
+      "canonical_name": "Lý Cao Tông"
+    },
+    "lý phật kim": {
+      "canonical_norm": "lý chiêu hoàng",
+      "canonical_name": "Lý Chiêu Hoàng"
+    },
+    "lý thiên hinh": {
+      "canonical_norm": "lý chiêu hoàng",
+      "canonical_name": "Lý Chiêu Hoàng"
+    },
+    "chiêu thánh hoàng hậu": {
+      "canonical_norm": "lý chiêu hoàng",
+      "canonical_name": "Lý Chiêu Hoàng"
+    },
+    "trần cảnh": {
+      "canonical_norm": "trần thái tông",
+      "canonical_name": "Trần Thái Tông"
+    },
+    "trần hoảng": {
+      "canonical_norm": "trần thánh tông",
+      "canonical_name": "Trần Thánh Tông"
+    },
+    "trần khâm": {
+      "canonical_norm": "trần nhân tông",
+      "canonical_name": "Trần Nhân Tông"
+    },
+    "điều ngự giác hoàng": {
+      "canonical_norm": "trần nhân tông",
+      "canonical_name": "Trần Nhân Tông"
+    },
+    "trúc lâm đại sĩ": {
+      "canonical_norm": "trần nhân tông",
+      "canonical_name": "Trần Nhân Tông"
+    },
+    "trần thuyên": {
+      "canonical_norm": "trần anh tông",
+      "canonical_name": "Trần Anh Tông"
+    },
+    "trần vượng": {
+      "canonical_norm": "trần hiến tông",
+      "canonical_name": "Trần Hiến Tông"
+    },
+    "trần hạo": {
+      "canonical_norm": "trần dụ tông",
+      "canonical_name": "Trần Dụ Tông"
+    },
+    "trần phủ": {
+      "canonical_norm": "trần nghệ tông",
+      "canonical_name": "Trần Nghệ Tông"
+    },
+    "trần kính": {
+      "canonical_norm": "trần duệ tông",
+      "canonical_name": "Trần Duệ Tông"
+    },
+    "trần hiện": {
+      "canonical_norm": "trần phế đế",
+      "canonical_name": "Trần Phế Đế"
+    },
+    "trần ngung": {
+      "canonical_norm": "trần thuận tông",
+      "canonical_name": "Trần Thuận Tông"
+    },
+    "trần an": {
+      "canonical_norm": "trần thiếu đế",
+      "canonical_name": "Trần Thiếu Đế"
+    },
+    "trần quốc tuấn": {
+      "canonical_norm": "trần hưng đạo",
+      "canonical_name": "Trần Hưng Đạo"
+    },
+    "hưng đạo vương": {
+      "canonical_norm": "trần hưng đạo",
+      "canonical_name": "Trần Hưng Đạo"
+    },
+    "hưng đạo đại vương": {
+      "canonical_norm": "trần hưng đạo",
+      "canonical_name": "Trần Hưng Đạo"
+    },
+    "đức thánh trần": {
+      "canonical_norm": "trần hưng đạo",
+      "canonical_name": "Trần Hưng Đạo"
+    },
+    "chiêu văn vương": {
+      "canonical_norm": "trần nhật duật",
+      "canonical_name": "Trần Nhật Duật"
+    },
+    "nhân huệ vương": {
+      "canonical_norm": "trần khánh dư",
+      "canonical_name": "Trần Khánh Dư"
+    },
+    "trần ngỗi": {
+      "canonical_norm": "giản định đế",
+      "canonical_name": "Giản Định Đế"
+    },
+    "trần quý khoáng": {
+      "canonical_norm": "trùng quang đế",
+      "canonical_name": "Trùng Quang Đế"
+    },
+    "lê lợi": {
+      "canonical_norm": "lê thái tổ",
+      "canonical_name": "Lê Thái Tổ"
+    },
+    "bình định vương": {
+      "canonical_norm": "lê thái tổ",
+      "canonical_name": "Lê Thái Tổ"
+    },
+    "lê nguyên long": {
+      "canonical_norm": "lê thái tông",
+      "canonical_name": "Lê Thái Tông"
+    },
+    "lê bang cơ": {
+      "canonical_norm": "lê nhân tông",
+      "canonical_name": "Lê Nhân Tông"
+    },
+    "lê tư thành": {
+      "canonical_norm": "lê thánh tông",
+      "canonical_name": "Lê Thánh Tông"
+    },
+    "lê hạo": {
+      "canonical_norm": "lê thánh tông",
+      "canonical_name": "Lê Thánh Tông"
+    },
+    "tao đàn nguyên súy": {
+      "canonical_norm": "lê thánh tông",
+      "canonical_name": "Lê Thánh Tông"
+    },
+    "lê thuần": {
+      "canonical_norm": "lê túc tông",
+      "canonical_name": "Lê Túc Tông"
+    },
+    "lê xuân": {
+      "canonical_norm": "lê cung hoàng",
+      "canonical_name": "Lê Cung Hoàng"
+    },
+    "ức trai": {
+      "canonical_norm": "nguyễn trãi",
+      "canonical_name": "Nguyễn Trãi"
+    },
+    "thụy hiên": {
+      "canonical_norm": "lương thế vinh",
+      "canonical_name": "Lương Thế Vinh"
+    },
+    "trạng lường": {
+      "canonical_norm": "lương thế vinh",
+      "canonical_name": "Lương Thế Vinh"
+    },
+    "bạch vân cư sĩ": {
+      "canonical_norm": "nguyễn bỉnh khiêm",
+      "canonical_name": "Nguyễn Bỉnh Khiêm"
+    },
+    "trạng trình": {
+      "canonical_norm": "nguyễn bỉnh khiêm",
+      "canonical_name": "Nguyễn Bỉnh Khiêm"
+    },
+    "mạc đăng dung": {
+      "canonical_norm": "mạc thái tổ",
+      "canonical_name": "Mạc Thái Tổ"
+    },
+    "mạc đăng doanh": {
+      "canonical_norm": "mạc thái tông",
+      "canonical_name": "Mạc Thái Tông"
+    },
+    "mạc phúc hải": {
+      "canonical_norm": "mạc hiến tông",
+      "canonical_name": "Mạc Hiến Tông"
+    },
+    "mạc phúc nguyên": {
+      "canonical_norm": "mạc tuyên tông",
+      "canonical_name": "Mạc Tuyên Tông"
+    },
+    "lê ninh": {
+      "canonical_norm": "lê trang tông",
+      "canonical_name": "Lê Trang Tông"
+    },
+    "lê huyên": {
+      "canonical_norm": "lê trung tông",
+      "canonical_name": "Lê Trung Tông"
+    },
+    "lê duy bang": {
+      "canonical_norm": "lê anh tông",
+      "canonical_name": "Lê Anh Tông"
+    },
+    "lê duy đàm": {
+      "canonical_norm": "lê thế tông",
+      "canonical_name": "Lê Thế Tông"
+    },
+    "lê duy tân": {
+      "canonical_norm": "lê kính tông",
+      "canonical_name": "Lê Kính Tông"
+    },
+    "lê duy kỳ": {
+      "canonical_norm": "lê thần tông",
+      "canonical_name": "Lê Thần Tông"
+    },
+    "lê duy hựu": {
+      "canonical_norm": "lê chân tông",
+      "canonical_name": "Lê Chân Tông"
+    },
+    "lê duy vũ": {
+      "canonical_norm": "lê huyền tông",
+      "canonical_name": "Lê Huyền Tông"
+    },
+    "lê duy cối": {
+      "canonical_norm": "lê gia tông",
+      "canonical_name": "Lê Gia Tông"
+    },
+    "lê duy hiệp": {
+      "canonical_norm": "lê hy tông",
+      "canonical_name": "Lê Hy Tông"
+    },
+    "lê duy đường": {
+      "canonical_norm": "lê dụ tông",
+      "canonical_name": "Lê Dụ Tông"
+    },
+    "lê duy tường": {
+      "canonical_norm": "lê thuần tông",
+      "canonical_name": "Lê Thuần Tông"
+    },
+    "lê duy thận": {
+      "canonical_norm": "lê ý tông",
+      "canonical_name": "Lê Ý Tông"
+    },
+    "lê duy diêu": {
+      "canonical_norm": "lê hiển tông",
+      "canonical_name": "Lê Hiển Tông"
+    },
+    "chúa tiên": {
+      "canonical_norm": "nguyễn hoàng",
+      "canonical_name": "Nguyễn Hoàng"
+    },
+    "thái tổ gia dụ hoàng đế": {
+      "canonical_norm": "nguyễn hoàng",
+      "canonical_name": "Nguyễn Hoàng"
+    },
+    "chúa sãi": {
+      "canonical_norm": "nguyễn phúc nguyên",
+      "canonical_name": "Nguyễn Phúc Nguyên"
+    },
+    "chúa phật": {
+      "canonical_norm": "nguyễn phúc nguyên",
+      "canonical_name": "Nguyễn Phúc Nguyên"
+    },
+    "chúa thượng": {
+      "canonical_norm": "nguyễn phúc lan",
+      "canonical_name": "Nguyễn Phúc Lan"
+    },
+    "nguyễn phúc trăn": {
+      "canonical_norm": "nguyễn phúc thái",
+      "canonical_name": "Nguyễn Phúc Thái"
+    },
+    "chúa nghĩa": {
+      "canonical_norm": "nguyễn phúc thái",
+      "canonical_name": "Nguyễn Phúc Thái"
+    },
+    "chúa minh": {
+      "canonical_norm": "nguyễn phúc chu",
+      "canonical_name": "Nguyễn Phúc Chu"
+    },
+    "quốc chúa": {
+      "canonical_norm": "nguyễn phúc chu",
+      "canonical_name": "Nguyễn Phúc Chu"
+    },
+    "nguyễn phúc thụ": {
+      "canonical_norm": "nguyễn phúc chú",
+      "canonical_name": "Nguyễn Phúc Chú"
+    },
+    "chúa ninh": {
+      "canonical_norm": "nguyễn phúc chú",
+      "canonical_name": "Nguyễn Phúc Chú"
+    },
+    "võ vương": {
+      "canonical_norm": "nguyễn phúc khoát",
+      "canonical_name": "Nguyễn Phúc Khoát"
+    },
+    "định vương": {
+      "canonical_norm": "nguyễn phúc thuần",
+      "canonical_name": "Nguyễn Phúc Thuần"
+    },
+    "nguyễn huệ": {
+      "canonical_norm": "quang trung",
+      "canonical_name": "Quang Trung"
+    },
+    "bắc bình vương": {
+      "canonical_norm": "quang trung",
+      "canonical_name": "Quang Trung"
+    },
+    "quang trung hoàng đế": {
+      "canonical_norm": "quang trung",
+      "canonical_name": "Quang Trung"
+    },
+    "thái đức hoàng đế": {
+      "canonical_norm": "nguyễn nhạc",
+      "canonical_name": "Nguyễn Nhạc"
+    },
+    "đông định vương": {
+      "canonical_norm": "nguyễn lữ",
+      "canonical_name": "Nguyễn Lữ"
+    },
+    "nguyễn phúc đảm": {
+      "canonical_norm": "minh mạng",
+      "canonical_name": "Minh Mạng"
+    },
+    "nguyễn phúc kiểu": {
+      "canonical_norm": "minh mạng",
+      "canonical_name": "Minh Mạng"
+    },
+    "nguyễn phúc miên tông": {
+      "canonical_norm": "thiệu trị",
+      "canonical_name": "Thiệu Trị"
+    },
+    "nguyễn phúc tuyền": {
+      "canonical_norm": "thiệu trị",
+      "canonical_name": "Thiệu Trị"
+    },
+    "nguyễn phúc hồng nhậm": {
+      "canonical_norm": "tự đức",
+      "canonical_name": "Tự Đức"
+    },
+    "nguyễn phúc ưng ái": {
+      "canonical_norm": "dục đức",
+      "canonical_name": "Dục Đức"
+    },
+    "nguyễn phúc ưng chân": {
+      "canonical_norm": "dục đức",
+      "canonical_name": "Dục Đức"
+    },
+    "nguyễn phúc hồng dật": {
+      "canonical_norm": "hiệp hòa",
+      "canonical_name": "Hiệp Hòa"
+    },
+    "lãng quốc công": {
+      "canonical_norm": "hiệp hòa",
+      "canonical_name": "Hiệp Hòa"
+    },
+    "nguyễn phúc ưng đăng": {
+      "canonical_norm": "kiến phúc",
+      "canonical_name": "Kiến Phúc"
+    },
+    "nguyễn phúc ưng lịch": {
+      "canonical_norm": "hàm nghi",
+      "canonical_name": "Hàm Nghi"
+    },
+    "nguyễn phúc ưng kỷ": {
+      "canonical_norm": "đồng khánh",
+      "canonical_name": "Đồng Khánh"
+    },
+    "nguyễn phúc chánh mông": {
+      "canonical_norm": "đồng khánh",
+      "canonical_name": "Đồng Khánh"
+    },
+    "nguyễn phúc bửu lân": {
+      "canonical_norm": "thành thái",
+      "canonical_name": "Thành Thái"
+    },
+    "nguyễn phúc vĩnh san": {
+      "canonical_norm": "duy tân",
+      "canonical_name": "Duy Tân"
+    },
+    "nguyễn phúc bửu đảo": {
+      "canonical_norm": "khải định",
+      "canonical_name": "Khải Định"
+    },
+    "nguyễn phúc vĩnh thụy": {
+      "canonical_norm": "bảo đại",
+      "canonical_name": "Bảo Đại"
+    },
+    "vĩnh thụy": {
+      "canonical_norm": "bảo đại",
+      "canonical_name": "Bảo Đại"
+    },
+    "nguyễn văn chương": {
+      "canonical_norm": "nguyễn tri phương",
+      "canonical_name": "Nguyễn Tri Phương"
+    },
+    "hoàng kim tích": {
+      "canonical_norm": "hoàng diệu",
+      "canonical_name": "Hoàng Diệu"
+    },
+    "trương văn thám": {
+      "canonical_norm": "hoàng hoa thám",
+      "canonical_name": "Hoàng Hoa Thám"
+    },
+    "đề thám": {
+      "canonical_norm": "hoàng hoa thám",
+      "canonical_name": "Hoàng Hoa Thám"
+    },
+    "phan văn san": {
+      "canonical_norm": "phan bội châu",
+      "canonical_name": "Phan Bội Châu"
+    },
+    "sào nam": {
+      "canonical_norm": "phan bội châu",
+      "canonical_name": "Phan Bội Châu"
+    },
+    "thị hán": {
+      "canonical_norm": "phan bội châu",
+      "canonical_name": "Phan Bội Châu"
+    },
+    "tây hồ": {
+      "canonical_norm": "phan châu trinh",
+      "canonical_name": "Phan Châu Trinh"
+    },
+    "hy mã": {
+      "canonical_norm": "phan châu trinh",
+      "canonical_name": "Phan Châu Trinh"
+    },
+    "mính viên": {
+      "canonical_norm": "huỳnh thúc kháng",
+      "canonical_name": "Huỳnh Thúc Kháng"
+    },
+    "ôn như": {
+      "canonical_norm": "lương văn can",
+      "canonical_name": "Lương Văn Can"
+    },
+    "đặng xuân khu": {
+      "canonical_norm": "trường chinh",
+      "canonical_name": "Trường Chinh"
+    },
+    "sóng hồng": {
+      "canonical_norm": "trường chinh",
+      "canonical_name": "Trường Chinh"
+    },
+    "lê văn nhuận": {
+      "canonical_norm": "lê duẩn",
+      "canonical_name": "Lê Duẩn"
+    },
+    "ba duẩn": {
+      "canonical_norm": "lê duẩn",
+      "canonical_name": "Lê Duẩn"
+    },
+    "phan đình khải": {
+      "canonical_norm": "lê đức thọ",
+      "canonical_name": "Lê Đức Thọ"
+    },
+    "sáu": {
+      "canonical_norm": "lê đức thọ",
+      "canonical_name": "Lê Đức Thọ"
+    },
+    "nguyễn vịnh": {
+      "canonical_norm": "nguyễn chí thanh",
+      "canonical_name": "Nguyễn Chí Thanh"
+    },
+    "hoàng văn xiêm": {
+      "canonical_norm": "hoàng văn thái",
+      "canonical_name": "Hoàng Văn Thái"
+    },
+    "chu văn điều": {
+      "canonical_norm": "chu huy mân",
+      "canonical_name": "Chu Huy Mân"
+    },
+    "lê trọng tố": {
+      "canonical_norm": "lê trọng tấn",
+      "canonical_name": "Lê Trọng Tấn"
+    },
+    "nguyễn hữu vũ": {
+      "canonical_norm": "đồng sĩ nguyên",
+      "canonical_name": "Đồng Sĩ Nguyên"
+    },
+    "nguyễn văn cúc": {
+      "canonical_norm": "nguyễn văn linh",
+      "canonical_name": "Nguyễn Văn Linh"
+    },
+    "mười cúc": {
+      "canonical_norm": "nguyễn văn linh",
+      "canonical_name": "Nguyễn Văn Linh"
+    },
+    "phạm văn thiện": {
+      "canonical_norm": "phạm hùng",
+      "canonical_name": "Phạm Hùng"
+    },
+    "hai hùng": {
+      "canonical_norm": "phạm hùng",
+      "canonical_name": "Phạm Hùng"
+    },
+    "phan văn hòa": {
+      "canonical_norm": "võ văn kiệt",
+      "canonical_name": "Võ Văn Kiệt"
+    },
+    "sáu dân": {
+      "canonical_norm": "võ văn kiệt",
+      "canonical_name": "Võ Văn Kiệt"
+    },
+    "tư chi": {
+      "canonical_norm": "trần văn trà",
+      "canonical_name": "Trần Văn Trà"
+    },
+    "ba định": {
+      "canonical_norm": "nguyễn thị định",
+      "canonical_name": "Nguyễn Thị Định"
+    },
+    "võ toàn": {
+      "canonical_norm": "võ chí công",
+      "canonical_name": "Võ Chí Công"
+    },
+    "phan đình dinh": {
+      "canonical_norm": "đinh đức thiện",
+      "canonical_name": "Đinh Đức Thiện"
+    },
+    "buôn ma thuột": {
+      "canonical_norm": "buôn ma thuật",
+      "canonical_name": "Buôn Ma Thuật"
+    },
+    "hạ hội": {
+      "canonical_norm": "hà nội",
+      "canonical_name": "Hà Nội"
+    },
+    "tuyên ngôn dộc lập": {
+      "canonical_norm": "tuyên ngôn độc lập",
+      "canonical_name": "Tuyên ngôn Độc lập"
     }
   }
 }

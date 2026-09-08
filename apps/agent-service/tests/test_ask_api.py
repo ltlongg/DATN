@@ -69,7 +69,8 @@ def _patch_graph(monkeypatch, *, route="needs_retrieval", retrieve_error=None):
     monkeypatch.setattr(nodes, "retrieve_hybrid", fake_retrieve)
 
     async def fake_synth(
-        messages, *, emitter, model, batch_chars, temperature=0.0, client=None, on_usage=None
+        messages, *, emitter, model, batch_chars, reasoning_effort="low", client=None,
+        on_usage=None,
     ):
         from app.orchestrator.synthesis import emit_text_as_batches
 

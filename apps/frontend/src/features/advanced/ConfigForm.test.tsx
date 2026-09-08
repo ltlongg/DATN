@@ -22,7 +22,6 @@ const sample: SystemConfig = {
   graph_max_context_items: 12,
   graph_max_path_hops: 3,
   graph_path_hit_weight: 1.5,
-  llm_temperature: 0.0,
   updated_at: "2026-07-11T00:00:00Z",
 };
 
@@ -46,15 +45,15 @@ describe("ConfigForm", () => {
     renderForm();
     const rag = (await screen.findByLabelText("RAG top-k")) as HTMLInputElement;
     expect(rag.value).toBe("20");
-    expect((screen.getByLabelText("Temperature") as HTMLInputElement).value).toBe("0");
+    expect((screen.getByLabelText("Graph path hit weight") as HTMLInputElement).value).toBe("1.5");
   });
 
-  it("chặn temperature ngoài [0,2] và vô hiệu nút lưu", async () => {
+  it("chặn số âm ở field float và vô hiệu nút lưu", async () => {
     vi.mocked(configApi.getSystemConfig).mockResolvedValue(sample);
     renderForm();
-    const temp = (await screen.findByLabelText("Temperature")) as HTMLInputElement;
-    fireEvent.change(temp, { target: { value: "3" } });
-    expect(screen.getByText("Phải ≤ 2.")).toBeInTheDocument();
+    const weight = (await screen.findByLabelText("Graph path hit weight")) as HTMLInputElement;
+    fireEvent.change(weight, { target: { value: "-1" } });
+    expect(screen.getByText("Phải ≥ 0.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Lưu/ })).toBeDisabled();
   });
 
@@ -78,7 +77,7 @@ describe("ConfigForm", () => {
     await waitFor(() => expect(configApi.updateSystemConfig).toHaveBeenCalled());
     // react-query truyền (variables, context) -> chỉ soi tham số đầu (patch).
     expect(vi.mocked(configApi.updateSystemConfig).mock.calls[0][0]).toEqual(
-      expect.objectContaining({ rag_top_k: 15, llm_temperature: 0 }),
+      expect.objectContaining({ rag_top_k: 15, graph_path_hit_weight: 1.5 }),
     );
     expect(await screen.findByText(/hiệu lực trong tối đa 60 giây/)).toBeInTheDocument();
   });

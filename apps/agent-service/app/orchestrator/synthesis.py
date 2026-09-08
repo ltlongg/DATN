@@ -58,7 +58,7 @@ async def stream_synthesis(
     emitter: Emitter,
     model: str,
     batch_chars: int,
-    temperature: float = 0.0,
+    reasoning_effort: str = "low",
     client: AsyncOpenAI | None = None,
     on_usage: Callable[[int, int, int], Awaitable[None]] | None = None,
 ) -> SynthesizedAnswer:
@@ -66,8 +66,10 @@ async def stream_synthesis(
     batch/guardrails). Trả về SynthesizedAnswer cuối. `answer` là field đầu nên token ra
     trước, `used_chunk_ids`/`confidence` về ở cuối.
 
-    `temperature` do admin chỉnh qua Cấu hình hệ thống (RuntimeConfig.llm_temperature); mặc
-    định 0.0. `plan`/`resolve` GIỮ 0.0 cứng (cần deterministic), chỉ synthesize dùng field này.
+    Model soạn câu trả lời là model reasoning (xem SYNTHESIZE_LLM_MODEL trong .env) -> nó TỪ
+    CHỐI `temperature`, chỉnh độ "nghĩ" bằng `reasoning_effort` thay thế. Giữ "low" đồng bộ với
+    `plan`/`resolve` và đường indexing: effort cao hơn kéo dài thời gian tới token đầu tiên,
+    đắt cho một câu trả lời đang stream.
 
     `on_usage(prompt, completion, total)` (nếu truyền) được await đúng 1 lần sau khi có
     usage. Mặc định None = giữ nguyên hành vi cũ (không đọc usage). `stream_options=
@@ -81,7 +83,7 @@ async def stream_synthesis(
         model=model,
         messages=messages,  # type: ignore[arg-type]
         response_format=SynthesizedAnswer,
-        temperature=temperature,
+        reasoning_effort=reasoning_effort,
         stream_options={"include_usage": True},
     ) as stream:
         async for event in stream:

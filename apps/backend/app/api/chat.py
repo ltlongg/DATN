@@ -154,6 +154,36 @@ def _visible_step(data: dict[str, Any], debug: bool) -> dict[str, Any]:
         return data
     return {k: v for k, v in data.items() if k != "internals"}
 
+async def _persist_on_disconnect(
+    conversation_id: str, assistant_id: str, collector: SseCollector
+) -> None:
+    """Lưu phần đã sinh khi stream đứt TRƯỚC `done` — rời trang, đóng tab, mạng rớt.
+
+    Thiếu nhánh này thì câu trả lời dở dang mất hẳn ở tầng dữ liệu: `_persist_assistant` chỉ
+    chạy ở `done`/`blocked`, nên bỏ đi giữa lượt để lại đúng câu hỏi trong DB, mở lại phiên
+    thấy câu hỏi cụt. `collector._closed_steps()` đã lường sẵn ca này (hạ dòng còn `running`
+    xuống `partial`), chỉ thiếu chỗ gọi.
+
+    Chạy trong CancelScope shield vì đường vào đây thường LÀ lúc task đang bị huỷ (client
+    disconnect) — không che thì lệnh ghi DB bị huỷ theo và ta quay lại đúng chỗ cũ. Nuốt mọi
+    exception: đây là dọn dẹp trên đường thất bại, không được đè lên lỗi gốc đang lan ra.
+    """
+    with anyio.CancelScope(shield=True):
+        try:
+            saved_id = await _persist_assistant(conversation_id, assistant_id, collector)
+        except Exception:
+            logger.exception(
+                "ask persist khi ngắt giữa chừng thất bại conversation=%s", conversation_id
+            )
+            return
+        logger.info(
+            "ask ngắt giữa chừng conversation=%s persisted=%s chars=%d citations=%d",
+            conversation_id,
+            saved_id is not None,
+            len(collector.content),
+            len(collector.citations),
+        )
+
 async def _proxy_stream(
     stream: AgentStream,
     collector: SseCollector,
@@ -174,66 +204,91 @@ async def _proxy_stream(
       message_id (message_id=None nếu không lưu) + ttft_ms để frontend hiện ngay, khỏi reload.
     - event == blocked: guardrails chặn input -> agent KHÔNG emit done. Persist safe message
       (nếu có content) NGAY tại đây rồi forward blocked nguyên (event realtime, không kèm id).
+    - thoát mà chưa persist (client ngắt giữa chừng): `finally` lưu phần dở dang. Cờ
+      `persisted` giữ cho mỗi lượt lưu ĐÚNG một lần — `done` và `blocked` cùng dùng
+      `assistant_id` pre-generate nên lưu lại lần nữa sẽ vỡ khoá chính.
+
+    Trên đường chạy bình thường chi phí thêm chỉ là một phép kiểm cờ; nhánh `finally` chỉ
+    động tới DB khi stream đứt, lúc đã không còn ai ngồi chờ.
     """
-    async for event in stream.events():
-        if event.event == "token" and collector.ttft_ms is None:
-            collector.mark_first_token(int((perf_counter() - started_at) * 1000))
-        collector.feed(event.event, event.data)
-        if event.event == "done":
-            saved_id = await _persist_assistant(conversation_id, assistant_id, collector)
-            logger.info(
-                "ask done conversation=%s confidence=%s mode=%s citations=%d warnings=%d "
-                "ttft_ms=%s",
-                conversation_id,
-                collector.confidence,
-                collector.retrieval_mode,
-                len(collector.citations),
-                len(collector.warnings),
-                collector.ttft_ms,
-            )
-            yield format_sse(
-                "done",
-                {
-                    **event.data,
-                    "conversation_id": conversation_id,
-                    "message_id": saved_id,
-                    "ttft_ms": collector.ttft_ms,
-                },
-            )
-        elif event.event == "blocked":
-            saved_id = await _persist_assistant(conversation_id, assistant_id, collector)
-            logger.info(
-                "ask blocked conversation=%s persisted=%s categories=%s",
-                conversation_id,
-                saved_id is not None,
-                event.data.get("categories"),
-            )
-            yield format_sse("blocked", event.data)
-        elif event.event == "step":
-            # collector.feed() ở trên đã nhận bản ĐẦY ĐỦ -> DB có internals; chỉ bản chảy
-            # xuống trình duyệt mới bị bóc.
-            yield format_sse("step", _visible_step(event.data, debug))
-        else:
-            yield format_sse(event.event, event.data)
-            if event.event == "error":
-                code = (collector.error or {}).get("code")
-                logger.info("ask error conversation=%s code=%s", conversation_id, code)
-                # HTTP response đã mở 200 từ trước (xem ask()) — lỗi này chỉ lộ giữa stream
-                # SSE nên middleware activity log không bắt được. Ghi thêm 1 dòng riêng để
-                # admin thấy trên trang Hoạt động hệ thống (activity-log-plan.md không cover
-                # ca này — bổ sung theo yêu cầu 2026-07-05).
-                await anyio.to_thread.run_sync(
-                    lambda: record_activity(
-                        request_id=request_id,
-                        user_id=user_id,
-                        method="POST",
-                        path=f"/api/conversations/{conversation_id}/ask (stream)",
-                        status_code=200,
-                        severity="error",
-                        latency_ms=None,
-                        error=str(code) if code else "stream_error",
-                    )
+    persisted = False
+    try:
+        async for event in stream.events():
+            if event.event == "token" and collector.ttft_ms is None:
+                collector.mark_first_token(int((perf_counter() - started_at) * 1000))
+            collector.feed(event.event, event.data)
+            if event.event == "done":
+                saved_id = await _persist_assistant(
+                    conversation_id, assistant_id, collector
                 )
+                persisted = True
+                logger.info(
+                    "ask done conversation=%s confidence=%s mode=%s citations=%d warnings=%d "
+                    "ttft_ms=%s",
+                    conversation_id,
+                    collector.confidence,
+                    collector.retrieval_mode,
+                    len(collector.citations),
+                    len(collector.warnings),
+                    collector.ttft_ms,
+                )
+                yield format_sse(
+                    "done",
+                    {
+                        **event.data,
+                        "conversation_id": conversation_id,
+                        "message_id": saved_id,
+                        "ttft_ms": collector.ttft_ms,
+                    },
+                )
+            elif event.event == "blocked":
+                saved_id = await _persist_assistant(
+                    conversation_id, assistant_id, collector
+                )
+                persisted = True
+                logger.info(
+                    "ask blocked conversation=%s persisted=%s categories=%s",
+                    conversation_id,
+                    saved_id is not None,
+                    event.data.get("categories"),
+                )
+                yield format_sse("blocked", event.data)
+            elif event.event == "step":
+                # collector.feed() ở trên đã nhận bản ĐẦY ĐỦ -> DB có internals; chỉ bản chảy
+                # xuống trình duyệt mới bị bóc.
+                yield format_sse("step", _visible_step(event.data, debug))
+            else:
+                yield format_sse(event.event, event.data)
+                if event.event == "error":
+                    code = (collector.error or {}).get("code")
+                    logger.info("ask error conversation=%s code=%s", conversation_id, code)
+                    # HTTP response đã mở 200 từ trước (xem ask()) — lỗi này chỉ lộ giữa stream
+                    # SSE nên middleware activity log không bắt được. Ghi thêm 1 dòng riêng để
+                    # admin thấy trên trang Hoạt động hệ thống (activity-log-plan.md không cover
+                    # ca này — bổ sung theo yêu cầu 2026-07-05).
+                    await anyio.to_thread.run_sync(
+                        lambda: record_activity(
+                            request_id=request_id,
+                            user_id=user_id,
+                            method="POST",
+                            path=f"/api/conversations/{conversation_id}/ask (stream)",
+                            status_code=200,
+                            severity="error",
+                            latency_ms=None,
+                            error=str(code) if code else "stream_error",
+                        )
+                    )
+    finally:
+        if not persisted:
+            await _persist_on_disconnect(conversation_id, assistant_id, collector)
+        # Đóng kết nối tới agent-service ngay thay vì chờ GC: client đã đi thì không có
+        # lý do giữ stream upstream chạy tiếp. aclose() idempotent nên đường `done`
+        # (events() đã tự đóng ở finally của nó) gọi lại vẫn vô hại.
+        with anyio.CancelScope(shield=True):
+            try:
+                await stream.aclose()
+            except Exception:
+                logger.debug("ask đóng stream agent lỗi conversation=%s", conversation_id)
 
 @router.post("/conversations/{conversation_id}/ask")
 async def ask(

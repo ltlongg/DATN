@@ -24,7 +24,6 @@ _PAYLOAD = {
     "graph_max_context_items": 10,
     "graph_max_path_hops": 2,
     "graph_path_hit_weight": 2.5,
-    "llm_temperature": 0.3,
     "updated_at": "2026-07-11T00:00:00Z",
 }
 
@@ -71,7 +70,6 @@ def test_parses_backend_response_and_ignores_extra(monkeypatch) -> None:
     cfg = RC.get_runtime_config()
     assert cfg.rag_top_k == 11
     assert cfg.graph_path_hit_weight == 2.5
-    assert cfg.llm_temperature == 0.3
     assert not hasattr(cfg, "updated_at")  # field thừa bị bỏ
 
 def test_fallback_default_on_connect_error(monkeypatch) -> None:

@@ -1,7 +1,8 @@
 """Chạy hệ trên retrieval_qa_v2.json và ghi output thô — bước 1.
 
 Năm metric RAGAS cần 2 thứ chỉ có được khi CHẠY THẬT: `response` (câu trả lời hệ sinh ra)
-và `retrieved_contexts` (các đoạn hệ tra được). Script này sinh ra chúng, và chỉ chúng —
+và `retrieved_contexts` (các đoạn thực sự được đưa vào prompt trả lời). Script này sinh ra
+chúng, và chỉ chúng —
 bản ghi ra file đúng bốn field `id / question / response / retrieved_contexts` (thêm
 `error` hoặc `blocked` khi câu đó không chạy bình thường).
 
@@ -13,7 +14,8 @@ Hai mức chạy:
 Gọi thẳng LangGraph (`get_graph().ainvoke`) chứ không qua HTTP `/ask`, vì hai lý do:
 
 - `AskResponse` chỉ trả `citations` (các chunk ĐƯỢC TRÍCH DẪN) — đó là tập con của tập
-  tra được, trong khi context precision/recall phải chấm trên toàn bộ `retrieval.chunks`.
+  context đã đưa cho model. Eval cần tập context đầy đủ này, gồm cả chunk không được trích
+  nhưng không gồm chunk provenance-only của GraphRAG.
 - Không phải dựng server + `X-Internal-Key` chỉ để chấm offline.
 
 Mỗi cấu hình ablation là một lần chạy với `--mode` khác nhau; kết quả ghi ra file JSON
@@ -50,6 +52,7 @@ from langgraph.graph.state import CompiledStateGraph
 
 from app.orchestrator import nodes
 from app.orchestrator.errors import GuardrailsBlocked
+from app.orchestrator.fusion import answer_context_chunks
 from app.orchestrator.graph import get_graph
 from app.orchestrator.runner import prepare_state
 from app.orchestrator.state import AgentState
@@ -160,7 +163,13 @@ async def run_one(item: dict, mode: EvalMode, pipeline: EvalPipeline = "full") -
         "id": item["id"],
         "question": item["question"],
         "response": final.get("answer") or "",
-        "retrieved_contexts": [c.text for c in (retrieval.chunks if retrieval else [])],
+        # Chấm trên đúng các đoạn LLM đã đọc để sinh câu trả lời. `retrieval.chunks` còn
+        # chứa citation_only: nguồn provenance của graph_context, chỉ phục vụ validator/
+        # citation và không được đưa vào prompt; giữ chúng sẽ làm context metric phình sai.
+        "retrieved_contexts": [
+            c.text
+            for c in answer_context_chunks(retrieval.chunks if retrieval else [])
+        ],
     }
 
 async def main_async(args: argparse.Namespace) -> int:

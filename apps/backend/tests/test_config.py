@@ -21,7 +21,6 @@ _ALL_FIELDS = {
     "graph_max_context_items",
     "graph_max_path_hops",
     "graph_path_hit_weight",
-    "llm_temperature",
     "updated_at",
 }
 
@@ -48,17 +47,21 @@ def test_put_config_partial_update(client, auth, db_conn) -> None:  # type: igno
     # đọc lại trong cùng txn phản ánh giá trị mới (chỉ đổi field đã gửi).
     assert client.get("/api/admin/config", headers=admin).json()["rag_top_k"] == 15
 
-def test_put_config_temperature(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
-    r = client.put("/api/admin/config", json={"llm_temperature": 0.7}, headers=auth("admin"))
+def test_put_config_float_field(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
+    r = client.put(
+        "/api/admin/config", json={"graph_path_hit_weight": 2.5}, headers=auth("admin")
+    )
     assert r.status_code == 200
-    assert r.json()["llm_temperature"] == 0.7
+    assert r.json()["graph_path_hit_weight"] == 2.5
 
 def test_put_config_rejects_nonpositive_int(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     r = client.put("/api/admin/config", json={"rag_top_k": 0}, headers=auth("admin"))
     assert r.status_code == 422
 
-def test_put_config_rejects_temperature_out_of_range(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
-    r = client.put("/api/admin/config", json={"llm_temperature": 2.5}, headers=auth("admin"))
+def test_put_config_rejects_negative_float(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
+    r = client.put(
+        "/api/admin/config", json={"graph_path_hit_weight": -1}, headers=auth("admin")
+    )
     assert r.status_code == 422
 
 def test_put_config_rejects_rerank_gt_candidate_same_payload(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]

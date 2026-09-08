@@ -36,11 +36,9 @@ const RETRIEVAL_FIELDS: FieldSpec[] = [
   { key: "graph_path_hit_weight", label: "Graph path hit weight", def: 1.5, integer: false, min: 0, step: 0.1, help: "Điểm cho chunk nằm trên đường nối 2 seed." },
 ];
 
-const SYNTHESIZE_FIELDS: FieldSpec[] = [
-  { key: "llm_temperature", label: "Temperature", def: 0.0, integer: false, min: 0, max: 2, step: 0.1, help: "Nhiệt độ LLM khi soạn câu trả lời (0–2). node plan luôn giữ 0." },
-];
-
-const ALL_FIELDS = [...RETRIEVAL_FIELDS, ...SYNTHESIZE_FIELDS];
+// Không có nhóm synthesize: 3 bước online chạy model reasoning, chúng từ chối `temperature`
+// và dùng `reasoning_effort` — hằng "low" trong agent-service, không phơi ra admin.
+const ALL_FIELDS = RETRIEVAL_FIELDS;
 
 /** Giá trị form là string (cho phép gõ dở); parse + validate khi lưu. */
 type FormValues = Record<FieldKey, string>;
@@ -169,21 +167,6 @@ export function ConfigForm() {
         <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-soft">Retrieval</h3>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {RETRIEVAL_FIELDS.map((spec) => (
-            <FieldInput
-              key={spec.key}
-              spec={spec}
-              value={values[spec.key]}
-              error={errors[spec.key]}
-              onChange={(v) => set(spec.key, v)}
-            />
-          ))}
-        </div>
-      </section>
-
-      <section className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-soft">Synthesize</h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {SYNTHESIZE_FIELDS.map((spec) => (
             <FieldInput
               key={spec.key}
               spec={spec}

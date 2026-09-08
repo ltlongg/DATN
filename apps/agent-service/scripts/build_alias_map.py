@@ -173,7 +173,7 @@ def _judge(pairs, rec, verdicts, workers, model):
                 {"role": "user", "content": build_user_prompt(a["type"], a, b)},
             ],
             response_format=AliasVerdict,
-            temperature=0.0,
+            reasoning_effort="low",
             timeout=60,
         )
         return pair, completion.choices[0].message.parsed

@@ -160,13 +160,15 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
     CREATE INDEX IF NOT EXISTS idx_activity_log_severity
     ON activity_log (severity);
     """,
-    # system_config — cấu hình tinh chỉnh retrieval + synthesize áp dụng LIVE cho
+    # system_config — cấu hình tinh chỉnh retrieval áp dụng LIVE cho
     # agent-service (nhóm "Cấu hình hệ thống", xem docs/plan/system-config-plan.md).
     # Singleton 1 dòng (id=1). Default = Y HỆT giá trị hardcode trong
     # agent-service/app/core/config.py::Settings -> tạo bảng xong KHÔNG đổi hành vi gì cho
-    # tới khi admin thật sự chỉnh. 13 field: 12 retrieval + llm_temperature (synthesize).
+    # tới khi admin thật sự chỉnh. 12 field, toàn bộ là retrieval.
     # KHÔNG có stream_batch_chars/synthesize_max_attempts: cơ chế chúng phục vụ (batching +
     # retry loop) hiện đã bị gỡ khỏi agent-service -> đưa vào đây sẽ là field không tác dụng.
+    # KHÔNG có llm_temperature: cả 3 bước online chạy model reasoning, chúng từ chối
+    # `temperature` và dùng `reasoning_effort` (hằng "low" trong code, không phơi ra admin).
     """
     CREATE TABLE IF NOT EXISTS system_config (
         id                               SMALLINT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
@@ -183,9 +185,6 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
         graph_max_context_items          INTEGER NOT NULL DEFAULT 12  CHECK (graph_max_context_items > 0),
         graph_max_path_hops              INTEGER NOT NULL DEFAULT 3   CHECK (graph_max_path_hops > 0),
         graph_path_hit_weight            REAL NOT NULL DEFAULT 1.5    CHECK (graph_path_hit_weight >= 0),
-        -- synthesize
-        llm_temperature                  REAL NOT NULL DEFAULT 0.0
-                                             CHECK (llm_temperature >= 0 AND llm_temperature <= 2),
         updated_at                       TIMESTAMPTZ NOT NULL DEFAULT now(),
         -- rerank cắt TỪ pool đã fuse (hybrid_candidate_k), không thể lớn hơn pool.
         CHECK (rerank_top_k <= hybrid_candidate_k)
