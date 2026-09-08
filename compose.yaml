@@ -1,0 +1,5 @@
+name: agentic-rag-lichsu
+
+include:
+  - path: infra/compose/docker-compose.yml
+    env_file: .env
