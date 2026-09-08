@@ -37,14 +37,22 @@ describe("AppSidebar", () => {
     }
   });
 
-  it("non-admin thấy đúng 2 mục khu user, không có nhóm/mục quản trị", () => {
+  it("non-admin thấy đúng 4 mục khu user, không có nhóm/mục quản trị", () => {
     renderSidebar("user");
     expect(screen.getByRole("link", { name: "Hỏi đáp" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Dòng lịch sử" })).toHaveAttribute(
       "href",
       "/timeline",
     );
-    expect(screen.getAllByRole("link")).toHaveLength(2);
+    expect(screen.getByRole("link", { name: "Danh nhân" })).toHaveAttribute(
+      "href",
+      "/danh-nhan",
+    );
+    expect(screen.getByRole("link", { name: "Chiến dịch" })).toHaveAttribute(
+      "href",
+      "/chien-dich",
+    );
+    expect(screen.getAllByRole("link")).toHaveLength(4);
     expect(screen.queryByText("QUẢN TRỊ")).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Chi phí" })).not.toBeInTheDocument();
   });

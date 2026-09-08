@@ -13,8 +13,10 @@ import {
   MessageSquare,
   Milestone,
   PanelLeft,
+  ScrollText,
   Share2,
   SlidersHorizontal,
+  Swords,
   Users,
   Wand2,
 } from "lucide-react";
@@ -34,6 +36,8 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { to: "/", label: "Hỏi đáp", icon: MessageSquare, end: true, adminOnly: false },
   { to: "/timeline", label: "Dòng lịch sử", icon: Milestone, end: false, adminOnly: false },
+  { to: "/danh-nhan", label: "Danh nhân", icon: ScrollText, end: false, adminOnly: false },
+  { to: "/chien-dich", label: "Chiến dịch", icon: Swords, end: false, adminOnly: false },
   { to: "/admin/documents", label: "Tài liệu", icon: FileText, end: false, adminOnly: true, group: "NỘI DUNG" },
   { to: "/admin/kb/chunks", label: "Đoạn tài liệu", icon: FileStack, end: false, adminOnly: true, group: "KHO TRI THỨC" },
   { to: "/admin/kb/graph", label: "Đồ thị tri thức", icon: Share2, end: false, adminOnly: true, group: "KHO TRI THỨC" },

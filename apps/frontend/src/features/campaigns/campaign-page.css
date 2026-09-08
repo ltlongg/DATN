@@ -1,0 +1,720 @@
+/* Trang chiến dịch — CSS thuần, CỐ Ý không dùng Tailwind, cùng lý do như
+ * `features/figures/figure-page.css`: đây là bản dựng chuyên đề bê nguyên từ mockup
+ * `docs/design/mockups/chien-dich-dien-bien-phu-1954.css`, dịch sang utility class thì dài
+ * hơn mà không được gì. Phần lớn số rule dưới đây còn tô cho markup SVG do
+ * `dien-bien-phu-1954.draw.ts` sinh ra — Tailwind không với tới chỗ đó.
+ *
+ * MỌI selector đều gói trong `.campaign-page`. Bắt buộc: file này vào bundle là CSS toàn
+ * cục, mà bản gốc có selector trần (`body`, `header`, `h1`, `main`, `button`, `select`) —
+ * không gói thì `header{...}` sẽ đập vào mọi trang khác.
+ *
+ * Tên `@keyframes` cũng thêm tiền tố `dbp-` vì keyframes không có phạm vi: trùng tên với
+ * animation của Tailwind hay của trang khác là ghi đè lẫn nhau.
+ *
+ * Hai rule gắn trên `html.campaign-page-open` (class do CampaignPage bật/tắt khi mount) là
+ * phần KHÔNG gói được vì thuộc về document: bỏ `height:100%` của #root (index.css) để
+ * trang cao hơn màn hình vẫn cuộn được, và đổi nền cửa sổ cho khớp.
+ */
+
+html.campaign-page-open #root {
+  height: auto;
+}
+html.campaign-page-open,
+html.campaign-page-open body {
+  background: #f5f2e8;
+}
+
+.campaign-page {
+  --ink: #223d35;
+  /* Georgia (font của mockup) KHÔNG có sẵn 'ắ', 'ế' đúc sẵn -> trình duyệt ghép tay và ra
+     "chă´c". Noto Serif do app nạp sẵn ở index.html (subset vietnamese), Cambria có sẵn
+     trên Windows; giữ Georgia làm dự phòng cuối. Xem thêm chú thích ở figure-page.css. */
+  --serif: "Noto Serif", Cambria, Georgia, serif;
+  --paper: #f5f2e8;
+  --green: #285d45;
+  --red: #a74737;
+  --muted: #72806f;
+  --line: #d5dccb;
+  --gold: #c89648;
+
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font: 14px/1.5 system-ui, sans-serif;
+}
+
+.campaign-page * {
+  box-sizing: border-box;
+}
+.campaign-page button,
+.campaign-page select {
+  font: inherit;
+}
+.campaign-page button {
+  cursor: pointer;
+}
+.campaign-page button:focus-visible,
+.campaign-page select:focus-visible,
+.campaign-page [role="button"]:focus-visible {
+  outline: 3px solid #cf923b;
+  outline-offset: 3px;
+}
+
+/* thanh quay lại: nút bên trái, khoảng thời gian của chiến dịch bên phải */
+.campaign-page .back-row {
+  max-width: 1540px;
+  margin: auto;
+  padding: 14px 28px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.campaign-page .crumb {
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+}
+.campaign-page .back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 13px 6px 10px;
+  border: 1px solid #c7d0bd;
+  border-radius: 999px;
+  background: #fffdf5;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: none;
+  transition: 0.25s;
+}
+.campaign-page .back:hover {
+  color: var(--green);
+  border-color: #a9bb9c;
+}
+
+.campaign-page header {
+  max-width: 1540px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px 16px;
+  gap: 20px;
+}
+.campaign-page .eyebrow {
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--green);
+}
+.campaign-page h1 {
+  font: 32px/1.2 var(--serif);
+  margin: 5px 0;
+}
+.campaign-page .intro {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.campaign-page .edition {
+  border: 1px solid #c7d0bd;
+  border-radius: 20px;
+  padding: 7px 13px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+.campaign-page main {
+  max-width: 1540px;
+  margin: auto;
+  padding: 0 24px 25px;
+}
+
+/* hai khung hình: phối cảnh bên trái, lược đồ bên phải */
+.campaign-page .theater {
+  display: grid;
+  grid-template-columns: 1.85fr 1fr;
+  overflow: hidden;
+  border: 1px solid #becaaf;
+  border-radius: 16px;
+  background: #e0e7d2;
+  box-shadow: 0 10px 35px #243e2510;
+}
+.campaign-page .panel {
+  position: relative;
+  min-width: 0;
+}
+.campaign-page .scene {
+  border-right: 3px solid #f7f3e6;
+}
+.campaign-page .panel svg {
+  display: block;
+  width: 100%;
+  height: 520px;
+}
+.campaign-page .map svg {
+  background: #f3f0e5;
+}
+.campaign-page .panel-tag {
+  position: absolute;
+  top: 15px;
+  left: 18px;
+  z-index: 2;
+  padding: 5px 10px;
+  border-radius: 14px;
+  background: #faf6e5ed;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  pointer-events: none;
+}
+.campaign-page .scene-top {
+  position: absolute;
+  right: 16px;
+  top: 14px;
+  text-align: right;
+  pointer-events: none;
+}
+.campaign-page .scene-top strong {
+  font: 20px var(--serif);
+  display: block;
+  color: #314c38;
+}
+.campaign-page .scene-top span {
+  font-size: 10px;
+  color: #47624b;
+}
+.campaign-page .scene-bottom {
+  position: absolute;
+  left: 15px;
+  bottom: 14px;
+  right: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 12px;
+  pointer-events: none;
+}
+.campaign-page .scene-note {
+  font-size: 9px;
+  background: #fff9e3d9;
+  padding: 4px 7px;
+  border-radius: 4px;
+  color: #526046;
+}
+.campaign-page .action-label {
+  background: #234737ee;
+  color: #fff9e6;
+  padding: 8px 12px;
+  border-radius: 7px;
+  font-size: 12px;
+  box-shadow: 0 3px 15px #17392920;
+  max-width: 72%;
+}
+.campaign-page .action-label span {
+  display: block;
+  color: #c5d7b6;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+.campaign-page .map-legend {
+  position: absolute;
+  bottom: 9px;
+  left: 16px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 9px;
+  color: #526552;
+}
+.campaign-page .map-legend span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.campaign-page .map-legend i {
+  width: 7px;
+  height: 7px;
+  background: var(--red);
+  display: inline-block;
+  border-radius: 1px;
+}
+.campaign-page .map-legend .taken {
+  background: var(--green);
+}
+.campaign-page .map-legend .focus {
+  background: none;
+  border: 1.5px solid var(--gold);
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+/* dải chọn cảnh */
+.campaign-page .chapter-strip {
+  display: flex;
+  gap: 0;
+  margin: 17px 0 0;
+  border-bottom: 1px solid var(--line);
+  overflow: auto;
+}
+.campaign-page .chapter {
+  position: relative;
+  min-width: 100px;
+  flex: 1;
+  border: 0;
+  background: none;
+  text-align: left;
+  padding: 9px 9px 12px;
+  color: #76806e;
+  border-bottom: 3px solid transparent;
+}
+.campaign-page .chapter small {
+  font-size: 9px;
+  display: block;
+  margin-bottom: 4px;
+  letter-spacing: 0.3px;
+}
+.campaign-page .chapter strong {
+  font-size: 11px;
+  display: block;
+}
+.campaign-page .chapter.active {
+  border-color: var(--green);
+  color: var(--green);
+  background: #e7ecdc;
+  border-radius: 5px 5px 0 0;
+}
+.campaign-page .chapter.done {
+  color: #42674f;
+}
+
+/* khối chữ của cảnh */
+.campaign-page .reading {
+  display: grid;
+  grid-template-columns: 220px 1fr 240px;
+  gap: 28px;
+  padding: 20px 5px;
+  align-items: start;
+  min-height: 133px;
+}
+.campaign-page .reading h2 {
+  font: 26px/1.25 var(--serif);
+  margin: 5px 0;
+}
+.campaign-page .reading p {
+  margin: 0;
+  line-height: 1.8;
+  font-size: 13px;
+  max-width: 730px;
+}
+.campaign-page .result {
+  border-left: 2px solid #c6b17e;
+  padding: 0 0 0 15px;
+  color: #62715e;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.campaign-page .result strong {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: #8c7952;
+  margin-bottom: 5px;
+}
+.campaign-page .microsteps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 5px 15px;
+}
+.campaign-page .microsteps > span {
+  font-size: 10px;
+  color: var(--muted);
+  margin-right: 10px;
+}
+.campaign-page .beat {
+  background: #fcfaf2;
+  border: 1px solid #d6ddcb;
+  border-radius: 20px;
+  padding: 6px 12px;
+  color: #63715e;
+  font-size: 11px;
+}
+.campaign-page .beat.active {
+  background: #285d45;
+  color: white;
+  border-color: #285d45;
+}
+.campaign-page .beat b {
+  opacity: 0.6;
+  margin-right: 6px;
+}
+
+/* điều khiển trình chiếu */
+.campaign-page .transport {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 13px 5px;
+  border-top: 1px solid var(--line);
+}
+.campaign-page .transport button {
+  border: 1px solid #c7d0bd;
+  border-radius: 7px;
+  padding: 8px 13px;
+  background: #fffdf5;
+  color: var(--ink);
+}
+.campaign-page .transport .play {
+  background: var(--green);
+  color: white;
+  min-width: 125px;
+  border-color: var(--green);
+}
+.campaign-page button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.campaign-page .transport .spacer {
+  flex: 1;
+}
+.campaign-page .transport label {
+  font-size: 11px;
+  color: var(--muted);
+}
+.campaign-page select {
+  font-size: 12px;
+  border: 0;
+  border-bottom: 1px solid #c5ceb9;
+  background: none;
+  color: var(--ink);
+  padding: 4px;
+}
+.campaign-page .progress {
+  height: 3px;
+  background: #dbdfcf;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.campaign-page .progress > div {
+  height: 100%;
+  background: var(--gold);
+  width: 0;
+}
+.campaign-page .footer {
+  font-size: 10px;
+  color: #7c8877;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+/* --- phần tô cho markup SVG do draw.ts sinh ra --- */
+
+.campaign-page .world {
+  transition: transform 1.05s cubic-bezier(0.2, 0.75, 0.2, 1);
+  transform-origin: 0 0;
+}
+.campaign-page .night {
+  pointer-events: none;
+  transition: opacity 1s;
+  fill: #21384f;
+}
+.campaign-page .landmark {
+  cursor: pointer;
+}
+.campaign-page .landmark .label {
+  font: 650 13px system-ui;
+  fill: #6b4934;
+  paint-order: stroke;
+  stroke: #fff1c9;
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+.campaign-page .landmark.active .label {
+  fill: #8e402c;
+}
+.campaign-page .landmark.captured .label {
+  fill: #2e6244;
+}
+.campaign-page .marker-ring {
+  fill: none;
+  stroke: #bf8b3f;
+  stroke-width: 2;
+  opacity: 0;
+}
+.campaign-page .landmark.active .marker-ring,
+.campaign-page .landmark:hover .marker-ring,
+.campaign-page .landmark:focus .marker-ring {
+  opacity: 1;
+}
+.campaign-page .landmark .hit {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 7;
+}
+.campaign-page .svg-note {
+  font: 11px system-ui;
+  fill: #675d42;
+  paint-order: stroke;
+  stroke: #f6edcf;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.campaign-page .map-focus {
+  fill: #cfab4910;
+  stroke: #bd9546;
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+.campaign-page .route {
+  fill: none;
+  stroke: #285d45;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: dbp-route 1.6s ease-out forwards;
+}
+.campaign-page .shell {
+  fill: none;
+  stroke: #f7e6b7;
+  stroke-width: 2.5;
+  stroke-dasharray: 16 350;
+  animation: dbp-shell 1.7s ease-out 2;
+}
+.campaign-page .impact {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: dbp-impact 1.7s ease-out 2;
+}
+.campaign-page .squad {
+  offset-rotate: 0deg;
+  animation: dbp-march 2.8s ease-in-out forwards;
+}
+.campaign-page .flag-cloth {
+  transform-box: fill-box;
+  transform-origin: left;
+  animation: dbp-wave 2.5s ease-in-out infinite;
+}
+.campaign-page .trench-line {
+  fill: none;
+  stroke: #806441;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: dbp-route 2.8s ease-out forwards;
+}
+/* hào đã đào ở cảnh trước: vẽ sẵn, không diễn lại nét vẽ */
+.campaign-page .trench-line.steady {
+  stroke-dashoffset: 0;
+  animation: none;
+}
+.campaign-page .tunnel-dig {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: dbp-route 3s linear forwards;
+}
+.campaign-page .parachute {
+  animation: dbp-drop 3s ease-out forwards;
+}
+.campaign-page .plane-flight {
+  animation: dbp-fly 4s linear forwards;
+}
+.campaign-page .smoke {
+  opacity: 0.35;
+  animation: dbp-smoke 3s ease-out infinite;
+}
+
+/* Tạm dừng thì đóng băng animation; giảm chuyển động thì đưa thẳng mọi hiệu ứng về
+   trạng thái cuối để hình vẫn đọc được mà không có gì nhúc nhích. */
+.campaign-page .paused *,
+.campaign-page .reduced * {
+  animation-play-state: paused !important;
+}
+.campaign-page .paused .world,
+.campaign-page .reduced .world {
+  transition: none;
+}
+.campaign-page .reduced .route,
+.campaign-page .reduced .trench-line,
+.campaign-page .reduced .tunnel-dig {
+  stroke-dashoffset: 0;
+}
+.campaign-page .reduced .squad {
+  offset-distance: 100%;
+}
+.campaign-page .reduced .impact,
+.campaign-page .reduced .shell,
+.campaign-page .reduced .smoke {
+  display: none;
+}
+.campaign-page .reduced .parachute {
+  transform: translate(0, 65px);
+}
+.campaign-page .reduced .plane-flight {
+  transform: translate(300px, 0);
+}
+
+@keyframes dbp-route {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes dbp-shell {
+  from {
+    stroke-dashoffset: 360;
+    opacity: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+@keyframes dbp-impact {
+  0%,
+  25% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.55);
+  }
+}
+@keyframes dbp-march {
+  to {
+    offset-distance: 100%;
+  }
+}
+@keyframes dbp-wave {
+  50% {
+    transform: skewY(6deg) scaleX(0.94);
+  }
+}
+@keyframes dbp-drop {
+  from {
+    transform: translate(-20px, -65px);
+    opacity: 0.4;
+  }
+  to {
+    transform: translate(0, 65px);
+    opacity: 1;
+  }
+}
+@keyframes dbp-fly {
+  from {
+    transform: translate(-180px, 0);
+  }
+  to {
+    transform: translate(850px, 0);
+  }
+}
+@keyframes dbp-smoke {
+  to {
+    transform: translate(-12px, -18px);
+    opacity: 0;
+  }
+}
+
+@media (min-width: 1550px) {
+  .campaign-page .panel svg {
+    height: 585px;
+  }
+}
+@media (max-width: 1000px) {
+  .campaign-page .reading {
+    grid-template-columns: 190px 1fr;
+    gap: 20px;
+  }
+  .campaign-page .result {
+    grid-column: 2;
+  }
+  .campaign-page .theater {
+    grid-template-columns: 1.6fr 1fr;
+  }
+  .campaign-page .panel svg {
+    height: 470px;
+  }
+  .campaign-page .chapter {
+    min-width: 90px;
+  }
+}
+@media (max-width: 700px) {
+  .campaign-page header {
+    padding: 16px;
+  }
+  .campaign-page .back-row {
+    padding: 12px 16px 0;
+  }
+  .campaign-page h1 {
+    font-size: 27px;
+  }
+  .campaign-page .edition {
+    display: none;
+  }
+  .campaign-page main {
+    padding: 0 10px 20px;
+  }
+  .campaign-page .theater {
+    grid-template-columns: 1fr;
+  }
+  .campaign-page .scene {
+    border-right: 0;
+    border-bottom: 3px solid #faf6e9;
+  }
+  .campaign-page .scene svg {
+    height: 370px;
+  }
+  .campaign-page .map svg {
+    height: 330px;
+  }
+  .campaign-page .reading {
+    grid-template-columns: 1fr;
+    padding: 16px 5px;
+    gap: 10px;
+  }
+  .campaign-page .result {
+    grid-column: auto;
+  }
+  .campaign-page .microsteps {
+    flex-wrap: wrap;
+  }
+  .campaign-page .microsteps > span {
+    width: 100%;
+  }
+  .campaign-page .transport {
+    flex-wrap: wrap;
+  }
+  .campaign-page .transport .spacer {
+    display: none;
+  }
+  .campaign-page .footer {
+    display: block;
+  }
+  .campaign-page .action-label {
+    font-size: 10px;
+  }
+  .campaign-page .scene-note {
+    font-size: 8px;
+  }
+  .campaign-page .scene-top strong {
+    font-size: 17px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .campaign-page .world {
+    transition: none;
+  }
+}

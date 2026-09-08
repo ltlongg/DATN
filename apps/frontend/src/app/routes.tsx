@@ -3,9 +3,13 @@ import { type RouteObject, Navigate } from "react-router-dom";
 import AppShell from "@/components/AppShell";
 import { RequireAuth } from "@/features/auth/RequireAuth";
 import { RoleGuard } from "@/features/auth/RoleGuard";
+import { DEFAULT_CAMPAIGN_SLUG } from "@/features/campaigns/registry";
+import { DEFAULT_FIGURE_SLUG } from "@/features/figures/registry";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import AskPage from "@/pages/AskPage";
+import FigurePage from "@/pages/FigurePage";
+import CampaignPage from "@/pages/CampaignPage";
 import TimelinePage from "@/pages/TimelinePage";
 import AdminLayout from "@/pages/AdminLayout";
 import AdminDocumentsPage from "@/pages/AdminDocumentsPage";
@@ -35,6 +39,18 @@ export const routes: RouteObject[] = [
     path: "/",
     element: <RequireAuth />,
     children: [
+      // Hai trang chuyên đề nằm NGOÀI AppShell: chiếm trọn màn hình, không sidebar.
+      // `/danh-nhan` và `/chien-dich` đưa thẳng vào mục duy nhất đang có.
+      {
+        path: "danh-nhan",
+        element: <Navigate to={`/danh-nhan/${DEFAULT_FIGURE_SLUG}`} replace />,
+      },
+      { path: "danh-nhan/:slug", element: <FigurePage /> },
+      {
+        path: "chien-dich",
+        element: <Navigate to={`/chien-dich/${DEFAULT_CAMPAIGN_SLUG}`} replace />,
+      },
+      { path: "chien-dich/:slug", element: <CampaignPage /> },
       {
         element: <AppShell />,
         children: [
