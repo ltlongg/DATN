@@ -6,7 +6,7 @@ import logging
 import uuid
 from collections.abc import AsyncIterator
 from time import perf_counter
-from typing import Any
+from typing import Any, cast
 
 import anyio
 from fastapi import APIRouter, Depends, Request
@@ -188,6 +188,7 @@ async def _proxy_stream(
     stream: AgentStream,
     collector: SseCollector,
     conversation_id: str,
+    user_message_id: str,
     assistant_id: str,
     request_id: str | None,
     user_id: str,
@@ -204,6 +205,7 @@ async def _proxy_stream(
       message_id (message_id=None nếu không lưu) + ttft_ms để frontend hiện ngay, khỏi reload.
     - event == blocked: guardrails chặn input -> agent KHÔNG emit done. Persist safe message
       (nếu có content) NGAY tại đây rồi forward blocked nguyên (event realtime, không kèm id).
+      Chặn vì vi phạm (không phải `system_error`) -> gắn cờ câu hỏi `user_message_id`.
     - thoát mà chưa persist (client ngắt giữa chừng): `finally` lưu phần dở dang. Cờ
       `persisted` giữ cho mỗi lượt lưu ĐÚNG một lần — `done` và `blocked` cùng dùng
       `assistant_id` pre-generate nên lưu lại lần nữa sẽ vỡ khoá chính.
@@ -246,6 +248,11 @@ async def _proxy_stream(
                     conversation_id, assistant_id, collector
                 )
                 persisted = True
+                if not event.data.get("system_error"):
+                    categories = cast(list[str], event.data.get("categories") or [])
+                    await anyio.to_thread.run_sync(
+                        conv_repo.flag_message, user_message_id, categories
+                    )
                 logger.info(
                     "ask blocked conversation=%s persisted=%s categories=%s",
                     conversation_id,
@@ -332,7 +339,7 @@ async def ask(
         )
 
     # 3) Lưu user message + bump conversation lên đầu danh sách.
-    await anyio.to_thread.run_sync(
+    user_message = await anyio.to_thread.run_sync(
         lambda: conv_repo.add_message(conv.id, "user", body.question)
     )
     await anyio.to_thread.run_sync(conv_repo.touch_conversation, conv.id)
@@ -358,7 +365,15 @@ async def ask(
     request_id = getattr(request.state, "request_id", None)
     return StreamingResponse(
         _proxy_stream(
-            stream, collector, conv.id, assistant_id, request_id, user.id, started_at, debug
+            stream,
+            collector,
+            conv.id,
+            user_message.id,
+            assistant_id,
+            request_id,
+            user.id,
+            started_at,
+            debug,
         ),
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},

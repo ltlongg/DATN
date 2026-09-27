@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
+from app.models.conversation import add_message, create_conversation, flag_message
 from app.services.agent_client import format_sse
 
 _DONE = format_sse("done", {"confidence": "cao", "retrieval_mode": "hybrid", "warnings": []})
@@ -44,6 +45,18 @@ def test_list_users_contains_created(client, auth, db_conn) -> None:  # type: ig
     r = client.get("/api/admin/users", headers=auth("admin"))
     assert r.status_code == 200
     assert "listed-zz@example.com" in [u["email"] for u in r.json()]
+
+def test_list_users_shows_flagged_count(client, auth, db_conn, users) -> None:  # type: ignore[no-untyped-def]
+    conv = create_conversation(users["user"].id, "t")
+    flag_message(add_message(conv.id, "user", "vi phạm 1").id, ["prompt_injection"])
+    flag_message(add_message(conv.id, "user", "vi phạm 2").id, ["hate_harassment"])
+    add_message(conv.id, "user", "câu bình thường")
+    by_email = {
+        u["email"]: u["flagged_count"]
+        for u in client.get("/api/admin/users", headers=auth("admin")).json()
+    }
+    assert by_email["user-test@example.com"] == 2
+    assert by_email["admin-test@example.com"] == 0
 
 def test_patch_user_role_and_quota(client, auth, db_conn) -> None:  # type: ignore[no-untyped-def]
     uid = _create_user(client, auth("admin"), "patch-zz@example.com").json()["id"]

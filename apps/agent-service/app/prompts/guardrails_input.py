@@ -1,6 +1,6 @@
 """Prompt guardrails input layer — phân loại 1 câu hỏi người dùng thành allow/block.
 
-Dùng với OpenAI Structured Outputs qua `.parse()`, schema `GuardrailDecision`. Sửa prompt
+Dùng với OpenAI Structured Outputs qua `.parse()`, schema `GuardrailVerdict`. Sửa prompt
 -> bump `GUARDRAILS_INPUT_PROMPT_VERSION` (và nhớ `seed_prompts.py --publish --key
 guardrails_input`, nếu không thì bản production trong DB vẫn là bản cũ).
 

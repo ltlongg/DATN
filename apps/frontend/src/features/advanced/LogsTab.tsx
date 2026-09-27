@@ -19,7 +19,12 @@ import { Pagination } from "@/features/kb/Pagination";
 import type { MessageTokens } from "@/types/admin";
 
 const LIMIT = 20;
-const EMPTY: LogsFilterValue = { user_email: "", from_date: "", to_date: "" };
+const EMPTY: LogsFilterValue = {
+  user_anon_id: "",
+  flagged_only: false,
+  from_date: "",
+  to_date: "",
+};
 
 function SummarySection({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -49,7 +54,8 @@ export function LogsTab() {
     queryKey: ["adm-logs", filter, offset],
     queryFn: () =>
       listConversationLogs({
-        user_email: filter.user_email || undefined,
+        user_anon_id: filter.user_anon_id || undefined,
+        flagged_only: filter.flagged_only || undefined,
         ...range,
         limit: LIMIT,
         offset,

@@ -131,6 +131,15 @@ def touch_conversation(conversation_id: str) -> None:
 
 # --- messages ---
 
+def flag_message(message_id: str, categories: list[str]) -> None:
+    """Gắn cờ vi phạm cho 1 message (câu hỏi bị guardrails chặn)."""
+    with connection() as conn, conn.cursor() as cur:
+        cur.execute(
+            "UPDATE messages SET flagged = true, flag_categories = %s WHERE id = %s",
+            (Jsonb(categories), message_id),
+        )
+        conn.commit()
+
 def add_message(
     conversation_id: str,
     role: str,

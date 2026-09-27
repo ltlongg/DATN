@@ -62,6 +62,11 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
     # User.password_hash: str | None và verify_password nhận None (trả False), nhờ đó
     # /login từ chối tài khoản Google-only bằng đúng message invalid_credentials.
     "ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;",
+    # Người dùng tự bật "Chia sẻ hội thoại" -> admin được đọc nội dung hội thoại của họ.
+    # Mặc định TẮT (phải chủ động đồng ý). `share_updated_at` = lần đổi lựa chọn gần nhất,
+    # làm bằng chứng thời điểm đồng ý/rút lại; NULL = chưa từng đổi.
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS share_conversations BOOLEAN NOT NULL DEFAULT false;",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS share_updated_at TIMESTAMPTZ;",
     """
     CREATE TABLE IF NOT EXISTS conversations (
         id         UUID PRIMARY KEY,
@@ -110,6 +115,11 @@ SCHEMA_STATEMENTS: tuple[str, ...] = (
     # thật. Cột ttft_ms ngay trên cũng thêm bằng đúng cách này — giữ nhất quán, và thêm cột
     # có DEFAULT thì ALTER không tốn gì so với drop.
     "ALTER TABLE messages ADD COLUMN IF NOT EXISTS steps JSONB NOT NULL DEFAULT '[]';",
+    # Câu hỏi bị guardrails chặn vì VI PHẠM (không tính chặn do guardrails lỗi) -> admin được
+    # xem nội dung + danh tính người gửi dù người dùng không bật chia sẻ. `flag_categories`
+    # là nhóm vi phạm guardrails trả về (vd ["prompt_injection"]).
+    "ALTER TABLE messages ADD COLUMN IF NOT EXISTS flagged BOOLEAN NOT NULL DEFAULT false;",
+    "ALTER TABLE messages ADD COLUMN IF NOT EXISTS flag_categories JSONB NOT NULL DEFAULT '[]';",
     # documents — danh mục tài liệu nguồn. `source_file` là KHÓA NỐI xuống kho tri thức
     # thật: khớp `rag_chunks.metadata->>'source_file'` (vd 'lichsu.clean.md'). Nhờ nó,
     # chunk_count/event_count được ĐẾM THẬT lúc đọc (xem models/document.py) thay vì lưu

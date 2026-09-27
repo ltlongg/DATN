@@ -37,6 +37,10 @@ class UserPublic(BaseModel):
     email: EmailStr
     name: str
     role: Role
+    share_conversations: bool
+
+class PreferencesUpdate(BaseModel):
+    share_conversations: bool
 
 class LoginResponse(BaseModel):
     access_token: str

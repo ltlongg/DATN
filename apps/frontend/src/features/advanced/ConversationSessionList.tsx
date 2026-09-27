@@ -31,15 +31,34 @@ export function ConversationSessionList({
               }`}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="truncate text-sm font-medium text-ink">{c.user_name}</span>
+                {/* Tên chỉ có khi hội thoại có tin vi phạm; còn lại hiện mã ẩn danh. */}
+                <span className="truncate text-sm font-medium text-ink">
+                  {c.user_name ?? c.user_anon_id}
+                </span>
                 <span className="shrink-0 text-[11px] text-ink-soft">
                   {formatDateTime(c.updated_at)}
                 </span>
               </div>
-              <p className="mt-0.5 truncate text-xs text-ink-soft">{c.title}</p>
+              <p className="mt-0.5 truncate text-xs text-ink-soft">
+                {c.title ?? <span className="italic">Tiêu đề được ẩn</span>}
+              </p>
               <p className="mt-0.5 text-[11px] text-ink-soft">
                 {c.message_count} lượt · {tok === undefined ? "—" : `${nf.format(tok)} token`}
               </p>
+              {(c.shared || c.flagged_count > 0) && (
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {c.shared && (
+                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] text-emerald-800">
+                      Đã chia sẻ
+                    </span>
+                  )}
+                  {c.flagged_count > 0 && (
+                    <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] text-rose-800">
+                      {c.flagged_count} tin bị gắn cờ
+                    </span>
+                  )}
+                </div>
+              )}
             </button>
           </li>
         );

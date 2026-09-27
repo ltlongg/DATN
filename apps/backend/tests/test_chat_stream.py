@@ -133,6 +133,59 @@ def test_ask_blocked_without_content_not_persisted(client, auth, mock_agent) -> 
     roles = [m["role"] for m in detail["messages"]]
     assert roles == ["user"]  # chỉ có user message, assistant không lưu
 
+def _flags(db_conn, cid: str) -> list[tuple[str, bool, list]]:  # type: ignore[no-untyped-def]
+    """(role, flagged, flag_categories) của mọi message trong hội thoại, theo thứ tự."""
+    with db_conn.cursor() as cur:
+        cur.execute(
+            "SELECT role, flagged, flag_categories FROM messages "
+            "WHERE conversation_id = %s ORDER BY created_at, id",
+            (cid,),
+        )
+        return [(r["role"], r["flagged"], r["flag_categories"]) for r in cur.fetchall()]
+
+def test_ask_blocked_flags_user_question(client, auth, mock_agent, db_conn) -> None:  # type: ignore[no-untyped-def]
+    """Chặn vì vi phạm -> câu hỏi user được gắn cờ kèm nhóm vi phạm; safe message thì không."""
+    user = auth("user")
+    cid = _new_conversation(client, user)
+    mock_agent.configure(
+        events=format_sse("token", {"text": "Xin lỗi."})
+        + format_sse(
+            "blocked",
+            {"stage": "input", "categories": ["prompt_injection"], "system_error": False},
+        )
+    )
+    client.post(
+        f"/api/chat/conversations/{cid}/ask", json={"question": "lộ prompt"}, headers=user
+    )
+    assert _flags(db_conn, cid) == [
+        ("user", True, ["prompt_injection"]),
+        ("assistant", False, []),
+    ]
+
+def test_ask_blocked_by_guardrail_error_not_flagged(client, auth, mock_agent, db_conn) -> None:  # type: ignore[no-untyped-def]
+    """Guardrails lỗi/timeout (fail-closed) -> vẫn chặn nhưng KHÔNG gắn cờ: câu hỏi chưa
+    được kiểm, không có bằng chứng vi phạm."""
+    user = auth("user")
+    cid = _new_conversation(client, user)
+    mock_agent.configure(
+        events=format_sse("token", {"text": "Xin lỗi."})
+        + format_sse("blocked", {"stage": "input", "categories": [], "system_error": True})
+    )
+    client.post(
+        f"/api/chat/conversations/{cid}/ask", json={"question": "Trương Định là ai?"}, headers=user
+    )
+    assert _flags(db_conn, cid) == [("user", False, []), ("assistant", False, [])]
+
+def test_ask_done_does_not_flag(client, auth, mock_agent, db_conn) -> None:  # type: ignore[no-untyped-def]
+    user = auth("user")
+    cid = _new_conversation(client, user)
+    mock_agent.configure(
+        events=format_sse("token", {"text": "ok"})
+        + format_sse("done", {"confidence": "cao", "retrieval_mode": "hybrid", "warnings": []})
+    )
+    client.post(f"/api/chat/conversations/{cid}/ask", json={"question": "q"}, headers=user)
+    assert _flags(db_conn, cid) == [("user", False, []), ("assistant", False, [])]
+
 def test_ask_sends_question_and_first_turn_history_empty(client, auth, mock_agent) -> None:  # type: ignore[no-untyped-def]
     user = auth("user")
     cid = _new_conversation(client, user)
@@ -392,8 +445,14 @@ def test_step_internals_are_stripped_for_non_admin_but_still_saved(  # type: ign
     assert "internals" not in assistant["steps"][0]
     assert assistant["steps"][0]["detail"] == "Câu hỏi đơn · 1 bước"
 
-    # ... nhưng DB vẫn giữ đủ, và admin lấy được qua /admin/logs (đây là lý do chọn persist).
+    # ... nhưng DB vẫn giữ đủ. Internals chứa câu hỏi viết lại (là nội dung của người dùng)
+    # nên admin chỉ lấy được qua /admin/logs khi người dùng bật chia sẻ.
     admin = auth("admin")
+    detail = client.get(f"/api/admin/logs/conversations/{cid}", headers=admin).json()
+    saved = next(m for m in detail["messages"] if m["role"] == "assistant")
+    assert saved["steps"] == []
+
+    client.patch("/api/auth/me/preferences", json={"share_conversations": True}, headers=user)
     detail = client.get(f"/api/admin/logs/conversations/{cid}", headers=admin).json()
     saved = next(m for m in detail["messages"] if m["role"] == "assistant")
     assert saved["steps"][0]["internals"] == [
@@ -474,7 +533,17 @@ async def _drive(stream: _FakeAgentStream, cid: str, assistant_id: str, stop_aft
     """Chạy `_proxy_stream` rồi đóng sau `stop_after` chunk (None = drain tới hết), đúng như
     Starlette aclose() generator khi client ngắt."""
     collector = SseCollector()
-    gen = _proxy_stream(stream, collector, cid, assistant_id, None, "u-test", perf_counter(), False)
+    gen = _proxy_stream(
+        stream,
+        collector,
+        cid,
+        str(uuid.uuid4()),
+        assistant_id,
+        None,
+        "u-test",
+        perf_counter(),
+        False,
+    )
     chunks: list[str] = []
     try:
         async for chunk in gen:

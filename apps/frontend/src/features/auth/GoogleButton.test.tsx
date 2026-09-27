@@ -46,7 +46,13 @@ describe("GoogleButton", () => {
     loginWithGoogle.mockResolvedValue({
       access_token: "tok",
       token_type: "bearer",
-      user: { id: "1", email: "gg@example.com", name: "Gờ", role: "user" },
+      user: {
+        id: "1",
+        email: "gg@example.com",
+        name: "Gờ",
+        role: "user",
+        share_conversations: false,
+      },
     });
     renderButton();
 

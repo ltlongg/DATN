@@ -24,18 +24,19 @@ from app.core.usage_log import record_usage
 from app.prompts import guardrails_input as gi_prompt
 from app.tools.prompts.prompt_store import get_active_prompt
 from app.schemas.ask import ChatMessage
-from app.schemas.guardrails import GuardrailDecision
+from app.schemas.guardrails import GuardrailDecision, GuardrailVerdict
 
 logger = logging.getLogger("agent.guardrails")
 
 GUARDRAIL_USAGE_TASK = "guardrail_input"
 
 def _fail_closed_decision() -> GuardrailDecision:
-    """Quyết định khi model lỗi/timeout với fail_closed=True: chặn + safe message mặc định."""
+    """Quyết định khi model lỗi/timeout với fail_closed=True: chặn + safe message mặc định.
+    Không gắn category nào: câu hỏi chưa được kiểm, không có bằng chứng vi phạm."""
     return GuardrailDecision(
         action="block",
-        categories=["other"],
         safe_message=gi_prompt.DEFAULT_SAFE_MESSAGE,
+        system_error=True,
     )
 
 async def _record_usage(
@@ -75,13 +76,13 @@ async def _call_llm(
             },
             {"role": "user", "content": gi_prompt.build_user_prompt(question, history)},
         ],
-        response_format=GuardrailDecision,
+        response_format=GuardrailVerdict,
         temperature=0.0,
     )
     parsed = completion.choices[0].message.parsed
     if parsed is None:
         raise ValueError("guardrails trả parsed None")
-    return parsed, completion
+    return GuardrailDecision(**parsed.model_dump()), completion
 
 async def check_input(
     question: str,

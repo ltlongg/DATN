@@ -15,6 +15,8 @@ export interface User {
   email: string;
   name: string;
   role: Role;
+  /** Người dùng cho phép admin đọc nội dung hội thoại của mình. */
+  share_conversations: boolean;
 }
 
 export interface LoginResponse {

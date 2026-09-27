@@ -16,6 +16,7 @@ class UserOut(BaseModel):
     role: Role
     is_active: bool
     question_quota: int | None  # None = không giới hạn
+    flagged_count: int  # số câu hỏi bị guardrails gắn cờ vi phạm
     created_at: datetime
 
 class UserCreate(BaseModel):

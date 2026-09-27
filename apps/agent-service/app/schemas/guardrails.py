@@ -25,8 +25,8 @@ GuardrailCategory = Literal[
     "other",
 ]
 
-class GuardrailDecision(BaseModel):
-    """Kết quả kiểm 1 input. `action="block"` -> emit safe_message + blocked, dừng flow."""
+class GuardrailVerdict(BaseModel):
+    """Structured-output schema LLM guardrails trả về."""
 
     action: Literal["allow", "block"]
     # Nhóm vi phạm khi block (rỗng khi allow). Nhiều nhóm nếu input dính nhiều loại.
@@ -34,3 +34,12 @@ class GuardrailDecision(BaseModel):
     # Câu trả lời an toàn stream cho người dùng khi block (tiếng Việt, lịch sự, không lộ
     # chi tiết luật). Rỗng khi allow.
     safe_message: str = ""
+
+class GuardrailDecision(GuardrailVerdict):
+    """Kết quả kiểm 1 input. `action="block"` -> emit safe_message + blocked, dừng flow.
+
+    `system_error` nằm NGOÀI schema LLM (LLM không tự gắn được): True = chặn vì guardrails
+    lỗi/timeout (fail-closed), KHÔNG phải vì nội dung câu hỏi -> backend không gắn cờ vi phạm.
+    """
+
+    system_error: bool = False

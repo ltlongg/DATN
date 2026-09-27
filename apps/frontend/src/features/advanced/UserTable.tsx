@@ -17,6 +17,7 @@ export function UserTable({
           <th className="py-2 pr-4 font-medium">Vai trò</th>
           <th className="py-2 pr-4 font-medium">Trạng thái</th>
           <th className="py-2 pr-4 font-medium">Quota/ngày</th>
+          <th className="py-2 pr-4 font-medium">Tin bị gắn cờ</th>
           <th className="py-2 pr-4 font-medium">Ngày tạo</th>
           <th className="py-2 font-medium"></th>
         </tr>
@@ -42,6 +43,13 @@ export function UserTable({
             </td>
             <td className="py-2 pr-4 text-ink-soft">
               {u.question_quota == null ? "không giới hạn" : u.question_quota}
+            </td>
+            <td
+              className={`py-2 pr-4 ${
+                u.flagged_count > 0 ? "font-medium text-rose-700" : "text-ink-soft"
+              }`}
+            >
+              {u.flagged_count}
             </td>
             <td className="py-2 pr-4 text-ink-soft">{formatDateTime(u.created_at)}</td>
             <td className="py-2 text-right">

@@ -136,6 +136,38 @@ def test_me_returns_current_user(client: TestClient, auth) -> None:  # type: ign
     assert r.status_code == 200
     assert r.json()["email"] == "user-test@example.com"
 
+def test_share_conversations_defaults_off_and_toggles(client: TestClient, auth, users, db_conn) -> None:  # type: ignore[no-untyped-def]
+    """Mặc định TẮT; user tự bật/tắt được, /me phản ánh ngay, có ghi thời điểm đổi."""
+    headers = auth("user")
+    assert client.get("/api/auth/me", headers=headers).json()["share_conversations"] is False
+
+    r = client.patch(
+        "/api/auth/me/preferences", json={"share_conversations": True}, headers=headers
+    )
+    assert r.status_code == 200
+    assert r.json()["share_conversations"] is True
+    assert client.get("/api/auth/me", headers=headers).json()["share_conversations"] is True
+    with db_conn.cursor() as cur:
+        cur.execute("SELECT share_updated_at FROM users WHERE id = %s", (users["user"].id,))
+        assert cur.fetchone()["share_updated_at"] is not None
+
+    client.patch("/api/auth/me/preferences", json={"share_conversations": False}, headers=headers)
+    assert client.get("/api/auth/me", headers=headers).json()["share_conversations"] is False
+
+def test_preferences_only_change_own_account(client: TestClient, auth, users) -> None:  # type: ignore[no-untyped-def]
+    """Không có cách nhắm tài khoản khác: id lấy từ token, field lạ trong body bị bỏ qua."""
+    client.patch(
+        "/api/auth/me/preferences",
+        json={"share_conversations": True, "id": users["admin"].id},
+        headers=auth("user"),
+    )
+    admin_me = client.get("/api/auth/me", headers=auth("admin")).json()
+    assert admin_me["share_conversations"] is False
+
+def test_preferences_requires_token(client: TestClient) -> None:
+    r = client.patch("/api/auth/me/preferences", json={"share_conversations": True})
+    assert r.status_code == 401
+
 def test_me_requires_token(client: TestClient) -> None:
     r = client.get("/api/auth/me")
     assert r.status_code == 401

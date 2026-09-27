@@ -8,15 +8,24 @@ backend-additions-plan.md §3.1.
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
+# Vì sao admin thấy/không thấy nội dung 1 message (xem services/privacy_service.py):
+# shared = chủ hội thoại bật chia sẻ; flagged = câu hỏi bị guardrails chặn vì vi phạm hoặc
+# câu trả lời an toàn ngay sau nó; hidden = chỉ còn số liệu.
+Visibility = Literal["shared", "flagged", "hidden"]
+
 class ConversationLogItem(BaseModel):
     id: str
-    title: str
-    user_email: str
-    user_name: str
+    title: str | None  # None = ẩn (title suy từ câu hỏi đầu -> là nội dung)
+    user_anon_id: str
+    # Chỉ có khi hội thoại có tin bị gắn cờ (admin cần biết ai để xử lý); còn lại None.
+    user_email: str | None
+    user_name: str | None
+    shared: bool
+    flagged_count: int
     message_count: int
     created_at: datetime
     updated_at: datetime
@@ -39,7 +48,9 @@ class MessageQuality(BaseModel):
 class MessageLogItem(BaseModel):
     id: str
     role: str
-    content: str
+    visibility: Visibility
+    # Khi `hidden`: content=None, citations/steps rỗng, visualization=None — chỉ giữ số liệu.
+    content: str | None
     clarification_needed: bool
     citations: list[dict[str, Any]]
     visualization: dict[str, Any] | None
@@ -52,13 +63,17 @@ class MessageLogItem(BaseModel):
     steps: list[dict[str, Any]] = Field(default_factory=list)
     ttft_ms: int | None
     created_at: datetime
+    flagged: bool
+    flag_categories: list[str]
     quality: MessageQuality
 
 class ConversationLogDetail(BaseModel):
     id: str
-    title: str
-    user_email: str
-    user_name: str
+    title: str | None
+    user_anon_id: str
+    user_email: str | None
+    user_name: str | None
+    shared: bool
     created_at: datetime
     updated_at: datetime
     messages: list[MessageLogItem]

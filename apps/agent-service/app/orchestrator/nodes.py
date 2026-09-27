@@ -154,7 +154,16 @@ async def guard_input(state: AgentState, config: RunnableConfig) -> dict[str, An
     )
     # Nhả safe message dần từng cụm cho giống câu trả lời thường (rồi mới báo blocked).
     await stream_static_text(safe, emitter)
-    await emitter.emit("blocked", {"stage": "input", "categories": decision.categories})
+    # `system_error` báo backend biết đây là chặn do guardrails lỗi (fail-closed), không
+    # phải vi phạm -> không gắn cờ câu hỏi.
+    await emitter.emit(
+        "blocked",
+        {
+            "stage": "input",
+            "categories": decision.categories,
+            "system_error": decision.system_error,
+        },
+    )
     raise GuardrailsBlocked(
         reason="input_guardrails", safe_message=safe, categories=decision.categories
     )

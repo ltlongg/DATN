@@ -9,7 +9,13 @@ import { useUiStore } from "@/store/uiStore";
 import type { User } from "@/types";
 
 function renderSidebar(role: User["role"]) {
-  const user: User = { id: "1", email: "u@example.com", name: "U", role };
+  const user: User = {
+    id: "1",
+    email: "u@example.com",
+    name: "U",
+    role,
+    share_conversations: false,
+  };
   useAuthStore.setState({ token: "t", user });
   useUiStore.setState({ sidebarOpen: true });
   return render(

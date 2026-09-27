@@ -50,6 +50,7 @@ async def test_check_input_allow(monkeypatch) -> None:
     d = await guardrails.check_input("Trương Định là ai?", [])
     assert d.action == "allow"
     assert d.categories == []
+    assert d.system_error is False
 
 async def test_check_input_block_keeps_model_message(monkeypatch) -> None:
     _settings(monkeypatch)
@@ -100,6 +101,9 @@ async def test_check_input_fail_closed_on_error(monkeypatch) -> None:
     d = await guardrails.check_input("x", [])
     assert d.action == "block"
     assert d.safe_message == guardrails.gi_prompt.DEFAULT_SAFE_MESSAGE
+    # Chặn vì lỗi, không phải vì nội dung -> không category, đánh dấu system_error.
+    assert d.system_error is True
+    assert d.categories == []
 
 async def test_check_input_fail_open_on_error(monkeypatch) -> None:
     _settings(monkeypatch, guardrails_fail_closed=False)
@@ -205,7 +209,11 @@ async def test_block_stream_emits_token_then_blocked_no_done(monkeypatch) -> Non
     tokens = [d["text"] for t, d in events if t == "token"]
     assert "".join(tokens) == safe  # ghép lại nguyên vẹn
     blk = next(d for t, d in events if t == "blocked")
-    assert blk == {"stage": "input", "categories": ["harmful_instructions"]}
+    assert blk == {
+        "stage": "input",
+        "categories": ["harmful_instructions"],
+        "system_error": False,
+    }
 
 async def test_allow_stream_proceeds_to_plan(monkeypatch) -> None:
     # allow -> `plan` được gọi (đánh dấu qua flag).

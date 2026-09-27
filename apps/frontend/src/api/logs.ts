@@ -8,7 +8,8 @@ import type {
 } from "@/types/admin";
 
 export interface LogsFilter {
-  user_email?: string;
+  user_anon_id?: string;
+  flagged_only?: boolean;
   from_date?: string;
   to_date?: string;
   limit?: number;

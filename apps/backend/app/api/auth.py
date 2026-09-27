@@ -27,11 +27,18 @@ from app.api.deps import get_current_user
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.core.security import create_access_token, hash_password, verify_password
-from app.models.user import User, create_user, get_user_by_email, get_user_by_google_sub
+from app.models.user import (
+    User,
+    create_user,
+    get_user_by_email,
+    get_user_by_google_sub,
+    set_share_conversations,
+)
 from app.schemas.auth import (
     GoogleLoginRequest,
     LoginRequest,
     LoginResponse,
+    PreferencesUpdate,
     RegisterRequest,
     UserPublic,
 )
@@ -45,7 +52,13 @@ router = APIRouter()
 _GA_REQUEST = ga_requests.Request(session=cachecontrol.CacheControl(requests.Session()))
 
 def _to_public(user: User) -> UserPublic:
-    return UserPublic(id=user.id, email=user.email, name=user.name, role=user.role)
+    return UserPublic(
+        id=user.id,
+        email=user.email,
+        name=user.name,
+        role=user.role,
+        share_conversations=user.share_conversations,
+    )
 
 def _issue_token(user: User) -> LoginResponse:
     return LoginResponse(
@@ -151,6 +164,18 @@ async def google_login(body: GoogleLoginRequest) -> LoginResponse:
 @router.get("/me", response_model=UserPublic)
 async def me(user: User = Depends(get_current_user)) -> UserPublic:
     return _to_public(user)
+
+@router.patch("/me/preferences", response_model=UserPublic)
+async def update_preferences(
+    body: PreferencesUpdate, user: User = Depends(get_current_user)
+) -> UserPublic:
+    """Người dùng tự bật/tắt chia sẻ hội thoại. Chỉ sửa được tài khoản của CHÍNH MÌNH: id
+    lấy từ token, không nhận từ body."""
+    updated = await anyio.to_thread.run_sync(
+        set_share_conversations, user.id, body.share_conversations
+    )
+    assert updated is not None  # get_current_user vừa xác nhận user tồn tại
+    return _to_public(updated)
 
 @router.post("/logout", response_model=OkResponse)
 async def logout(_: User = Depends(get_current_user)) -> OkResponse:

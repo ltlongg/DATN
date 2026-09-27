@@ -20,7 +20,7 @@ from app.schemas.user import UserCreate, UserOut, UserUpdate
 
 router = APIRouter(dependencies=[Depends(require_admin)])
 
-def _to_out(user: User) -> UserOut:
+def _to_out(user: User, flagged_count: int) -> UserOut:
     return UserOut(
         id=user.id,
         email=user.email,
@@ -28,13 +28,15 @@ def _to_out(user: User) -> UserOut:
         role=user.role,
         is_active=user.is_active,
         question_quota=user.question_quota,
+        flagged_count=flagged_count,
         created_at=user.created_at,
     )
 
 @router.get("", response_model=list[UserOut])
 async def list_users() -> list[UserOut]:
     users = await anyio.to_thread.run_sync(user_repo.list_users)
-    return [_to_out(u) for u in users]
+    counts = await anyio.to_thread.run_sync(user_repo.flagged_counts)
+    return [_to_out(u, counts.get(u.id, 0)) for u in users]
 
 @router.post("", response_model=UserOut, status_code=201)
 async def create_user(body: UserCreate) -> UserOut:
@@ -46,7 +48,7 @@ async def create_user(body: UserCreate) -> UserOut:
         )
     except psycopg.errors.UniqueViolation:
         raise AppError(409, "conflict", "Email đã tồn tại.")
-    return _to_out(user)
+    return _to_out(user, 0)  # tài khoản mới, chưa có câu hỏi nào
 
 @router.patch("/{user_id}", response_model=UserOut)
 async def update_user(
@@ -63,4 +65,5 @@ async def update_user(
     user = await anyio.to_thread.run_sync(user_repo.update_user, user_id, fields)
     if user is None:
         raise AppError(404, "not_found", "Không tìm thấy người dùng.")
-    return _to_out(user)
+    counts = await anyio.to_thread.run_sync(user_repo.flagged_counts)
+    return _to_out(user, counts.get(user.id, 0))

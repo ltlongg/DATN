@@ -2,11 +2,16 @@
 import type { Citation, ProgressStep, Role, VisualizationPayload } from "@/types";
 
 // --- Hội thoại & chất lượng ---
+// Quyền riêng tư (backend quyết, xem services/privacy_service.py): title chỉ có khi người dùng
+// bật chia sẻ; email/tên chỉ có khi hội thoại có tin bị gắn cờ vi phạm; còn lại null.
 export interface ConversationLogItem {
   id: string;
-  title: string;
-  user_email: string;
-  user_name: string;
+  title: string | null;
+  user_anon_id: string;
+  user_email: string | null;
+  user_name: string | null;
+  shared: boolean;
+  flagged_count: number;
   message_count: number;
   created_at: string;
   updated_at: string;
@@ -27,10 +32,15 @@ export interface MessageQuality {
   has_warning: boolean;
 }
 
+/** Vì sao admin thấy/không thấy nội dung: người dùng chia sẻ / bị gắn cờ vi phạm / ẩn. */
+export type MessageVisibility = "shared" | "flagged" | "hidden";
+
 export interface MessageLogItem {
   id: string;
   role: string;
-  content: string;
+  visibility: MessageVisibility;
+  /** null khi `hidden` (citations/steps cũng rỗng, visualization null). */
+  content: string | null;
   clarification_needed: boolean;
   citations: Citation[];
   visualization: VisualizationPayload | null;
@@ -42,14 +52,18 @@ export interface MessageLogItem {
   steps: ProgressStep[];
   ttft_ms: number | null;
   created_at: string;
+  flagged: boolean;
+  flag_categories: string[];
   quality: MessageQuality;
 }
 
 export interface ConversationLogDetail {
   id: string;
-  title: string;
-  user_email: string;
-  user_name: string;
+  title: string | null;
+  user_anon_id: string;
+  user_email: string | null;
+  user_name: string | null;
+  shared: boolean;
   created_at: string;
   updated_at: string;
   messages: MessageLogItem[];
@@ -110,6 +124,8 @@ export interface UserOut {
   role: Role;
   is_active: boolean;
   question_quota: number | null;
+  /** Số câu hỏi bị guardrails gắn cờ vi phạm. */
+  flagged_count: number;
   created_at: string;
 }
 

@@ -36,6 +36,10 @@ export function getMe(): Promise<User> {
   return apiFetch<User>("/api/auth/me");
 }
 
+export function updatePreferences(prefs: { share_conversations: boolean }): Promise<User> {
+  return apiFetch<User>("/api/auth/me/preferences", { method: "PATCH", body: prefs });
+}
+
 export function logout(): Promise<{ ok: boolean }> {
   return apiFetch<{ ok: boolean }>("/api/auth/logout", { method: "POST" });
 }

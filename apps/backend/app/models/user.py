@@ -24,6 +24,7 @@ class User(BaseModel):
     google_sub: str | None = None  # `sub` bất biến của Google, None = tài khoản mật khẩu
     is_active: bool = True
     question_quota: int | None = None  # None = không giới hạn
+    share_conversations: bool = False  # True = cho admin đọc nội dung hội thoại
     created_at: datetime
 
 def _row_to_user(row: dict[str, Any]) -> User:
@@ -36,11 +37,13 @@ def _row_to_user(row: dict[str, Any]) -> User:
         google_sub=row["google_sub"],
         is_active=row["is_active"],
         question_quota=row["question_quota"],
+        share_conversations=row["share_conversations"],
         created_at=row["created_at"],
     )
 
 _COLUMNS = (
-    "id, email, name, role, password_hash, google_sub, is_active, question_quota, created_at"
+    "id, email, name, role, password_hash, google_sub, is_active, question_quota, "
+    "share_conversations, created_at"
 )
 _SELECT = f"SELECT {_COLUMNS} FROM users"
 
@@ -113,3 +116,26 @@ def update_user(user_id: str, fields: dict[str, Any]) -> User | None:
         row = cur.fetchone()
         conn.commit()
     return _row_to_user(row) if row else None
+
+def set_share_conversations(user_id: str, enabled: bool) -> User | None:
+    """Người dùng tự bật/tắt chia sẻ hội thoại; ghi kèm thời điểm đổi."""
+    with connection() as conn, conn.cursor() as cur:
+        cur.execute(
+            f"UPDATE users SET share_conversations = %s, share_updated_at = now() "
+            f"WHERE id = %s RETURNING {_COLUMNS}",
+            (enabled, user_id),
+        )
+        row = cur.fetchone()
+        conn.commit()
+    return _row_to_user(row) if row else None
+
+def flagged_counts() -> dict[str, int]:
+    """Số câu hỏi bị guardrails gắn cờ vi phạm của từng user (user không có thì vắng mặt)."""
+    with connection() as conn, conn.cursor() as cur:
+        cur.execute(
+            "SELECT c.user_id, count(*) AS n FROM messages m "
+            "JOIN conversations c ON c.id = m.conversation_id "
+            "WHERE m.flagged GROUP BY c.user_id"
+        )
+        rows = cur.fetchall()
+    return {str(r["user_id"]): int(r["n"]) for r in rows}

@@ -35,7 +35,13 @@ describe("RegisterForm", () => {
     register.mockResolvedValue({
       access_token: "tok",
       token_type: "bearer",
-      user: { id: "1", email: "moi@example.com", name: "Người Mới", role: "user" },
+      user: {
+        id: "1",
+        email: "moi@example.com",
+        name: "Người Mới",
+        role: "user",
+        share_conversations: false,
+      },
     });
     render(
       <MemoryRouter>

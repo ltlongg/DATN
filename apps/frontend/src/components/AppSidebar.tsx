@@ -1,4 +1,4 @@
-import { Fragment, type ComponentType, type ReactNode } from "react";
+import { Fragment, useState, type ComponentType, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import {
@@ -14,10 +14,12 @@ import {
   Milestone,
   PanelLeft,
   Share2,
+  ShieldCheck,
   SlidersHorizontal,
   Users,
   Wand2,
 } from "lucide-react";
+import { PrivacyModal } from "@/features/auth/PrivacyModal";
 import { useAuthStore } from "@/store/authStore";
 import { useUiStore } from "@/store/uiStore";
 
@@ -99,7 +101,8 @@ function SidebarLink({ item, open, active }: { item: NavItem; open: boolean; act
 }
 
 /** Sidebar điều hướng dọc dùng chung cả app (user + admin), đóng/mở persist qua uiStore.
- * Mở: icon + tên; đóng: chỉ icon, hover có tooltip. Đăng xuất + email user nằm ở đáy. */
+ * Mở: icon + tên; đóng: chỉ icon, hover có tooltip. Quyền riêng tư + đăng xuất + email user
+ * nằm ở đáy. */
 export function AppSidebar() {
   const open = useUiStore((s) => s.sidebarOpen);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
@@ -108,6 +111,7 @@ export function AppSidebar() {
   const clear = useAuthStore((s) => s.clear);
   const location = useLocation();
   const navigate = useNavigate();
+  const [privacyOpen, setPrivacyOpen] = useState(false);
 
   const items = NAV_ITEMS.filter((i) => !i.adminOnly || isAdmin);
 
@@ -179,6 +183,20 @@ export function AppSidebar() {
           }
         >
           {open && <p className="truncate px-3 pt-1 text-xs text-ink-soft">{user?.email}</p>}
+          <WithTooltip open={open} label="Quyền riêng tư">
+            <button
+              onClick={() => setPrivacyOpen(true)}
+              aria-label={open ? undefined : "Quyền riêng tư"}
+              className={`text-sm text-ink-soft hover:bg-paper hover:text-brand ${
+                open
+                  ? "flex h-10 w-full items-center gap-3 rounded-md px-3 transition-colors"
+                  : iconOnlyButtonClass
+              }`}
+            >
+              <ShieldCheck size={open ? 18 : 20} className="shrink-0" />
+              {open && <span>Quyền riêng tư</span>}
+            </button>
+          </WithTooltip>
           <WithTooltip open={open} label="Đăng xuất">
             <button
               onClick={onLogout}
@@ -195,6 +213,7 @@ export function AppSidebar() {
           </WithTooltip>
         </div>
       </aside>
+      {privacyOpen && <PrivacyModal onClose={() => setPrivacyOpen(false)} />}
     </Tooltip.Provider>
   );
 }

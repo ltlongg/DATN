@@ -33,58 +33,74 @@ def _date_filters(
         params.append(to_date)
     return where, params
 
+# Chủ hội thoại, kèm mã ẩn danh `user-xxxxxxxx` = md5(secret || user id). Có secret nên admin
+# không tự tính lại từ user id được (không đối chiếu ngược ra người thật); cùng user luôn ra
+# cùng mã nên vẫn gom được hội thoại theo người. Tham số duy nhất: secret.
+_OWNERS_CTE = (
+    "WITH owners AS (SELECT id, email, name, share_conversations, "
+    "'user-' || left(md5(%s || id::text), 8) AS anon_id FROM users) "
+)
+
 def list_conversations_admin(
-    user_email: str | None,
+    secret: str,
+    user_anon_id: str | None,
+    flagged_only: bool,
     from_date: str | None,
     to_date: str | None,
     limit: int,
     offset: int,
 ) -> tuple[list[dict[str, Any]], int]:
-    """List conversation (mọi user) + chủ sở hữu + số message; lọc email/khoảng ngày."""
+    """List conversation (mọi user) + chủ sở hữu + số message/số tin bị gắn cờ; lọc theo mã
+    ẩn danh / chỉ hội thoại có tin bị gắn cờ / khoảng ngày. Trả cột THÔ (cả email/tên/title)
+    — API quyết định cái gì được lộ."""
     where, params = _date_filters(from_date, to_date, "c.updated_at")
-    if user_email:
-        where.append("u.email = %s")
-        params.append(user_email)
+    if user_anon_id:
+        where.append("o.anon_id = %s")
+        params.append(user_anon_id)
+    if flagged_only:
+        where.append(
+            "EXISTS (SELECT 1 FROM messages m WHERE m.conversation_id = c.id AND m.flagged)"
+        )
     where_sql = ("WHERE " + " AND ".join(where)) if where else ""
+    from_sql = f"FROM conversations c JOIN owners o ON o.id = c.user_id {where_sql} "
 
     with connection() as conn, conn.cursor() as cur:
-        cur.execute(
-            f"SELECT count(*) AS n FROM conversations c JOIN users u ON u.id = c.user_id "
-            f"{where_sql}",
-            params,
-        )
+        cur.execute(f"{_OWNERS_CTE}SELECT count(*) AS n {from_sql}", [secret, *params])
         count_row = cur.fetchone()
         total = int(count_row["n"]) if count_row else 0
         cur.execute(
-            f"SELECT c.id, c.title, c.created_at, c.updated_at, "
-            f"u.email AS user_email, u.name AS user_name, "
+            f"{_OWNERS_CTE}SELECT c.id, c.title, c.created_at, c.updated_at, "
+            f"o.email AS user_email, o.name AS user_name, o.anon_id AS user_anon_id, "
+            f"o.share_conversations AS shared, "
             f"(SELECT count(*) FROM messages m WHERE m.conversation_id = c.id) "
-            f"AS message_count "
-            f"FROM conversations c JOIN users u ON u.id = c.user_id "
-            f"{where_sql} "
+            f"AS message_count, "
+            f"(SELECT count(*) FROM messages m WHERE m.conversation_id = c.id AND m.flagged) "
+            f"AS flagged_count "
+            f"{from_sql}"
             f"ORDER BY c.updated_at DESC LIMIT %s OFFSET %s",
-            [*params, limit, offset],
+            [secret, *params, limit, offset],
         )
         rows = cur.fetchall()
     for r in rows:
         r["id"] = str(r["id"])
     return rows, total
 
-def get_conversation_detail_admin(conversation_id: str) -> dict[str, Any] | None:
-    """Conversation + owner + TẤT CẢ message (thô). None nếu không tồn tại."""
+def get_conversation_detail_admin(secret: str, conversation_id: str) -> dict[str, Any] | None:
+    """Conversation + owner + TẤT CẢ message (thô, kèm cờ vi phạm). None nếu không tồn tại."""
     with connection() as conn, conn.cursor() as cur:
         cur.execute(
-            "SELECT c.id, c.title, c.created_at, c.updated_at, "
-            "u.email AS user_email, u.name AS user_name "
-            "FROM conversations c JOIN users u ON u.id = c.user_id WHERE c.id = %s",
-            (conversation_id,),
+            f"{_OWNERS_CTE}SELECT c.id, c.title, c.created_at, c.updated_at, "
+            f"o.email AS user_email, o.name AS user_name, o.anon_id AS user_anon_id, "
+            f"o.share_conversations AS shared "
+            f"FROM conversations c JOIN owners o ON o.id = c.user_id WHERE c.id = %s",
+            (secret, conversation_id),
         )
         conv = cur.fetchone()
         if conv is None:
             return None
         cur.execute(
-            f"SELECT {_MSG_COLS} FROM messages WHERE conversation_id = %s "
-            f"ORDER BY created_at ASC, id ASC",
+            f"SELECT {_MSG_COLS}, flagged, flag_categories FROM messages "
+            f"WHERE conversation_id = %s ORDER BY created_at ASC, id ASC",
             (conversation_id,),
         )
         messages = cur.fetchall()
