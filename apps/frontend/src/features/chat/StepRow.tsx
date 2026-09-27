@@ -1,4 +1,12 @@
 import { useState } from "react";
+import {
+  AlertTriangle,
+  Check,
+  ChevronRight,
+  Circle,
+  Minus,
+  type LucideIcon,
+} from "lucide-react";
 import type { ProgressStep, StepState } from "@/types";
 
 /**
@@ -11,12 +19,12 @@ import type { ProgressStep, StepState } from "@/types";
  * chạy tới đây rồi CHỦ ĐỘNG bỏ (không trích được mắt xích thì tra tiếp cũng bằng thừa) —
  * gạch ngang để đọc ra ngay là có bước đã bị cắt khỏi kế hoạch ban đầu.
  */
-const MARK: Record<StepState, { icon: string; className: string; srLabel: string }> = {
-  running: { icon: "", className: "text-ink-soft", srLabel: "đang chạy" },
-  done: { icon: "✓", className: "text-emerald-600", srLabel: "xong" },
-  partial: { icon: "!", className: "text-amber-600", srLabel: "chưa trọn vẹn" },
-  skipped: { icon: "–", className: "text-ink-soft/60", srLabel: "đã bỏ qua" },
-  pending: { icon: "○", className: "text-ink-soft/40", srLabel: "chưa chạy" },
+const MARK: Record<StepState, { icon: LucideIcon | null; className: string; srLabel: string }> = {
+  running: { icon: null, className: "text-ink-soft", srLabel: "đang chạy" },
+  done: { icon: Check, className: "text-emerald-600", srLabel: "xong" },
+  partial: { icon: AlertTriangle, className: "text-amber-600", srLabel: "chưa trọn vẹn" },
+  skipped: { icon: Minus, className: "text-ink-faint", srLabel: "đã bỏ qua" },
+  pending: { icon: Circle, className: "text-ink-faint/60", srLabel: "chưa chạy" },
 };
 
 /**
@@ -25,7 +33,7 @@ const MARK: Record<StepState, { icon: string; className: string; srLabel: string
  */
 function InternalsTable({ rows }: { rows: { label: string; value: string }[] }) {
   return (
-    <dl className="mt-1.5 space-y-0.5 rounded-md bg-paper-card px-2.5 py-2">
+    <dl className="mt-2 space-y-1 rounded-lg border border-paper-border bg-paper-card px-3 py-2">
       {rows.map((r, i) => (
         <div key={i} className="flex gap-2 text-xs">
           <dt className="w-36 shrink-0 text-ink-soft">{r.label}</dt>
@@ -41,6 +49,7 @@ function InternalsTable({ rows }: { rows: { label: string; value: string }[] }) 
 export function StepRow({ step, index }: { step: ProgressStep; index: number }) {
   const [open, setOpen] = useState(false);
   const mark = MARK[step.state];
+  const Icon = mark.icon;
   const labelClass =
     step.state === "skipped"
       ? "text-ink-soft line-through"
@@ -55,14 +64,14 @@ export function StepRow({ step, index }: { step: ProgressStep; index: number }) 
   return (
     <li className="flex gap-2.5">
       <span
-        className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center text-xs font-semibold ${mark.className}`}
+        className={`mt-px flex h-4 w-4 shrink-0 items-center justify-center ${mark.className}`}
         aria-label={mark.srLabel}
         role="img"
       >
-        {step.state === "running" ? (
-          <span className="h-3 w-3 animate-spin rounded-full border-2 border-paper-border border-t-brand" />
+        {Icon ? (
+          <Icon size={step.state === "pending" ? 10 : 14} strokeWidth={2.5} aria-hidden />
         ) : (
-          mark.icon
+          <span className="h-3 w-3 animate-spin rounded-full border-2 border-paper-border border-t-brand" />
         )}
       </span>
       <div className="min-w-0 flex-1">
@@ -71,9 +80,15 @@ export function StepRow({ step, index }: { step: ProgressStep; index: number }) 
             type="button"
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
-            className="flex w-full items-start gap-1.5 text-left hover:text-brand"
+            className="group flex w-full items-start gap-1 text-left"
           >
-            <span className="mt-px text-[10px] text-ink-soft">{open ? "▾" : "▸"}</span>
+            <ChevronRight
+              size={14}
+              className={`mt-px shrink-0 text-ink-faint transition-transform group-hover:text-brand ${
+                open ? "rotate-90" : ""
+              }`}
+              aria-hidden
+            />
             <span className="min-w-0">
               <span className={`block text-xs font-medium ${labelClass}`}>
                 {index}. {step.label}

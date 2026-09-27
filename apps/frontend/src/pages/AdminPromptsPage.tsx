@@ -8,6 +8,7 @@ import {
   listPrompts,
   promotePromptVersion,
 } from "@/api/prompts";
+import { Alert } from "@/components/Alert";
 import { PageHeader } from "@/components/PageHeader";
 import { Spinner } from "@/components/Spinner";
 import { DiffModal } from "@/features/prompts/DiffModal";
@@ -105,7 +106,7 @@ export default function AdminPromptsPage() {
   const dirty = detail.data ? content !== (detail.data.production_content ?? "") : false;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader
         title="Quản lý Prompt"
         desc="Sửa system prompt và áp dụng ngay; mỗi lần lưu tạo một phiên bản mới trong lịch sử. Agent luôn fallback về hằng code nếu DB thiếu."
@@ -114,18 +115,18 @@ export default function AdminPromptsPage() {
       {list.isLoading ? (
         <Spinner />
       ) : list.isError ? (
-        <p className="text-sm text-rose-700">Không tải được danh sách prompt.</p>
+        <Alert>Không tải được danh sách prompt.</Alert>
       ) : !list.data || list.data.length === 0 ? (
-        <p className="rounded-md bg-paper p-3 text-sm text-ink-soft">
+        <p className="rounded-xl border border-dashed border-paper-border px-4 py-3 text-sm text-ink-soft">
           Chưa có prompt nào — chạy <code>scripts/seed_prompts.py</code> để khởi tạo từ code.
         </p>
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,2fr)_minmax(0,1.1fr)]">
-          <div className="rounded-lg border border-paper-border bg-paper-card p-3">
+          <div className="card p-2">
             <PromptTree items={list.data} selectedKey={selectedKey} onSelect={setSelectedKey} />
           </div>
 
-          <div className="rounded-lg border border-paper-border bg-paper-card p-4">
+          <div className="card p-5">
             {detail.isLoading || !detail.data ? (
               <Spinner />
             ) : (
@@ -143,7 +144,7 @@ export default function AdminPromptsPage() {
             )}
           </div>
 
-          <div className="rounded-lg border border-paper-border bg-paper-card p-3">
+          <div className="card p-4">
             {detail.data && (
               <VersionHistory
                 versions={detail.data.versions}

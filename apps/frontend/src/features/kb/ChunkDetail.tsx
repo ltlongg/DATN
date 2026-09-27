@@ -24,24 +24,24 @@ export function ChunkDetail({
   referencingEntities: EntityListItem[];
 }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div>
-        <p className="text-xs text-ink-soft">
+        <p className="text-xs font-medium text-ink-soft">
           {detail.heading_path.length > 0 ? detail.heading_path.join(" › ") : detail.chunk_id}
         </p>
-        <pre className="mt-2 max-h-72 overflow-y-auto whitespace-pre-wrap rounded-md bg-paper p-3 font-sans text-sm text-ink">
+        <pre className="mt-2 max-h-80 overflow-y-auto whitespace-pre-wrap rounded-lg border border-paper-border bg-paper p-4 font-sans text-sm leading-7 text-ink">
           {detail.text}
         </pre>
       </div>
 
       {Object.keys(detail.metadata).length > 0 && (
         <section>
-          <p className="mb-1 text-xs font-semibold uppercase text-ink-soft">Metadata</p>
+          <p className="section-title mb-2">Metadata</p>
           {/* grid thay vì width cứng: key dài (extracted_prompt_version) tự nới cột, không đè giá trị */}
-          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-xs">
             {Object.entries(detail.metadata).map(([k, v]) => (
               <div key={k} className="contents">
-                <dt className="text-ink-soft">{k}</dt>
+                <dt className="font-mono text-ink-soft">{k}</dt>
                 <dd className="min-w-0 break-words text-ink">{formatMetaValue(v)}</dd>
               </div>
             ))}
@@ -50,13 +50,13 @@ export function ChunkDetail({
       )}
 
       <section>
-        <p className="mb-1 text-xs font-semibold uppercase text-ink-soft">
+        <p className="section-title mb-2">
           Sự kiện tham chiếu ({detail.referencing_events.length})
         </p>
         {detail.referencing_events.length === 0 ? (
-          <p className="text-xs text-ink-soft">Không có.</p>
+          <p className="text-xs text-ink-faint">Không có.</p>
         ) : (
-          <ul className="space-y-1">
+          <ul className="space-y-1.5">
             {detail.referencing_events.map((e) => (
               <li key={e.event_id} className="flex items-center gap-2 text-sm text-ink">
                 <span>{e.label}</span>
@@ -68,18 +68,15 @@ export function ChunkDetail({
       </section>
 
       <section>
-        <p className="mb-1 text-xs font-semibold uppercase text-ink-soft">
+        <p className="section-title mb-2">
           Thực thể tham chiếu ({referencingEntities.length})
         </p>
         {referencingEntities.length === 0 ? (
-          <p className="text-xs text-ink-soft">Không có.</p>
+          <p className="text-xs text-ink-faint">Không có.</p>
         ) : (
-          <ul className="flex flex-wrap gap-2">
+          <ul className="flex flex-wrap gap-1.5">
             {referencingEntities.map((ent) => (
-              <li
-                key={ent.norm_name}
-                className="rounded-full border border-paper-border px-2 py-0.5 text-xs text-ink"
-              >
+              <li key={ent.norm_name} className="badge badge-neutral">
                 {ent.name}
               </li>
             ))}

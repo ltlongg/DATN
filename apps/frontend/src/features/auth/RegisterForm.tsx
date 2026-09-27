@@ -1,9 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { Lock, Mail, User } from "lucide-react";
+import { Alert } from "@/components/Alert";
 import { AuthInput } from "@/features/auth/AuthInput";
 import { useRegister } from "@/features/auth/useRegister";
-
-const LABEL_CLASS = "block text-sm font-semibold text-ink";
 
 export function RegisterForm() {
   const { submit, pending, error } = useRegister();
@@ -26,9 +25,9 @@ export function RegisterForm() {
   const shownError = mismatch ? "Mật khẩu xác nhận không khớp." : error;
 
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
-      <div className="space-y-1.5">
-        <label htmlFor="reg-name" className={LABEL_CLASS}>
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div>
+        <label htmlFor="reg-name" className="label">
           Họ tên
         </label>
         <AuthInput
@@ -45,8 +44,8 @@ export function RegisterForm() {
         />
       </div>
 
-      <div className="space-y-1.5">
-        <label htmlFor="reg-email" className={LABEL_CLASS}>
+      <div>
+        <label htmlFor="reg-email" className="label">
           Email
         </label>
         <AuthInput
@@ -61,8 +60,8 @@ export function RegisterForm() {
         />
       </div>
 
-      <div className="space-y-1.5">
-        <label htmlFor="reg-password" className={LABEL_CLASS}>
+      <div>
+        <label htmlFor="reg-password" className="label">
           Mật khẩu
         </label>
         <AuthInput
@@ -81,8 +80,8 @@ export function RegisterForm() {
         />
       </div>
 
-      <div className="space-y-1.5">
-        <label htmlFor="reg-confirm" className={LABEL_CLASS}>
+      <div>
+        <label htmlFor="reg-confirm" className="label">
           Mật khẩu xác nhận
         </label>
         <AuthInput
@@ -101,16 +100,12 @@ export function RegisterForm() {
         />
       </div>
 
-      {shownError && (
-        <p role="alert" className="text-sm text-brand">
-          {shownError}
-        </p>
-      )}
+      {shownError && <Alert>{shownError}</Alert>}
 
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-full bg-brand py-2.5 font-medium text-brand-fg transition hover:bg-brand-dark disabled:opacity-60"
+        className="btn btn-primary mt-2 h-11 w-full"
       >
         {pending ? "Đang tạo tài khoản…" : "Đăng ký"}
       </button>

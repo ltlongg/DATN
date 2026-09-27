@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ChevronDown, ListChecks } from "lucide-react";
 import { StepRow } from "@/features/chat/StepRow";
 import { formatDuration } from "@/lib/format";
 import type { ProgressStep } from "@/types";
@@ -63,19 +64,33 @@ export function ProgressPanel({
   ].join(" · ");
 
   return (
-    <div className="mb-3 rounded-lg border border-paper-border bg-paper px-3 py-2">
+    <div className="mb-4 rounded-xl border border-paper-border bg-paper/70">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-2 text-xs text-ink-soft hover:text-brand"
+        className="flex w-full items-center justify-between gap-2 rounded-xl px-3.5 py-2.5 text-xs text-ink-soft transition-colors hover:text-ink"
       >
-        <span>{summary}</span>
-        <span>{open ? "Ẩn tiến trình" : "Xem tiến trình"}</span>
+        <span className="flex items-center gap-2">
+          {streaming ? (
+            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-paper-border border-t-brand" />
+          ) : (
+            <ListChecks size={14} className="text-ink-faint" aria-hidden />
+          )}
+          <span>{summary}</span>
+        </span>
+        <span className="flex items-center gap-1">
+          <span>{open ? "Ẩn tiến trình" : "Xem tiến trình"}</span>
+          <ChevronDown
+            size={14}
+            className={`transition-transform ${open ? "rotate-180" : ""}`}
+            aria-hidden
+          />
+        </span>
       </button>
 
       {open && (
-        <ol className="mt-2 space-y-1.5">
+        <ol className="space-y-2 border-t border-paper-border px-3.5 py-3">
           {steps.map((step, i) => (
             <StepRow key={step.id} step={step} index={i + 1} />
           ))}

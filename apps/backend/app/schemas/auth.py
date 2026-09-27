@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from typing import Annotated
+
+from pydantic import BaseModel, EmailStr, Field, StringConstraints, field_validator
 
 from app.core.security import validate_bcrypt_password
 from app.schemas.common import Role
@@ -38,9 +40,27 @@ class UserPublic(BaseModel):
     name: str
     role: Role
     share_conversations: bool
+    # False = tài khoản Google-only -> frontend ẩn mục "Đổi mật khẩu".
+    has_password: bool
 
 class PreferencesUpdate(BaseModel):
     share_conversations: bool
+
+class ProfileUpdate(BaseModel):
+    """Người dùng tự sửa hồ sơ. CHỈ có `name`: email là định danh đăng nhập (và gắn với
+    tài khoản Google), hệ thống chưa xác minh email nên không cho tự đổi."""
+
+    # strip trước khi đếm độ dài: "   " không được lọt thành tên rỗng.
+    name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=2, max_length=80)]
+
+class PasswordChange(BaseModel):
+    current_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=8)  # cùng ngưỡng với RegisterRequest
+
+    @field_validator("new_password")
+    @classmethod
+    def _fits_bcrypt(cls, v: str) -> str:
+        return validate_bcrypt_password(v)
 
 class LoginResponse(BaseModel):
     access_token: str

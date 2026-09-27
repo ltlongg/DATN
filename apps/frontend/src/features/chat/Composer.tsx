@@ -5,7 +5,7 @@ import {
   useState,
   type KeyboardEvent,
 } from "react";
-import { Mic, Square } from "lucide-react";
+import { ArrowUp, Mic, Square } from "lucide-react";
 import { joinText, useSpeechRecognition } from "@/features/chat/useSpeechRecognition";
 
 /**
@@ -92,46 +92,51 @@ export function Composer({
   }
 
   return (
-    <div className="border-t border-paper-border bg-paper-card p-3">
-      <div className="flex items-end gap-2">
-        <textarea
-          ref={textareaRef}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={onKeyDown}
-          rows={1}
-          readOnly={listening}
-          placeholder={placeholder}
-          className="max-h-40 flex-1 resize-none rounded-lg border border-paper-border bg-white px-3 py-2 outline-none focus:border-brand"
-        />
-        {micSupported && (
+    <div className="px-6 pb-4 pt-2">
+      <div className="mx-auto max-w-3xl">
+        <div className="card flex items-end gap-1.5 p-2 transition-shadow focus-within:border-brand/40 focus-within:ring-2 focus-within:ring-brand/10">
+          <textarea
+            ref={textareaRef}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={onKeyDown}
+            rows={1}
+            readOnly={listening}
+            placeholder={placeholder}
+            className="max-h-40 min-h-[40px] flex-1 resize-none bg-transparent px-2.5 py-2 leading-6 text-ink outline-none"
+          />
+          {micSupported && (
+            <button
+              onClick={toggleMic}
+              disabled={disabled}
+              aria-label={listening ? "Dừng nói" : "Nói"}
+              aria-pressed={listening}
+              className={`btn btn-icon h-10 w-10 rounded-xl ${
+                listening ? "animate-pulse bg-brand text-brand-fg" : "btn-ghost"
+              }`}
+            >
+              {listening ? <Square size={16} /> : <Mic size={18} />}
+            </button>
+          )}
           <button
-            onClick={toggleMic}
-            disabled={disabled}
-            aria-label={listening ? "Dừng nói" : "Nói"}
-            aria-pressed={listening}
-            className={`flex h-[42px] w-[42px] items-center justify-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-50 ${
-              listening
-                ? "animate-pulse border-brand bg-brand text-brand-fg"
-                : "border-paper-border text-ink-soft hover:border-brand hover:text-brand"
-            }`}
+            onClick={send}
+            disabled={disabled || listening || text.trim() === ""}
+            aria-label="Gửi"
+            className="btn btn-primary btn-icon h-10 w-10 rounded-xl"
           >
-            {listening ? <Square size={16} /> : <Mic size={16} />}
+            <ArrowUp size={18} />
           </button>
+        </div>
+        {micError ? (
+          <p role="alert" className="mt-2 text-center text-xs text-rose-700">
+            {micError}
+          </p>
+        ) : (
+          <p className="mt-2 text-center text-xs text-ink-faint">
+            Enter để gửi · Shift + Enter để xuống dòng
+          </p>
         )}
-        <button
-          onClick={send}
-          disabled={disabled || listening || text.trim() === ""}
-          className="rounded-lg bg-brand px-4 py-2 font-medium text-brand-fg disabled:opacity-60"
-        >
-          Gửi
-        </button>
       </div>
-      {micError && (
-        <p role="alert" className="mt-2 text-sm text-brand">
-          {micError}
-        </p>
-      )}
     </div>
   );
 }

@@ -41,6 +41,7 @@ describe("RegisterForm", () => {
         name: "Người Mới",
         role: "user",
         share_conversations: false,
+        has_password: true,
       },
     });
     render(

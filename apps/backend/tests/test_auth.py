@@ -168,6 +168,68 @@ def test_preferences_requires_token(client: TestClient) -> None:
     r = client.patch("/api/auth/me/preferences", json={"share_conversations": True})
     assert r.status_code == 401
 
+# --- hồ sơ + đổi mật khẩu (trang Cài đặt) ------------------------------------
+
+def test_me_reports_has_password(client: TestClient, auth, google) -> None:  # type: ignore[no-untyped-def]
+    assert client.get("/api/auth/me", headers=auth("user")).json()["has_password"] is True
+    token = _google_login(client).json()["access_token"]
+    me = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
+    assert me.json()["has_password"] is False
+
+def test_update_profile_changes_name_only(client: TestClient, auth, users) -> None:  # type: ignore[no-untyped-def]
+    headers = auth("user")
+    r = client.patch(
+        "/api/auth/me/profile",
+        json={"name": "  Tên Mới  ", "email": "doi-zz@example.com", "role": "admin"},
+        headers=headers,
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body["name"] == "Tên Mới"
+    # Field lạ bị bỏ qua: không tự đổi email, không tự phong admin.
+    assert body["email"] == "user-test@example.com"
+    assert body["role"] == "user"
+    assert client.get("/api/auth/me", headers=headers).json()["name"] == "Tên Mới"
+
+@pytest.mark.parametrize("name", ["", "   ", "A", "x" * 81])
+def test_update_profile_rejects_bad_name(client: TestClient, auth, name: str) -> None:  # type: ignore[no-untyped-def]
+    r = client.patch("/api/auth/me/profile", json={"name": name}, headers=auth("user"))
+    assert r.status_code == 422
+
+def test_update_profile_requires_token(client: TestClient) -> None:
+    assert client.patch("/api/auth/me/profile", json={"name": "Ai Đó"}).status_code == 401
+
+def _change_password(client: TestClient, headers: dict[str, str], current: str, new: str):  # type: ignore[no-untyped-def]
+    return client.post(
+        "/api/auth/me/password",
+        json={"current_password": current, "new_password": new},
+        headers=headers,
+    )
+
+def test_change_password_then_login_with_new(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
+    r = _change_password(client, auth("user"), "userpw", "matkhaumoi123")
+    assert r.status_code == 200
+    login = lambda pw: client.post(  # noqa: E731
+        "/api/auth/login", json={"email": "user-test@example.com", "password": pw}
+    )
+    assert login("matkhaumoi123").status_code == 200
+    assert login("userpw").status_code == 401
+
+def test_change_password_wrong_current_is_400_not_401(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
+    # 401 sẽ khiến client tưởng hết phiên và đăng xuất người dùng.
+    r = _change_password(client, auth("user"), "sai-mat-khau", "matkhaumoi123")
+    assert r.status_code == 400
+    assert r.json()["code"] == "invalid_current_password"
+
+def test_change_password_short_new_422(client: TestClient, auth) -> None:  # type: ignore[no-untyped-def]
+    assert _change_password(client, auth("user"), "userpw", "1234567").status_code == 422
+
+def test_change_password_google_only_account(client: TestClient, google) -> None:  # type: ignore[no-untyped-def]
+    token = _google_login(client).json()["access_token"]
+    r = _change_password(client, {"Authorization": f"Bearer {token}"}, "bat-ky", "matkhaumoi123")
+    assert r.status_code == 400
+    assert r.json()["code"] == "no_password"
+
 def test_me_requires_token(client: TestClient) -> None:
     r = client.get("/api/auth/me")
     assert r.status_code == 401

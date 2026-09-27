@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { getEntity, listEntities } from "@/api/kb";
+import { Alert } from "@/components/Alert";
 import { EmptyState } from "@/components/EmptyState";
 import { Spinner } from "@/components/Spinner";
 import { EntityDetail } from "@/features/kb/EntityDetail";
@@ -80,7 +81,7 @@ export function GraphTab() {
             value={type}
             onChange={(e) => setType(e.target.value)}
             aria-label="Lọc theo loại thực thể"
-            className="rounded-md border border-paper-border px-2 py-1.5 text-sm outline-none focus:border-brand"
+            className="input h-9 w-auto"
           >
             <option value="">Tất cả loại</option>
             {ENTITY_TYPES.map((t) => (
@@ -92,22 +93,18 @@ export function GraphTab() {
         </KbSearchBar>
 
         {list.isLoading ? (
-          <div className="rounded-lg border border-paper-border bg-paper-card p-4">
+          <div className="card p-4">
             <Spinner />
           </div>
         ) : list.isError ? (
-          <p className="rounded-lg border border-paper-border bg-paper-card p-4 text-sm text-rose-700">
-            Không tải được danh sách thực thể.
-          </p>
+          <Alert>Không tải được danh sách thực thể.</Alert>
         ) : items.length === 0 ? (
-          <div className="rounded-lg border border-paper-border bg-paper-card">
-            <EmptyState>Không có thực thể khớp bộ lọc.</EmptyState>
-          </div>
+          <EmptyState>Không có thực thể khớp bộ lọc.</EmptyState>
         ) : (
           <>
             <div
               ref={scrollRef}
-              className="max-h-[70vh] overflow-y-auto rounded-lg border border-paper-border bg-paper-card"
+              className="card max-h-[70vh] overflow-y-auto p-1.5"
             >
               <EntityTable items={items} selectedNorm={selectedNorm} onSelect={setSelectedNorm} />
               <div ref={sentinelRef} className="h-px" />
@@ -117,7 +114,7 @@ export function GraphTab() {
                 </div>
               )}
             </div>
-            <p className="text-center text-xs text-ink-soft">
+            <p className="text-center text-xs text-ink-faint">
               Đã tải {items.length} / {total}
               {!hasNextPage && total > 0 && " · hết"}
             </p>
@@ -125,13 +122,13 @@ export function GraphTab() {
         )}
       </div>
 
-      <div className="rounded-lg border border-paper-border bg-paper-card p-4">
+      <div className="card p-6">
         {!selectedNorm ? (
           <p className="text-sm text-ink-soft">Chọn một thực thể để xem ego-graph.</p>
         ) : detail.isLoading ? (
           <Spinner />
         ) : detail.isError || !detail.data ? (
-          <p className="text-sm text-rose-700">Không tải được chi tiết thực thể.</p>
+          <Alert>Không tải được chi tiết thực thể.</Alert>
         ) : (
           <EntityDetail detail={detail.data} onSelectEntity={setSelectedNorm} />
         )}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { getChunk, listChunks, listEntities } from "@/api/kb";
+import { Alert } from "@/components/Alert";
 import { EmptyState } from "@/components/EmptyState";
 import { Spinner } from "@/components/Spinner";
 import { useKbSources } from "@/features/admin/useDocuments";
@@ -84,7 +85,7 @@ export function ChunksTab() {
                 setSelectedChunkId(null);
               }}
               aria-label="Lọc theo tài liệu nguồn"
-              className="rounded-md border border-paper-border px-2 py-1.5 text-sm outline-none focus:border-brand"
+              className="input h-9 w-auto"
             >
               <option value="">Mọi tài liệu</option>
               {sources.data?.map((s) => (
@@ -97,22 +98,18 @@ export function ChunksTab() {
         </KbSearchBar>
 
         {list.isLoading ? (
-          <div className="rounded-lg border border-paper-border bg-paper-card p-4">
+          <div className="card p-4">
             <Spinner />
           </div>
         ) : list.isError ? (
-          <p className="rounded-lg border border-paper-border bg-paper-card p-4 text-sm text-rose-700">
-            Không tải được danh sách chunk.
-          </p>
+          <Alert>Không tải được danh sách chunk.</Alert>
         ) : items.length === 0 ? (
-          <div className="rounded-lg border border-paper-border bg-paper-card">
-            <EmptyState>Không có chunk nào.</EmptyState>
-          </div>
+          <EmptyState>Không có chunk nào.</EmptyState>
         ) : (
           <>
             <div
               ref={scrollRef}
-              className="max-h-[70vh] overflow-y-auto rounded-lg border border-paper-border bg-paper-card"
+              className="card max-h-[70vh] overflow-y-auto p-1.5"
             >
               <ChunkTable items={items} selectedId={selectedChunkId} onSelect={setSelectedChunkId} />
               <div ref={sentinelRef} className="h-px" />
@@ -122,7 +119,7 @@ export function ChunksTab() {
                 </div>
               )}
             </div>
-            <p className="text-center text-xs text-ink-soft">
+            <p className="text-center text-xs text-ink-faint">
               Đã tải {items.length} / {total}
               {!hasNextPage && total > 0 && " · hết"}
             </p>
@@ -130,13 +127,13 @@ export function ChunksTab() {
         )}
       </div>
 
-      <div className="rounded-lg border border-paper-border bg-paper-card p-4">
+      <div className="card p-6">
         {!selectedChunkId ? (
           <p className="text-sm text-ink-soft">Chọn một chunk để xem chi tiết.</p>
         ) : detail.isLoading ? (
           <Spinner />
         ) : detail.isError || !detail.data ? (
-          <p className="text-sm text-rose-700">Không tải được chi tiết chunk.</p>
+          <Alert>Không tải được chi tiết chunk.</Alert>
         ) : (
           <ChunkDetail detail={detail.data} referencingEntities={refEntities.data?.items ?? []} />
         )}

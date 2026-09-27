@@ -103,7 +103,8 @@ def list_users() -> list[User]:
     return [_row_to_user(r) for r in rows]
 
 def update_user(user_id: str, fields: dict[str, Any]) -> User | None:
-    """PATCH một phần (role/is_active/question_quota). `fields` đã lọc cột hợp lệ ở API."""
+    """PATCH một phần (role/is_active/question_quota; name/password_hash từ /api/auth/me).
+    `fields` đã lọc cột hợp lệ ở API — tên cột nối thẳng vào SQL."""
     if not fields:
         return get_user_by_id(user_id)
     set_clause = ", ".join(f"{col} = %s" for col in fields)

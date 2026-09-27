@@ -7,6 +7,7 @@ import {
   getTokenSummary,
   listConversationLogs,
 } from "@/api/logs";
+import { Alert } from "@/components/Alert";
 import { EmptyState } from "@/components/EmptyState";
 import { Spinner } from "@/components/Spinner";
 import { ConversationDetailPanel } from "@/features/advanced/ConversationDetailPanel";
@@ -15,7 +16,7 @@ import { ConversationSessionList } from "@/features/advanced/ConversationSession
 import { LogsFilterBar, type LogsFilterValue } from "@/features/advanced/LogsFilterBar";
 import { QualitySummaryCard } from "@/features/advanced/QualitySummaryCard";
 import { TokenSummaryCard } from "@/features/advanced/TokenSummaryCard";
-import { Pagination } from "@/features/kb/Pagination";
+import { Pagination } from "@/components/Pagination";
 import type { MessageTokens } from "@/types/admin";
 
 const LIMIT = 20;
@@ -28,8 +29,8 @@ const EMPTY: LogsFilterValue = {
 
 function SummarySection({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="space-y-2">
-      <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft">{title}</p>
+    <div className="space-y-2.5">
+      <p className="section-title">{title}</p>
       {children}
     </div>
   );
@@ -93,7 +94,7 @@ export function LogsTab() {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {summary.data && (
         <SummarySection title="Chất lượng câu trả lời">
           <QualitySummaryCard summary={summary.data} />
@@ -116,19 +117,15 @@ export function LogsTab() {
       {logs.isLoading ? (
         <Spinner />
       ) : logs.isError ? (
-        <p className="text-sm text-rose-700">Không tải được danh sách hội thoại.</p>
+        <Alert>Không tải được danh sách hội thoại.</Alert>
       ) : !logs.data || logs.data.items.length === 0 ? (
-        <div className="rounded-lg border border-paper-border bg-paper-card p-3">
-          <EmptyState>Không có hội thoại nào khớp bộ lọc.</EmptyState>
-        </div>
+        <EmptyState>Không có hội thoại nào khớp bộ lọc.</EmptyState>
       ) : (
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,2fr)_minmax(0,1.1fr)]">
           {/* Trái: danh sách phiên + phân trang */}
           <div className="space-y-3">
-            <div className="rounded-lg border border-paper-border bg-paper-card p-2">
-              <p className="px-1 pb-1 text-xs font-semibold uppercase tracking-wide text-ink-soft">
-                {logs.data.total} phiên
-              </p>
+            <div className="card p-2">
+              <p className="section-title px-2 pb-2 pt-1">{logs.data.total} phiên</p>
               <ConversationSessionList
                 items={logs.data.items}
                 selectedId={selectedId}
@@ -148,7 +145,7 @@ export function LogsTab() {
           </div>
 
           {/* Giữa: replay hội thoại */}
-          <div className="min-h-[24rem] rounded-lg border border-paper-border bg-paper-card p-4">
+          <div className="card min-h-[24rem] p-5">
             {detail.isLoading ? (
               <Spinner />
             ) : detail.data ? (
@@ -159,11 +156,11 @@ export function LogsTab() {
           </div>
 
           {/* Phải: panel chất lượng / token */}
-          <div className="min-h-[24rem] rounded-lg border border-paper-border bg-paper-card p-4">
+          <div className="card min-h-[24rem] p-5">
             {detail.data ? (
               <ConversationDetailPanel detail={detail.data} tokensByMessage={tokensByMessage} />
             ) : (
-              <p className="text-sm text-ink-soft">—</p>
+              <p className="text-sm text-ink-faint">—</p>
             )}
           </div>
         </div>

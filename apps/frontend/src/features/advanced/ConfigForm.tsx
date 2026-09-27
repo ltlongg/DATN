@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/api/client";
+import { Save } from "lucide-react";
 import { getSystemConfig, updateSystemConfig } from "@/api/config";
+import { Alert } from "@/components/Alert";
 import { EmptyState } from "@/components/EmptyState";
 import { Spinner } from "@/components/Spinner";
 import type { SystemConfig, SystemConfigUpdate } from "@/types/admin";
@@ -89,23 +91,21 @@ function FieldInput({
   onChange: (v: string) => void;
 }) {
   return (
-    <label className="flex flex-col gap-1">
-      <span className="text-sm font-medium text-ink">{spec.label}</span>
+    <label className="block">
+      <span className="label">{spec.label}</span>
       <input
         type="number"
         step={spec.step ?? 1}
         value={value}
         aria-label={spec.label}
         onChange={(e) => onChange(e.target.value)}
-        className={`rounded-md border px-3 py-2 text-sm ${
-          error ? "border-rose-500" : "border-paper-border"
-        }`}
+        className={`input tabular-nums ${error ? "input-error" : ""}`}
       />
       {error ? (
-        <span className="text-xs text-rose-700">{error}</span>
+        <span className="field-error">{error}</span>
       ) : (
         spec.help && (
-          <span className="text-xs text-ink-soft">
+          <span className="help">
             {spec.help} Mặc định: {spec.def}.
           </span>
         )
@@ -163,9 +163,9 @@ export function ConfigForm() {
 
   return (
     <div className="space-y-6">
-      <section className="space-y-3">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-ink-soft">Retrieval</h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="card p-6">
+        <h2 className="section-title mb-5">Retrieval</h2>
+        <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-3">
           {RETRIEVAL_FIELDS.map((spec) => (
             <FieldInput
               key={spec.key}
@@ -178,20 +178,21 @@ export function ConfigForm() {
         </div>
       </section>
 
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <button
           onClick={handleSave}
           disabled={hasError || mutation.isPending}
-          className="rounded-md bg-brand px-4 py-2 text-sm text-brand-fg hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
+          className="btn btn-primary"
         >
+          <Save size={16} />
           {mutation.isPending ? "Đang lưu…" : "Lưu & áp dụng"}
         </button>
         {saved && (
-          <span className="text-sm text-emerald-700">
+          <Alert tone="success">
             Đã lưu — có hiệu lực trong tối đa 60 giây (cache nội bộ agent-service).
-          </span>
+          </Alert>
         )}
-        {saveError && <span className="text-sm text-rose-700">{saveError}</span>}
+        {saveError && <Alert>{saveError}</Alert>}
       </div>
     </div>
   );

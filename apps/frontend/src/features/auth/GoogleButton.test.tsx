@@ -52,6 +52,7 @@ describe("GoogleButton", () => {
         name: "Gờ",
         role: "user",
         share_conversations: false,
+        has_password: true,
       },
     });
     renderButton();

@@ -17,14 +17,12 @@ export function AuthInput({ icon, type, ...props }: AuthInputProps) {
 
   return (
     <div className="relative">
-      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-soft">
+      <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint">
         {icon}
       </span>
       <input
         type={inputType}
-        className={`w-full rounded-full border border-paper-border bg-white py-2.5 pl-11 ${
-          isPassword ? "pr-11" : "pr-5"
-        } text-ink outline-none transition placeholder:text-ink-soft/60 focus:border-brand focus:ring-2 focus:ring-brand/20`}
+        className={`input h-11 pl-10 ${isPassword ? "pr-11" : ""}`}
         {...props}
       />
       {isPassword && (
@@ -33,7 +31,7 @@ export function AuthInput({ icon, type, ...props }: AuthInputProps) {
           onClick={() => setShow((s) => !s)}
           tabIndex={-1}
           aria-label={show ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-          className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-soft transition hover:text-ink"
+          className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-0.5 text-ink-faint transition-colors hover:text-ink"
         >
           {show ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>

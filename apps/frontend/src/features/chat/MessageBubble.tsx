@@ -1,3 +1,5 @@
+import { Clock } from "lucide-react";
+import { Alert } from "@/components/Alert";
 import { Markdown } from "@/components/Markdown";
 import { CitationList } from "@/features/chat/CitationList";
 import { AssistantAvatar, UserAvatar } from "@/features/chat/MessageAvatar";
@@ -21,8 +23,8 @@ export function MessageBubble({ item }: { item: ChatItem }) {
 
   if (item.role === "user") {
     return (
-      <div className="flex justify-end gap-2">
-        <div className="max-w-[80%] whitespace-pre-wrap rounded-2xl rounded-br-sm bg-brand px-4 py-2 text-brand-fg">
+      <div className="flex justify-end gap-3">
+        <div className="max-w-[80%] whitespace-pre-wrap rounded-2xl rounded-tr-md bg-brand px-4 py-2.5 leading-relaxed text-brand-fg shadow-sm">
           {item.content}
         </div>
         <UserAvatar name={userName} />
@@ -31,9 +33,9 @@ export function MessageBubble({ item }: { item: ChatItem }) {
   }
 
   return (
-    <div className="flex justify-start gap-2">
+    <div className="flex justify-start gap-3">
       <AssistantAvatar />
-      <div className="min-w-0 flex-1 rounded-2xl rounded-bl-sm border border-paper-border bg-paper-card px-4 py-3">
+      <div className="min-w-0 flex-1 rounded-2xl rounded-tl-md border border-paper-border bg-paper-card px-5 py-4 shadow-card">
         {/* Trên MỌI nhánh (kể cả lỗi/bị chặn): panel cho thấy hệ thống đã đi tới đâu rồi
             mới dừng — im lặng ở đúng lúc hỏng là thứ khó chịu nhất. */}
         <ProgressPanel
@@ -42,7 +44,7 @@ export function MessageBubble({ item }: { item: ChatItem }) {
           streaming={item.streaming}
         />
         {item.error ? (
-          <p className="text-sm text-rose-700">⚠ {item.error.message}</p>
+          <Alert>{item.error.message}</Alert>
         ) : item.blocked ? (
           // Guardrails chặn: ưu tiên hiện safe message (agent đã stream qua token). Chỉ khi
           // không có content mới rơi về câu cố định.
@@ -51,9 +53,7 @@ export function MessageBubble({ item }: { item: ChatItem }) {
               <Markdown content={item.content} />
             </div>
           ) : (
-            <p className="text-sm text-rose-700">
-              Câu hỏi bị chặn bởi bộ lọc an toàn.
-            </p>
+            <Alert tone="warning">Câu hỏi bị chặn bởi bộ lọc an toàn.</Alert>
           )
         ) : (
           // Câu hỏi lại (route `ambiguous`) đi CHUNG nhánh này, không có khối vàng riêng:
@@ -64,10 +64,17 @@ export function MessageBubble({ item }: { item: ChatItem }) {
             <div className="text-ink">
               {item.content !== "" && <Markdown content={item.content} />}
               {item.streaming && item.content === "" && (
-                <span className="text-ink-soft">Đang suy nghĩ…</span>
+                <span className="inline-flex items-center gap-2 text-sm text-ink-soft">
+                  <span className="flex gap-1" aria-hidden>
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand/70 [animation-delay:-0.3s]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand/70 [animation-delay:-0.15s]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand/70" />
+                  </span>
+                  Đang suy nghĩ…
+                </span>
               )}
               {item.streaming && item.content !== "" && (
-                <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse bg-ink-soft align-middle" />
+                <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse rounded-sm bg-brand/60 align-middle" />
               )}
             </div>
 
@@ -77,18 +84,17 @@ export function MessageBubble({ item }: { item: ChatItem }) {
                 lại tưởng câu trả lời có vấn đề. Chỗ xem chúng là trang quản trị
                 (`features/advanced`), nơi có ngữ cảnh để hiểu. */}
             {!item.streaming && (
-              <div className="mt-2 flex flex-wrap items-center gap-2">
+              <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-ink-faint">
                 {item.ttftMs !== null && (
                   <span
-                    className="text-xs text-ink-soft"
+                    className="inline-flex items-center gap-1"
                     title="Thời gian chờ tới chữ đầu tiên (gồm truy hồi + LLM)"
                   >
-                    ⏱ {formatTtft(item.ttftMs)}
+                    <Clock size={12} aria-hidden />
+                    {formatTtft(item.ttftMs)}
                   </span>
                 )}
-                <span className="text-xs text-ink-soft">
-                  {countWords(item.content)} từ
-                </span>
+                <span>{countWords(item.content)} từ</span>
               </div>
             )}
 

@@ -1,10 +1,10 @@
 import type { DocumentStatus } from "@/types";
 
-const STYLES: Record<DocumentStatus, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  indexing: "bg-amber-100 text-amber-800",
-  indexed: "bg-emerald-100 text-emerald-800",
-  failed: "bg-rose-100 text-rose-800",
+const TONE: Record<DocumentStatus, string> = {
+  draft: "badge-neutral",
+  indexing: "badge-warning",
+  indexed: "badge-success",
+  failed: "badge-danger",
 };
 
 const LABELS: Record<DocumentStatus, string> = {
@@ -15,11 +15,5 @@ const LABELS: Record<DocumentStatus, string> = {
 };
 
 export function StatusBadge({ status }: { status: DocumentStatus }) {
-  return (
-    <span
-      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${STYLES[status]}`}
-    >
-      {LABELS[status]}
-    </span>
-  );
+  return <span className={`badge ${TONE[status]}`}>{LABELS[status]}</span>;
 }

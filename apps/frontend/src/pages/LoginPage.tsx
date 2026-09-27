@@ -9,12 +9,12 @@ export default function LoginPage() {
   if (token) return <Navigate to="/" replace />;
 
   return (
-    <AuthLayout title="Đăng nhập">
+    <AuthLayout title="Đăng nhập" subtitle="Chào mừng trở lại. Đăng nhập để tiếp tục hỏi đáp.">
       <LoginForm />
       <GoogleButton />
-      <p className="mt-5 text-center text-sm text-ink">
+      <p className="mt-8 text-center text-sm text-ink-soft">
         Chưa có tài khoản?{" "}
-        <Link to="/register" className="font-bold text-ink transition hover:underline">
+        <Link to="/register" className="font-semibold text-brand hover:underline">
           Đăng ký
         </Link>
       </p>

@@ -16,7 +16,7 @@ export function ConversationSessionList({
   onSelect: (id: string) => void;
 }) {
   return (
-    <ul className="space-y-1">
+    <ul className="space-y-0.5">
       {items.map((c) => {
         const active = c.id === selectedId;
         const tok = tokensByConv.get(c.id);
@@ -24,36 +24,28 @@ export function ConversationSessionList({
           <li key={c.id}>
             <button
               onClick={() => onSelect(c.id)}
-              className={`w-full rounded-md border px-2.5 py-2 text-left transition-colors ${
-                active
-                  ? "border-brand bg-brand/10"
-                  : "border-transparent hover:border-paper-border hover:bg-paper"
-              }`}
+              className={`item-row ${active ? "item-row-active" : ""}`}
             >
               <div className="flex items-center justify-between gap-2">
                 {/* Tên chỉ có khi hội thoại có tin vi phạm; còn lại hiện mã ẩn danh. */}
                 <span className="truncate text-sm font-medium text-ink">
                   {c.user_name ?? c.user_anon_id}
                 </span>
-                <span className="shrink-0 text-[11px] text-ink-soft">
+                <span className="shrink-0 text-[11px] tabular-nums text-ink-faint">
                   {formatDateTime(c.updated_at)}
                 </span>
               </div>
               <p className="mt-0.5 truncate text-xs text-ink-soft">
                 {c.title ?? <span className="italic">Tiêu đề được ẩn</span>}
               </p>
-              <p className="mt-0.5 text-[11px] text-ink-soft">
+              <p className="mt-0.5 text-[11px] text-ink-faint">
                 {c.message_count} lượt · {tok === undefined ? "—" : `${nf.format(tok)} token`}
               </p>
               {(c.shared || c.flagged_count > 0) && (
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {c.shared && (
-                    <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] text-emerald-800">
-                      Đã chia sẻ
-                    </span>
-                  )}
+                <div className="mt-1.5 flex flex-wrap gap-1">
+                  {c.shared && <span className="badge badge-success">Đã chia sẻ</span>}
                   {c.flagged_count > 0 && (
-                    <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] text-rose-800">
+                    <span className="badge badge-danger">
                       {c.flagged_count} tin bị gắn cờ
                     </span>
                   )}

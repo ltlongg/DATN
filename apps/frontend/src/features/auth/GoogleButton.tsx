@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import { ApiError } from "@/api/client";
 import { loginWithGoogle } from "@/api/auth";
+import { Alert } from "@/components/Alert";
 import { redirectTargetFrom } from "@/features/auth/redirectTarget";
 import { useAuthStore } from "@/store/authStore";
 
@@ -20,6 +21,13 @@ export function GoogleButton() {
   const location = useLocation();
   const setAuth = useAuthStore((s) => s.setAuth);
   const [error, setError] = useState<string | null>(null);
+  // Nút GIS nhận bề rộng px cố định (không co giãn) -> đo cột form rồi mới render, để màn
+  // hẹp không bị tràn ngang. GIS giới hạn tối đa 400px.
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    if (boxRef.current) setWidth(Math.min(400, boxRef.current.offsetWidth));
+  }, []);
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? "";
 
   if (!clientId) return null;
@@ -38,38 +46,39 @@ export function GoogleButton() {
   }
 
   return (
-    <div className="mt-5">
-      <div className="mb-5 flex items-center gap-3 text-xs font-semibold uppercase tracking-wide text-ink">
-        <span className="h-px flex-1 bg-ink/25" />
+    <div className="mt-6">
+      <div className="mb-6 flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-ink-faint">
+        <span className="h-px flex-1 bg-paper-border" />
         hoặc
-        <span className="h-px flex-1 bg-ink/25" />
+        <span className="h-px flex-1 bg-paper-border" />
       </div>
 
       {/* `locale` là prop của PROVIDER (nó nạp script GIS kèm hl=vi), KHÔNG phải của
           <GoogleLogin> — đặt nhầm chỗ là TypeScript báo lỗi ngay. */}
       <GoogleOAuthProvider clientId={clientId} locale="vi">
-        <div className="flex justify-center">
-          <GoogleLogin
-            // `credential` là ID token. Kiểu của nó là optional; thiếu thì báo lỗi chứ
-            // KHÔNG im lặng bỏ qua (người dùng bấm mà không có gì xảy ra là tệ nhất).
-            onSuccess={(res) =>
-              res.credential
-                ? void submitGoogle(res.credential)
-                : setError("Không đăng nhập được bằng Google.")
-            }
-            onError={() => setError("Không đăng nhập được bằng Google.")}
-            shape="pill"
-            // width theo hợp đồng GIS là CHUỖI số pixel (tối đa "400") — không phải số,
-            // không phải "100%". Muốn co giãn thì canh bằng div bọc ngoài.
-            width="320"
-          />
+        <div ref={boxRef} className="flex justify-center">
+          {width !== null && (
+            <GoogleLogin
+              // `credential` là ID token. Kiểu của nó là optional; thiếu thì báo lỗi chứ
+              // KHÔNG im lặng bỏ qua (người dùng bấm mà không có gì xảy ra là tệ nhất).
+              onSuccess={(res) =>
+                res.credential
+                  ? void submitGoogle(res.credential)
+                  : setError("Không đăng nhập được bằng Google.")
+              }
+              onError={() => setError("Không đăng nhập được bằng Google.")}
+              shape="rectangular"
+              // width theo hợp đồng GIS là CHUỖI số pixel — không phải số, không phải "100%".
+              width={String(width)}
+            />
+          )}
         </div>
       </GoogleOAuthProvider>
 
       {error && (
-        <p role="alert" className="mt-3 text-center text-sm text-brand">
-          {error}
-        </p>
+        <div className="mt-3">
+          <Alert>{error}</Alert>
+        </div>
       )}
     </div>
   );

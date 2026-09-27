@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import ForceGraph2D from "react-force-graph-2d";
+import { palette } from "@/theme";
 import type { EntityDetail } from "@/types/kb";
 
 interface GraphNode {
@@ -56,14 +57,14 @@ export function EgoGraph({
 
   if (graph.nodes.length <= 1) {
     return (
-      <div className="rounded-lg border border-dashed border-paper-border p-6 text-center text-sm text-ink-soft">
+      <div className="rounded-xl border border-dashed border-paper-border p-6 text-center text-sm text-ink-soft">
         Không có quan hệ 1-hop cho thực thể này.
       </div>
     );
   }
 
   return (
-    <div ref={ref} className="overflow-hidden rounded-lg border border-paper-border bg-white">
+    <div ref={ref} className="overflow-hidden rounded-xl border border-paper-border bg-paper">
       <ForceGraph2D
         graphData={graph}
         width={width}
@@ -71,7 +72,7 @@ export function EgoGraph({
         nodeLabel="name"
         nodeRelSize={5}
         linkLabel="keyword"
-        linkColor={() => "#c9bda8"}
+        linkColor={() => palette.ink.faint}
         onNodeClick={(n) => onSelectEntity((n as GraphNode).id)}
         cooldownTicks={60}
         nodeCanvasObject={(node, ctx, globalScale) => {
@@ -80,19 +81,19 @@ export function EgoGraph({
           const r = n.center ? 6 : 4;
           ctx.beginPath();
           ctx.arc(n.x, n.y, r, 0, 2 * Math.PI);
-          ctx.fillStyle = n.center ? "#A4161A" : "#c4494c";
+          ctx.fillStyle = n.center ? palette.brand.DEFAULT : palette.gold.DEFAULT;
           ctx.fill();
 
           const fontSize = 12 / globalScale;
-          ctx.font = `${n.center ? 700 : 400} ${fontSize}px sans-serif`;
+          ctx.font = `${n.center ? 700 : 400} ${fontSize}px "Be Vietnam Pro", sans-serif`;
           ctx.textAlign = "center";
           ctx.textBaseline = "top";
           const label = n.name;
           const tw = ctx.measureText(label).width;
           const pad = 2 / globalScale;
-          ctx.fillStyle = "rgba(255,255,255,0.78)";
+          ctx.fillStyle = "rgba(247,246,243,0.85)"; // palette.paper, hơi trong
           ctx.fillRect(n.x - tw / 2 - pad, n.y + r + pad, tw + pad * 2, fontSize + pad);
-          ctx.fillStyle = "#3a332b";
+          ctx.fillStyle = palette.ink.DEFAULT;
           ctx.fillText(label, n.x, n.y + r + pad * 1.5);
         }}
         nodePointerAreaPaint={(node, color, ctx) => {

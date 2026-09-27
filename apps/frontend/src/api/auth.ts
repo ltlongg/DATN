@@ -40,6 +40,20 @@ export function updatePreferences(prefs: { share_conversations: boolean }): Prom
   return apiFetch<User>("/api/auth/me/preferences", { method: "PATCH", body: prefs });
 }
 
+/** Chỉ sửa được họ tên — email là định danh đăng nhập, không cho tự đổi. */
+export function updateProfile(profile: { name: string }): Promise<User> {
+  return apiFetch<User>("/api/auth/me/profile", { method: "PATCH", body: profile });
+}
+
+/** Sai mật khẩu hiện tại -> 400 `invalid_current_password` (không phải 401, nên không bị
+ * client coi là hết phiên). */
+export function changePassword(body: {
+  current_password: string;
+  new_password: string;
+}): Promise<{ ok: boolean }> {
+  return apiFetch<{ ok: boolean }>("/api/auth/me/password", { method: "POST", body });
+}
+
 export function logout(): Promise<{ ok: boolean }> {
   return apiFetch<{ ok: boolean }>("/api/auth/logout", { method: "POST" });
 }

@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from "react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
-const BTN = "rounded-md border border-paper-border px-2 py-1 disabled:opacity-40 hover:bg-paper";
+const BTN = "btn btn-secondary btn-sm btn-icon h-8 w-8";
 
-/** Phân trang offset/limit: nhảy đầu/cuối + tiến/lùi + ô "tới trang" (bỏ Trước/Sau đơn điệu). */
+/** Phân trang offset/limit: nhảy đầu/cuối + tiến/lùi + ô "tới trang". */
 export function Pagination({
   total,
   limit,
@@ -37,34 +38,49 @@ export function Pagination({
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-ink-soft">
-      <span>
+      <span className="tabular-nums">
         {from}–{to} / {total}
       </span>
-      <div className="flex items-center gap-1">
+      <div className="flex flex-wrap items-center gap-1">
         <button disabled={!canPrev} onClick={() => goPage(1)} className={BTN} aria-label="Trang đầu">
-          «
+          <ChevronsLeft size={15} />
         </button>
-        <button disabled={!canPrev} onClick={() => goPage(page - 1)} className={BTN}>
-          Trước
+        <button
+          disabled={!canPrev}
+          onClick={() => goPage(page - 1)}
+          className={BTN}
+          aria-label="Trang trước"
+        >
+          <ChevronLeft size={15} />
         </button>
-        <span className="px-1 tabular-nums">
+        <span className="whitespace-nowrap px-2 tabular-nums text-ink">
           {page} / {pageCount}
         </span>
-        <button disabled={!canNext} onClick={() => goPage(page + 1)} className={BTN}>
-          Sau
+        <button
+          disabled={!canNext}
+          onClick={() => goPage(page + 1)}
+          className={BTN}
+          aria-label="Trang sau"
+        >
+          <ChevronRight size={15} />
         </button>
-        <button disabled={!canNext} onClick={() => goPage(pageCount)} className={BTN} aria-label="Trang cuối">
-          »
+        <button
+          disabled={!canNext}
+          onClick={() => goPage(pageCount)}
+          className={BTN}
+          aria-label="Trang cuối"
+        >
+          <ChevronsRight size={15} />
         </button>
         {pageCount > 2 && (
-          <form onSubmit={submitJump} className="ml-1 flex items-center gap-1">
+          <form onSubmit={submitJump} className="ml-1">
             <input
               value={jump}
               onChange={(e) => setJump(e.target.value)}
               inputMode="numeric"
               placeholder="Tới…"
               aria-label="Tới trang"
-              className="w-16 rounded-md border border-paper-border px-2 py-1 text-sm outline-none focus:border-brand"
+              className="input h-8 w-16 px-2 py-1"
             />
           </form>
         )}

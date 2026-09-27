@@ -1,4 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { Alert } from "@/components/Alert";
+import { Field } from "@/components/Field";
 import { Modal } from "@/components/Modal";
 import type { DocumentInput } from "@/api/documents";
 import type { Document, DocumentStatus } from "@/types";
@@ -49,27 +51,27 @@ export function DocumentFormModal({
       onOpenChange={(o) => !o && onClose()}
       title={initial ? "Sửa tài liệu" : "Thêm tài liệu"}
     >
-      <form onSubmit={submit} className="space-y-3">
+      <form onSubmit={submit} className="space-y-4">
         <Field label="Tên hiển thị">
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="w-full rounded-md border border-paper-border px-3 py-2 outline-none focus:border-brand"
+            className="input"
           />
         </Field>
         <Field label="Loại">
           <input
             value={type}
             onChange={(e) => setType(e.target.value)}
-            className="w-full rounded-md border border-paper-border px-3 py-2 outline-none focus:border-brand"
+            className="input"
           />
         </Field>
         <Field label="Trạng thái">
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as DocumentStatus)}
-            className="w-full rounded-md border border-paper-border px-3 py-2 outline-none focus:border-brand"
+            className="input"
           >
             {STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -80,7 +82,7 @@ export function DocumentFormModal({
         </Field>
 
         {initial?.source_file && (
-          <p className="rounded-md border border-paper-border bg-paper px-3 py-2 text-xs text-ink-soft">
+          <p className="rounded-lg bg-paper-sunken px-3 py-2.5 text-xs leading-relaxed text-ink-soft">
             Nguồn trong kho: <code>{initial.source_file}</code> —{" "}
             {initial.chunk_count.toLocaleString("vi-VN")} chunk,{" "}
             {initial.event_count.toLocaleString("vi-VN")} sự kiện. Nguồn là khóa nối, không đổi
@@ -88,34 +90,17 @@ export function DocumentFormModal({
           </p>
         )}
 
-        {error && <p className="text-sm text-rose-700">{error}</p>}
+        {error && <Alert>{error}</Alert>}
 
         <div className="flex justify-end gap-2 pt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-md px-3 py-2 text-sm text-ink-soft hover:text-ink"
-          >
+          <button type="button" onClick={onClose} className="btn btn-secondary">
             Huỷ
           </button>
-          <button
-            type="submit"
-            disabled={pending}
-            className="rounded-md bg-brand px-4 py-2 text-sm text-brand-fg disabled:opacity-60"
-          >
+          <button type="submit" disabled={pending} className="btn btn-primary">
             {pending ? "Đang lưu…" : "Lưu"}
           </button>
         </div>
       </form>
     </Modal>
-  );
-}
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block space-y-1">
-      <span className="text-sm font-medium text-ink-soft">{label}</span>
-      {children}
-    </label>
   );
 }

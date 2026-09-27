@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Play, Square } from "lucide-react";
+import { CalendarRange, ChevronDown, ChevronUp, Maximize2, Play, Square, X } from "lucide-react";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import {
   parseYearFrac,
@@ -16,10 +16,8 @@ import type { TimelineItem } from "@/types";
  * thời gian; click icon mới mở popover chi tiết. Sự kiện sát nhau gom thành cluster
  * (icon số đếm -> popover danh sách); LĂN CHUỘT phóng to tại vị trí con trỏ để tách
  * cluster, KÉO để di chuyển, double-click / nút "Toàn cảnh" reset.
- * Liên kết 2 chiều với map qua `selectedEventId`.
- *
- * `variant`: `docked` = dải full-width dưới khung chat (layout split);
- * `overlay` = thẻ bo góc nổi trên map (layout float).
+ * Sự kiện đang chọn nằm ở `selectedEventId` (chatUiStore) — trình chiếu cũng đi qua đó.
+ * Hiển thị dạng dải full-width dưới khung chat.
  */
 
 // --- scale + cluster ---
@@ -132,20 +130,15 @@ const POPOVER_LEFT = (pct: number) => ({
   left: `clamp(168px, ${pct}%, calc(100% - 168px))`,
 });
 
-type TimelineVariant = "docked" | "overlay";
-
-const FRAME_CLASS: Record<TimelineVariant, string> = {
-  docked: "border-t border-paper-border bg-paper-card",
-  overlay: "rounded-xl border border-paper-border bg-paper-card shadow-lg",
-};
+const POPOVER_CLASS =
+  "absolute bottom-[calc(100%+4px)] z-30 w-80 -translate-x-1/2 rounded-xl border border-paper-border bg-paper-card shadow-pop";
+const CLOSE_BTN = "btn btn-ghost h-6 w-6 shrink-0 rounded-md p-0";
 
 export function TimelineBar({
   items,
-  variant = "docked",
   streaming = false,
 }: {
   items: TimelineItem[];
-  variant?: TimelineVariant;
   /** Đang chờ câu trả lời -> không cho bật trình chiếu (sự kiện sắp bị thay). */
   streaming?: boolean;
 }) {
@@ -251,20 +244,18 @@ export function TimelineBar({
   }
 
   return (
-    <div className={`relative ${FRAME_CLASS[variant]}`}>
+    <div className="relative border-t border-paper-border bg-paper-card">
       {/* header */}
-      <div className="flex items-center justify-between px-4 py-1.5">
-        <div className="flex items-center gap-2">
-          <span className="inline-block h-2.5 w-2.5 rounded-sm bg-brand" aria-hidden />
-          <span className="text-xs font-semibold uppercase tracking-widest text-brand">
-            Dòng thời gian
-          </span>
-          <span className="text-xs text-ink-soft">{items.length} mốc</span>
-          <span className="hidden text-[10px] text-ink-soft/70 sm:inline">
-            · lăn chuột: phóng to · kéo: di chuyển
+      <div className="flex items-center justify-between gap-3 px-5 py-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <CalendarRange size={15} className="shrink-0 text-brand" aria-hidden />
+          <span className="section-title text-brand">Dòng thời gian</span>
+          <span className="badge badge-neutral">{items.length} mốc</span>
+          <span className="hidden truncate text-xs text-ink-faint md:inline">
+            Lăn chuột để phóng to · kéo để di chuyển
           </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-1.5">
           {/* Trình chiếu: tự chạy lần lượt các mốc theo thời gian, map bám theo. */}
           <button
             onClick={tour.playing ? tour.stop : tour.start}
@@ -275,29 +266,24 @@ export function TimelineBar({
                 : "Lần lượt kể các sự kiện theo dòng thời gian"
             }
             aria-pressed={tour.playing}
-            className={`flex items-center gap-1 rounded-md border px-2 py-1 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
-              tour.playing
-                ? "border-brand bg-brand text-brand-fg hover:bg-brand-dark"
-                : "border-paper-border text-ink-soft hover:border-brand hover:text-brand"
-            }`}
+            className={`btn btn-sm ${tour.playing ? "btn-primary" : "btn-secondary"}`}
           >
             {tour.playing ? <Square size={12} /> : <Play size={12} />}
             {tour.playing ? "Dừng" : "Trình chiếu"}
           </button>
           {view !== null && (
-            <button
-              onClick={() => setView(null)}
-              className="text-xs font-medium text-brand hover:text-brand-dark"
-            >
-              ⟲ Toàn cảnh
+            <button onClick={() => setView(null)} className="btn btn-sm btn-ghost">
+              <Maximize2 size={12} />
+              Toàn cảnh
             </button>
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="text-xs text-ink-soft hover:text-brand"
+            className="btn btn-sm btn-ghost"
             aria-expanded={!collapsed}
           >
-            {collapsed ? "Mở rộng ▴" : "Thu gọn ▾"}
+            {collapsed ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            {collapsed ? "Mở rộng" : "Thu gọn"}
           </button>
         </div>
       </div>
@@ -316,7 +302,7 @@ export function TimelineBar({
             onDoubleClick={() => setView(null)}
           >
             {/* trục */}
-            <div className="absolute left-0 right-0 top-[38px] h-px bg-paper-border" />
+            <div className="absolute left-0 right-0 top-[36px] h-px bg-paper-border" />
 
             {/* khoảng thời gian (event có time_end) */}
             {clusters.flatMap((c) =>
@@ -329,7 +315,7 @@ export function TimelineBar({
                   return (
                     <div
                       key={`span-${p.item.event_id}`}
-                      className={`absolute top-[37px] h-[3px] rounded-full ${
+                      className={`absolute top-[35px] h-[3px] rounded-full ${
                         p.item.event_id === selectedEventId ? "bg-brand/60" : "bg-brand/25"
                       }`}
                       style={{ left: `${left}%`, width: `${Math.max(0.4, right - left)}%` }}
@@ -346,11 +332,11 @@ export function TimelineBar({
               return (
                 <div
                   key={`tick-${y.toFixed(3)}`}
-                  className="absolute top-[38px] -translate-x-1/2"
+                  className="absolute top-[36px] -translate-x-1/2"
                   style={{ left: `${pct}%` }}
                 >
                   <div className="mx-auto h-2.5 w-px bg-ink-soft/40" />
-                  <div className="mt-0.5 text-center text-[11px] tabular-nums text-ink-soft">
+                  <div className="mt-2.5 text-center text-[11px] tabular-nums text-ink-faint">
                     {tickLabel(y, step)}
                   </div>
                 </div>
@@ -379,10 +365,10 @@ export function TimelineBar({
                     onClick={() => onClickCluster(c)}
                     title={single ? single.label : `${c.placed.length} sự kiện — click để xem`}
                     aria-pressed={isSelected || isOpen}
-                    className={`mt-1 flex h-9 w-9 items-center justify-center rounded-full border-2 shadow-sm transition ${
+                    className={`mx-auto mt-1 flex h-8 w-8 items-center justify-center rounded-full border-2 shadow-sm transition ${
                       isSelected || isOpen
-                        ? "border-brand bg-brand text-brand-fg ring-2 ring-brand/25"
-                        : "border-brand bg-paper-card text-brand hover:bg-brand/10"
+                        ? "border-brand bg-brand text-brand-fg ring-4 ring-brand/15"
+                        : "border-brand bg-paper-card text-brand hover:bg-brand-soft"
                     } ${single ? confidenceOpacity(single.confidence) : ""}`}
                   >
                     {single ? (
@@ -400,20 +386,13 @@ export function TimelineBar({
 
           {/* popover danh sách cluster */}
           {listCluster && (
-            <div
-              className="absolute bottom-[calc(100%+2px)] z-30 w-80 -translate-x-1/2 rounded-lg border border-paper-border bg-paper-card p-2 shadow-lg"
-              style={POPOVER_LEFT(listCluster.pct)}
-            >
-              <div className="flex items-center justify-between px-1 pb-1">
+            <div className={`${POPOVER_CLASS} p-2`} style={POPOVER_LEFT(listCluster.pct)}>
+              <div className="flex items-center justify-between gap-2 px-1.5 pb-1.5">
                 <span className="text-xs font-medium text-ink-soft">
                   {listCluster.placed.length} sự kiện — lăn chuột trên trục để tách nhỏ
                 </span>
-                <button
-                  onClick={() => setOpenCluster(null)}
-                  className="text-xs text-ink-soft hover:text-brand"
-                  aria-label="Đóng"
-                >
-                  ✕
+                <button onClick={() => setOpenCluster(null)} className={CLOSE_BTN} aria-label="Đóng">
+                  <X size={14} />
                 </button>
               </div>
               <ul className="max-h-48 space-y-1 overflow-y-auto">
@@ -424,7 +403,7 @@ export function TimelineBar({
                         setOpenCluster(null);
                         setSelected(p.item.event_id);
                       }}
-                      className="w-full rounded-md px-2 py-1 text-left text-xs hover:bg-brand/10"
+                      className="w-full rounded-lg px-2 py-1.5 text-left text-xs transition-colors hover:bg-brand-soft"
                     >
                       <span className="font-medium tabular-nums text-brand">
                         {rangeLabel(p.item.time_start, p.item.time_end)}
@@ -439,10 +418,7 @@ export function TimelineBar({
 
           {/* popover chi tiết sự kiện đang chọn */}
           {!listCluster && selectedPlaced && (
-            <div
-              className="absolute bottom-[calc(100%+2px)] z-30 w-80 -translate-x-1/2 rounded-lg border border-paper-border bg-paper-card p-3 shadow-lg"
-              style={POPOVER_LEFT(selectedPlaced.cluster.pct)}
-            >
+            <div className={`${POPOVER_CLASS} p-4`} style={POPOVER_LEFT(selectedPlaced.cluster.pct)}>
               <div className="flex items-start justify-between gap-2">
                 <span className="text-xs font-semibold tabular-nums text-brand">
                   {rangeLabel(
@@ -450,21 +426,17 @@ export function TimelineBar({
                     selectedPlaced.placed.item.time_end,
                   )}
                 </span>
-                <button
-                  onClick={() => setSelected(null)}
-                  className="text-xs text-ink-soft hover:text-brand"
-                  aria-label="Đóng"
-                >
-                  ✕
+                <button onClick={() => setSelected(null)} className={CLOSE_BTN} aria-label="Đóng">
+                  <X size={14} />
                 </button>
               </div>
-              <p className="mt-1 font-serif text-sm font-semibold text-ink">
+              <p className="mt-1 font-serif text-base font-semibold leading-snug text-ink">
                 {selectedPlaced.placed.item.label}
               </p>
-              <p className="mt-1 line-clamp-4 text-xs text-ink-soft">
+              <p className="mt-1.5 line-clamp-4 text-xs leading-relaxed text-ink-soft">
                 {selectedPlaced.placed.item.summary}
               </p>
-              <div className="mt-2 flex flex-wrap items-center gap-2">
+              <div className="mt-3 flex flex-wrap items-center gap-2">
                 <ConfidenceBadge confidence={selectedPlaced.placed.item.confidence} />
                 {selectedPlaced.placed.item.locations.length > 0 && (
                   <span className="text-xs text-ink-soft">

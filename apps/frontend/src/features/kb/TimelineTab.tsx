@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { getEvent, listEvents } from "@/api/kb";
+import { Alert } from "@/components/Alert";
 import { EmptyState } from "@/components/EmptyState";
 import { Spinner } from "@/components/Spinner";
 import { EventDetail } from "@/features/kb/EventDetail";
@@ -70,7 +71,7 @@ export function TimelineTab() {
             value={confidence}
             onChange={(e) => setConfidence(e.target.value)}
             aria-label="Lọc theo độ tin cậy"
-            className="rounded-md border border-paper-border px-2 py-1.5 text-sm outline-none focus:border-brand"
+            className="input h-9 w-auto"
           >
             <option value="">Mọi độ tin cậy</option>
             <option value="cao">cao</option>
@@ -80,22 +81,18 @@ export function TimelineTab() {
         </KbSearchBar>
 
         {list.isLoading ? (
-          <div className="rounded-lg border border-paper-border bg-paper-card p-4">
+          <div className="card p-4">
             <Spinner />
           </div>
         ) : list.isError ? (
-          <p className="rounded-lg border border-paper-border bg-paper-card p-4 text-sm text-rose-700">
-            Không tải được danh sách sự kiện.
-          </p>
+          <Alert>Không tải được danh sách sự kiện.</Alert>
         ) : items.length === 0 ? (
-          <div className="rounded-lg border border-paper-border bg-paper-card">
-            <EmptyState>Không có sự kiện nào.</EmptyState>
-          </div>
+          <EmptyState>Không có sự kiện nào.</EmptyState>
         ) : (
           <>
             <div
               ref={scrollRef}
-              className="max-h-[70vh] overflow-y-auto rounded-lg border border-paper-border bg-paper-card"
+              className="card max-h-[70vh] overflow-y-auto p-1.5"
             >
               <EventTable items={items} selectedId={selectedEventId} onSelect={setSelectedEventId} />
               <div ref={sentinelRef} className="h-px" />
@@ -105,7 +102,7 @@ export function TimelineTab() {
                 </div>
               )}
             </div>
-            <p className="text-center text-xs text-ink-soft">
+            <p className="text-center text-xs text-ink-faint">
               Đã tải {items.length} / {total}
               {!hasNextPage && total > 0 && " · hết"}
             </p>
@@ -113,13 +110,13 @@ export function TimelineTab() {
         )}
       </div>
 
-      <div className="rounded-lg border border-paper-border bg-paper-card p-4">
+      <div className="card p-6">
         {!selectedEventId ? (
           <p className="text-sm text-ink-soft">Chọn một sự kiện để xem chi tiết.</p>
         ) : detail.isLoading ? (
           <Spinner />
         ) : detail.isError || !detail.data ? (
-          <p className="text-sm text-rose-700">Không tải được chi tiết sự kiện.</p>
+          <Alert>Không tải được chi tiết sự kiện.</Alert>
         ) : (
           <EventDetail detail={detail.data} />
         )}

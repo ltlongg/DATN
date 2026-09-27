@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getSource } from "@/api/chat";
+import { Alert } from "@/components/Alert";
 import { Modal } from "@/components/Modal";
 import { Spinner } from "@/components/Spinner";
 import type { Citation } from "@/types";
@@ -39,19 +40,17 @@ export function SourceModal({
   return (
     <Modal open onOpenChange={(open) => !open && onClose()} title={title} size="lg">
       {(breadcrumb || lines) && (
-        <p className="-mt-2 mb-3 text-xs text-ink-soft">
+        <p className="-mt-2 mb-4 text-xs text-ink-soft">
           {[breadcrumb, lines].filter(Boolean).join(" · ")}
         </p>
       )}
 
       {isPending && <Spinner label="Đang tải nguồn…" />}
       {isError && (
-        <p className="text-sm text-brand">
-          Không tải được nguồn này. Có thể đoạn tài liệu đã bị gỡ khỏi kho tri thức.
-        </p>
+        <Alert>Không tải được nguồn này. Có thể đoạn tài liệu đã bị gỡ khỏi kho tri thức.</Alert>
       )}
       {data && (
-        <div className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap rounded-md border border-paper-border bg-paper p-4 text-sm leading-relaxed text-ink">
+        <div className="max-h-[60vh] overflow-y-auto whitespace-pre-wrap rounded-xl border border-paper-border bg-paper p-5 text-sm leading-7 text-ink">
           {data.text}
         </div>
       )}

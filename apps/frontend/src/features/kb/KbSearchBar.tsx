@@ -1,4 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from "react";
+import { Search } from "lucide-react";
 
 /** Ô tìm kiếm (submit -> onSearch) + slot filter phụ (select confidence/type…). */
 export function KbSearchBar({
@@ -19,17 +20,22 @@ export function KbSearchBar({
 
   return (
     <form onSubmit={submit} className="flex flex-wrap items-center gap-2">
-      <input
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        placeholder={placeholder}
-        className="flex-1 rounded-md border border-paper-border px-3 py-1.5 text-sm outline-none focus:border-brand"
-      />
+      <div className="relative min-w-[12rem] flex-1">
+        <Search
+          size={16}
+          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint"
+          aria-hidden
+        />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder={placeholder}
+          aria-label={placeholder}
+          className="input h-9 pl-9"
+        />
+      </div>
       {children}
-      <button
-        type="submit"
-        className="rounded-md bg-brand px-3 py-1.5 text-sm text-brand-fg hover:bg-brand-dark"
-      >
+      <button type="submit" className="btn btn-primary">
         Tìm
       </button>
     </form>

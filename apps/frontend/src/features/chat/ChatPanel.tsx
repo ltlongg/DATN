@@ -1,3 +1,5 @@
+import { Lightbulb } from "lucide-react";
+import { BrandMark } from "@/components/BrandMark";
 import { Composer } from "@/features/chat/Composer";
 import { MessageList } from "@/features/chat/MessageList";
 import type { ChatItem } from "@/features/chat/chatReducer";
@@ -31,20 +33,26 @@ export function ChatPanel({
   return (
     <div className="flex h-full flex-col">
       {items.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-6 px-6 text-center">
-          <div>
-            <h2 className="text-xl font-semibold text-ink">Bắt đầu hỏi đáp lịch sử</h2>
-            <p className="mt-1 text-sm text-ink-soft">
-              Câu trả lời có căn cứ từ tài liệu, kèm nguồn trích dẫn.
+        <div className="flex flex-1 flex-col items-center justify-center gap-8 overflow-y-auto px-6 py-10 text-center">
+          <div className="flex flex-col items-center">
+            <BrandMark className="h-12 w-12 rounded-xl" />
+            <h2 className="mt-5 text-2xl font-semibold text-ink">Xin chàoooooooo!</h2>
+            <p className="mt-2 text-sm text-ink-soft">
+              Bạn hỏi tự nhiên nhé, mình rất sẵn lòng trả lời. Hoặc thử một trong các câu hỏi mẫu dưới đây.
             </p>
           </div>
-          <div className="grid w-full max-w-xl gap-2 sm:grid-cols-2">
+          <div className="grid w-full max-w-2xl gap-3 sm:grid-cols-2">
             {SAMPLE_QUESTIONS.map((q) => (
               <button
                 key={q}
                 onClick={() => onSend(q)}
-                className="rounded-lg border border-paper-border bg-paper-card px-4 py-3 text-left text-sm text-ink transition hover:border-brand"
+                className="card group flex items-start gap-3 p-4 text-left text-sm leading-relaxed text-ink transition hover:border-brand/40 hover:shadow-pop"
               >
+                <Lightbulb
+                  size={16}
+                  className="mt-0.5 shrink-0 text-gold transition-colors group-hover:text-brand"
+                  aria-hidden
+                />
                 {q}
               </button>
             ))}

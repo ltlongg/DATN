@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { ChevronDown } from "lucide-react";
 import { listTimelineCards } from "@/api/timeline";
+import { Alert } from "@/components/Alert";
 import { EmptyState } from "@/components/EmptyState";
 import { Spinner } from "@/components/Spinner";
 import { TimelineCard } from "@/features/explore/TimelineCard";
@@ -79,12 +81,12 @@ export function TimelineSpine() {
   }
 
   return (
-    <div ref={scrollRef} className="h-full overflow-y-auto px-4 py-6 md:px-8">
+    <div ref={scrollRef} className="h-full overflow-y-auto px-4 py-8 md:px-8">
       <div className="mx-auto max-w-4xl">
         {feed.isLoading ? (
           <Spinner />
         ) : feed.isError ? (
-          <p className="text-sm text-rose-700">Không tải được dòng lịch sử.</p>
+          <Alert>Không tải được dòng lịch sử.</Alert>
         ) : marks.length === 0 ? (
           <EmptyState>Chưa có sự kiện nào trong kho.</EmptyState>
         ) : (
@@ -102,22 +104,24 @@ export function TimelineSpine() {
                 >
                   {/* Cột trục: đường kẻ chạy suốt chiều cao ô -> nối liền giữa các mốc. */}
                   <div className="relative col-start-1 row-start-1 flex w-6 justify-center md:col-start-2">
-                    <span aria-hidden className="absolute inset-y-0 w-px bg-paper-border" />
+                    <span aria-hidden className="absolute inset-y-0 w-0.5 bg-paper-border" />
                     <span
                       aria-hidden
-                      className="relative mt-1.5 h-2.5 w-2.5 rounded-full border-2 border-brand bg-paper-card"
+                      className="relative mt-1 h-3.5 w-3.5 rounded-full border-[3px] border-brand bg-paper-card ring-4 ring-paper"
                     />
                   </div>
 
                   <div
-                    className={`col-start-2 row-start-1 pb-6 ${
+                    className={`col-start-2 row-start-1 pb-8 ${
                       isLeft ? "md:col-start-1 md:text-right" : "md:col-start-3"
                     }`}
                   >
-                    <p className="mb-1.5 text-xs font-semibold tabular-nums text-brand">
-                      {shortTime(mark.time)}
+                    <p className="mb-2">
+                      <span className="inline-block rounded-full bg-brand-soft px-2.5 py-0.5 text-xs font-semibold tabular-nums text-brand-dark">
+                        {shortTime(mark.time)}
+                      </span>
                     </p>
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                       {shown.map((c) => (
                         <TimelineCard
                           key={c.event_id}
@@ -132,9 +136,14 @@ export function TimelineSpine() {
                       {(hidden > 0 || open) && (
                         <button
                           onClick={() => toggleMark(mark.time)}
-                          className="text-xs font-medium text-brand hover:text-brand-dark"
+                          className="inline-flex items-center gap-1 rounded-md px-1 text-xs font-medium text-brand hover:text-brand-dark"
                         >
-                          {open ? "thu gọn ▴" : `còn ${hidden} sự kiện ▾`}
+                          {open ? "Thu gọn" : `Còn ${hidden} sự kiện`}
+                          <ChevronDown
+                            size={14}
+                            className={open ? "rotate-180" : undefined}
+                            aria-hidden
+                          />
                         </button>
                       )}
                     </div>
@@ -152,7 +161,7 @@ export function TimelineSpine() {
           </div>
         )}
 
-        <footer className="border-t border-paper-border pt-3 text-center text-xs text-ink-soft">
+        <footer className="border-t border-paper-border pt-4 text-center text-xs text-ink-faint">
           Đã hiện {items.length} / {total} sự kiện. Trang này chỉ hiện sự kiện đã xác định
           được thời gian.
         </footer>

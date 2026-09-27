@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import { ApiError } from "@/api/client";
 import type { DocumentInput } from "@/api/documents";
 import { Modal } from "@/components/Modal";
@@ -49,7 +50,7 @@ export default function AdminDocumentsPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader
         title="Quản lý tài liệu"
         desc="Tài liệu đã index tự hiện ở đây; số chunk và sự kiện là số đếm thật từ kho tri thức."
@@ -59,9 +60,10 @@ export default function AdminDocumentsPage() {
               setFormError(null);
               setForm({ open: true, doc: null });
             }}
-            className="rounded-md bg-brand px-4 py-2 text-sm text-brand-fg hover:bg-brand-dark"
+            className="btn btn-primary"
           >
-            + Thêm tài liệu
+            <Plus size={16} />
+            Thêm tài liệu
           </button>
         }
       />
@@ -98,18 +100,11 @@ export default function AdminDocumentsPage() {
         <p className="text-sm text-ink-soft">
           Xoá tài liệu “{toDelete?.name}” khỏi danh mục? Hành động không thể hoàn tác.
         </p>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            onClick={() => setToDelete(null)}
-            className="rounded-md px-3 py-2 text-sm text-ink-soft hover:text-ink"
-          >
+        <div className="mt-6 flex justify-end gap-2">
+          <button onClick={() => setToDelete(null)} className="btn btn-secondary">
             Huỷ
           </button>
-          <button
-            onClick={confirmDelete}
-            disabled={deleteMut.isPending}
-            className="rounded-md bg-rose-600 px-4 py-2 text-sm text-white disabled:opacity-60"
-          >
+          <button onClick={confirmDelete} disabled={deleteMut.isPending} className="btn btn-danger">
             Xoá
           </button>
         </div>

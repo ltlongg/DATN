@@ -1,4 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { Alert } from "@/components/Alert";
+import { Field } from "@/components/Field";
 import { Modal } from "@/components/Modal";
 import type { Role } from "@/types";
 import type { UserCreateInput, UserOut, UserUpdateInput } from "@/types/admin";
@@ -68,7 +70,7 @@ export function UserFormModal({
       onOpenChange={(o) => !o && onClose()}
       title={isEdit ? "Sửa người dùng" : "Thêm người dùng"}
     >
-      <form onSubmit={submit} className="space-y-3">
+      <form onSubmit={submit} className="space-y-4">
         {!isEdit && (
           <>
             <Field label="Email">
@@ -77,11 +79,11 @@ export function UserFormModal({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className={inputCls}
+                className="input"
               />
             </Field>
             <Field label="Tên">
-              <input value={name} onChange={(e) => setName(e.target.value)} required className={inputCls} />
+              <input value={name} onChange={(e) => setName(e.target.value)} required className="input" />
             </Field>
             <Field label="Mật khẩu (≥ 6 ký tự)">
               <input
@@ -90,14 +92,14 @@ export function UserFormModal({
                 onChange={(e) => setPassword(e.target.value)}
                 minLength={6}
                 required
-                className={inputCls}
+                className="input"
               />
             </Field>
           </>
         )}
 
         <Field label="Vai trò">
-          <select value={role} onChange={(e) => setRole(e.target.value as Role)} className={inputCls}>
+          <select value={role} onChange={(e) => setRole(e.target.value as Role)} className="input">
             {ROLES.map((r) => (
               <option key={r} value={r}>
                 {r}
@@ -108,22 +110,23 @@ export function UserFormModal({
 
         {isEdit && (
           <>
-            <label className="flex items-center gap-2 text-sm text-ink">
+            <label className="flex items-center gap-2.5 text-sm font-medium text-ink">
               <input
                 type="checkbox"
+                className="h-4 w-4 accent-brand"
                 checked={isActive}
                 disabled={isSelf}
                 onChange={(e) => setIsActive(e.target.checked)}
               />
               Tài khoản hoạt động
               {isSelf && (
-                <span className="text-xs text-ink-soft">(không thể tự khóa)</span>
+                <span className="text-xs font-normal text-ink-soft">(không thể tự khóa)</span>
               )}
             </label>
             {isEdit && !isActive && (
-              <p className="text-xs text-amber-700">
+              <Alert tone="warning">
                 Token hiện tại của user này sẽ bị từ chối ở lượt gọi API tiếp theo.
-              </p>
+              </Alert>
             )}
             <Field label="Quota câu hỏi/ngày (trống = không giới hạn)">
               <input
@@ -131,39 +134,23 @@ export function UserFormModal({
                 min={0}
                 value={quota}
                 onChange={(e) => setQuota(e.target.value)}
-                className={inputCls}
+                className="input"
               />
             </Field>
           </>
         )}
 
-        {error && <p className="text-sm text-rose-700">{error}</p>}
+        {error && <Alert>{error}</Alert>}
 
         <div className="flex justify-end gap-2 pt-2">
-          <button type="button" onClick={onClose} className="rounded-md px-3 py-2 text-sm text-ink-soft hover:text-ink">
+          <button type="button" onClick={onClose} className="btn btn-secondary">
             Huỷ
           </button>
-          <button
-            type="submit"
-            disabled={pending}
-            className="rounded-md bg-brand px-4 py-2 text-sm text-brand-fg disabled:opacity-60"
-          >
+          <button type="submit" disabled={pending} className="btn btn-primary">
             {pending ? "Đang lưu…" : "Lưu"}
           </button>
         </div>
       </form>
     </Modal>
-  );
-}
-
-const inputCls =
-  "w-full rounded-md border border-paper-border px-3 py-2 outline-none focus:border-brand";
-
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block space-y-1">
-      <span className="text-sm font-medium text-ink-soft">{label}</span>
-      {children}
-    </label>
   );
 }

@@ -1,6 +1,6 @@
-const STYLES: Record<string, string> = {
-  production: "bg-green-100 text-green-800",
-  archived: "bg-gray-200 text-gray-600",
+const TONE: Record<string, string> = {
+  production: "badge-success",
+  archived: "badge-neutral",
 };
 const LABELS: Record<string, string> = {
   production: "PRODUCTION",
@@ -9,11 +9,7 @@ const LABELS: Record<string, string> = {
 
 export function PromptStatusBadge({ status }: { status: string }) {
   return (
-    <span
-      className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-        STYLES[status] ?? "bg-gray-200 text-gray-600"
-      }`}
-    >
+    <span className={`badge text-[10px] tracking-wide ${TONE[status] ?? "badge-neutral"}`}>
       {LABELS[status] ?? status.toUpperCase()}
     </span>
   );

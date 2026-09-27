@@ -10,12 +10,138 @@
   }
 
   body {
-    @apply bg-paper text-ink font-sans antialiased;
+    @apply bg-paper font-sans text-ink antialiased;
   }
 
   h1,
   h2,
   h3 {
     @apply font-serif;
+  }
+
+  /* Một vòng focus thống nhất cho phần tử bấm được (chỉ hiện khi dùng bàn phím). Ô nhập
+     chữ có style focus riêng (`.input`), không dùng vòng này để khỏi chồng hai lớp viền. */
+  :where(a, button, summary, [tabindex], input[type="checkbox"], input[type="radio"]):focus-visible {
+    @apply outline-none ring-2 ring-brand/40 ring-offset-1 ring-offset-paper-card;
+  }
+
+  ::placeholder {
+    @apply text-ink-faint;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 1ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* --- Nút --- */
+  .btn {
+    @apply inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-lg px-3.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-sm {
+    @apply h-8 px-2.5 text-xs;
+  }
+  .btn-icon {
+    @apply h-9 w-9 px-0;
+  }
+  .btn-primary {
+    @apply bg-brand text-brand-fg shadow-sm hover:bg-brand-dark;
+  }
+  .btn-secondary {
+    @apply border border-paper-border bg-paper-card text-ink shadow-sm hover:bg-paper-sunken;
+  }
+  .btn-ghost {
+    @apply text-ink-soft hover:bg-paper-sunken hover:text-ink;
+  }
+  .btn-danger {
+    @apply bg-rose-600 text-white shadow-sm hover:bg-rose-700;
+  }
+
+  /* --- Ô nhập (input / select / textarea) --- */
+  .input {
+    @apply w-full rounded-lg border border-paper-border bg-paper-card px-3 py-2 text-sm text-ink shadow-sm outline-none transition-colors focus:border-brand/50 focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:bg-paper-sunken;
+  }
+  .input-error {
+    @apply border-rose-400 focus:border-rose-500 focus:ring-rose-500/15;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-ink;
+  }
+  .help {
+    @apply mt-1 block text-xs text-ink-soft;
+  }
+  .field-error {
+    @apply mt-1 block text-xs text-rose-700;
+  }
+
+  /* --- Bề mặt --- */
+  .card {
+    @apply rounded-xl border border-paper-border bg-paper-card shadow-card;
+  }
+  .section-title {
+    @apply font-sans text-xs font-semibold uppercase tracking-wider text-ink-soft;
+  }
+
+  /* --- Nhãn trạng thái --- */
+  .badge {
+    @apply inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset;
+  }
+  .badge-neutral {
+    @apply bg-paper-sunken text-ink-soft ring-paper-border;
+  }
+  .badge-brand {
+    @apply bg-brand-soft text-brand-dark ring-brand/15;
+  }
+  .badge-success {
+    @apply bg-emerald-50 text-emerald-800 ring-emerald-600/15;
+  }
+  .badge-warning {
+    @apply bg-amber-50 text-amber-800 ring-amber-600/20;
+  }
+  .badge-danger {
+    @apply bg-rose-50 text-rose-800 ring-rose-600/15;
+  }
+
+  /* --- Bảng dữ liệu admin: chỉ cần class trên <table>. `:where()` giữ specificity ở mức 1
+     class để utility đặt trên từng ô (text-right, px-…) vẫn ghi đè được. --- */
+  .data-table {
+    @apply w-full border-collapse text-sm;
+  }
+  .data-table :where(th) {
+    @apply whitespace-nowrap border-b border-paper-border bg-paper-sunken/60 px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-ink-soft;
+  }
+  .data-table :where(td) {
+    @apply border-b border-paper-border/70 px-4 py-3 align-top text-ink;
+  }
+  .data-table :where(tbody tr) {
+    @apply transition-colors hover:bg-paper-sunken/50;
+  }
+  .data-table :where(tbody tr:last-child td) {
+    @apply border-b-0;
+  }
+
+  /* --- Mục chọn trong danh sách master-detail --- */
+  .item-row {
+    @apply w-full cursor-pointer rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-paper-sunken;
+  }
+  .item-row-active {
+    @apply bg-brand-soft hover:bg-brand-soft;
+  }
+
+  /* --- Thanh cuộn mảnh tông tối cho vùng nền night (sidebar) --- */
+  .scrollbar-night {
+    scrollbar-width: thin;
+    scrollbar-color: theme("colors.night.border") transparent;
+  }
+  .scrollbar-night:hover {
+    scrollbar-color: theme("colors.night.muted") transparent;
   }
 }

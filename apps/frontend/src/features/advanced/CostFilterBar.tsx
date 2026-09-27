@@ -30,29 +30,26 @@ export function CostFilterBar({
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-wrap items-end gap-2">
-      <label className="text-sm">
-        <span className="block text-xs text-ink-soft">Từ ngày</span>
+    <form onSubmit={submit} className="flex flex-wrap items-end gap-3">
+      <label>
+        <span className="label text-xs">Từ ngày</span>
         <input
           type="date"
           value={from}
           onChange={(e) => setFrom(e.target.value)}
-          className="rounded-md border border-paper-border px-2 py-1.5 outline-none focus:border-brand"
+          className="input h-9 w-auto"
         />
       </label>
-      <label className="text-sm">
-        <span className="block text-xs text-ink-soft">Đến ngày</span>
+      <label>
+        <span className="label text-xs">Đến ngày</span>
         <input
           type="date"
           value={to}
           onChange={(e) => setTo(e.target.value)}
-          className="rounded-md border border-paper-border px-2 py-1.5 outline-none focus:border-brand"
+          className="input h-9 w-auto"
         />
       </label>
-      <button
-        type="submit"
-        className="rounded-md bg-brand px-3 py-1.5 text-sm text-brand-fg hover:bg-brand-dark"
-      >
+      <button type="submit" className="btn btn-primary">
         Áp dụng
       </button>
     </form>

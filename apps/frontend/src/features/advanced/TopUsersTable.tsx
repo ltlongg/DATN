@@ -5,28 +5,32 @@ const nf = new Intl.NumberFormat("vi-VN");
 
 export function TopUsersTable({ users }: { users: TopUserCost[] }) {
   return (
-    <div>
-      <p className="mb-2 text-sm font-medium text-ink">Người dùng tốn token nhất</p>
+    <div className="card overflow-hidden">
+      <p className="border-b border-paper-border px-5 py-3.5 text-sm font-semibold text-ink">
+        Người dùng tốn token nhất
+      </p>
       {users.length === 0 ? (
-        <EmptyState>Chưa có dữ liệu.</EmptyState>
+        <div className="p-4">
+          <EmptyState>Chưa có dữ liệu.</EmptyState>
+        </div>
       ) : (
-        <table className="w-full border-collapse text-sm">
+        <table className="data-table">
           <thead>
-            <tr className="border-b border-paper-border text-left text-ink-soft">
-              <th className="py-2 pr-4 font-medium">Người dùng</th>
-              <th className="py-2 pr-4 font-medium">Số lượt</th>
-              <th className="py-2 font-medium">Tổng token</th>
+            <tr>
+              <th>Người dùng</th>
+              <th className="text-right">Số lượt</th>
+              <th className="text-right">Tổng token</th>
             </tr>
           </thead>
           <tbody>
             {users.map((u) => (
-              <tr key={u.user_id} className="border-b border-paper-border">
-                <td className="py-2 pr-4 text-ink">
-                  {u.name}
-                  <span className="block text-xs text-ink-soft">{u.email}</span>
+              <tr key={u.user_id}>
+                <td>
+                  <p className="font-medium">{u.name}</p>
+                  <p className="text-xs text-ink-soft">{u.email}</p>
                 </td>
-                <td className="py-2 pr-4 text-ink-soft">{u.call_count}</td>
-                <td className="py-2 text-ink">{nf.format(u.total_tokens)}</td>
+                <td className="text-right tabular-nums text-ink-soft">{u.call_count}</td>
+                <td className="text-right font-medium tabular-nums">{nf.format(u.total_tokens)}</td>
               </tr>
             ))}
           </tbody>

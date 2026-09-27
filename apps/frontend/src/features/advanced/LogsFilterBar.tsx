@@ -26,46 +26,44 @@ export function LogsFilterBar({ onApply }: { onApply: (v: LogsFilterValue) => vo
   }
 
   return (
-    <form onSubmit={submit} className="flex flex-wrap items-end gap-2">
-      <label className="text-sm">
-        <span className="block text-xs text-ink-soft">Mã người dùng</span>
+    <form onSubmit={submit} className="card flex flex-wrap items-end gap-3 p-4">
+      <label>
+        <span className="label text-xs">Mã người dùng</span>
         <input
           value={anonId}
           onChange={(e) => setAnonId(e.target.value)}
           placeholder="user-1a2b3c4d"
-          className="rounded-md border border-paper-border px-2 py-1.5 outline-none focus:border-brand"
+          className="input h-9 w-auto"
         />
       </label>
-      <label className="text-sm">
-        <span className="block text-xs text-ink-soft">Từ ngày</span>
+      <label>
+        <span className="label text-xs">Từ ngày</span>
         <input
           type="date"
           value={from}
           onChange={(e) => setFrom(e.target.value)}
-          className="rounded-md border border-paper-border px-2 py-1.5 outline-none focus:border-brand"
+          className="input h-9 w-auto"
         />
       </label>
-      <label className="text-sm">
-        <span className="block text-xs text-ink-soft">Đến ngày</span>
+      <label>
+        <span className="label text-xs">Đến ngày</span>
         <input
           type="date"
           value={to}
           onChange={(e) => setTo(e.target.value)}
-          className="rounded-md border border-paper-border px-2 py-1.5 outline-none focus:border-brand"
+          className="input h-9 w-auto"
         />
       </label>
-      <label className="flex items-center gap-2 py-1.5 text-sm text-ink">
+      <label className="flex h-9 items-center gap-2 text-sm text-ink">
         <input
           type="checkbox"
+          className="h-4 w-4 accent-brand"
           checked={flaggedOnly}
           onChange={(e) => setFlaggedOnly(e.target.checked)}
         />
         Chỉ hội thoại bị gắn cờ
       </label>
-      <button
-        type="submit"
-        className="rounded-md bg-brand px-3 py-1.5 text-sm text-brand-fg hover:bg-brand-dark"
-      >
+      <button type="submit" className="btn btn-primary">
         Lọc
       </button>
     </form>

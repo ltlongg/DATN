@@ -17,6 +17,8 @@ export interface User {
   role: Role;
   /** Người dùng cho phép admin đọc nội dung hội thoại của mình. */
   share_conversations: boolean;
+  /** False = tài khoản chỉ đăng nhập Google (chưa có mật khẩu) -> ẩn mục đổi mật khẩu. */
+  has_password: boolean;
 }
 
 export interface LoginResponse {

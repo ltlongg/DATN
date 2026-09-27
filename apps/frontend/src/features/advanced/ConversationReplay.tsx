@@ -1,3 +1,4 @@
+import { Clock } from "lucide-react";
 import { ConfidenceBadge } from "@/components/ConfidenceBadge";
 import { Markdown } from "@/components/Markdown";
 import { ProgressPanel } from "@/features/chat/ProgressPanel";
@@ -27,7 +28,7 @@ function UserMessage({ m }: { m: MessageLogItem }) {
   if (m.visibility === "hidden") {
     return (
       <div className="text-right">
-        <div className="inline-block max-w-[85%] rounded-lg bg-paper px-3 py-2 text-left text-sm">
+        <div className="inline-block max-w-[85%] rounded-2xl rounded-tr-md bg-paper-sunken px-4 py-2.5 text-left text-sm">
           <HiddenContent />
         </div>
       </div>
@@ -38,15 +39,15 @@ function UserMessage({ m }: { m: MessageLogItem }) {
       {m.flagged && (
         <div className="mb-1 flex flex-wrap justify-end gap-1">
           {m.flag_categories.map((c) => (
-            <span key={c} className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] text-rose-800">
+            <span key={c} className="badge badge-danger">
               {CATEGORY_LABELS[c] ?? c}
             </span>
           ))}
         </div>
       )}
       <div
-        className={`inline-block max-w-[85%] rounded-lg bg-brand px-3 py-2 text-left text-sm text-brand-fg ${
-          m.flagged ? "ring-2 ring-rose-500" : ""
+        className={`inline-block max-w-[85%] rounded-2xl rounded-tr-md bg-brand px-4 py-2.5 text-left text-sm text-brand-fg ${
+          m.flagged ? "ring-2 ring-rose-400 ring-offset-2" : ""
         }`}
       >
         <p className="whitespace-pre-wrap">{m.content}</p>
@@ -58,14 +59,20 @@ function UserMessage({ m }: { m: MessageLogItem }) {
 function AssistantMessage({ m }: { m: MessageLogItem }) {
   return (
     <div className="text-left">
-      <div className="mb-0.5 flex items-center gap-2 text-[11px] text-ink-soft">
-        <span>AI</span>
+      <div className="mb-1.5 flex items-center gap-2 text-[11px] text-ink-soft">
+        <span className="font-semibold uppercase tracking-wider">AI</span>
         <ConfidenceBadge confidence={m.confidence} />
         {m.ttft_ms !== null && (
-          <span title="TTFT: từ lúc user hỏi tới chữ đầu tiên">⏱ {formatTtft(m.ttft_ms)}</span>
+          <span
+            className="inline-flex items-center gap-1"
+            title="TTFT: từ lúc user hỏi tới chữ đầu tiên"
+          >
+            <Clock size={11} aria-hidden />
+            {formatTtft(m.ttft_ms)}
+          </span>
         )}
       </div>
-      <div className="inline-block max-w-[92%] rounded-lg border border-paper-border bg-paper-card px-3 py-2 text-sm text-ink">
+      <div className="inline-block max-w-[92%] rounded-2xl rounded-tl-md border border-paper-border bg-paper-card px-4 py-3 text-sm text-ink shadow-card">
         {m.visibility === "hidden" ? (
           <HiddenContent />
         ) : (
@@ -90,31 +97,27 @@ function AssistantMessage({ m }: { m: MessageLogItem }) {
 export function ConversationReplay({ detail }: { detail: Detail }) {
   return (
     <div className="flex h-full flex-col">
-      <div className="border-b border-paper-border pb-2">
-        <p className="font-medium text-ink">
+      <div className="border-b border-paper-border pb-3">
+        <p className="font-serif text-lg font-semibold text-ink">
           {detail.title ?? <span className="italic text-ink-soft">Tiêu đề được ẩn</span>}
         </p>
-        <p className="flex flex-wrap items-center gap-x-1 text-xs text-ink-soft">
+        <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-ink-soft">
           {detail.user_email ? (
             <>
               {detail.user_name} · {detail.user_email}
-              <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] text-rose-800">
-                Hiện danh tính do vi phạm
-              </span>
+              <span className="badge badge-danger">Hiện danh tính do vi phạm</span>
             </>
           ) : (
             detail.user_anon_id
           )}{" "}
           · {formatDateTime(detail.created_at)}
           {detail.shared && (
-            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] text-emerald-800">
-              Người dùng đã chia sẻ
-            </span>
+            <span className="badge badge-success">Người dùng đã chia sẻ</span>
           )}
         </p>
       </div>
 
-      <div className="mt-3 flex-1 space-y-3 overflow-y-auto">
+      <div className="mt-4 flex-1 space-y-4 overflow-y-auto">
         {detail.messages.map((m) =>
           m.role === "user" ? (
             <UserMessage key={m.id} m={m} />

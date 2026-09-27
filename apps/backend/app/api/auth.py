@@ -1,4 +1,4 @@
-"""Auth router — register / login / google / me / logout.
+"""Auth router — register / login / google / me (+ hồ sơ, mật khẩu) / logout.
 
 JWT stateless: logout chỉ là no-op phía server (client xóa token). Không có refresh/
 revoke ở MVP (xem "Sau MVP" trong backend-plan.md).
@@ -33,12 +33,15 @@ from app.models.user import (
     get_user_by_email,
     get_user_by_google_sub,
     set_share_conversations,
+    update_user,
 )
 from app.schemas.auth import (
     GoogleLoginRequest,
     LoginRequest,
     LoginResponse,
+    PasswordChange,
     PreferencesUpdate,
+    ProfileUpdate,
     RegisterRequest,
     UserPublic,
 )
@@ -58,6 +61,7 @@ def _to_public(user: User) -> UserPublic:
         name=user.name,
         role=user.role,
         share_conversations=user.share_conversations,
+        has_password=user.password_hash is not None,
     )
 
 def _issue_token(user: User) -> LoginResponse:
@@ -176,6 +180,34 @@ async def update_preferences(
     )
     assert updated is not None  # get_current_user vừa xác nhận user tồn tại
     return _to_public(updated)
+
+@router.patch("/me/profile", response_model=UserPublic)
+async def update_profile(
+    body: ProfileUpdate, user: User = Depends(get_current_user)
+) -> UserPublic:
+    """Người dùng tự sửa họ tên. Như /me/preferences: id lấy từ token, không từ body."""
+    updated = await anyio.to_thread.run_sync(update_user, user.id, {"name": body.name})
+    assert updated is not None  # get_current_user vừa xác nhận user tồn tại
+    return _to_public(updated)
+
+@router.post("/me/password", response_model=OkResponse)
+async def change_password(
+    body: PasswordChange, user: User = Depends(get_current_user)
+) -> OkResponse:
+    """Đổi mật khẩu, bắt nhập lại mật khẩu hiện tại (token bị lộ không đủ để chiếm tài
+    khoản). Sai mật khẩu hiện tại trả 400, KHÔNG phải 401: client coi 401 là hết phiên và
+    đá người dùng ra màn đăng nhập.
+
+    JWT stateless -> token cũ vẫn dùng được tới khi hết hạn (không có revoke ở MVP)."""
+    if user.password_hash is None:
+        raise AppError(
+            400, "no_password", "Tài khoản đăng nhập bằng Google chưa có mật khẩu."
+        )
+    if not verify_password(body.current_password, user.password_hash):
+        raise AppError(400, "invalid_current_password", "Mật khẩu hiện tại không đúng.")
+    new_hash = hash_password(body.new_password)
+    await anyio.to_thread.run_sync(update_user, user.id, {"password_hash": new_hash})
+    return OkResponse()
 
 @router.post("/logout", response_model=OkResponse)
 async def logout(_: User = Depends(get_current_user)) -> OkResponse:

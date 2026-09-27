@@ -11,11 +11,13 @@ export function MessageList({ items }: { items: ChatItem[] }) {
   }, [items]);
 
   return (
-    <div className="flex-1 space-y-4 overflow-y-auto px-4 py-6">
-      {items.map((item) => (
-        <MessageBubble key={item.id} item={item} />
-      ))}
-      <div ref={endRef} />
+    <div className="flex-1 overflow-y-auto">
+      <div className="mx-auto max-w-3xl space-y-6 px-6 py-8">
+        {items.map((item) => (
+          <MessageBubble key={item.id} item={item} />
+        ))}
+        <div ref={endRef} />
+      </div>
     </div>
   );
 }

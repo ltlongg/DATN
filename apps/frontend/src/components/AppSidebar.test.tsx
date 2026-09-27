@@ -15,6 +15,7 @@ function renderSidebar(role: User["role"]) {
     name: "U",
     role,
     share_conversations: false,
+    has_password: true,
   };
   useAuthStore.setState({ token: "t", user });
   useUiStore.setState({ sidebarOpen: true });
@@ -43,14 +44,15 @@ describe("AppSidebar", () => {
     }
   });
 
-  it("non-admin thấy đúng 2 mục khu user, không có nhóm/mục quản trị", () => {
+  it("non-admin thấy đúng 2 mục khu user + Cài đặt, không có nhóm/mục quản trị", () => {
     renderSidebar("user");
     expect(screen.getByRole("link", { name: "Hỏi đáp" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Dòng lịch sử" })).toHaveAttribute(
       "href",
       "/timeline",
     );
-    expect(screen.getAllByRole("link")).toHaveLength(2);
+    expect(screen.getByRole("link", { name: "Cài đặt" })).toHaveAttribute("href", "/settings");
+    expect(screen.getAllByRole("link")).toHaveLength(3);
     expect(screen.queryByText("QUẢN TRỊ")).not.toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Chi phí" })).not.toBeInTheDocument();
   });

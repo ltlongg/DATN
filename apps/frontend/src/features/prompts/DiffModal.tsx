@@ -2,9 +2,9 @@ import { Modal } from "@/components/Modal";
 import { lineDiff } from "@/features/prompts/diff";
 
 const ROW_STYLE: Record<string, string> = {
-  add: "bg-green-50 text-green-900",
+  add: "bg-emerald-50 text-emerald-900",
   del: "bg-rose-50 text-rose-900",
-  same: "text-ink",
+  same: "text-ink-soft",
 };
 const SIGN: Record<string, string> = { add: "+", del: "-", same: " " };
 
@@ -25,11 +25,11 @@ export function DiffModal({
 }) {
   const rows = open ? lineDiff(oldText, newText) : [];
   return (
-    <Modal open={open} onOpenChange={(o) => !o && onClose()} title={title}>
-      <div className="max-h-[60vh] overflow-auto rounded-md border border-paper-border">
-        <pre className="min-w-full font-mono text-[11px] leading-relaxed">
+    <Modal open={open} onOpenChange={(o) => !o && onClose()} title={title} size="lg">
+      <div className="max-h-[60vh] overflow-auto rounded-lg border border-paper-border">
+        <pre className="min-w-full py-1 font-mono text-[11px] leading-relaxed">
           {rows.map((r, i) => (
-            <div key={i} className={`whitespace-pre-wrap px-2 ${ROW_STYLE[r.type]}`}>
+            <div key={i} className={`whitespace-pre-wrap px-3 ${ROW_STYLE[r.type]}`}>
               {SIGN[r.type]} {r.text}
             </div>
           ))}

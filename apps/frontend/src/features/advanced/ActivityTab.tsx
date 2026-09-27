@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getActivity } from "@/api/activity";
+import { Alert } from "@/components/Alert";
 import { EmptyState } from "@/components/EmptyState";
+import { Pagination } from "@/components/Pagination";
 import { Spinner } from "@/components/Spinner";
 import type { ActivityLogItem } from "@/types/admin";
 
@@ -19,11 +21,7 @@ function formatLatency(ms: number | null): string {
 function SeverityBadge({ severity }: { severity: ActivityLogItem["severity"] }) {
   const isError = severity === "error";
   return (
-    <span
-      className={`rounded px-1.5 py-0.5 text-xs font-medium ${
-        isError ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"
-      }`}
-    >
+    <span className={`badge ${isError ? "badge-danger" : "badge-success"}`}>
       {severity}
     </span>
   );
@@ -62,33 +60,30 @@ export function ActivityTab() {
 
   return (
     <div className="space-y-4">
-      <form onSubmit={submitFilter} className="flex flex-wrap items-end gap-2">
-        <label className="text-sm">
-          <span className="block text-xs text-ink-soft">Mức độ</span>
+      <form onSubmit={submitFilter} className="card flex flex-wrap items-end gap-3 p-4">
+        <label>
+          <span className="label text-xs">Mức độ</span>
           <select
             value={severity}
             onChange={(e) => setSeverity(e.target.value as SeverityFilter)}
-            className="rounded-md border border-paper-border px-2 py-1.5 outline-none focus:border-brand"
+            className="input h-9 w-40"
           >
             <option value="">Tất cả</option>
             <option value="ok">ok</option>
             <option value="error">error</option>
           </select>
         </label>
-        <label className="text-sm">
-          <span className="block text-xs text-ink-soft">Lọc theo path</span>
+        <label className="min-w-[16rem] flex-1 sm:flex-none">
+          <span className="label text-xs">Lọc theo path</span>
           <input
             type="text"
             value={path}
             onChange={(e) => setPath(e.target.value)}
             placeholder="vd: /api/chat/ask"
-            className="rounded-md border border-paper-border px-2 py-1.5 outline-none focus:border-brand"
+            className="input h-9 sm:w-72"
           />
         </label>
-        <button
-          type="submit"
-          className="rounded-md bg-brand px-3 py-1.5 text-sm text-brand-fg hover:bg-brand-dark"
-        >
+        <button type="submit" className="btn btn-primary">
           Áp dụng
         </button>
       </form>
@@ -96,44 +91,44 @@ export function ActivityTab() {
       {query.isLoading ? (
         <Spinner />
       ) : query.isError ? (
-        <p className="text-sm text-rose-700">Không tải được nhật ký hoạt động.</p>
+        <Alert>Không tải được nhật ký hoạt động.</Alert>
       ) : !data || data.items.length === 0 ? (
         <EmptyState>Chưa có hoạt động nào khớp bộ lọc.</EmptyState>
       ) : (
-        <div className="overflow-x-auto rounded-lg border border-paper-border bg-paper-card">
-          <table className="w-full border-collapse text-sm">
+        <div className="card overflow-x-auto">
+          <table className="data-table">
             <thead>
-              <tr className="border-b border-paper-border text-left text-ink-soft">
-                <th className="px-3 py-2 font-medium">Thời điểm</th>
-                <th className="px-3 py-2 font-medium">Người dùng</th>
-                <th className="px-3 py-2 font-medium">Method</th>
-                <th className="px-3 py-2 font-medium">Path</th>
-                <th className="px-3 py-2 font-medium">Status</th>
-                <th className="px-3 py-2 font-medium">Mức độ</th>
-                <th className="px-3 py-2 font-medium">Thời lượng</th>
-                <th className="px-3 py-2 font-medium">Lỗi</th>
-                <th className="px-3 py-2 font-medium">Request ID</th>
+              <tr>
+                <th>Thời điểm</th>
+                <th>Người dùng</th>
+                <th>Method</th>
+                <th>Path</th>
+                <th className="text-right">Status</th>
+                <th>Mức độ</th>
+                <th className="text-right">Thời lượng</th>
+                <th>Lỗi</th>
+                <th>Request ID</th>
               </tr>
             </thead>
             <tbody>
               {data.items.map((it) => (
-                <tr key={it.id} className="border-b border-paper-border/60 align-top">
-                  <td className="whitespace-nowrap px-3 py-2 text-ink-soft">
+                <tr key={it.id}>
+                  <td className="whitespace-nowrap tabular-nums text-ink-soft">
                     {dtf.format(new Date(it.created_at))}
                   </td>
-                  <td className="px-3 py-2 text-ink-soft">{it.user_id ?? "—"}</td>
-                  <td className="px-3 py-2 font-medium text-ink">{it.method}</td>
-                  <td className="px-3 py-2 font-mono text-xs text-ink">{it.path}</td>
-                  <td className="px-3 py-2 text-ink-soft">{it.status_code}</td>
-                  <td className="px-3 py-2">
+                  <td className="text-ink-soft">{it.user_id ?? "—"}</td>
+                  <td className="font-mono text-xs font-semibold">{it.method}</td>
+                  <td className="font-mono text-xs">{it.path}</td>
+                  <td className="text-right tabular-nums text-ink-soft">{it.status_code}</td>
+                  <td>
                     <SeverityBadge severity={it.severity} />
                   </td>
-                  <td className="whitespace-nowrap px-3 py-2 text-ink-soft">
+                  <td className="whitespace-nowrap text-right tabular-nums text-ink-soft">
                     {formatLatency(it.latency_ms)}
                   </td>
-                  <td className="px-3 py-2 text-rose-700">{it.error ?? "—"}</td>
+                  <td className={it.error ? "text-rose-700" : "text-ink-faint"}>{it.error ?? "—"}</td>
                   <td
-                    className="px-3 py-2 font-mono text-xs text-ink-soft"
+                    className="font-mono text-xs text-ink-soft"
                     title={it.request_id ?? undefined}
                   >
                     {it.request_id ? `${it.request_id.slice(0, 8)}…` : "—"}
@@ -146,29 +141,7 @@ export function ActivityTab() {
       )}
 
       {total > 0 && (
-        <div className="flex items-center justify-between text-sm text-ink-soft">
-          <span>
-            {offset + 1}–{Math.min(offset + LIMIT, total)} / {total}
-          </span>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={offset === 0}
-              onClick={() => setOffset((o) => Math.max(0, o - LIMIT))}
-              className="rounded-md border border-paper-border px-3 py-1 disabled:opacity-40"
-            >
-              Trước
-            </button>
-            <button
-              type="button"
-              disabled={offset + LIMIT >= total}
-              onClick={() => setOffset((o) => o + LIMIT)}
-              className="rounded-md border border-paper-border px-3 py-1 disabled:opacity-40"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
+        <Pagination total={total} limit={LIMIT} offset={offset} onChange={setOffset} />
       )}
     </div>
   );

@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { UserPlus } from "lucide-react";
 import { ApiError } from "@/api/client";
 import { createUser, listUsers, updateUser } from "@/api/users";
+import { Alert } from "@/components/Alert";
 import { EmptyState } from "@/components/EmptyState";
 import { Spinner } from "@/components/Spinner";
 import { UserFormModal } from "@/features/advanced/UserFormModal";
@@ -52,22 +54,26 @@ export function UsersTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm text-ink-soft">
+          {users.data ? `${users.data.length} tài khoản` : ""}
+        </p>
         <button
           onClick={() => {
             setError(null);
             setForm({ open: true, user: null });
           }}
-          className="rounded-md bg-brand px-4 py-2 text-sm text-brand-fg hover:bg-brand-dark"
+          className="btn btn-primary"
         >
-          + Thêm người dùng
+          <UserPlus size={16} />
+          Thêm người dùng
         </button>
       </div>
 
       {users.isLoading ? (
         <Spinner />
       ) : users.isError ? (
-        <p className="text-sm text-rose-700">Không tải được danh sách người dùng.</p>
+        <Alert>Không tải được danh sách người dùng.</Alert>
       ) : !users.data || users.data.length === 0 ? (
         <EmptyState>Chưa có người dùng nào.</EmptyState>
       ) : (

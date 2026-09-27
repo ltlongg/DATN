@@ -1,3 +1,4 @@
+import { Pencil, Trash2 } from "lucide-react";
 import { StatusBadge } from "@/features/admin/StatusBadge";
 import { formatDateTime } from "@/lib/format";
 import type { Document } from "@/types";
@@ -17,56 +18,56 @@ export function DocumentTable({
   onDelete: (doc: Document) => void;
 }) {
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-sm">
+    <div className="card overflow-x-auto">
+      <table className="data-table">
         <thead>
-          <tr className="border-b border-paper-border text-left text-ink-soft">
-            <th className="py-2 pr-4 font-medium">Tên</th>
-            <th className="py-2 pr-4 font-medium">Nguồn trong kho</th>
-            <th className="py-2 pr-4 font-medium">Loại</th>
-            <th className="py-2 pr-4 font-medium">Trạng thái</th>
-            <th className="py-2 pr-4 text-right font-medium">Số chunk</th>
-            <th className="py-2 pr-4 text-right font-medium">Sự kiện</th>
-            <th className="py-2 pr-4 font-medium">Ngày tạo</th>
-            <th className="py-2 font-medium"></th>
+          <tr>
+            <th>Tên</th>
+            <th>Nguồn trong kho</th>
+            <th>Loại</th>
+            <th>Trạng thái</th>
+            <th className="text-right">Số chunk</th>
+            <th className="text-right">Sự kiện</th>
+            <th>Ngày tạo</th>
+            <th>
+              <span className="sr-only">Thao tác</span>
+            </th>
           </tr>
         </thead>
         <tbody>
           {documents.map((doc) => (
-            <tr key={doc.id} className="border-b border-paper-border">
-              <td className="py-2 pr-4 text-ink">{doc.name}</td>
-              <td className="py-2 pr-4">
+            <tr key={doc.id}>
+              <td className="font-medium">{doc.name}</td>
+              <td>
                 {doc.source_file ? (
-                  <code className="text-xs text-ink-soft">{doc.source_file}</code>
+                  <code className="rounded bg-paper-sunken px-1.5 py-0.5 font-mono text-xs text-ink-soft">
+                    {doc.source_file}
+                  </code>
                 ) : (
-                  <span className="text-xs text-ink-soft">Chưa gắn nguồn</span>
+                  <span className="text-xs text-ink-faint">Chưa gắn nguồn</span>
                 )}
               </td>
-              <td className="py-2 pr-4 text-ink-soft">{doc.type}</td>
-              <td className="py-2 pr-4">
+              <td className="text-ink-soft">{doc.type}</td>
+              <td>
                 <StatusBadge status={doc.status} />
               </td>
-              <td className="py-2 pr-4 text-right tabular-nums text-ink-soft">
+              <td className="text-right tabular-nums text-ink-soft">
                 {doc.source_file ? doc.chunk_count.toLocaleString("vi-VN") : "—"}
               </td>
-              <td className="py-2 pr-4 text-right tabular-nums text-ink-soft">
+              <td className="text-right tabular-nums text-ink-soft">
                 {doc.source_file ? doc.event_count.toLocaleString("vi-VN") : "—"}
               </td>
-              <td className="py-2 pr-4 text-ink-soft">{formatDateTime(doc.created_at)}</td>
-              <td className="py-2 text-right whitespace-nowrap">
-                <button
-                  onClick={() => onEdit(doc)}
-                  className="mr-3 text-ink-soft hover:text-brand"
-                >
+              <td className="whitespace-nowrap text-ink-soft">{formatDateTime(doc.created_at)}</td>
+              <td className="whitespace-nowrap py-2 text-right">
+                <button onClick={() => onEdit(doc)} className="btn btn-sm btn-ghost">
+                  <Pencil size={14} />
                   Sửa
                 </button>
                 {/* Tài liệu còn chunk trong kho: xoá khỏi danh mục là vô nghĩa (lần load
                     sau nó tự hiện lại), backend cũng chặn -> không hiện nút. */}
                 {!doc.source_file && (
-                  <button
-                    onClick={() => onDelete(doc)}
-                    className="text-ink-soft hover:text-rose-700"
-                  >
+                  <button onClick={() => onDelete(doc)} className="btn btn-sm btn-ghost hover:text-rose-700">
+                    <Trash2 size={14} />
                     Xoá
                   </button>
                 )}

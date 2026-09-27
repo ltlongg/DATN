@@ -125,8 +125,9 @@ export default function AskPage() {
           onRename={handleRename}
           onDelete={handleDelete}
         />
-        {/* Cột chat giới hạn bề ngang + mx-auto: chỗ thừa chia đều 2 bên. */}
-        <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col overflow-hidden">
+        {/* Cột chat chiếm hết phần còn lại (thanh cuộn nằm sát mép phải); bề ngang đọc được
+            do MessageList/Composer tự giới hạn + căn giữa. */}
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <ChatPanel items={items} streaming={streaming} onSend={handleSend} />
         </div>
       </div>

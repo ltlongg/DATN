@@ -26,25 +26,27 @@ export function PromptTree({
   const groups = [...GROUP_ORDER.filter((g) => byGroup.has(g)), ...[...byGroup.keys()].filter((g) => !GROUP_ORDER.includes(g as (typeof GROUP_ORDER)[number]))];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {groups.map((g) => (
         <div key={g}>
-          <p className="px-1 pb-1 text-[10px] font-semibold uppercase tracking-wide text-ink-soft/70">
+          <p className="section-title px-3 pb-1.5 pt-2 text-[11px]">
             {GROUP_LABELS[g] ?? g}
           </p>
-          <ul className="space-y-1">
+          <ul className="space-y-0.5">
             {(byGroup.get(g) ?? []).map((p) => {
               const active = p.key === selectedKey;
               return (
                 <li key={p.key}>
                   <button
                     onClick={() => onSelect(p.key)}
-                    className={`w-full rounded-md px-2 py-1.5 text-left ${
-                      active ? "bg-brand text-brand-fg" : "hover:bg-paper"
-                    }`}
+                    className={`item-row py-2 ${active ? "item-row-active" : ""}`}
                   >
-                    <span className="block text-sm font-medium">{p.title}</span>
-                    <span className={`block text-[11px] ${active ? "text-brand-fg/80" : "text-ink-soft"}`}>
+                    <span
+                      className={`block text-sm font-medium ${active ? "text-brand-dark" : "text-ink"}`}
+                    >
+                      {p.title}
+                    </span>
+                    <span className="block font-mono text-[11px] text-ink-soft">
                       {p.key} · v{p.active_version_no ?? "—"} · {p.version_count} bản
                     </span>
                   </button>

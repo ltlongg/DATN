@@ -10,17 +10,17 @@ export function EntityTable({
   onSelect: (normName: string) => void;
 }) {
   return (
-    <ul className="divide-y divide-paper-border">
+    <ul className="space-y-0.5">
       {items.map((e) => (
         <li key={e.norm_name}>
           <button
             onClick={() => onSelect(e.norm_name)}
             aria-pressed={e.norm_name === selectedNorm}
-            className={`flex w-full items-center justify-between gap-2 px-3 py-2 text-left ${
-              e.norm_name === selectedNorm ? "bg-brand/5" : "hover:bg-paper"
+            className={`item-row flex items-center justify-between gap-2 ${
+              e.norm_name === selectedNorm ? "item-row-active" : ""
             }`}
           >
-            <span className="truncate text-sm text-ink">{e.name}</span>
+            <span className="truncate text-sm font-medium text-ink">{e.name}</span>
             <span className="shrink-0 text-xs text-ink-soft">
               {e.type ?? "—"} · {e.source_chunk_count} chunk
             </span>

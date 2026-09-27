@@ -1,5 +1,6 @@
 import { useState } from "react";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import { BookOpen } from "lucide-react";
 import { groupCitations, type CitationChip } from "@/features/chat/groupCitations";
 import { SourceModal } from "@/features/chat/SourceModal";
 import type { Citation } from "@/types";
@@ -22,7 +23,7 @@ function ChipButton({ chip, onSelect }: { chip: CitationChip; onSelect: () => vo
         <button
           type="button"
           onClick={onSelect}
-          className="rounded border border-paper-border px-1.5 py-0.5 font-medium text-ink-soft transition-colors hover:border-brand hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/30"
+          className="rounded-md border border-paper-border bg-paper px-1.5 py-0.5 font-medium tabular-nums text-ink-soft transition-colors hover:border-brand/40 hover:bg-brand-soft hover:text-brand"
         >
           [{chip.n}]
         </button>
@@ -32,7 +33,7 @@ function ChipButton({ chip, onSelect }: { chip: CitationChip; onSelect: () => vo
           side="top"
           sideOffset={6}
           collisionPadding={12}
-          className="z-50 max-w-sm rounded-md bg-ink px-3 py-2 text-xs leading-relaxed text-white shadow-md"
+          className="z-50 max-w-sm rounded-lg bg-ink px-3 py-2 text-xs leading-relaxed text-white shadow-pop"
         >
           {quote ? `“${quote}”` : NO_QUOTE_HINT}
           <Tooltip.Arrow className="fill-ink" />
@@ -48,10 +49,13 @@ export function CitationList({ citations }: { citations: Citation[] }) {
   const { groups, commonPath } = groupCitations(citations);
 
   return (
-    <div className="mt-3 space-y-2 border-t border-paper-border pt-3">
+    <div className="mt-4 space-y-2.5 border-t border-paper-border pt-3">
       <div className="flex items-baseline justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-wide text-ink-soft">Nguồn</p>
-        <p className="text-xs text-ink-soft">
+        <p className="section-title flex items-center gap-1.5">
+          <BookOpen size={13} aria-hidden />
+          Nguồn
+        </p>
+        <p className="text-xs text-ink-faint">
           {citations.length} trích đoạn
           {groups.length > 1 && ` · ${groups.length} mục`}
         </p>
@@ -60,9 +64,9 @@ export function CitationList({ citations }: { citations: Citation[] }) {
       <Tooltip.Provider delayDuration={200}>
         <ul className="space-y-1.5">
           {groups.map((group, i) => (
-            <li key={i} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xs">
+            <li key={i} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-sm">
               <span className="text-ink">{group.title}</span>
-              <span className="flex gap-1">
+              <span className="flex gap-1 text-xs">
                 {group.chips.map((chip) => (
                   <ChipButton
                     key={chip.n}
@@ -77,7 +81,7 @@ export function CitationList({ citations }: { citations: Citation[] }) {
       </Tooltip.Provider>
 
       {commonPath.length > 0 && (
-        <p className="border-t border-paper-border pt-2 text-xs text-ink-soft">
+        <p className="text-xs text-ink-faint">
           {commonPath.join(" › ")}
         </p>
       )}

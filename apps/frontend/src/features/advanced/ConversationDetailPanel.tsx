@@ -23,20 +23,20 @@ const taskLabel = (t: string) => TASK_LABELS[t] ?? t;
 
 function QualityFlags({ m }: { m: MessageLogItem }) {
   const flags: { label: string; on: boolean; cls: string }[] = [
-    { label: "tin cậy thấp", on: m.quality.low_confidence, cls: "bg-orange-100 text-orange-800" },
-    { label: "thiếu citation", on: m.quality.no_citation, cls: "bg-rose-100 text-rose-800" },
-    { label: "cần làm rõ", on: m.quality.clarification, cls: "bg-amber-100 text-amber-800" },
-    { label: "có cảnh báo", on: m.quality.has_warning, cls: "bg-yellow-100 text-yellow-800" },
+    { label: "tin cậy thấp", on: m.quality.low_confidence, cls: "badge-warning" },
+    { label: "thiếu citation", on: m.quality.no_citation, cls: "badge-danger" },
+    { label: "cần làm rõ", on: m.quality.clarification, cls: "badge-neutral" },
+    { label: "có cảnh báo", on: m.quality.has_warning, cls: "badge-warning" },
   ];
   const active = flags.filter((f) => f.on);
   if (active.length === 0 && m.warnings.length === 0)
-    return <span className="text-[11px] text-green-700">không có cảnh báo</span>;
+    return <span className="badge badge-success">không có cảnh báo</span>;
   return (
     <div className="space-y-1">
       {active.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {active.map((f) => (
-            <span key={f.label} className={`rounded-full px-2 py-0.5 text-[11px] ${f.cls}`}>
+            <span key={f.label} className={`badge ${f.cls}`}>
               {f.label}
             </span>
           ))}
@@ -47,9 +47,9 @@ function QualityFlags({ m }: { m: MessageLogItem }) {
           cảnh báo" ở trên là cờ tổng hợp từ backend, giữ nguyên — danh sách dưới là chi
           tiết của chính cờ đó. */}
       {m.warnings.length > 0 && (
-        <ul className="space-y-0.5 rounded-md border border-yellow-200 bg-yellow-50/60 p-2">
+        <ul className="space-y-1 rounded-lg bg-amber-50 p-2.5 ring-1 ring-inset ring-amber-600/20">
           {m.warnings.map((w, i) => (
-            <li key={i} className="text-[11px] text-amber-800">
+            <li key={i} className="text-xs leading-relaxed text-amber-800">
               • {String(w)}
             </li>
           ))}
@@ -61,9 +61,9 @@ function QualityFlags({ m }: { m: MessageLogItem }) {
 
 function TokenBreakdown({ tokens }: { tokens: MessageTokens }) {
   return (
-    <div className="rounded-md border border-paper-border bg-paper/60 p-2 text-[11px] text-ink-soft">
-      <p className="mb-1 font-medium text-ink">Tổng: {nf.format(tokens.total_tokens)} token</p>
-      <table className="w-full">
+    <div className="rounded-lg border border-paper-border bg-paper/60 p-2.5 text-xs text-ink-soft">
+      <p className="mb-1.5 font-medium text-ink">Tổng: {nf.format(tokens.total_tokens)} token</p>
+      <table className="w-full tabular-nums">
         <tbody>
           {tokens.rows.map((r) => (
             <tr key={`${r.task}-${r.model}`}>
@@ -96,12 +96,12 @@ export function ConversationDetailPanel({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="mb-3 flex gap-1 border-b border-paper-border">
+      <div className="mb-4 flex gap-1 border-b border-paper-border">
         {(["quality", "token"] as TabKey[]).map((k) => (
           <button
             key={k}
             onClick={() => setTab(k)}
-            className={`border-b-2 px-3 py-1.5 text-sm ${
+            className={`-mb-px border-b-2 px-3 pb-2 text-sm transition-colors ${
               tab === k
                 ? "border-brand font-medium text-brand"
                 : "border-transparent text-ink-soft hover:text-ink"
@@ -112,15 +112,15 @@ export function ConversationDetailPanel({
         ))}
       </div>
 
-      <div className="flex-1 space-y-3 overflow-y-auto">
+      <div className="flex-1 space-y-4 overflow-y-auto">
         {assistants.length === 0 ? (
           <p className="text-sm text-ink-soft">
             Chưa có câu trả lời nào được lưu (hội thoại lỗi/bị chặn giữa chừng).
           </p>
         ) : (
           assistants.map((m, i) => (
-            <div key={m.id} className="space-y-1">
-              <p className="flex items-center gap-2 text-xs font-medium text-ink">
+            <div key={m.id} className="space-y-1.5">
+              <p className="flex items-center gap-2 text-xs font-semibold text-ink">
                 Lượt {i + 1}
                 <ConfidenceBadge confidence={m.confidence} />
               </p>
@@ -129,7 +129,7 @@ export function ConversationDetailPanel({
               ) : tokensByMessage.has(m.id) ? (
                 <TokenBreakdown tokens={tokensByMessage.get(m.id) as MessageTokens} />
               ) : (
-                <p className="text-[11px] text-ink-soft">Không có dữ liệu token.</p>
+                <p className="text-xs text-ink-faint">Không có dữ liệu token.</p>
               )}
             </div>
           ))

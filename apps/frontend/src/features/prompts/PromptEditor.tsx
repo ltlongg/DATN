@@ -1,3 +1,5 @@
+import { Save } from "lucide-react";
+import { Alert } from "@/components/Alert";
 import { PromptStatusBadge } from "@/features/prompts/PromptStatusBadge";
 import type { PromptDetail } from "@/types/prompt";
 
@@ -26,47 +28,52 @@ export function PromptEditor({
   const hasProduction = detail.production_content !== null;
   return (
     <div className="flex h-full flex-col">
-      <div className="mb-2 flex flex-wrap items-center gap-2">
-        <h3 className="text-lg font-semibold text-ink">{detail.title}</h3>
-        <span className="text-xs text-ink-soft">{detail.key}</span>
-        <span className="rounded-full border border-paper-border px-2 py-0.5 text-[10px] text-ink-soft">
-          {detail.grp}
-        </span>
+      <div className="flex flex-wrap items-center gap-2">
+        <h2 className="text-xl font-semibold text-ink">{detail.title}</h2>
+        <span className="font-mono text-xs text-ink-soft">{detail.key}</span>
+        <span className="badge badge-neutral text-[10px]">{detail.grp}</span>
         {hasProduction ? (
           <PromptStatusBadge status="production" />
         ) : (
-          <span className="text-[11px] text-amber-700">Chưa có bản production — đang dùng hằng trong code</span>
+          <span className="badge badge-warning">
+            Chưa có bản production — đang dùng hằng trong code
+          </span>
         )}
       </div>
-      {detail.description && <p className="mb-2 text-xs text-ink-soft">{detail.description}</p>}
+      {detail.description && <p className="mt-1.5 text-sm text-ink-soft">{detail.description}</p>}
 
-      <label className="mb-1 text-xs font-medium text-ink-soft">Nội dung system prompt</label>
+      <label htmlFor="prompt-content" className="label mt-5">
+        Nội dung system prompt
+      </label>
       <textarea
+        id="prompt-content"
         value={content}
         onChange={(e) => onContentChange(e.target.value)}
         spellCheck={false}
         wrap="off"
-        className="min-h-[320px] flex-1 resize-y rounded-md border border-paper-border bg-paper-card p-3 font-mono text-xs leading-relaxed text-ink outline-none focus:border-brand"
+        className="input min-h-[360px] flex-1 resize-y p-3 font-mono text-xs leading-relaxed"
       />
 
-      <label className="mb-1 mt-3 text-xs font-medium text-ink-soft">
+      <label htmlFor="prompt-note" className="label mt-4">
         Ghi chú thay đổi (vì sao?)
       </label>
       <input
+        id="prompt-note"
         value={note}
         onChange={(e) => onNoteChange(e.target.value)}
         placeholder="vd: thêm quy tắc trích dẫn nguồn"
-        className="rounded-md border border-paper-border bg-paper-card px-3 py-2 text-sm text-ink outline-none focus:border-brand"
+        className="input"
       />
 
-      {error && <p className="mt-2 text-sm text-rose-700">{error}</p>}
+      {error && (
+        <div className="mt-3">
+          <Alert>{error}</Alert>
+        </div>
+      )}
 
-      <div className="mt-3 flex flex-wrap justify-end gap-2">
-        <button
-          onClick={onSave}
-          disabled={!dirty || pending}
-          className="rounded-md bg-brand px-4 py-2 text-sm text-brand-fg hover:bg-brand-dark disabled:opacity-50"
-        >
+      <div className="mt-4 flex flex-wrap justify-end gap-2">
+        <button onClick={onSave} disabled={!dirty || pending} className="btn btn-primary">
+          <Save size={16} />
           Lưu & áp dụng
         </button>
       </div>

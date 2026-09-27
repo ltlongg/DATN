@@ -17,21 +17,19 @@ export function EventTable({
   onSelect: (eventId: string) => void;
 }) {
   return (
-    <ul className="divide-y divide-paper-border">
+    <ul className="space-y-0.5">
       {items.map((e) => (
         <li key={e.event_id}>
           <button
             onClick={() => onSelect(e.event_id)}
             aria-pressed={e.event_id === selectedId}
-            className={`w-full px-3 py-2 text-left ${
-              e.event_id === selectedId ? "bg-brand/5" : "hover:bg-paper"
-            }`}
+            className={`item-row ${e.event_id === selectedId ? "item-row-active" : ""}`}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-ink-soft">{timeLabel(e)}</span>
+              <span className="text-xs font-medium tabular-nums text-brand">{timeLabel(e)}</span>
               <ConfidenceBadge confidence={e.confidence} />
             </div>
-            <p className="mt-0.5 text-sm text-ink">{e.label}</p>
+            <p className="mt-1 text-sm font-medium text-ink">{e.label}</p>
             {e.locations.length > 0 && (
               <p className="mt-0.5 text-xs text-ink-soft">{e.locations.join(", ")}</p>
             )}
